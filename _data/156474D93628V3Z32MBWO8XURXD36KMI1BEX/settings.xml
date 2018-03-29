@@ -1,0 +1,12 @@
+<project name="My Thesis" version="docear 1.0" ID="156474D93628V3Z32MBWO8XURXD36KMI1BEX">
+<folder type="library" name="Library">
+<link type="literature_annotations" name="Literature &amp; Annotations" path="project://156474D93628V3Z32MBWO8XURXD36KMI1BEX/_data/156474D93628V3Z32MBWO8XURXD36KMI1BEX/default_files/literature_and_annotations.mm"/>
+<link type="file" name="Temp" path="project://156474D93628V3Z32MBWO8XURXD36KMI1BEX/_data/156474D93628V3Z32MBWO8XURXD36KMI1BEX/default_files/temp.mm" system="true"/>
+<link type="file" name="Trash" path="project://156474D93628V3Z32MBWO8XURXD36KMI1BEX/_data/156474D93628V3Z32MBWO8XURXD36KMI1BEX/default_files/trash.mm" system="true"/>
+</folder>
+<folder type="physical" name="My drafts" path="project://156474D93628V3Z32MBWO8XURXD36KMI1BEX/_data/156474D93628V3Z32MBWO8XURXD36KMI1BEX/My%20Drafts/"/>
+<folder type="literature_repository" name="Literature repository" system="true">
+<folder type="repository_path" name="default" path="file:/Users/andrewwork/Documents/Grad%20School/Thesis//literature_repository"/>
+</folder>
+<link type="references" name="References" path="project://156474D93628V3Z32MBWO8XURXD36KMI1BEX/_data/156474D93628V3Z32MBWO8XURXD36KMI1BEX/default_files/My%20Thesis.bib" system="true"/>
+</project>
