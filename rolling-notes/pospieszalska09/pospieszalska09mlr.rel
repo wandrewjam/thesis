@@ -1,0 +1,67 @@
+;; RefTeX parse info file
+;; File: /Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex
+;; User: andrewwork (Andrew Work)
+
+(set reftex-docstruct-symbol '(
+
+
+(xr nil "\\\\\\\\\\\\")
+
+(index-tags)
+
+(is-multi nil)
+
+(bibview-cache)
+
+(master-dir . "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/")
+
+(label-numbers)
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex")
+
+(file-error "structure.tex")
+
+(toc "toc" "    1  " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 2 "1" "\\section{}" 2301)
+
+(toc "toc" "    2 Published Modeling Approaches" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 2 "2" "\\section{Published Modeling Approaches}" 6881)
+
+(toc "toc" "      2.1 Adhesion Dynamics Model by Hammer and Apte (1992)" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 3 "2.1" "\\subsection{Adhesion Dynamics Model by Hammer and Apte (1992)}" 7365)
+
+("sec:adhes-dynam-model" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil)
+
+("eq:ligand_onrate" "e" "\\left(k_f^0\\right)_L = k_0 P n_R " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil)
+
+(toc "toc" "      2.2 Event-Tracking Model of Adhesion by Pospieszalska et al. (2009)" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 3 "2.2" "\\subsection{Event-Tracking Model of Adhesion by Pospieszalska et
+  al. (2009)}" 8649)
+
+("sec:event-tracking-model" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil)
+
+(toc "toc" "      2.3 Model by Tozeren and Ley (1992)" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 3 "2.3" "\\subsection{Model by Tozeren and Ley (1992)}" 9417)
+
+("sec:model-tozeren-ley" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil)
+
+(toc "toc" "      2.4 Model by Khismatullin and Truskey (2004)" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 3 "2.4" "\\subsection{Model by Khismatullin and Truskey (2004)}" 10309)
+
+("sec:model-khism-trusk" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil)
+
+(toc "toc" "      2.5 Model by Zhao et al. (1995)" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 3 "2.5" "\\subsection{Model by Zhao et al. (1995)}" 10836)
+
+("sec:model-zhao" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil)
+
+("eq:random_velocity" "e" "V(x, t) = \\frac{x(t + 0.5 \\Delta t) - x(t - 0.5 \\Delta t)}{\\Delta t}. " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil)
+
+(toc "toc" "      2.6 In Silico White Blood Cell Model by Tang et al. (2007)" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 3 "2.6" "\\subsection{In Silico White Blood Cell Model by Tang et al. (2007)}" 12087)
+
+("sec:silico-white-blood" "s" nil "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil "")
+
+("eq:1" "e" " " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil)
+
+(toc "toc" "    3 Results Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 2 "3" "\\section{Results Overview}" 12919)
+
+(toc "toc" "    4 Discussion/Conclusions Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 2 "4" "\\section{Discussion/Conclusions Overview}" 12919)
+
+(toc "toc" "    * Article Evaluation" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex" nil 2 "*" "\\section*{Article Evaluation}" 12919)
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/pospieszalska09/pospieszalska09mlr.tex")
+))
+

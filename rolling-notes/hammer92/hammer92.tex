@@ -1,0 +1,333 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+letterpaper, % Alternatively letterpaper for US letter
+twocolumn, % Alternatively onecolumn
+landscape % Alternatively portrait
+]{article}
+
+\usepackage{amsmath}
+\newcommand{\mv}{\textnormal{mv}}
+\newcommand{\ch}{\textnormal{ch}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\on}{\textnormal{on}}
+\newcommand{\off}{\textnormal{off}}
+\newcommand{\ts}{\textnormal{ts}}
+\newcommand{\sep}{\textnormal{sep}}
+\input{structure.tex} % Input the file specifying the document layout and structure
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\articletitle{Simulation of cell rolling and adhesion on surfaces in
+  shear flow} % The title of the article
+\articlecitation{\cite{Hammer1992}} % The BibTeX citation key from your bibliography
+
+\datenotesstarted{April 30, 2018} % The date when these notes were first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes were lasted updated (automatically the current date)
+
+\docauthor{Andrew Watson} % Your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%----------------------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE NOTES
+%----------------------------------------------------------------------------------------
+
+\section{Introduction Overview}
+
+\begin{itemize}
+\item Goal: come up with a physically realistic, stochastic model of
+  leukocyte rolling
+\item Motion of the cell is calculated by balancing fluid forces on
+  the cell with bond and colloidal forces.
+\item They explicitly track individual microvilli and receptors, and
+  their bound states. 
+\item They assume microvilli all have a fixed length, are stiff and
+  oriented normal to the surface of a spherical cell, and support a
+  random number of receptors.
+\item All receptors are the same type, and they assume all the
+  receptors are linear springs with force-dependent on and off rates
+  governed by the Dembo model. 
+\item They compute rolling velocities for different parameters. They
+  also characterize a few qualitatively different rolling/adhesive
+  behaviors (unbound, rolling, tumbling, transient adhesion, and
+  adhesion) and identify important parameters for rolling.
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Model Description}
+
+\subsection{Cell Geometry and Receptors}
+\label{sec:cell-geom-recept}
+
+
+\begin{itemize}
+\item Assume the cell is a sphere of radius $R_c$, which is covered by
+  $N_\mv$ microvilli with radius $R_\mv$ and length $L_\mv$. Assume
+  the microvilli are rigid, and are oriented normal to the cell
+  surface. 
+\item For calculating the hydrodynamic forces on the cell, it is
+  assumed that the cell is a sphere with radius $R_\ch \equiv R_c +
+  L_\mv$. 
+\item There are $R_T$ receptors on a cell, and the rolling surface
+  has a ligand density of $N_l$.
+\item Assume the adhesion molecules are linear springs.
+\item Bonds are assumed to form between the center of the tip of a
+  microvillus (denoted $\x_m \equiv (x_m, y_m, z_m)$) and a point on
+  the surface (denoted $\x_0 \equiv (x_0, y_0, z_0)$). Define $\x_b =
+  \x_0 - \x_m$ which gives the orientation and length of the bond.
+\item The on and off rates of each bond depend on the bond length
+  according to the Dembo model: 
+\begin{align}
+  k_\on &= k_\on^0 \exp\left(- \frac{\sigma_\ts
+                (L_\sep - \lambda)^2}{2k_b
+          T}\right) \label{eq:dembo_on} \\ 
+  k_\off &= k_\off^0 \exp\left(\frac{(\sigma -
+                 \sigma_\ts)(L_\sep - \lambda)^2}{2k_b
+                 T}\right). \label{eq:dembo_off}
+\end{align}
+\item Here $\lambda$ is the equilibrium separation distance, $k_b T$
+  is the thermal energy, $\sigma$ is the spring constant, and
+  $\sigma_\ts$ is the transition state spring constant.
+\item Note from equations (\ref{eq:dembo_on}) and
+  (\ref{eq:dembo_off}), if $\sigma - \sigma_\ts > 0$ the bonds are
+  slip bonds, but if $\sigma - \sigma_\ts < 0$ the bonds are catch
+  bonds.
+\item They find that $\sigma - \sigma_\ts$ has a large effect on
+  cell adhesion in flow.
+\item They assume that only receptors on microvilli tips are able to
+  bind to the rolling surface, therefore they only track receptors on
+  the tips of microvilli.
+\item Bonds form normal to the rolling surface, so $k_\on$ is given by
+  equation (\ref{eq:dembo_on}) with $L_\sep \equiv x_m$.
+\item The off rate of a specific bond depends on the length of the
+  existing bond, and so $k_\off$ is given by equation
+  (\ref{eq:dembo_off}) with $L_\sep \equiv |\x_b|$.
+\item If receptors are distributed uniformly over the surface of the
+  cell, then the number of receptors on the tip of a single
+  microvillus is Poisson-distributed:
+  \begin{equation}
+    \label{eq:receptor_distribution}
+    P(n) = \frac{\left(\frac{R_T A_\mv}{A_c}\right)^n \exp
+      \left(-\frac{R_T A_\mv}{A_c}\right)}{n!}.
+  \end{equation}
+\item $A_\mv$ is the surface area of a single microvillus tip, and
+  $A_c$ is the surface area of the entire cell. So $\frac{R_T
+    A_\mv}{A_c}$ is the average number of receptors on a microvillus
+  tip.
+\item Assume that the time it takes for a given bond to form or break is
+  given by an exponential distribution with mean $1/k_\on$ or
+  $1/k_\off$. Then the probability that a given bond forms in a time
+  interval $\Delta t$ is given by
+  \begin{equation}
+    \label{eq:prob_bond_form}
+    P_\on = 1 - \exp(-k_\on \Delta t),
+  \end{equation}
+  and the probability of a given bond breaking is the same with
+  $k_\off$ in place of $k_\on$.
+\item Each bond generates a force and torque on the cell body, and the
+  sum of these forces along with colloidal forces (described in
+  sub-section \ref{sec:bond-coll-forc}) affect the cell velocity.
+\item We assume the fluid velocity is given by Stokes' equation, and
+  therefore the cell velocity is linearly related to the net force on
+  the cell:
+  \begin{equation*}
+    \mathbf{U} = \underline{\underline{M}} \mathbf{F}
+  \end{equation*}
+where $\mathbf{U} = (V_x, V_y, V_z, \Omega_x, \Omega_y, \Omega_z)$ and
+$\mathbf{F} = (F^b_x + F^c_x, F^b_y + F^s, F^b_z, C^b_x, C^b_y, C^b_z
++ C^s)$.
+\item The positions of the microvilli must be tracked as the cell
+  translates and rotates. Spherical coordinates are used to track the
+  microvilli. If a given microvillus has coordinates $(\theta_m,
+  \phi_m)$, then its position evolves according to:
+  \begin{align}
+    \label{eq:phi_evol}
+    \frac{d \phi_m}{dt} &= -\sin\theta_m \Omega_x + \cos\theta_m
+                          \Omega_y \\
+    \label{eq:thet_evol}
+    \frac{d \theta_m}{dt} &= -\frac{\cos\phi_m
+                            \cos\theta_m}{\sin\phi_m} \Omega_x -
+                            \frac{\cos\phi_m \sin\theta_m}{\sin
+                            \phi_m} \Omega_y + \Omega_z.
+  \end{align}
+\item Both coordinate systems use the cell's frame of reference (see
+  Fig. ), so the anchor point $\x_0$ of each bond must be tracked as
+  well:
+  \begin{equation}
+    \label{eq:anch_evol}
+    \frac{d \x_0}{dt} = -\mathbf{V}
+  \end{equation}
+\item Cartesian and spherical coordinates are related through the
+  expected equations:
+  \begin{align*}
+    x &= R_\ch \sin\phi \cos\theta \\
+    y &= R_\ch \sin\phi \sin\theta \\
+    z &= R_\ch \cos\phi
+  \end{align*}
+\end{itemize}
+
+\subsection{Bond and Colloidal Forces}
+\label{sec:bond-coll-forc}
+
+\begin{itemize}
+\item Assume the bonds are linear springs with spring constant $\sigma$ and
+  rest length $\lambda$.
+\item The force generated by a single bond is given by 
+  \begin{equation}
+    \label{eq:bond_forc}
+    \mathbf{F}^b = \sigma (|\x_b| - \lambda) \frac{\x_b}{|\x_b|}.
+  \end{equation}
+\item The torque generated by a single bond is given by
+  \begin{equation}
+    \label{eq:bond_torq}
+    \mathbf{C}^b = \x_m \times \mathbf{F}^b.
+  \end{equation}
+\item The force due to gravity is approximately
+  \begin{equation}
+    \label{eq:gravity}
+    F_\textnormal{gr} = \frac{4}{3}\pi(\rho_c - \rho_m) R_\ch^3 g,
+  \end{equation}
+where $\rho_c$ and $rho_m$ are the densities of the cell and the
+medium, and $g$ is the acceleration due to gravity.
+\item Colloidal forces decay strongly with distance, and usually the
+  length scale for decay is shorter than the length of the microvilli
+  (sources in \cite{Hammer1992}: Bongrand and Bell, 1984;
+  Israelachvili, 1985).
+\item Therefore assume that all of the colloidal forces acting on the
+  cell come from the microvilli (except for gravity).
+\item There are three colloidal forces associated with individual
+  microvilli: van der Waals forces, electrostatic forces, and steric
+  stabilization forces. All of these forces only act normal to the
+  rolling surface, i.e. in the $x$ direction.
+\item van der Waals force:
+  \begin{equation}
+    \label{eq:vdw_forc}
+    F_\textnormal{vdw} = \frac{A_\textnormal{H} A_\mv}{6\pi}
+    \sum_\textnormal{microvilli} x_m^{-3}.
+  \end{equation}
+$A_\textnormal{H}$ is the Hamaker constant.
+\item Electrostatic force:
+  \begin{equation}
+    \label{eq:elec_forc}
+    F_\textnormal{el} = \frac{e^2 z_1 z_2 N_1 N_2 A_\mv}{2 \epsilon_r
+      \epsilon_o \delta^2} \sinh \delta L_1 \sinh \delta L_2
+    \sum_\textnormal{microvilli} e^{-\delta x_m}.
+  \end{equation}
+% What about the signs of these forces? These equations all seem to
+% give positive forces
+\item Steric stabilization force:
+  \begin{equation}
+    \label{eq:ster_forc}
+    F_\textnormal{ss} = \left(\lambda_\textnormal{ss} A_\mv
+    \sum_\textnormal{microvilli} x_m^{-2}\right) \mathcal{H}\left(L_g
+    - x_m\right)
+  \end{equation}
+where $\mathcal{H}$ is the Heaviside function.
+\item Then the colloidal force is the sum of the above 4 forces (with
+  the appropriate signs)
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Results Overview}
+
+\begin{itemize}
+\item Increasing the number of receptors per microvillus leads to a
+  decrease in rolling velocity (see Fig. 4 in the paper). Also, the
+  population average of velocity variance reaches a minimum around 5
+  receptors per microvillus.
+\item Increasing $\dot{\gamma}$ results in a decrease in dimensionless
+  rolling velocity (dimensionless velocity is velocity scaled by
+  $\dot{\gamma} R_\ch$).
+\item Increasing $F_\sigma$ (a nondimensional parameter that is
+  related to the bond's response to force, in the limit $F_\sigma
+  \rightarrow 0$ the off rate becomes independent of force) leads to a
+  greater average rolling velocity (less adhesion). 
+\item Next they examined the effect of $\sigma$ on rolling
+  velocity. They found that increasing bond stiffness resulted in an
+  increase of rolling velocity, primarily because the off rate of
+  bonds is more sensitive to force.
+\item Changing the formation rate of bonds is more important to
+  rolling velocity than changing the breaking rate.
+\item They classify cell trajectories into 5 qualitative groups:
+  unbound, rolling at a constant speed, tumbling (rolling w/ brief
+  adhesion), transient adhesion, and permanent adhesion.
+\item They introduce 3 new statistics to help distinguish between the
+  5 different types of motion.
+\item The first is $F_a$ which is the frequency of adhesion, defined
+  as the fraction of time a cell has a nondimensional velocity
+  $\tilde{V}_y < 0.001$.
+\item The second and third are forward and reverse kinetic constants
+  $k_a$ and $k_d$, defined as the inverse of the mean time before a
+  moving/adherent cell becomes attached/unattached.
+  \begin{equation}
+    \label{eq:forward_kin_const}
+    k_a = \frac{N_{\tilde{V}_y > 0.001}}{\sum_{i = 1}^{N_{\tilde{V}_y
+          > 0.001}} \Delta t_{i, N_{\tilde{V}_y > 0.001}}} 
+  \end{equation}
+  $k_d$ is defined in a similar way.
+\item 
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Discussion/Conclusions Overview}
+
+
+
+%------------------------------------------------
+
+\section*{Article Evaluation}
+
+
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography title
+
+\bibliography{/Users/andrewwork/thesis/library} % Input your
+                                % bibliography file 
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

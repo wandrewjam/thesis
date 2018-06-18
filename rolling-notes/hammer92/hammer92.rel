@@ -1,0 +1,76 @@
+;; RefTeX parse info file
+;; File: /Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex
+;; User: andrewwork (Andrew Work)
+
+(set reftex-docstruct-symbol '(
+
+
+(xr nil "\\\\\\\\\\\\")
+
+(index-tags)
+
+(is-multi t)
+
+(bibview-cache ("Hammer1992" . "Hammer & Apte 1992, {Sim. cell roll. adhes. surf., Biophysical Journal 63:35"))
+
+(master-dir . "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/")
+
+(label-numbers)
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex")
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/structure.tex")
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/structure.tex")
+
+(toc "toc" "    1 Introduction Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil 2 "1" "\\section{Introduction Overview}" 2596)
+
+(toc "toc" "    2 Model Description" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil 2 "2" "\\section{Model Description}" 3593)
+
+(toc "toc" "      2.1 Cell Geometry and Receptors" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil 3 "2.1" "\\subsection{Cell Geometry and Receptors}" 3622)
+
+("sec:cell-geom-recept" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:dembo_on" "e" "k_\\on &= k_\\on^0 \\exp\\left(- \\frac{\\sigma_\\ts (L_\\sep - \\lambda)^2}{2k_b T}\\right)  " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:dembo_off" "e" "k_\\off &= k_\\off^0 \\exp\\left(\\frac{(\\sigma - \\sigma_\\ts)(L_\\sep - \\lambda)^2}{2k_b T}\\right). \\label" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:receptor_distribution" "e" "P(n) = \\frac{\\left(\\frac{R_T A_\\mv}{A_c}\\right)^n \\exp \\left(-\\frac{R_T A_\\mv}{A_c}\\right)}{n!}. \\en" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:prob_bond_form" "e" "P_\\on = 1 - \\exp(-k_\\on \\Delta t), " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:phi_evol" "e" "\\frac{d \\phi_m}{dt} &= -\\sin\\theta_m \\Omega_x + \\cos\\theta_m \\Omega_y " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:thet_evol" "e" "\\frac{d \\theta_m}{dt} &= -\\frac{\\cos\\phi_m \\cos\\theta_m}{\\sin\\phi_m} \\Omega_x - " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:anch_evol" "e" "\\frac{d \\x_0}{dt} = -\\mathbf{V} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+(toc "toc" "      2.2 Bond and Colloidal Forces" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil 3 "2.2" "\\subsection{Bond and Colloidal Forces}" 8576)
+
+("sec:bond-coll-forc" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:bond_forc" "e" "\\mathbf{F}^b = \\sigma (|\\x_b| - \\lambda) \\frac{\\x_b}{|\\x_b|}. " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:bond_torq" "e" "\\mathbf{C}^b = \\x_m \\times \\mathbf{F}^b. " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:gravity" "e" "F_\\textnormal{gr} = \\frac{4}{3}\\pi(\\rho_c - \\rho_m) R_\\ch^3 g, " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:vdw_forc" "e" "F_\\textnormal{vdw} = \\frac{A_\\textnormal{H} A_\\mv}{6\\pi} \\sum_\\textnormal{microvilli} x_m^{-3}. " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:elec_forc" "e" "F_\\textnormal{el} = \\frac{e^2 z_1 z_2 N_1 N_2 A_\\mv}{2 \\epsilon_r \\epsilon_o \\delta^2} \\sinh \\delta " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+("eq:ster_forc" "e" "F_\\textnormal{ss} = \\left(\\lambda_\\textnormal{ss} A_\\mv \\sum_\\textnormal{microvilli} x_m^{-2}\\right)" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+(toc "toc" "    3 Results Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil 2 "3" "\\section{Results Overview}" 11034)
+
+("eq:2" "e" " " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil)
+
+(toc "toc" "    4 Discussion/Conclusions Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil 2 "4" "\\section{Discussion/Conclusions Overview}" 13018)
+
+(toc "toc" "    * Article Evaluation" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex" nil 2 "*" "\\section*{Article Evaluation}" 13114)
+
+(bib "/Users/andrewwork/thesis/library.bib")
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/hammer92/hammer92.tex")
+))
+

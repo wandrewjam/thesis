@@ -1,0 +1,231 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+letterpaper, % Alternatively letterpaper for US letter
+twocolumn, % Alternatively onecolumn
+landscape % Alternatively portrait
+]{article}
+
+\usepackage{amsmath}
+
+\input{structure.tex} % Input the file specifying the document layout
+                      % and structure 
+
+%------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%------------------------------------------------------------------------
+
+\articletitle{Experimental and numerical study of platelets rolling on
+a von Willebrand factor-coated surface} % The title of the article
+\articlecitation{\cite{Pujos2018}} % The BibTeX citation key from your
+                                % bibliography
+
+\datenotesstarted{April 13, 2018} % The date when these notes were
+                                % first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes
+                                % were lasted updated (automatically
+                                % the current date)
+
+\docauthor{Andrew Watson} % Your name
+
+%------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%------------------------------------------------------------------------
+%	ARTICLE NOTES
+%------------------------------------------------------------------------
+
+% \section{Introduction}
+
+%------------------------------------------------
+
+\section{Experimental Observations}
+
+\begin{itemize}
+\item Experimental setup: Fixed platelets were perfused through a
+  microfluidic channel coated with von Willebrand factor.
+\item Flow chamber dimensions: 400 $\mu$m wide, 4 cm long, and a
+  height of either 14 or 63 $\mu$m (why?). The shear rate was between
+  $1400$ and $1800$ s$^{-1}$, to facilitate unfolding of vWF.
+\item After 95 min of perfusion, platelets adhered at a greater
+  concentration close to the channel entrance, and decreasing platelet
+  concentration along the flow channel. 
+\item Videos showed a couple of different platelet behaviors. Over the
+  17 minute time period illustrated in the paper, some platelets
+  remained adhered throughout the time interval, some platelets rolled
+  during the entire period, some platelets initially rolled and then
+  adhered, and some platelets which were initially adhered came
+  unstuck and began rolling. 
+\item Note: they do not characterize the rolling at all, i.e. no
+  rolling velocity, pause times, step size, etc are measured.
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Model Description}
+
+\begin{itemize}
+\item In their model, they only consider platelet dynamics on the
+  vWF-coated surface, and a small boundary layer in the fluid above
+  the surface, which contains platelets that are able to interact with
+  the surface.
+\item Platelets in the bulk outside of this boundary layer are assumed
+  to have some fixed concentration $C_v^\infty$.
+\item To derive PDEs for the platelet concentration, consider a small
+  volume in the boundary layer with dimensions $dx \times dy \times
+  h$, where $h$ is the height of the boundary layer.
+\item Denote the number of platelets in the boundary layer element as
+  $n_v$ and the number of platelets on the surface below this element
+  as $n_s$. 
+\item Platelet number can change in the volume element by
+  transport in the flow into/out of the upstream/downstream ends,
+  respectively, binding/unbinding to the surface, and diffusion from
+  bulk. 
+\item Platelet number can change on the surface element by rolling
+  into/out of the region, and binding/unbinding. 
+\item Then by taking limits as $dx, dy, dt \rightarrow 0$, you get an
+  advection-reaction equation for platelets in the boundary layer and
+  platelets on the surface:  
+  \begin{align}
+    \label{eq:dimensional_pde1}
+    &\partial_t C_v + V_v \partial_x C_x = -J +
+    \frac{D}{l_D^2}(C_v^\infty - C_v) \\
+    \label{eq:dimensional_pde2}
+    &\partial_t C_s + V_s \partial_x C_s = h J \\
+    \label{eq:dimensional_reaction} 
+    &J = k_\text{on} C_v \left(1 - \frac{C_s}{C_{s,
+      \text{max}}}\right) - k_\text{off} \frac{C_s}{h}.
+  \end{align}
+\item Parameter definitions:\\
+  \begin{tabular}{|c|c|}
+    \hline
+    $V_v$ & Velocity of free-flowing platelets \\
+    $V_s$ & Velocity of rolling platelets \\
+    $D$ & Diffusion coefficient of platelets \\
+    $l_D$ & Characteristic length scale of diffusion \\
+    $C_v^\infty$ & Concentration of platelets in the bulk \\
+    $h$ & Height of the boundary layer \\
+    $k_\text{on}$ & On rate of platelet binding to vWF \\
+    $k_\text{off}$ & Off rate of platelet binding to vWF \\
+    $C_{s,\text{max}}$ & Maximum concentration of platelets on the
+                         surface \\ \hline
+  \end{tabular}
+\item They non-dimensionalized the above equations to get:
+  \begin{align*}
+    &v_t + v_x = -j + d(v^\infty - v) \\
+    &s_t + \epsilon s_x = j \\
+    &j = v(1-s) - \alpha s.
+  \end{align*}
+\item Non-dimensional parameter definitions: $v = \frac{C_v
+    j}{C_\text{s, max}}$, $d = \frac{D}{l_D^2 k_\text{on}}$, $\epsilon
+  = \frac{V_s}{V_v}$, and $\alpha =
+  \frac{k_\text{off}}{k_\text{on}}$.
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Discussion/Conclusions Overview}
+
+\begin{itemize}
+\item Figure 9 in the paper compares experimental data on accumulation
+  of platelets on the surface with simulations from the fitted
+  model. The model seems to fit-ish, but it in particular
+  underestimates platelet accumulation on the surface early in time at
+  points close to the inflow and points near the outflow.
+\item Other estimated parameters seem more
+  reasonable. $C_{s,\text{max}}$ is $1.7 \times 10^4$ mm$^{-2}$,
+  compared to the theoretical maximal 2D packing concentration $12
+  \times 10^4$ mm$^{-2}$. 
+\item $k_\text{on}$ is estimated at 0.24 s$^{-1}$, which is consistent
+  with estimates by \cite{Fitzgibbon2014}.
+\item $k_\text{off}$ is estimated at $6 \times 10^{-5}$, which they
+  claim is reasonable, because the surface is densely coated with vWF.
+\item The height of the boundary layer is found to be $0.1$
+  $\mu$m. This is obviously quite a bit smaller than a platelet, so
+  they interpret the volume concentration of platelets in the boundary
+  layer as a probability that a platelet in the bulk interacts with
+  the wall.
+\item The estimated value of $V_v$ is 0.36 mm/s. Based on a shear rate
+  of 1500 s$^{-1}$, the velocity of fluid 1 platelet radius from the
+  wall is about $1.5$ mm/s. In the paper, they estimate $V_v$ to be
+  0.6 based on the shear rate (somehow).
+\item The estimated value of $V_s$ is effectively 0 ($\sim 10^{-10}$
+  to $10^{-13}$). They speculate that this is due to the presence of
+  platelets that were activated prior to fixing, and remain bound to
+  the surface throughout the experiment.
+\item When they included diffusion (assumed to be shear-induced
+  diffusion), the curve farthest from the channel entrance fit the
+  experimental data more closely. That is, platelets accumulated more
+  quickly when they included diffusion.
+\item Because their estimated value of $V_s$ is so low, they just
+  exclude it from the model, and their new parameter estimates remain
+  within the same order of magnitude.
+\item They also eliminate the saturation term because they only see
+  values of $C_s$ much lower than $C_\text{s, max}$.
+\item In the supplementary data, they have a couple of figures showing
+  model fits to data from different patients, and under different
+  experimental conditions. 
+\end{itemize}
+
+%------------------------------------------------
+
+\section*{Article Evaluation}
+
+This model doesn't include any activation (platelets are fixed in the
+experiment) and greatly simplifies diffusion and rolling. Their data
+is much more suited to estimating platelet on and off rates than
+rolling parameters. I am dissatisfied with their interpretation of the
+concentration of platelets in the boundary layer as a probability of a
+platelet from the bulk contacting the wall. It seems to me they
+developed their model with the assumption that the boundary layer is
+large enough to contain enough platelets to reasonably be approximated
+as a continuum, but the estimated $h$ based on fitting doesn't
+validate this assumption, so they change their interpretation of the
+model after the fact.
+
+%-----------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%-----------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography
+                                % title 
+
+\bibliography{/Users/andrewwork/thesis/library} % Input your
+                                % bibliography file 
+
+%-----------------------------------------------------------------------
+
+\end{document}

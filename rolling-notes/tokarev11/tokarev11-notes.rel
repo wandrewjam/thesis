@@ -1,0 +1,56 @@
+;; RefTeX parse info file
+;; File: /Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex
+;; User: andrewwork (Andrew Work)
+
+(set reftex-docstruct-symbol '(
+
+
+(xr nil "\\\\\\\\\\\\")
+
+(index-tags)
+
+(is-multi t)
+
+(bibview-cache ("tokarev11pas" . "Tokarev etal. 2011, Platelet adhesion from shear blood, Biophysical Journal 799"))
+
+(master-dir . "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/")
+
+(label-numbers)
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex")
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/structure.tex")
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/structure.tex")
+
+(toc "toc" "    1 Introduction" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil 2 "1" "\\section{Introduction}" 2401)
+
+(toc "toc" "    2 Mathematical Model" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil 2 "2" "\\section{Mathematical Model}" 4132)
+
+("eq:velocity_profile" "e" "u(y) = \\dot{\\gamma}_w y \\left(1 - \\frac{y}{2H}\\right). " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil)
+
+("eq:plt_conc_bulk" "e" "\\frac{\\partial P}{\\partial t} u(y) \\frac{\\partial P}{\\partial x} = \\nabla\\left(D(P)\\nabla P\\right). " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil)
+
+("eq:diff_coeff" "e" "D(P) = k_{ZC} \\left(\\frac{d_\\textit{RBC}}{2}\\right)^2 \\dot{\\gamma} \\Phi_\\textit{RBC}(1 - \\Phi_\\texti" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil)
+
+("eq:BCs_top_right" "e" "\\left.D(P) \\frac{\\partial P}{\\partial y}\\right|_{y = 2H} = D(P) \\left.\\frac{\\partial P}{\\partial x}\\" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil)
+
+("eq:BC_inflow" "e" "\\left. P \\right|_{x = 0} = P_0 " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil)
+
+("eq:BC_bottom" "e" "\\left. D(P) \\frac{\\partial P}{\\partial y} \\right|_{y = 0} = \\frac{dM}{dt} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil)
+
+("eq:plt_conc_wall" "e" "\\frac{\\partial R}{t} + w \\frac{\\partial R}{\\partial x} = \\alpha J(x) \\Omega(x) - (k_\\textit{bind} + " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil)
+
+("eq:1" "e" " " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil)
+
+(toc "toc" "    3 Results Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil 2 "3" "\\section{Results Overview}" 9149)
+
+(toc "toc" "    4 Discussion/Conclusions Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil 2 "4" "\\section{Discussion/Conclusions Overview}" 11042)
+
+(toc "toc" "    * Article Evaluation" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex" nil 2 "*" "\\section*{Article Evaluation}" 11643)
+
+(bib "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/sample.bib")
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/tokarev11/tokarev11-notes.tex")
+))
+

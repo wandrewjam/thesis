@@ -1,0 +1,40 @@
+;; RefTeX parse info file
+;; File: /Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/chen-dissertation.tex
+;; User: andrewwork (Andrew Work)
+
+(set reftex-docstruct-symbol '(
+
+
+(xr nil "\\\\\\\\\\\\")
+
+(index-tags)
+
+(is-multi t)
+
+(bibview-cache)
+
+(master-dir . "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/")
+
+(label-numbers)
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/chen-dissertation.tex")
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/structure.tex")
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/structure.tex")
+
+(toc "toc" "    1 Introduction" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/chen-dissertation.tex" nil 2 "1" "\\section{Introduction}" 2322)
+
+(toc "toc" "    2 Methodology Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/chen-dissertation.tex" nil 2 "2" "\\section{Methodology Overview}" 4928)
+
+(toc "toc" "    3 Results Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/chen-dissertation.tex" nil 2 "3" "\\section{Results Overview}" 5013)
+
+(toc "toc" "    4 Discussion/Conclusions Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/chen-dissertation.tex" nil 2 "4" "\\section{Discussion/Conclusions Overview}" 5094)
+
+(toc "toc" "    * Article Evaluation" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/chen-dissertation.tex" nil 2 "*" "\\section*{Article Evaluation}" 5190)
+
+(bib "/Users/andrewwork/thesis/library.bib")
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/chen-dissertation/chen-dissertation.tex")
+))
+

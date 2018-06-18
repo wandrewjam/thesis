@@ -1,0 +1,42 @@
+;; RefTeX parse info file
+;; File: /Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex
+;; User: andrewwork (Andrew Work)
+
+(set reftex-docstruct-symbol '(
+
+
+(xr nil "\\\\\\\\\\\\")
+
+(index-tags)
+
+(is-multi nil)
+
+(bibview-cache)
+
+(master-dir . "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/")
+
+(label-numbers)
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex")
+
+(file-error "structure.tex")
+
+(toc "toc" "    1 Introduction" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex" nil 2 "1" "\\section{Introduction}" 2561)
+
+("item:model1" "i" "All tethering events are mediated by a single mutant GP1b-vWF bond.  " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex" nil)
+
+("item:model2" "i" "All tethering events are mediated by a single GP1b-vWF bond, which can either be wild-type or mutant" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex" nil)
+
+("item:model3" "i" "Tethering can be mediated by multiple GP1b-vWF bonds of either type.  " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex" nil)
+
+(toc "toc" "    2 Models" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex" nil 2 "2" "\\section{Models}" 3541)
+
+(toc "toc" "    3 Results Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex" nil 2 "3" "\\section{Results Overview}" 6075)
+
+(toc "toc" "    4 Discussion/Conclusions Overview" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex" nil 2 "4" "\\section{Discussion/Conclusions Overview}" 6890)
+
+(toc "toc" "    * Article Evaluation" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex" nil 2 "*" "\\section*{Article Evaluation}" 6891)
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/doggett03/doggett03-notes.tex")
+))
+

@@ -1,0 +1,58 @@
+;; RefTeX parse info file
+;; File: /Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex
+;; User: andrewwork (Andrew Work)
+
+(set reftex-docstruct-symbol '(
+
+
+(xr nil "\\\\\\\\\\\\")
+
+(index-tags)
+
+(is-multi t)
+
+(bibview-cache ("Ju2013" . "Ju 2013, {Single molecule study GP1b$\\alpha$ von, Georgia Institute of Technology"))
+
+(master-dir . "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/")
+
+(label-numbers)
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex")
+
+(bof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/structure.tex")
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/structure.tex")
+
+(toc "toc" "    1 Summary" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil 2 "1" "\\section{Summary}" 2603)
+
+("sec:summary" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil)
+
+(toc "toc" "    2 Introduction" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil 2 "2" "\\section{Introduction}" 4579)
+
+("sec:introduction" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil)
+
+(toc "toc" "    3 Chapter 4: The interplay of force and the A1 domain N-terminal flanking region on regulating the vWF" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil 2 "3" "\\section{Chapter 4: The interplay of force and the A1 domain
+  N-terminal flanking region on regulating the vWF-GP1b\\inta{} 
+  catch bond}" 6753)
+
+("sec:chapter4" "s" "\\begin{itemize} " "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil)
+
+(toc "toc" "    4 Chapter 5: Transport regulation of 2D kinetics of vWF-GP1b\\inta{} association" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil 2 "4" "\\section{Chapter 5: Transport regulation of 2D kinetics of
+  vWF-GP1b\\inta{} association}" 6967)
+
+("sec:chapter5" "s" "%------------------------------------------------ \\section{Chapter 6: vWF-GP1b\\inta{} catch bond tri" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil)
+
+(toc "toc" "    5 Chapter 6: vWF-GP1b\\inta{} catch bond triggers platelet signaling by force prolonged bond lifetimes" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil 2 "5" "\\section{Chapter 6: vWF-GP1b\\inta{} catch bond triggers platelet
+  signaling by force prolonged bond lifetimes}" 7168)
+
+("sec:chapter6" "s" "%------------------------------------------------ \\section*{Article Evaluation} %-------------------" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil)
+
+(toc "toc" "    * Article Evaluation" "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil 2 "*" "\\section*{Article Evaluation}" 8183)
+
+("sec:conclusions" "s" nil "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex" nil "")
+
+(bib "/Users/andrewwork/thesis/library.bib")
+
+(eof "/Users/andrewwork/Documents/Grad_School/thesis/rolling-notes/ju13/ju13.tex")
+))
+

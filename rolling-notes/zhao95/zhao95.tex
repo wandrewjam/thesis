@@ -1,0 +1,289 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+letterpaper, % Alternatively letterpaper for US letter
+twocolumn, % Alternatively onecolumn
+landscape % Alternatively portrait
+]{article}
+
+\usepackage{amsmath, amsfonts}
+\input{structure.tex} % Input the file specifying the document layout
+                      % and structure
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\articletitle{A stochastic model of leukocyte rolling} % The title of
+                                % the article
+\articlecitation{\cite{Zhao1995}} % The BibTeX citation key from your
+                                % bibliography
+
+\datenotesstarted{April 8, 2018} % The date when these notes were
+                                % first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes
+                                % were lasted updated (automatically
+                                % the current date)
+
+\docauthor{Andrew Watson} % Your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%----------------------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE NOTES
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+
+
+
+%------------------------------------------------
+
+\section{Model Overview}
+
+They approximate the displacement of a rolling cell by a step-like
+function in time, where there are rapid jumps in the cells position,
+followed by a relatively long period where the cell is bound to the
+substrate. Motivation: leukocytes bind to the substrate through
+receptors located in the microvilli. When all the bonds on the
+trailing microvillus are broken, the cell ``jumps'' forward. In
+between steps, the cell is stationary, and so the bonds between
+cell-surface receptors and the substrate must balance the forces
+exerted on the cell by the fluid.
+
+The displacement $h$ in a single step ``is a random variable
+determined mainly by the spacing of microvilli and by the
+distributions of adhesion molecules on the individual microvilli and
+the ligands on the substraturm surface.'' The time of this
+displacement is just $t_1 = \frac{h}{v_\text{free}}$ (they write $t_1
+\sim \frac{h}{v_\text{free}}$, is this the same?) They define $t_2$ as
+the time between successive jumps (i.e. $t_1$ plus the resting time
+following a jump), and then claim $t_2 \sim
+\frac{h}{v_\text{rolling}}$. Here $v_\text{free}$ is the velocity of a
+free-flowing cell, and $v_\text{rolling}$ is the average velocity of a
+rolling cell. (Note: though this isn't explicitly stated, I think that
+$x \sim y$ means the distribution of $x$ is $y$. 
+
+Define $\tau_1 \equiv \langle t_1 \rangle$ and $\tau_2 = \langle t_2
+\rangle$, then 
+\begin{equation*}
+  \frac{\tau_1}{\tau_2} \sim \frac{v_\text{rolling}}{v_\text{free}}.
+\end{equation*}
+(Are the $\tau$s themselves random variables? I'm not sure if the
+above equation can be interpreted as a regular equals.) Experimentally
+this ratio is much less than 1. This is their justification for
+idealizing cell motion as a random jumping process. 
+
+The waiting time $t_2$ is a function of the dissociation rate of the
+bonds in the rearmost microvillus (because these are the bonds
+preventing the forward progress of the cell). If we assume that there
+is only a single bond in this rearmost cluster, then $\tau_2 =
+1/k_\text{off}$. When adhesion is mediated by multiple bonds, the
+relationship is more complicated. They suggest that $h$ is related to
+the spatial distribution of receptors and ligands. If the the density
+of ligands on the substrate is high, then $h$ is determined by the
+spacing of adhesion receptors on the cell. They want to estimate $h$
+and $\tau_2$ from the distribution of rolling velocities. 
+
+%------------------------------------------------
+
+\section{Stochastic model of cell rolling for a homogeneous
+  population}
+
+In this section they consider a homogeneous population of cells. They
+model the rolling velocity using a Fokker-Planck equation with drift
+and diffusion terms. If $\Delta t \ll \tau_2$, then instantaneous
+velocity can't be determined, and instead 
+\begin{equation}
+  \label{eq:velocity}
+  v(t) \equiv \frac{x(t + \Delta t/2) - x(t - \Delta t/2)}{\Delta t}
+\end{equation}
+defines a moving average of the velocity. When $\Delta t/\tau_2 \gg
+1$, then $v(t)$ is approximately continuous. Therefore they model the
+distribution of velocities as 
+\begin{equation*}
+  \frac{\partial p}{\partial t}(v, t) = -\frac{\partial}{\partial
+    v}[A(v)p(v,t)] + \frac{1}{2}\frac{\partial^2}{\partial
+    v^2}[B(v)p(v,t)].
+\end{equation*}
+
+The drift term $A(v)$ is defined as
+\begin{equation}
+  \label{eq:drift_defn}
+  A(v) = \lim_{t' \rightarrow t}\frac{\langle v' - v\rangle}{t' - t}.
+\end{equation}
+(Remark: the definitions for $A(v)$ and $B(v)$ below come from the
+derivation of the Fokker-Planck equation, which is an approximation of
+the Chapman-Kolmogorov equation describing the distribution of the
+random jump process). Here $v'$ is the realization of the random
+process at time $t'$. By substituting equation (\ref{eq:velocity})
+into equation (\ref{eq:drift_defn}), you find
+\begin{equation}
+  \label{eq:drift_2}
+  A(v) = \lim_{t' \rightarrow t}\frac{\langle x(t + \Delta t/2) - x(t
+    + \Delta t/2)\rangle - \langle x(t' - \Delta t/2) - x(t - \Delta
+    t/2)\rangle}{(t' - t)\Delta t}.
+\end{equation}
+
+Consider the mean of the displacement of a rolling cell in the
+interval $\delta t = t' - t$. Assuming the jumps are a Poisson process
+with mean $1/\langle t_2 \rangle$, then the probability of a jump
+occurring in the time interval $\delta t$ is approximately
+$\frac{\delta t}{\langle t_2 \rangle}$. Then it seems reasonable that
+the displacement in the interval $\delta t$ should be distributed like
+$h \mathbb{P}[\text{jump}]$. 
+\begin{equation}
+  \label{eq:average_displacement}
+  \langle x(t + \delta t) - x(t) \rangle = \left\langle h
+    \left[\frac{\delta t}{\langle t_2 \rangle} + o\left(\frac{\delta
+          t}{\langle t_2 \rangle}\right) \right] \right\rangle.
+\end{equation}
+
+Let's look at the two averages in (\ref{eq:drift_2}). The first term
+is $\langle x(t' + \Delta t/2) - x(t + \Delta t/2)\rangle$. Applying
+(\ref{eq:average_displacement}) we get $\langle x(t' + \Delta t/2) -
+x(t + \Delta t/2) \rangle \approx \left\langle h \frac{\delta
+    t}{\tau_2}\right\rangle$ for the first term and $\langle x(t' -
+\Delta t/2) - x(t - \Delta t/2)\rangle \approx \left\langle h
+  \frac{\delta t}{\langle t_2 \rangle} \right\rangle$ for the second
+term. We have to be careful about the $\langle t_2 \rangle$ term. In
+the second term, we have prior information about the distribution of
+$t_2$ in the interval $[t - \Delta t/2, t + \Delta
+t/2]$. Specifically, we know that the average velocity of the cell in
+this interval is $v$. Therefore $\langle t_2 \rangle = \bar{h}/v$,
+not $\tau_2$. 
+
+The diffusion coefficient is given by 
+\begin{equation}
+  \label{eq:diff_defn}
+  B(v) = \lim_{t' \rightarrow t}\frac{\langle (v' - v)^2 \rangle}{t' - t}.
+\end{equation}
+Again, by substituting (\ref{eq:velocity}) into (\ref{eq:diff_defn}),
+we get 
+\begin{equation*}
+  B(v) = \lim_{t' \rightarrow t}\frac{\left\langle ([x(t' + \Delta t/2) -
+    x(t + \Delta t/2)] - [x(t' - \Delta t/2) - x(t - \Delta
+    t/2)])^2\right\rangle}{(t' - t)(\Delta t)^2}. 
+\end{equation*}
+When you expand the numerator, you get each of the square bracket
+terms squared, plus the cross term. This cross term disappears by
+assuming that the terms in the square brackets are essentially
+independent. This is because we've assumed that $\delta t \ll t_2 <
+\Delta t$.
+
+Then, we assume that $\left\langle [x(t'-\Delta t/2) - x(t - \Delta
+  t/2)]^2\right\rangle = \left\langle h^2\left(\frac{\delta t}{\langle
+      t_2 \rangle} + o\left(\frac{\delta t}{\langle t_2
+        \rangle}\right)\right) \right\rangle$ and similar for the
+other term. Here $\langle t_2 \rangle = \bar{h}/v$ in both terms (I
+don't understand their argument why, and so $B(v)$ reduces to 
+\begin{equation*}
+  B(v) = \frac{2 \langle h^2 \rangle}{\bar{h}(\Delta t)^2}v = \frac{2
+    \bar{h} v}{(\Delta t^2)}\left(1 + \frac{\sigma_h^2}{\bar{h}^2}\right).
+\end{equation*}
+
+%------------------------------------------------
+
+\section{Boundary conditions for the Fokker-Planck equation}
+
+From the conservation of probability mass, we require that
+$\frac{\partial}{\partial t}p(v, t) = -\frac{\partial}{\partial v} J(v,
+t)$. Therefore the probability flux is given by
+\begin{equation}
+  \label{eq:prob_flux}
+  J(v, t) = A(v)p + \frac{1}{2}\frac{\partial}{\partial v}[B(v)p].
+\end{equation}
+The lower limit on the velocity of a rolling cell is 0, by the
+definition of the stochastic process (no backwards jumps are
+allowed). To find the flux at this boundary, plug $v = 0$ into
+(\ref{eq:prob_flux}), then $J(0, t) \ge 0$ if $\Delta t \ge
+\tau_2(1 + \sigma^2_h/\bar{h}^2).$ There is also no source of
+probability to the left of $v = 0$, and so we must have that $J(0, t)
+= 0$. The maximum possible rolling velocity is $\infty$.
+
+The stationary solution of $p(v, t)$ is a $\gamma$ distribution:
+\begin{equation}
+  \label{eq:stable_distribution}
+  p_s(v) = \frac{1}{\beta^\alpha\Gamma(\alpha)} v^{\alpha-1}
+  \exp\left(-\frac{v}{\beta}\right),
+\end{equation}
+where
+\begin{equation*}
+  \alpha = \frac{\Delta t}{\tau_2} \left(1 +
+    \frac{\sigma_h^2}{\bar{h}^2}\right)^{-1}, \quad 
+  \beta = \frac{\bar{h}}{\Delta t} \left(1 +
+    \frac{\sigma^2_h}{\bar{h}^2}\right). 
+\end{equation*}
+The steady state distribution of rolling velocities spreads out as
+$\Delta t$ increases, but the mean remains the same. 
+
+%------------------------------------------------
+
+%------------------------------------------------
+
+\section{Discussion/Conclusions Overview}
+
+Their method provides a way to estimate the step size $\bar{h}$ and
+average pause time $\tau_2$ when $\Delta t \gg \tau_2$. They also do
+an analysis for a heterogeneous population of cells, and propose that
+by varying $\Delta t$, one can separate the contribution to the
+variance of heterogeneity in the cell population from the contribution
+by variations in the pause time. 
+
+%------------------------------------------------
+
+\section{Article Evaluation}
+
+While it may be good to keep in mind the fact that experimental
+results in estimating rolling velocity can depend on the time interval
+of observation, I don't know if we can do anything to improve on this
+analysis for platelets, but it may be of interest to Vlado's group to
+interpret their experimental results. I think it makes more sense for
+us to look at more physical models.
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography title
+
+\bibliography{/Users/andrewwork/Documents/Grad_School/thesis/library}
+% Input your bibliography file
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

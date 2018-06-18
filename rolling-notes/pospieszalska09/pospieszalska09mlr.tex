@@ -1,0 +1,335 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+letterpaper, % Alternatively letterpaper for US letter
+twocolumn, % Alternatively onecolumn
+landscape % Alternatively portrait
+]{article}
+
+\usepackage{amsmath}
+\input{structure.tex} % Input the file specifying the document layout and structure
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\articletitle{Modeling Leukocyte Rolling} % The title of the article
+\articlecitation{} % The BibTeX citation key from your bibliography
+
+\datenotesstarted{April 5, 2018} % The date when these notes were first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes were lasted updated (automatically the current date)
+
+\docauthor{Andrew Watson} % Your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%----------------------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE NOTES
+%----------------------------------------------------------------------------------------
+
+\section{Introduction} 
+
+\begin{itemize}
+% Introduction
+\item Leukocyte rolling is mediated by a continuous series of
+  molecular bonds between the cell and the substrate that rapidly form
+  and dissociate. Some models of rolling are direct models that track
+  the states of important molecules and bonds, and others are
+  semi-analytic or analytic or agent-based models (unsure what this
+  means?). 
+% Motivation for modeling leukocyte rolling
+\item Rolling of leukocytes is necessary for firm adhesion. Rolling of
+  leukocytes involves, at a minimum, a selectin and selectin
+  ligand. Selectins bind carbohydrates and are expressed on leukocytes
+  and other cells.
+\item There are different scales of leukocyte binding/rolling, from
+  the cellular level down to the molecular level ($\sim$ 4 orders of
+  magnitude).
+\item While the simplest description of rolling involves a single
+  selectin binding to a single ligand, in reality rolling involves
+  several selectins interacting with an unknown number of ligands.
+\item Rolling velocity is modulated by integrins. 
+\item Mechanical properties of the cell are also important. Rolling of
+  rigid beads, for example, is unstable even at relatively low shear
+  rates (no specific shear rates are given in this section).
+\item Modeling shows that rolling requires molecular bonds with fast
+  association and dissociation.
+% History of modeling leukocyte rolling
+\item The motion of a rigid sphere in flow next to a wall can be
+  calculated (see Goldman et al., 1967), and the translational
+  velocity of a sphere in flow next to a wall is the hydrodynamic
+  velocity. Rolling cells travel at a much lower velocity than the
+  hydrodynamic velocity. 
+\item A repulsive force is necessary to prevent permanent adhesion of
+  a sphere to the wall. 
+\item There are four basic types of leukocyte rolling models:
+  \begin{enumerate}
+  \item Direct models---track receptor-ligand bonds individually,
+    track positions of receptors and ligands, and their association
+    state 
+  \item Semi-analytic models---track bond density in the cell-substrate
+    contact area using kinetic rate equations
+  \item Analytic models---``describe the evolution of the rolling
+    process through individual variables, the evolution of which can
+    be described by mathematical equations.''
+  \item Agent-based models---``multilevel, object-oriented models,
+    which are typically based on available software toolkits.''
+  \end{enumerate}
+\item See p. 228 for a brief historical description of the development
+  of leukocyte rolling models. They mention a couple of models where
+  the activity of integrins is included.
+% Development of a leukocyte rolling model
+\item Four important classes of parameters:
+  \begin{enumerate}
+  \item Cellular parameters like cell radius and density, properties
+    of the microvilli, and viscoelastic/mechanical properties.
+  \item Molecular parameters like receptor and ligand lengths,
+    densities, and bond properties
+  \item Environmental parameters like temperature and fluid properties
+  \item Algorithmic/Numerical parameters, like time step, mesh size, etc.
+  \end{enumerate}
+\item There are three classes of interactions:
+  \begin{enumerate}
+  \item Receptor-ligand interactions: the Bell model or the Dembo
+    model and MC simulations
+  \item Cell-substrate interactions: forces due to gravity, other cells,
+    electrostatics, and receptor-ligand binding
+  \item Cell-fluid interactions.
+  \end{enumerate}
+\item With the Dembo model of binding/unbinding, 
+  \begin{align*}
+    k_f = k_f^0 \exp\left[\frac{-\sigma_\text{ts} \left(L_\text{sep} -
+    \lambda\right)^2}{2\kappa_B T}\right], \text{ and } \\
+    k_d = k_d^0\exp\left[\frac{(\sigma -
+    \sigma_\text{ts})\left(L_\text{sep} - \lambda\right)^2}{2\kappa_B
+    T}\right]
+  \end{align*}
+  where $\sigma_\text{ts}$, $\sigma$, $\lambda$, and $L_\text{sep}$
+  are the transition-state spring constant, the bound-state spring
+  constant, the unstressed bond length, and the separation distance.
+\item With the Bell model, 
+  \begin{align*}
+    k_f = k_f^0 \exp\left[\frac{\sigma \left| L_\text{sep} - \lambda
+    \right|(\delta - 0.5\left|L_\text{sep} - \lambda\right|)}{\kappa_B
+    T}\right], \text{ and } \\ 
+    k_d = k_d^0\exp\left[\frac{\sigma\left|L_\text{sep} -
+    \lambda\right|}{\kappa_B T}\right]
+  \end{align*}
+  where $\delta$ is the reactive compliance.
+\item Then these reaction rates can be used to run Monte Carlo
+  simulations of bond formation and breaking.
+\item 
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Published Modeling Approaches} 
+
+The authors discuss 6 models:
+\begin{enumerate}
+\item Adhesion dynamics model of Hammer and Apte (1992)
+\item Event-tracking model of adhesion (ETMA) of Pospieszalska et
+  al. (2009)
+\item A semi-analytic model of Tozeren and Ley (1992)
+\item A model of cell deformation in rolling by Khismatullin and
+  Truskey (2004)
+\item An analytic model by Zhao et al. (1995)
+\item An agent-based model of rolling by Tang et al. (2007)
+\end{enumerate}
+
+\subsection{Adhesion Dynamics Model by Hammer and Apte (1992)}
+\label{sec:adhes-dynam-model}
+
+\begin{itemize}
+\item Simulates the rolling of a rigid sphere with rigid microvilli
+  protruding normally from the surface
+\item Have a single class of receptors, randomly distributed over the
+  sphere surface
+\item Receptor-ligand bonds are modeled with the Dembo model, and
+  bonds form perpendicularly to the substrate and are modeled as
+  Hookean springs.
+\item They use a fixed time step, and in each step determine whether
+  each bond or potential bond breaks or forms, and update the velocity
+  on the sphere
+\item This model has been updated and modified several times,
+  substituting the Bell model for the Dembo model, adding integrin
+  receptors, adding deformable microvilli, etc.
+\item One extension of the model by Krasik et al. (2006) adds
+  activation of integrins
+\item Another extension by Caputo et al. (2007) introduces an overall
+  ligand on rate given by
+  \begin{equation}
+    \label{eq:ligand_onrate}
+    \left(k_f^0\right)_L = k_0 P n_R
+  \end{equation}
+  where $k_0$ is the encounter rate, $P$ is the probability of bond
+  formation, and $n_R$ is the density of substrate receptors. With
+  increasing shear rate, $k_0$ increases and $P$ decreases. 
+\end{itemize}
+
+\subsection{Event-Tracking Model of Adhesion by Pospieszalska et
+  al. (2009)}
+\label{sec:event-tracking-model}
+
+\begin{itemize}
+\item The cell is modeled as a sphere with flexible microvilli.
+\item ETMA tracks individual receptors, and so bonds can form at
+  angles other than $90^\circ$, and they track individual microvilli
+\item Use a variable time step for MC simulation, and pick the first
+  reaction, and ignore the others.
+\item They ignore translation along the $y$-axis and rotations about
+  the $x$- and $z$-axes
+\item Track a single type of receptor.
+\item They found that $30\%$ of bonds do not last long enough to
+  become load-bearing ($\gamma = 50 s^{-1}$).
+\item In a later iteration, they allow microvilli to stretch as well
+  as bend
+\end{itemize}
+
+\subsection{Model by Tozeren and Ley (1992)}
+\label{sec:model-tozeren-ley}
+
+\begin{itemize}
+\item The first semi-analytic model of rolling
+\item They model the leukocyte as a ``bumpy'' sphere. They assume
+  there is a fluid layer separating the cell and the substrate with a
+  thickness of the length of typical cell protrusions. 
+\item The cells have a uniform rolling velocity $V_x$ and slip
+  velocity $V_s$, and are separated from the surface with a constant
+  distance $h_c$.
+\item All bonds formed at the same time are lumped together into a
+  single bond state
+\item The forces on a bond can be found from the bond length, and the
+  bond density as a function of $x$ in the contact zone is calculated
+  according to equation (29) (it looks like the steady state of an
+  advection-reaction equation).
+\item The model describes steady-state rolling for a given shear rate
+\end{itemize}
+
+\subsection{Model by Khismatullin and Truskey (2004)}
+\label{sec:model-khism-trusk}
+
+\begin{itemize}
+\item Model whole-cell deformation in rolling. The leukocyte is
+  modeled as a viscoelastic drop composed of a viscoelastic nucleus
+  surrounded by a viscoelastic cytoplasm. The membrane has a cortical
+  tension, which pulls it into a sphere shape.
+\item Microvilli are modeled as springs
+\item The fluid is modeled with the Navier-Stokes equations, as
+  opposed to the Stokes equations used in previous models
+\end{itemize}
+
+\subsection{Model by Zhao et al. (1995)}
+\label{sec:model-zhao}
+
+\begin{itemize}
+\item This is an analytical model of rolling which tracks the
+  distribution of velocities for rolling leukocytes
+\item Assumption: leukocyte displacement is composed of random
+  step-like jumps at random times
+\item Assume cells are observed at intervals of $\Delta t$, then the
+  observed velocity of a cell at a time $t$ and position $x$ is given
+  by
+  \begin{equation}
+    \label{eq:random_velocity}
+    V(x, t) = \frac{x(t + 0.5 \Delta t) - x(t - 0.5 \Delta t)}{\Delta
+      t}.
+  \end{equation}
+\item Then $p(V, t)$ satisfies $\frac{\partial p}{\partial t} =
+  -\frac{\partial J}{\partial V}$ where $J$ is a probability flux
+  given by
+  \begin{equation}
+    \label{eq:prob_flux}
+    J(V, t) = A(V) p(V, t) - \frac{1}{2}\frac{\partial (B(V) p(V,
+      t))}{\partial V}.
+  \end{equation}
+  where $A(V) = \frac{l_\text{mean}/t_\text{mean} - V}{\Delta t}$ and
+  $B(V) = 2V l_\text{mean}\left[\frac{1 +
+      (\sigma_1/l_\text{mean})^2}{(\Delta t)^2}\right].$
+\item This describes the transient evolution of leukocyte rolling. The
+  steady state distribution is a $\gamma$ distribution, that depends
+  on the frame rate of the observations $\Delta t$.
+\end{itemize}
+
+\subsection{In Silico White Blood Cell Model by Tang et al. (2007)}
+\label{sec:silico-white-blood}
+
+\begin{itemize}
+\item This is an agent-based model
+\item The cell is modeled as a rectangle with rounded edges, and the
+  surface of the cell is divided into 600 subunits. The substrate
+  surface is also divided into subunits of the same size.
+\item The leukocyte subunits contain 3 agents representing PSGL-1,
+  VLA-4, and CXCR2. The substrate subunits contain 3 agents
+  representing P-selectin, VCAM-1, and GRO-$\alpha$.
+\item I don't understand the geometry of this model. Something like
+  rolling is simulated by removing elements from the trailing end of
+  the cell and adding them to the leading end of the cell, and then
+  elements on the cell and substrate which are adjacent to each other
+  can form bonds.
+\end{itemize}
+
+% %------------------------------------------------
+
+% \section{Results Overview}
+
+
+
+% %------------------------------------------------
+
+% \section{Discussion/Conclusions Overview}
+
+
+
+% %------------------------------------------------
+
+% \section*{Article Evaluation}
+
+
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography title
+
+\bibliography{/Users/andrewwork/thesis/library} % Input your bibliography file
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
+%  LocalWords:  twocolumn onecolumn myheadings
