@@ -37,7 +37,7 @@ def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0):
     return A, B, C, D, R
 
 
-def nd_torque(m_mesh, z_mesh, th_mesh, d_prime):
+def nd_torque(m_mesh, z_mesh, th_mesh, d_prime=0):
     # Function to calculate net torque given a distribution of bonds, m
     tau = trapz(trapz(((1 - np.cos(th_mesh) + d_prime)*np.sin(th_mesh) +
                        (np.sin(th_mesh) - z_mesh))*m_mesh, x=z_mesh,
@@ -51,7 +51,19 @@ def nd_force(m_mesh, z_mesh, th_mesh):
     return f_prime
 
 
-def find_torque_roll(A, B, C, D, R, om, v, lam, nu, h, kap, M, z_mesh, th_mesh, d_prime):
+def find_torque_roll(A, B, C, D, R, om, v, lam, nu, h, kap, M, z_mesh, th_mesh, d_prime=0):
     m = spsolve(om*A + v*lam*B + h*nu*kap*C + nu*D, -R)  # Calculate the bond density function
     m_mesh = m.reshape(2*M+1, -1, order='F')
     return nd_torque(m_mesh, z_mesh, th_mesh, d_prime), m_mesh
+
+
+def find_force_roll(A, B, C, D, R, om, v, lam, nu, h, kap, M, z_mesh, th_mesh, d_prime=0):
+    m = spsolve(om*A + v*lam*B + h*nu*kap*C + nu*D, -R)  # Calculate the bond density function
+    m_mesh = m.reshape(2*M+1, -1, order='F')
+    return nd_force(m_mesh, z_mesh, th_mesh), m_mesh
+
+
+def find_forces(A, B, C, D, R, om, v, lam, nu, h, kap, M, z_mesh, th_mesh, d_prime=0):
+    m = spsolve(om*A + v*lam*B + h*nu*kap*C + nu*D, -R)  # Calculate the bond density function
+    m_mesh = m.reshape(2*M+1, -1, order='F')
+    return nd_torque(m_mesh, z_mesh, th_mesh, d_prime), nd_force(m_mesh, z_mesh, th_mesh), m_mesh
