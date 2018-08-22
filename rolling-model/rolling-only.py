@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 use_torque = True
 
 # Parameters
-L = 2.0
+L = 2.5
 M, N = 50, 50
 z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
                               np.linspace(-np.pi/2, np.pi/2, N+1),
@@ -17,11 +17,11 @@ lam = nu/h
 
 eta = .1
 delta = 3
-kap = 1
+kap = 3
 
 if use_torque:
-    om_max, om_number = 200, 21
-    eta_om = 1/5000
+    om_max, om_number = 200, 101
+    eta_om = 1/7500
 
     omegas = np.linspace(0, om_max, om_number)
     torques = np.zeros(om_number)
