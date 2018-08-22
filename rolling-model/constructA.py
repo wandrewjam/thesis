@@ -7,7 +7,7 @@ from scipy.integrate import trapz
 
 
 def length(z_mesh, th_mesh, d_prime=0):
-    return (1-np.cos(th_mesh) + d_prime)**2 + (np.sin(th_mesh) - z_mesh)**2
+    return np.sqrt((1-np.cos(th_mesh) + d_prime)**2 + (np.sin(th_mesh) - z_mesh)**2)
 
 
 def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0):
