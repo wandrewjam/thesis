@@ -1,18 +1,14 @@
 from constructA import *
 import matplotlib.pyplot as plt
-from timeit import default_timer as timer
-
-# Numerical Parameters
-L, T = 2.5, 0.4
-M, N, time_steps = 100, 100, 1000
-bond_max = 100
 
 
-def stochastic_model_tau(L=2.5, T=0.4, M=100, N=100, time_steps=1000, bond_max=100,
+def stochastic_model_tau(T=0.4, N=100, time_steps=1000, bond_max=100,
                          d_prime=0.1, eta=0.1, delta=3.0, kap=1.0, eta_v=0.01, eta_om=0.01, gamma=20.0):
     ####################################################################
     # This function runs a stochastic simulation with a fixed timestep #
     ####################################################################
+
+    # Reduced model (without bond saturation)
 
     th_vec = np.linspace(-np.pi/2, np.pi/2, num=N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
@@ -39,7 +35,6 @@ def stochastic_model_tau(L=2.5, T=0.4, M=100, N=100, time_steps=1000, bond_max=1
         # Reclassify theta bins
         bin_list = ((bond_list[:, 1] + np.pi/2)/nu).astype(dtype=int)  # I might not need this list
         break_indices = np.where(bin_list < 0)
-        bin_list = bin_list[bin_list >= 0]  # I need to make sure bonds with attachments theta < -pi/2 break always
 
         bond_lengths = length(bond_list[:, 0], bond_list[:, 1], d_prime=d_prime)
 
@@ -70,7 +65,15 @@ def stochastic_model_tau(L=2.5, T=0.4, M=100, N=100, time_steps=1000, bond_max=1
         thetas = bond_list[:, 1]
         force = nu/bond_max*np.sum(a=zs-np.sin(thetas))  # Might need an additional factor of something
         torque = nu/bond_max*np.sum(a=(1-np.cos(thetas)+d_prime)*np.sin(thetas) +
-                                     (np.sin(thetas)-zs)*np.cos(thetas))  # Might need an additional factor of something
+                                      (np.sin(thetas)-zs)*np.cos(thetas))  # Might need an additional factor of something
 
         v[i+1], om[i+1] = v_f + force/eta_v, om_f + torque/eta_om
-    return v, om, t,
+    return v, om, t
+
+
+v, om, t = stochastic_model_tau()
+plt.step(t, v)
+plt.show()
+
+plt.step(t, om)
+plt.show()

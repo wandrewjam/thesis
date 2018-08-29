@@ -1,5 +1,4 @@
 from constructA import *
-import matplotlib.pyplot as plt
 from timeit import default_timer as timer
 
 def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
@@ -12,15 +11,8 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
     nu = th_vec[1] - th_vec[0]
     th_vec += nu/2
 
-    bond_list = np.empty(shape=(0, 2))  # Might need to make this a regular Python list
+    bond_list = np.empty(shape=(0, 2))
 
-    # Biological Parameters
-    # d_prime = .1
-    # eta = .1
-    # delta = 3.0
-    # kap = 1.0
-    # eta_v = .01
-    # eta_om = .01
     expected_coefs = kap*np.sqrt(2*np.pi/eta)*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)
 
     om_f = 20.0
