@@ -15,10 +15,12 @@ def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, 
     h = z_mesh[1, 0] - z_mesh[0, 0]
     nu = th_mesh[0, 1] - th_mesh[0, 0]
     dt = t[1]-t[0]
-    lam = nu/h
 
-    om_f = gamma
-    v_f = (1 + d_prime)*gamma
+    if type(gamma) is float or int:
+        om_f = gamma*np.ones(shape=time_steps+1)
+    else:
+        om_f = gamma
+    v_f = (1 + d_prime)*om_f
 
     om = np.zeros(time_steps + 1)
     v = np.zeros(time_steps + 1)
@@ -27,29 +29,29 @@ def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, 
 
     if expt == 'unbound':
         # Initialize platelet velocities to fluid velocities (initial bond density is zero)
-        om[0] = om_f
-        v[0] = v_f
+        om[0] = om_f[0]
+        v[0] = v_f[0]
     elif expt == 'unmoving':
         # Calculate the steady state bond density for an unmoving platelet
         z_vec, th_vec = np.ravel(z_mesh, order='F'), np.ravel(th_mesh, order='F')
-        A, B, C, D, R = construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime)
+        A, B, C, D, R = construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime, saturation=saturation)
         m = spsolve(h*nu*kap*C + nu*D, -R)  # Calculate the bond density function
         m_mesh[:, :, 0] = m.reshape(2*M+1, -1, order='F')  # Reshape the m vector into an array
         # Note, the platelet velocities are already initialized to zero
-        plt.pcolormesh(z_mesh, th_mesh, m_mesh[:, :, 0])
-        plt.colorbar()
-        plt.xlabel('$z$ position')
-        plt.ylabel('$\\theta$ position')
-        plt.title('Initial Bond density ($m_0$)')
-        plt.show()
+        # plt.pcolormesh(z_mesh, th_mesh, m_mesh[:, :, 0])
+        # plt.colorbar()
+        # plt.xlabel('$z$ position')
+        # plt.ylabel('$\\theta$ position')
+        # plt.title('Initial Bond density ($m_0$)')
+        # plt.show()
 
     l_matrix = length(z_mesh, th_mesh, d_prime)
 
     # Check for the CFL condition
 
-    if om_f*dt/nu > 1:
+    if np.max(om_f)*dt/nu > 1:
         print('Warning: the CFL condition for theta is not satisfied!')
-    if v_f*dt/h > 1:
+    if np.max(v_f)*dt/h > 1:
         print('Warning: the CFL condition for z is not satisfied!')
 
     for i in range(time_steps):
@@ -66,7 +68,7 @@ def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, 
                                     (1 + dt*np.exp(delta*l_matrix[:-1, :-1]))
         f_prime = nd_force(m_mesh[:-1, :-1, i+1], z_mesh[:-1, :-1], th_mesh[:-1, :-1])
         tau = nd_torque(m_mesh[:-1, :-1, i+1], z_mesh[:-1, :-1], th_mesh[:-1, :-1], d_prime)
-        v[i+1], om[i+1] = v_f + f_prime/eta_v, om_f + tau/eta_om
+        v[i+1], om[i+1] = v_f[i] + f_prime/eta_v, om_f[i] + tau/eta_om
 
     # fig = plt.figure()
     #
@@ -96,4 +98,4 @@ def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, 
     # plt.ylabel('ND angular velocity ($\\omega$)')
     # plt.show()
 
-    return v, om, t, m_mesh
+    return v, om, m_mesh, t
