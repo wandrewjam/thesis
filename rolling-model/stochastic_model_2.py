@@ -69,11 +69,11 @@ def stochastic_model_tau(T=0.4, N=100, time_steps=1000, bond_max=100,
 
         v[i+1], om[i+1] = v_f + force/eta_v, om_f + torque/eta_om
     return v, om, t
-
-
-v, om, t = stochastic_model_tau()
-plt.step(t, v)
-plt.show()
-
-plt.step(t, om)
-plt.show()
+#
+#
+# v, om, t = stochastic_model_tau()
+# plt.step(t, v)
+# plt.show()
+#
+# plt.step(t, om)
+# plt.show()
