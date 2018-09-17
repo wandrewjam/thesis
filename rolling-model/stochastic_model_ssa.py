@@ -1,8 +1,9 @@
 from constructA import *
 from timeit import default_timer as timer
+import matplotlib.pyplot as plt
 
 def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
-                         delta=3.0, kap=1.0, eta_v=.01, eta_om=.01):
+                         delta=3.0, kap=1.0, eta_v=.01, eta_om=.01, gamma=20):
     ########################################################################
     # This function runs a stochastic simulation using a variable timestep #
     ########################################################################
@@ -15,8 +16,8 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
 
     expected_coefs = kap*np.sqrt(2*np.pi/eta)*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)
 
-    om_f = 20.0
-    v_f = (1 + d_prime)*om_f
+    om_f = gamma
+    v_f = (1 + d_prime)*gamma
 
     # A, B, C, D, R = construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime)
 
@@ -30,7 +31,9 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         # Reclassify theta bins
         bin_list = ((bond_list[:, 1] + np.pi/2)/nu).astype(dtype=int)  # I might not need this list
         break_indices = np.where(bin_list < 0)
+        break_indices = np.append(arr=break_indices, values=np.where(bin_list >= N))
         bin_list = bin_list[bin_list >= 0]  # I need to make sure bonds with attachments theta < -pi/2 break always
+        bin_list = bin_list[bin_list < N]
 
         bond_lengths = length(bond_list[:, 0], bond_list[:, 1], d_prime=d_prime)
 
@@ -75,3 +78,12 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
 
         v, om = np.append(arr=v, values=v_f + force/eta_v), np.append(arr=om, values=om_f + torque/eta_om)
     return v, om, t, n
+
+
+# v, om, t, n = stochastic_model_ssa(bond_max=100, eta_v=.0001, eta_om=.0001, gamma=200)
+#
+# plt.plot(t, v)
+# plt.show()
+#
+# plt.plot(t, om)
+# plt.show()
