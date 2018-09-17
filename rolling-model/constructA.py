@@ -10,7 +10,7 @@ def length(z_mesh, th_mesh, d_prime=0):
     return np.sqrt((1-np.cos(th_mesh) + d_prime)**2 + (np.sin(th_mesh) - z_mesh)**2)
 
 
-def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0):
+def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0, saturation=True):
     # Construct A matrix (upwind in theta)
     diagonals = [-np.ones((2*M+1)*(N+1)), np.ones((2*M+1)*N)]
     offsets = [0, 2*M+1]
@@ -24,9 +24,12 @@ def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0):
     B = diags(diagonals, offsets)
 
     # Construct C matrix (bond formation term)
-    left_matrix = diags(np.exp(-eta*length(z_vec, th_vec, d_prime)/2))
-    right_matrix = block_diag((-np.ones((2*M+1, 2*M+1)),)*(N+1))
-    C = np.dot(left_matrix, right_matrix)
+    if saturation:
+        left_matrix = diags(np.exp(-eta*length(z_vec, th_vec, d_prime)/2))
+        right_matrix = block_diag((-np.ones((2*M+1, 2*M+1)),)*(N+1))
+        C = np.dot(left_matrix, right_matrix)
+    else:
+        C = diags(np.exp(-eta*length(z_vec, th_vec, d_prime)/2))
 
     # Construct D matrix (bond breaking term)
     D = diags(-np.exp(delta*length(z_vec, th_vec, d_prime)))
