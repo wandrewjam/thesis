@@ -7,8 +7,8 @@ from matplotlib.colors import Normalize
 def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, time_steps=1000,
                    d_prime=0.1, eta=0.1, delta=3.0, kap=1.0, eta_v=0.01, eta_om=0.01, gamma=20.0, saturation=True):
     # Numerical Parameters
-    z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
-                                  np.linspace(-np.pi/2, np.pi/2, N+1),
+    z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+2)[1:],
+                                  np.linspace(-np.pi/2, np.pi/2, N+2)[1:],
                                   indexing='ij')
 
     t = np.linspace(0, T, time_steps+1)
