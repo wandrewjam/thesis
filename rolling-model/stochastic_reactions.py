@@ -11,7 +11,7 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
                          delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact'):
 
     z_vec = np.linspace(-L, L, 2*M+2)
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
     z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
     h = z_vec[1] - z_vec[0]
     nu = th_vec[1] - th_vec[0]
@@ -19,7 +19,8 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
     if init is None:
         bond_list = np.empty(shape=(0, 2))
     elif init is 'sat':
-        bond_list = np.concatenate((np.tile(z_vec, N)[:, None], np.repeat(th_vec, 2*M)[:, None]), axis=1)
+        bond_list = np.concatenate((np.random.uniform(low=-L, high=L, size=(bond_max*(N+2), 1)),
+                                    np.repeat(th_vec, bond_max)[:, None]), axis=1)
     else:
         # Handle a bad init input
         print('Error: Unknown initial distribution')
@@ -126,7 +127,7 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
                   delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact'):
 
     z_vec = np.linspace(-L, L, 2*M+2)
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
     z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
     h = z_vec[1] - z_vec[0]
     nu = th_vec[1] - th_vec[0]
@@ -134,7 +135,8 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
     if init is None:
         bond_list = np.empty(shape=(0, 2))
     elif init is 'sat':
-        bond_list = np.concatenate((np.tile(z_vec, N+1)[:, None], np.repeat(th_vec, 2*M+1)[:, None]), axis=1)
+        bond_list = np.concatenate((np.random.uniform(low=-L, high=L, size=(bond_max*(N+2), 1)),
+                                    np.repeat(th_vec, bond_max)[:, None]), axis=1)
     else:
         # Handle a bad init input
         print('Error: Unknown initial distribution')
@@ -238,25 +240,6 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
     return master_list, t
 
 
-def ssa_reactions1(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0.1, eta=0.1,
-                  delta=3.0, kap=1.0, saturation=True, binding='both'):
-    t = [0]
-    z_vec = np.linspace(-L, L, 2*M+2)
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
-    z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
-    h = z_vec[1] - z_vec[0]
-    nu = th_vec[1] - th_vec[0]
-
-    l_matrix = length(z_mesh, th_mesh, d_prime)
-    rate = kap*np.trapz(np.trapz(np.exp(-eta/2*l_matrix**2), z_vec, axis=0), th_vec, axis=0)*N*bond_max/np.pi
-
-    while t[-1] < T:
-        r = np.random.rand(1)
-        dt = 1/rate*np.log(1/r)
-        t = np.append(t, t[-1] + dt)
-    return t
-
-
 def pde_reactions(init=None, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
                   eta=0.1, delta=3.0, kap=1.0, saturation=True, binding='both'):
 
@@ -296,25 +279,21 @@ def pde_reactions(init=None, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime
     return z_mesh, th_mesh, m_mesh, t
 
 
-def f(z, th):
-    return np.exp(-.05*((1 - np.cos(th) + .1)**2 + (np.sin(th) - z)**2))
-
-
-trials = 5
+trials = 10
 fix_master_list = []
 var_master_list = []
 t_list = []
 
 # Parameters
 delta = 3
-T = .4
+T = 1.5
 init = None
-sat = False
-binding = 'on'
+sat = True
+binding = 'both'
 M, N = 31, 62
 bond_max = 100
 L = 2.5
-ztype = 'discrete'
+ztype = 'cont_exact'
 
 for i in range(trials):
     start = timer()
@@ -349,10 +328,10 @@ for i in range(trials):
     temp_sto_count = np.zeros(shape=len(var_master_list[i]))
     for j in range(len(var_master_list[i])):
         temp_sto_count[j] = var_master_list[i][j].shape[0]
-    var_sto_count[i, :] = temp_sto_count[np.searchsorted(t_list[i], tp)]
+    var_sto_count[i, :] = temp_sto_count[np.searchsorted(t_list[i], tp, side='right')-1]
 
 # for i in range(trials):
-#     var_sto_count[i, :] = np.arange(t_list1[i].shape[0])[np.searchsorted(t_list1[i], tp)]
+#     var_sto_count[i, :] = np.arange(t_list1[i].shape[0])[np.searchsorted(t_list1[i], tp, side='right')-1]
 
 avg_fix_sto_count = np.mean(fix_sto_count, axis=0)
 std_fix_sto_count = np.std(fix_sto_count, axis=0)
