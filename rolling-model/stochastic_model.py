@@ -1,34 +1,38 @@
 from constructA import *
-import matplotlib.pyplot as plt
+from scipy.special import erf
+from scipy.stats import truncnorm
 from timeit import default_timer as timer
 
 
-def stochastic_model(T=0.4, N=100, time_steps=1000, bond_max=100,d_prime=0.1, eta=0.1,
+def stochastic_model(L=2.5, T=0.4, M=100, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
                      delta=3.0, kap=1.0, eta_v=0.01, eta_om=0.01, gamma=20.0, saturation=True):
-    ####################################################################
-    # This function runs a stochastic simulation with a fixed timestep #
-    ####################################################################
+    #####################################################################
+    # This function runs a stochastic simulation using a fixed timestep #
+    #####################################################################
 
     # Full Model
-
-    th_vec = np.linspace(-np.pi/2, np.pi/2, num=N+1)[:-1]
+    # z_vec = np.linspace(-L, L, num=2*M+2)[1:-1]
+    th_vec = np.linspace(-np.pi/2, np.pi/2, num=N+2)[1:-1]
     nu = th_vec[1] - th_vec[0]
-    th_vec += nu/2
 
     bond_list = np.empty(shape=(0, 2))
 
     t = np.linspace(0, T, time_steps+1)
     dt = t[1]-t[0]
 
-    expected_coeffs = kap*np.sqrt(2*np.pi/eta)*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)
+    # Restrict the z values to those allowed in the PDE
+    expected_coeffs = dt*kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
+        erf(np.sqrt(eta/2)*(np.sin(th_vec) + L)) - erf(np.sqrt(eta/2)*(np.sin(th_vec) - L))
+    )
+    a = (-L - th_vec)/np.sqrt(1/eta)
+    b = (L - th_vec)/np.sqrt(1/eta)
 
     om_f = gamma
     v_f = (1 + d_prime)*gamma
 
-    # A, B, C, D, R = construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime)
-
     om = np.zeros(time_steps + 1)
     v = np.zeros(time_steps + 1)
+    master_list = [bond_list]
     om[0] = om_f
     v[0] = v_f
 
@@ -37,10 +41,15 @@ def stochastic_model(T=0.4, N=100, time_steps=1000, bond_max=100,d_prime=0.1, et
     for i in range(time_steps):
         bond_list[:, 0] += -dt*v[i]  # Update z positions
         bond_list[:, 1] += -dt*om[i]  # Update theta positions
+
         # Reclassify theta bins
         bin_list = ((bond_list[:, 1] + np.pi/2)/nu).astype(dtype=int)  # I might not need this list
         break_indices = np.where(bin_list < 0)
+        break_indices = np.append(break_indices, values=np.where(bin_list >= N))
+        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] > L))
+        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] < -L))
         bin_list = bin_list[bin_list >= 0]  # I need to make sure bonds with attachments theta < -pi/2 break always
+        bin_list = bin_list[bin_list < N]  # Same for bonds with attachments theta > pi/2
 
         bond_lengths = length(bond_list[:, 0], bond_list[:, 1], d_prime=d_prime)
 
@@ -53,11 +62,12 @@ def stochastic_model(T=0.4, N=100, time_steps=1000, bond_max=100,d_prime=0.1, et
         bond_counts = np.bincount(bin_list)  # I need this column to be dtype=int, maybe use a separate array
         bond_counts = np.append(bond_counts, values=np.zeros(shape=N-bond_counts.shape[0]))
         if saturation:
-            expected_vals = expected_coeffs*(bond_max - bond_counts)*dt  # Calculate the expected values
+            expected_vals = expected_coeffs*(bond_max - bond_counts)  # Calculate the expected values
         else:
-            expected_vals = expected_coeffs*bond_max*dt  # Calculate the expected values without saturation
+            expected_vals = expected_coeffs*bond_max  # Calculate the expected values without saturation
 
         # Generate bonds in each bin
+        expected_vals = expected_vals.clip(min=0)
         forming_bonds = np.random.poisson(lam=expected_vals)
 
         new_bonds = np.zeros(shape=(np.sum(forming_bonds), 2))
@@ -65,14 +75,16 @@ def stochastic_model(T=0.4, N=100, time_steps=1000, bond_max=100,d_prime=0.1, et
 
         # Choose lengths, add to new bond array
         for j in np.where(forming_bonds)[0]:
-            new_bonds[counter:counter+forming_bonds[j], 0] = np.random.normal(loc=np.sin(th_vec[j]),
-                                                                              scale=np.sqrt(1/eta))
+            new_bonds[counter:counter+forming_bonds[j], 0] = truncnorm.rvs(a=a[j], b=b[j], loc=np.sin(th_vec[j]),
+                                                                           scale=np.sqrt(1/eta),
+                                                                           size=forming_bonds[j])
             new_bonds[counter:counter+forming_bonds[j], 1] = th_vec[j]
             counter += forming_bonds[j]
 
         # Update the bond array
         bond_list = np.delete(arr=bond_list, obj=break_indices, axis=0)
         bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
+        master_list.append(bond_list)
 
         # Calculate forces and torques
         zs = bond_list[:, 0]
@@ -82,5 +94,5 @@ def stochastic_model(T=0.4, N=100, time_steps=1000, bond_max=100,d_prime=0.1, et
                                      (np.sin(thetas)-zs)*np.cos(thetas))  # Might need an additional factor of something
 
         v[i+1], om[i+1] = v_f + force/eta_v, om_f + torque/eta_om
-    return v, om, t
+    return v, om, master_list, t
 

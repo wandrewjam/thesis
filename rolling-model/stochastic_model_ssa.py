@@ -1,6 +1,8 @@
 from constructA import *
+from scipy.special import erf
+from scipy.stats import truncnorm
 from timeit import default_timer as timer
-import matplotlib.pyplot as plt
+
 
 def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
                          delta=3.0, kap=1.0, eta_v=.01, eta_om=.01, gamma=20):
@@ -14,15 +16,17 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
 
     bond_list = np.empty(shape=(0, 2))
 
-    expected_coefs = kap*np.sqrt(2*np.pi/eta)*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)
+    expected_coeffs = kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
+        erf(np.sqrt(eta/2)*(np.sin(th_vec) + L)) - erf(np.sqrt(eta/2)*(np.sin(th_vec) - L))
+    )
+    a = (-L - th_vec)/np.sqrt(1/eta)
+    b = (L - th_vec)/np.sqrt(1/eta)
 
     om_f = gamma
     v_f = (1 + d_prime)*gamma
 
-    # A, B, C, D, R = construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime)
-
     v, om = np.array([v_f]), np.array([om_f])
-    n = np.array([0])
+    master_list = [bond_list]
     t = np.array([0])
     i = 0
 
@@ -32,6 +36,8 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         bin_list = ((bond_list[:, 1] + np.pi/2)/nu).astype(dtype=int)  # I might not need this list
         break_indices = np.where(bin_list < 0)
         break_indices = np.append(arr=break_indices, values=np.where(bin_list >= N))
+        break_indices = np.append(arr=break_indices, values=np.where(bond_list[:, 0] > L))
+        break_indices = np.append(arr=break_indices, values=np.where(bond_list[:, 0] < -L))
         bin_list = bin_list[bin_list >= 0]  # I need to make sure bonds with attachments theta < -pi/2 break always
         bin_list = bin_list[bin_list < N]
 
@@ -43,7 +49,7 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         # Decide which bonds form
         bond_counts = np.bincount(bin_list)  # I need this column to be dtype=int, maybe use a separate array
         bond_counts = np.append(bond_counts, values=np.zeros(shape=N-bond_counts.shape[0]))
-        form_rates = expected_coefs*(bond_max - bond_counts)  # Calculate the expected values
+        form_rates = expected_coeffs*(bond_max - bond_counts)  # Calculate the expected values
 
         all_rates = np.append(break_rates, form_rates)
         sum_rates = np.cumsum(all_rates)
@@ -60,30 +66,23 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         if j < break_rates.shape[0]:
             break_indices = np.append(break_indices, j)
         else:
+            index = j - break_rates.shape[0]
             new_bonds = np.zeros(shape=(1, 2))
-            new_bonds[0, 0] = np.random.normal(loc=np.sin(th_vec[j - break_rates.shape[0]]), scale=np.sqrt(1/eta))
+            new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index], loc=np.sin(th_vec[index]), scale=np.sqrt(1/eta))
+            # new_bonds[0, 0] = np.random.normal(loc=np.sin(th_vec[j - break_rates.shape[0]]), scale=np.sqrt(1/eta))
             new_bonds[0, 1] = th_vec[j - break_rates.shape[0]]
             bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
         # Update the bond array
         bond_list = np.delete(arr=bond_list, obj=break_indices, axis=0)
-        n = np.append(arr=n, values=bond_list.shape[0])
+        master_list.append(bond_list)
 
         # Calculate forces and torques
         zs = bond_list[:, 0]
         thetas = bond_list[:, 1]
-        force = nu/bond_max*np.sum(a=zs-np.sin(thetas))  # Might need an additional factor of something
+        force = nu/bond_max*np.sum(a=zs-np.sin(thetas))
         torque = nu/bond_max*np.sum(a=(1-np.cos(thetas)+d_prime)*np.sin(thetas) +
-                                     (np.sin(thetas)-zs)*np.cos(thetas))  # Might need an additional factor of something
+                                     (np.sin(thetas)-zs)*np.cos(thetas))
 
         v, om = np.append(arr=v, values=v_f + force/eta_v), np.append(arr=om, values=om_f + torque/eta_om)
-    return v, om, t, n
-
-
-# v, om, t, n = stochastic_model_ssa(bond_max=100, eta_v=.0001, eta_om=.0001, gamma=200)
-#
-# plt.plot(t, v)
-# plt.show()
-#
-# plt.plot(t, om)
-# plt.show()
+    return v, om, master_list, t
