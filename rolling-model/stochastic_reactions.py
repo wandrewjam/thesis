@@ -369,10 +369,7 @@ plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*np.p
          tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max))[1:], 'r:',
          linewidth=0.5)
 plt.plot(tp, pde_count, 'k', label='PDE Solution')
-if binding is 'on' and not sat:
-    exact_rate = dblquad(f, -np.pi/2, np.pi/2, -L, L)[0]
-    exact_quant = exact_rate*tp
-    plt.plot(tp, exact_quant, 'g', linewidth=2, label='Exact solution')
+
 plt.legend()
 if ztype is 'cont_exact' or ztype is 'cont_approx':
     plt.title('Bond quantities of the stochastic simulations with continuous z')
