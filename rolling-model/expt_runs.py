@@ -2,10 +2,10 @@ from time_dependent import time_dependent
 import numpy as np
 import matplotlib.pyplot as plt
 
-v1, om1, m1, t = time_dependent(expt='unbound', gamma=0.0)
+v1, om1, m1, t = time_dependent(expt='unbound', gamma=20.0)
 
-# gamma = 0*t**4/(t**4 + .02**4)
-v2, om2, m2, _ = time_dependent(expt='unmoving', gamma=0.0)
+gamma = 20*t**2/(t**2 + .02**2)
+v2, om2, m2, _ = time_dependent(expt='unmoving', gamma=gamma)
 
 fig1, ax1 = plt.subplots(ncols=2)
 ax1[0].plot(t, v1)
@@ -22,11 +22,11 @@ for ax in ax1:
 fig2, ax2 = plt.subplots(ncols=2)
 
 ax2[0].plot(t, v2)
-ax2[0].plot(t, np.zeros_like(t), 'k--')
+ax2[0].plot(t, 1.1*gamma, 'k--')
 ax2[0].set_ylabel('ND linear velocity ($v$)')
 ax2[0].set_title('Linear velocity of stably bound platelet')
 ax2[1].plot(t, om2)
-ax2[1].plot(t, np.zeros_like(t), 'k--')
+ax2[1].plot(t, gamma, 'k--')
 ax2[1].set_ylabel('ND angular velocity ($\\omega$)')
 ax2[1].set_title('Angular velocity of stably bound platelet')
 for ax in ax2:
