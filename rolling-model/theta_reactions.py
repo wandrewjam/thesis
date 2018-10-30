@@ -1,4 +1,4 @@
-# A simple check with binding in several theta positions, one z position
+# A simple check with binding in several theta positions, one z position for each theta
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +9,7 @@ def fixed_theta(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000, bond_max
                 delta=3.0, kap=1.0, saturation=True, binding='both', seed=None):
 
     np.random.seed(seed)
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
     bond_number = np.zeros(shape=(N+2, time_steps+1))
 
     if init is 'sat':
@@ -39,7 +39,7 @@ def variable_theta(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000, bond_
                    delta=3.0, kap=1.0, saturation=True, binding='both', seed=None):
 
     np.random.seed(seed)
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
     bond_number = [np.zeros(shape=N+2)]
 
     if init is 'sat':
@@ -79,7 +79,7 @@ def variable_theta(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000, bond_
 def pde_theta(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
                delta=3.0, kap=1.0, saturation=True, binding='both'):
 
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
     bond_number = np.zeros(shape=(N+2, time_steps+1))
 
     if init is 'sat':
