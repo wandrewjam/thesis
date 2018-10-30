@@ -35,17 +35,17 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
     if ztype is 'cont_exact':
         # For continuous z, exact rate integral
         expected_coeffs = dt*kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
-            erf(np.sqrt(eta/2)*(np.sin(th_vec) + z_vec[-1])) - erf(np.sqrt(eta/2)*(np.sin(th_vec) + z_vec[0]))
+            erf(np.sqrt(eta/2)*(np.sin(th_vec) + L)) - erf(np.sqrt(eta/2)*(np.sin(th_vec) - L))
         )
-        a = (z_vec[0] - th_vec)/np.sqrt(1/eta)
-        b = (z_vec[-1] - th_vec)/np.sqrt(1/eta)
+        a = (-L - th_vec)/np.sqrt(1/eta)
+        b = (L - th_vec)/np.sqrt(1/eta)
     elif ztype is 'cont_approx':
         # For continuous z, approximate rate integral
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
-        expected_coeffs = dt*kap*np.trapz(np.exp(-eta/2*l_matrix[1:-1, :]**2), z_vec[1:-1], axis=0)  # I'm not sure about this
+        expected_coeffs = dt*kap*np.trapz(np.exp(-eta/2*l_matrix**2), z_vec, axis=0)  # I'm not sure about this
         # expected_coeffs = dt*kap*h*np.sum(np.exp(-eta/2*l_matrix**2), axis=0)
-        a = (z_vec[0] - th_vec)/np.sqrt(1/eta)
-        b = (z_vec[-1] - th_vec)/np.sqrt(1/eta)
+        a = (-L - th_vec)/np.sqrt(1/eta)
+        b = (L - th_vec)/np.sqrt(1/eta)
     elif ztype is 'discrete':
         # For discrete z
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
@@ -73,7 +73,7 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
                     expected_vals = expected_coeffs*(bond_max - bond_counts)  # Calculate the expected values
                 elif ztype is 'discrete':
                     # Discrete z formulation
-                    expected_vals = expected_coeffs*(bond_max - bond_counts[None, 1:])
+                    expected_vals = expected_coeffs*(bond_max - bond_counts[None, :])
             else:
                 if ztype is 'cont_exact' or ztype is 'cont_approx':
                     # Continuous z formulation
@@ -151,16 +151,16 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
     if ztype is 'cont_exact':
         # For continuous z
         expected_coeffs = kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
-            erf(np.sqrt(eta/2)*(np.sin(th_vec) + z_vec[-1])) - erf(np.sqrt(eta/2)*(np.sin(th_vec) + z_vec[0]))
+            erf(np.sqrt(eta/2)*(np.sin(th_vec) + L)) - erf(np.sqrt(eta/2)*(np.sin(th_vec) - L))
         )
-        a = (z_vec[0] - th_vec)/np.sqrt(1/eta)
-        b = (z_vec[-1] - th_vec)/np.sqrt(1/eta)
+        a = (-L - th_vec)/np.sqrt(1/eta)
+        b = (L - th_vec)/np.sqrt(1/eta)
     elif ztype is 'cont_approx':
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
         # expected_coeffs = kap*np.trapz(np.exp(-eta/2*l_matrix**2), z_vec, axis=0)
         expected_coeffs = kap*np.trapz(np.exp(-eta/2*l_matrix[:, :]**2), z_vec, axis=0)
-        a = (z_vec[0] - th_vec)/np.sqrt(1/eta)
-        b = (z_vec[-2] - th_vec)/np.sqrt(1/eta)
+        a = (-L - th_vec)/np.sqrt(1/eta)
+        b = (L - th_vec)/np.sqrt(1/eta)
     elif ztype is 'discrete':
         # For discrete z
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
@@ -222,8 +222,11 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
         elif ztype is 'discrete':
             # Discrete z formulation
             all_rates = np.append(break_rates, form_rates.ravel(order='F'))
-            sum_rates = np.cumsum(all_rates)
-            a0 = sum_rates[-1]
+            if all_rates.shape[0] == 0:
+                a0 = 1e-10
+            else:
+                sum_rates = np.cumsum(all_rates)
+                a0 = sum_rates[-1]
 
             r = np.random.rand(2)
             dt = 1/a0*np.log(1/r[0])
@@ -288,22 +291,21 @@ fix_master_list = []
 var_master_list = []
 t_list = []
 
-## This code works for discrete z for both on-only cases. Except now I've changed it... and it doesn't work anymore
-## Does this work for binding and unbinding as well? In the discrete case?
-## It seems to work for unbinding alone, but not for binding and unbinding together? Check this tomorrow
+# This code works for both, on-only cases, discrete. It 'seems' to work for both on and off reactions as well
+# It also works for the continuous z case, on-only both saturation cases. The breaking seems to be wrong in both cases. Why???
 
-## Maybe I need to make the theta vector midpoints of bins stretching from -pi/2 to pi/2
+# This seems to work for the variable time-step algo for on/off with saturation, but not the fixed time-step. (Both discrete and continuous z cases)
 # Parameters
 delta = 3
-T = .4
+T = 2
 init = None
-sat = False
-binding = 'on'
+sat = True
+binding = 'both'
 M, N = 128, 128
-time_steps = 1000
+time_steps = 4000
 bond_max = 10
 L = 2.5
-ztype = 'discrete'
+ztype = 'cont_exact'
 nu = np.pi/N
 
 for i in range(trials):
@@ -357,7 +359,7 @@ np.savez(file_path+file_name, par_array, fix_sto_count, var_sto_count, pde_count
          par_array=par_array, fix_sto_count=fix_sto_count, var_sto_count=var_sto_count, pde_count=pde_count, tp=tp)
 print('Data saved in file {:s}'.format(file_name))
 
-plt.plot(tp[1:], (avg_fix_sto_count*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
+plt.plot(tp, (avg_fix_sto_count*nu/bond_max - pde_count)/pde_count, 'b', label='Fixed Step')
 plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
                   pde_count)[1:]/pde_count[1:], 'b:',
          tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
