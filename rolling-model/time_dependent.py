@@ -4,11 +4,11 @@ import matplotlib.animation as animation
 from matplotlib.colors import Normalize
 
 
-def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, time_steps=1000,
-                   d_prime=0.1, eta=0.1, delta=3.0, kap=1.0, eta_v=0.01, eta_om=0.01, gamma=20.0, saturation=True):
+def time_dependent(expt='unbound', L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1, delta=3.0,
+                   kap=1.0, eta_v=0.01, eta_om=0.01, gamma=20.0, saturation=True, save_m=False, save_movie=False):
     # Numerical Parameters
-    z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+2)[1:],
-                                  np.linspace(-np.pi/2, np.pi/2, N+2)[1:],
+    z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
+                                  np.linspace(-np.pi/2, np.pi/2, N+1),
                                   indexing='ij')
 
     t = np.linspace(0, T, time_steps+1)
@@ -25,7 +25,10 @@ def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, 
     om = np.zeros(time_steps + 1)
     v = np.zeros(time_steps + 1)
 
-    m_mesh = np.zeros(shape=(2*M+1, N+1, time_steps+1))  # Bond densities are initialized to zero
+    if save_m:
+        m_mesh = np.zeros(shape=(2*M+1, N+1, time_steps+1))  # Bond densities are initialized to zero
+    else:
+        m_mesh = np.zeros(shape=(2*M+1, N+1))
 
     if expt == 'unbound':
         # Initialize platelet velocities to fluid velocities (initial bond density is zero)
@@ -36,7 +39,10 @@ def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, 
         z_vec, th_vec = np.ravel(z_mesh, order='F'), np.ravel(th_mesh, order='F')
         A, B, C, D, R = construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime, saturation=saturation)
         m = spsolve(h*nu*kap*C + nu*D, -R)  # Calculate the bond density function
-        m_mesh[:, :, 0] = m.reshape(2*M+1, -1, order='F')  # Reshape the m vector into an array
+        if save_m:
+            m_mesh[:, :, 0] = m.reshape(2*M+1, -1, order='F')  # Reshape the m vector into an array
+        else:
+            m_mesh = m.reshape(2*M+1, -1, order='F')
         # Note, the platelet velocities are already initialized to zero
         # plt.pcolormesh(z_mesh, th_mesh, m_mesh[:, :, 0])
         # plt.colorbar()
@@ -55,19 +61,26 @@ def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, 
         print('Warning: the CFL condition for z is not satisfied!')
 
     for i in range(time_steps):
-        if saturation:
-            m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om[i]*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
-                                     v[i]*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
-                                     dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
-                                     (1 - h*np.tile(np.sum(m_mesh[:-1, :-1, i], axis=0), reps=(2*M, 1)))) /\
-                                    (1 + dt*np.exp(delta*l_matrix[:-1, :-1]))
+        if save_m:
+            m_mesh[1:-1, 1:-1, i+1] = (m_mesh[1:-1, 1:-1, i] + om[i]*dt/nu*(m_mesh[1:-1, 2:, i] -
+                                                                            m_mesh[1:-1, 1:-1, i]) +
+                                       v[i]*dt/h*(m_mesh[2:, 1:-1, i] - m_mesh[1:-1, 1:-1, i]) +
+                                       dt*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2) *
+                                       (1 - saturation*h*np.tile(np.sum(m_mesh[1:-1, 1:-1, i], axis=0),
+                                                                 reps=(2*M-1, 1)))) / \
+                                      (1 + dt*np.exp(delta*l_matrix[1:-1, 1:-1]))
         else:
-            m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om[i]*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
-                                     v[i]*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
-                                     dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2)) /\
-                                    (1 + dt*np.exp(delta*l_matrix[:-1, :-1]))
-        f_prime = nd_force(m_mesh[:-1, :-1, i+1], z_mesh[:-1, :-1], th_mesh[:-1, :-1])
-        tau = nd_torque(m_mesh[:-1, :-1, i+1], z_mesh[:-1, :-1], th_mesh[:-1, :-1], d_prime)
+            m_mesh[1:-1, 1:-1] = (m_mesh[1:-1, 1:-1] + om[i]*dt/nu*(m_mesh[1:-1, 2:] - m_mesh[1:-1, 1:-1]) +
+                                  v[i]*dt/h*(m_mesh[2:, 1:-1] - m_mesh[1:-1, 1:-1]) +
+                                  dt*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2) *
+                                  (1 - saturation*h*np.tile(np.sum(m_mesh[1:-1, 1:-1], axis=0), reps=(2*M-1, 1)))) / \
+                                 (1 + dt*np.exp(delta*l_matrix[1:-1, 1:-1]))
+        if save_m:
+            f_prime = nd_force(m_mesh[1:-1, 1:-1, i+1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1])
+            tau = nd_torque(m_mesh[1:-1, 1:-1, i+1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1], d_prime)
+        else:
+            f_prime = nd_force(m_mesh[1:-1, 1:-1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1])
+            tau = nd_torque(m_mesh[1:-1, 1:-1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1], d_prime)
         v[i+1], om[i+1] = v_f[i] + f_prime/eta_v, om_f[i] + tau/eta_om
 
     # fig = plt.figure()
@@ -99,3 +112,8 @@ def time_dependent(expt='unbound', save_movie=False, L=2.5, T=.4, M=100, N=100, 
     # plt.show()
 
     return v, om, m_mesh, t
+
+
+if __name__ == '__main__':
+    time_dependent(M=2**6, N=2**6, time_steps=25*2**6)
+    print('Done!')
