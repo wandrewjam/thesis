@@ -23,8 +23,8 @@ def fixed_motion(L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1
             erf(np.sqrt(eta/2)*(np.sin(bins) + L)) - erf(np.sqrt(eta/2)*(np.sin(bins) - L))
         )
         coeffs = (bins > -np.pi/2)*(bins < np.pi/2)*coeffs
-        a = (-L - bins)/np.sqrt(1/eta)
-        b = (L - bins)/np.sqrt(1/eta)
+        a = (-L - np.sin(bins))/np.sqrt(1/eta)
+        b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
     om = gamma
@@ -86,7 +86,6 @@ def fixed_motion(L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1
         torques[i+1] = nu/bond_max*np.sum(a=(1-np.cos(th_vec[thetas])+d_prime)*np.sin(th_vec[thetas]) +
                                      (np.sin(th_vec[thetas])-zs)*np.cos(th_vec[thetas]))
 
-
     return master_list, t, forces, torques
 
 
@@ -103,8 +102,8 @@ def variable_motion(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
             erf(np.sqrt(eta/2)*(np.sin(bins) + L)) - erf(np.sqrt(eta/2)*(np.sin(bins) - L))
         )
         coeffs = (bins > -np.pi/2)*(bins < np.pi/2)*coeffs
-        a = (-L - bins)/np.sqrt(1/eta)
-        b = (L - bins)/np.sqrt(1/eta)
+        a = (-L - np.sin(bins))/np.sqrt(1/eta)
+        b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
     om = gamma
@@ -199,14 +198,14 @@ def pde_motion(L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
         print('Warning: the CFL condition for z is not satisfied!')
 
     for i in range(time_steps):
-        m_mesh[1:-1, 1:-1, i+1] = (m_mesh[1:-1, 1:-1, i] + om*dt/nu*(m_mesh[1:-1, 2:, i] - m_mesh[1:-1, 1:-1, i]) +
-                                   v*dt/h*(m_mesh[2:, 1:-1, i] - m_mesh[1:-1, 1:-1, i]) +
-                                   on*dt*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2) *
-                                   (1 - saturation*h*np.tile(np.sum(m_mesh[1:-1, 1:-1, i], axis=0), reps=(2*M-1, 1)))) /\
-                                  (1 + off*dt*np.exp(delta*l_matrix[1:-1, 1:-1]))
+        m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
+                                 v*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
+                                 on*dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
+                                 (1 - saturation*np.tile(np.trapz(m_mesh[:, :-1, i], z_mesh[:, 0], axis=0), reps=(2*M, 1)))) /\
+                                  (1 + off*dt*np.exp(delta*l_matrix[:-1, :-1]))
 
-        forces[i+1] = nd_force(m_mesh[1:-1, 1:-1, i+1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1])
-        torques[i+1] = nd_torque(m_mesh[1:-1, 1:-1, i+1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1], d_prime)
+        forces[i+1] = nd_force(m_mesh[:, :, i+1], z_mesh, th_mesh)  # Changed force calculations to integrate over all z and th meshes
+        torques[i+1] = nd_torque(m_mesh[:, :, i+1], z_mesh, th_mesh, d_prime)
 
     return z_mesh, th_mesh, m_mesh, t, forces, torques
 
@@ -217,14 +216,14 @@ var_master_list = []
 t_list = []
 
 # Parameters
-gamma = 20
+gamma = 18
 delta = 3
 T = 0.4
 init = None
 sat = True
 binding = 'both'
-M, N = 256, 256
-time_steps = 2000
+M, N = 128, 128
+time_steps = 1000
 bond_max = 10
 L = 2.5
 nu = np.pi/N

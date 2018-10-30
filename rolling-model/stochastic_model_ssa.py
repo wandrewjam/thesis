@@ -20,8 +20,8 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
             erf(np.sqrt(eta/2)*(np.sin(bins) + L)) - erf(np.sqrt(eta/2)*(np.sin(bins) - L))
         )
         coeffs = (bins > -np.pi/2)*(bins < np.pi/2)*coeffs
-        a = (-L - bins)/np.sqrt(1/eta)
-        b = (L - bins)/np.sqrt(1/eta)
+        a = (-L - np.sin(bins))/np.sqrt(1/eta)
+        b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
     om_f = gamma

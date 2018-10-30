@@ -37,8 +37,8 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
         expected_coeffs = dt*kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
             erf(np.sqrt(eta/2)*(np.sin(th_vec) + L)) - erf(np.sqrt(eta/2)*(np.sin(th_vec) - L))
         )
-        a = (-L - th_vec)/np.sqrt(1/eta)
-        b = (L - th_vec)/np.sqrt(1/eta)
+        a = (-L - np.sin(th_vec))/np.sqrt(1/eta)
+        b = (L - np.sin(th_vec))/np.sqrt(1/eta)
     elif ztype is 'cont_approx':
         # For continuous z, approximate rate integral
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
@@ -153,8 +153,8 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
         expected_coeffs = kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
             erf(np.sqrt(eta/2)*(np.sin(th_vec) + L)) - erf(np.sqrt(eta/2)*(np.sin(th_vec) - L))
         )
-        a = (-L - th_vec)/np.sqrt(1/eta)
-        b = (L - th_vec)/np.sqrt(1/eta)
+        a = (-L - np.sin(th_vec))/np.sqrt(1/eta)
+        b = (L - np.sin(th_vec))/np.sqrt(1/eta)
     elif ztype is 'cont_approx':
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
         # expected_coeffs = kap*np.trapz(np.exp(-eta/2*l_matrix**2), z_vec, axis=0)
@@ -302,7 +302,7 @@ init = None
 sat = True
 binding = 'both'
 M, N = 128, 128
-time_steps = 4000
+time_steps = 1000
 bond_max = 10
 L = 2.5
 ztype = 'cont_exact'
