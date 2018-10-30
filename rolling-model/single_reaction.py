@@ -10,7 +10,7 @@ def fixed_single(i, j, init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000, b
 
     np.random.seed(seed)
     z_vec = np.linspace(-L, L, 2*M+2)
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
     z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
     bond_number = np.zeros(shape=time_steps+1)
 
@@ -42,7 +42,7 @@ def variable_single(i, j, init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d
 
     np.random.seed(seed)
     z_vec = np.linspace(-L, L, 2*M+2)
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
     z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
 
     t = np.array([0])
@@ -77,7 +77,7 @@ def pde_single(i, j, init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000, d_p
                delta=3.0, kap=1.0, saturation=True, binding='both'):
 
     z_vec = np.linspace(-L, L, 2*M+2)
-    th_vec = np.linspace(-np.pi/2, np.pi, N+2)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
     z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
     h = z_vec[1] - z_vec[0]
     nu = th_vec[1] - th_vec[0]
