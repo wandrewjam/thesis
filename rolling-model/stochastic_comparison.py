@@ -1,29 +1,35 @@
 from stochastic_model import *
 from stochastic_model_ssa import *
 from sampling import *
+import matplotlib.pyplot as plt
 from timeit import default_timer as timer
 
+##################### Check the forces! Compare with the known solutions #############################
 
-def stochastic_comparison(num_iterations=100, num_samples=200, N=100, bond_max=100, kap=1.0, delta=3.0,
-                          eta_v=.01, eta_om=.01, gamma=20.0, plot=True):
+
+def stochastic_comparison(num_iterations=100, num_samples=200, M=100, N=100, time_steps=1000, bond_max=100,
+                          kap=1.0, delta=3.0, eta_v=.01, eta_om=.01, gamma=20.0, plot=True):
     v3_sampled = np.zeros(shape=(num_iterations, num_samples))
     t_sampled = np.linspace(start=0, stop=0.4, num=num_samples)
 
-    v1_array, om1_array = np.zeros(shape=(num_iterations, 1001)), np.zeros(shape=(num_iterations, 1001))
-    v2_array, om2_array = np.zeros(shape=(num_iterations, 1001)), np.zeros(shape=(num_iterations, 1001))
+    v1_array, om1_array = np.zeros(shape=(num_iterations, time_steps+1)), np.zeros(shape=(num_iterations, time_steps+1))
+    v2_array, om2_array = np.zeros(shape=(num_iterations, time_steps+1)), np.zeros(shape=(num_iterations, time_steps+1))
     v3_list, om3_list, t3_list = [], [], []
-    n1_array, n2_array, n3_list = np.zeros(shape=(num_iterations, 1001)), np.zeros(shape=(num_iterations, 1001)), []
+    n1_array, n2_array, n3_list = np.zeros(shape=(num_iterations, time_steps+1)), \
+                                  np.zeros(shape=(num_iterations, time_steps+1)), []
 
     for i in range(num_iterations):
         start = timer()
-        v1_array[i, :], om1_array[i, :], bond_list_temp, t1 = stochastic_model(N=N, bond_max=bond_max, eta_v=eta_v,
+        v1_array[i, :], om1_array[i, :], bond_list_temp, t1 = stochastic_model(N=N, time_steps=time_steps,
+                                                                               bond_max=bond_max, eta_v=eta_v,
                                                                                eta_om=eta_om, gamma=gamma)
-        for j in range(1001):
+        for j in range(time_steps+1):
             n1_array[i, j] = bond_list_temp[j].shape[0]
-        v2_array[i, :], om2_array[i, :], bond_list_temp, t2 = stochastic_model(N=N, bond_max=bond_max, eta_v=eta_v,
+        v2_array[i, :], om2_array[i, :], bond_list_temp, t2 = stochastic_model(N=N, time_steps=time_steps,
+                                                                               bond_max=bond_max, eta_v=eta_v,
                                                                                eta_om=eta_om, gamma=gamma,
                                                                                saturation=False)
-        for j in range(1001):
+        for j in range(time_steps+1):
             n2_array[i, j] = bond_list_temp[j].shape[0]
         end = timer()
         print('Completed {:d} of {:d} fixed time-step experiments. This run took {:g} seconds.'.format(
@@ -38,8 +44,7 @@ def stochastic_comparison(num_iterations=100, num_samples=200, N=100, bond_max=1
 
     for i in range(num_iterations):
         start = timer()
-        v3, om3, bond_list_temp, t3 = stochastic_model_ssa(N=N, bond_max=bond_max, eta_v=eta_v,
-                                                           eta_om=eta_om, gamma=gamma)
+        v3, om3, bond_list_temp, t3 = stochastic_model_ssa(N=N, bond_max=bond_max, eta_v=eta_v, eta_om=eta_om, gamma=gamma)
         v3_list.append(v3)
         om3_list.append(om3)
         n_temp = np.zeros(shape=len(bond_list_temp))
@@ -68,5 +73,7 @@ def stochastic_comparison(num_iterations=100, num_samples=200, N=100, bond_max=1
     return None
 
 
-stochastic_comparison(N=200, bond_max=100, gamma=20.0, num_iterations=10)
-print('Done!')
+if __name__ == '__main__':
+    exp = 8
+    stochastic_comparison(M=2**exp, N=2**exp, time_steps=2000, bond_max=10, gamma=20.0, num_iterations=100)
+    print('Done!')
