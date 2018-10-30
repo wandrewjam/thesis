@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 d_prime = 0.1
-om_number, v_number = 11, 11
+om_number, v_number = 51, 51
 eta_om, eta_v = 0.0001, 0.0001
 sat = True
 
-data = np.load('ss_sweep_dprime{:g}_num{:g}_sat{:b}.npz'.format(d_prime, om_number, sat))
+data = np.load('./data/ss_sweep_dprime{:g}_num{:g}_sat{:b}.npz'.format(d_prime, om_number, sat))
 om_f, v_f, omegas, vees, torques, forces = data['om_f'], data['v_f'], data['omegas'], \
                                            data['vees'], data['torques'], data['forces']
 
