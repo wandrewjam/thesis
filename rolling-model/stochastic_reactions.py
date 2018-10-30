@@ -1,17 +1,17 @@
 import numpy as np
 from scipy.special import erf
 from scipy.stats import truncnorm
-from scipy.integrate import dblquad
 from constructA import length
 from timeit import default_timer as timer
+from time import strftime
 import matplotlib.pyplot as plt
 
 
 def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
                          delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact'):
 
-    z_vec = np.linspace(-L, L, 2*M+2)
-    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
+    z_vec = np.linspace(-L, L, 2*M+1)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+1)
     z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
     h = z_vec[1] - z_vec[0]
     nu = th_vec[1] - th_vec[0]
@@ -19,7 +19,7 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
     if init is None:
         bond_list = np.empty(shape=(0, 2))
     elif init is 'sat':
-        bond_list = np.concatenate((np.random.uniform(low=-L, high=L, size=(bond_max*(N+2), 1)),
+        bond_list = np.concatenate((np.random.uniform(low=-L, high=L, size=(bond_max*(N+1), 1)),
                                     np.repeat(th_vec, bond_max)[:, None]), axis=1)
     else:
         # Handle a bad init input
@@ -32,22 +32,22 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
 
     if ztype is 'cont_exact':
         # For continuous z, exact rate integral
-        expected_coeffs = dt*kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
-            erf(np.sqrt(eta/2)*(np.sin(th_vec) + z_vec[-1])) - erf(np.sqrt(eta/2)*(np.sin(th_vec) + z_vec[0]))
+        expected_coeffs = dt*kap*np.exp(-eta/2*(1 - np.cos(th_vec[1:-1]) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
+            erf(np.sqrt(eta/2)*(np.sin(th_vec[1:-1]) + z_vec[-1])) - erf(np.sqrt(eta/2)*(np.sin(th_vec[1:-1]) + z_vec[0]))
         )
         a = (z_vec[0] - th_vec)/np.sqrt(1/eta)
         b = (z_vec[-1] - th_vec)/np.sqrt(1/eta)
     elif ztype is 'cont_approx':
         # For continuous z, approximate rate integral
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
-        expected_coeffs = dt*kap*np.trapz(np.exp(-eta/2*l_matrix**2), z_vec, axis=0)
+        expected_coeffs = dt*kap*np.trapz(np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2), z_vec[1:-1], axis=0)
         # expected_coeffs = dt*kap*h*np.sum(np.exp(-eta/2*l_matrix**2), axis=0)
         a = (z_vec[0] - th_vec)/np.sqrt(1/eta)
         b = (z_vec[-1] - th_vec)/np.sqrt(1/eta)
     elif ztype is 'discrete':
         # For discrete z
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
-        expected_coeffs = h*dt*kap*np.exp(-eta/2*l_matrix**2)
+        expected_coeffs = h*dt*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2)
 
     for i in range(time_steps):
 
@@ -60,18 +60,18 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
 
         if binding is 'both' or binding is 'on':
             # Reclassify theta bins
-            bin_list = ((bond_list[:, 1] + np.pi/2 + 1e-6)/nu).astype(dtype=int)  # Is this a problem?
+            bin_list = ((bond_list[:, 1] + np.pi/2)/nu + .5).astype(dtype=int)  # Is this a problem?
 
             # Decide which bonds form
             bond_counts = np.bincount(bin_list)
-            bond_counts = np.append(bond_counts, values=np.zeros(shape=N+2-bond_counts.shape[0]))
+            bond_counts = np.append(bond_counts, values=np.zeros(shape=N-bond_counts.shape[0]))  # I was working on debugging this term
             if saturation:
                 if ztype is 'cont_exact' or ztype is 'cont_approx':
                     # Continuous z formulation
                     expected_vals = expected_coeffs*(bond_max - bond_counts)  # Calculate the expected values
                 elif ztype is 'discrete':
                     # Discrete z formulation
-                    expected_vals = expected_coeffs*(bond_max - bond_counts)
+                    expected_vals = expected_coeffs*(bond_max - bond_counts[None, 1:])
             else:
                 if ztype is 'cont_exact' or ztype is 'cont_approx':
                     # Continuous z formulation
@@ -94,23 +94,23 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
                     # new_bonds[counter:counter+forming_bonds[j], 0] = np.random.normal(loc=np.sin(th_vec[j]),
                     #                                                                   scale=np.sqrt(1/eta),
                     #                                                                   size=forming_bonds[j])
-                    new_bonds[counter:counter+forming_bonds[j], 0] = truncnorm.rvs(a=a[j], b=b[j], loc=np.sin(th_vec[j]),
+                    new_bonds[counter:counter+forming_bonds[j], 0] = truncnorm.rvs(a=a[j], b=b[j], loc=np.sin(th_vec[j+1]),
                                                                                    scale=np.sqrt(1/eta),
                                                                                    size=forming_bonds[j])
-                    new_bonds[counter:counter+forming_bonds[j], 1] = th_vec[j]
+                    new_bonds[counter:counter+forming_bonds[j], 1] = th_vec[j+1]
                     counter += forming_bonds[j]
             elif ztype is 'discrete':
                 # Discrete z formulation
                 expected_vals = expected_vals.clip(min=0)
                 forming_bonds = np.random.poisson(lam=expected_vals)
 
-                new_bonds = np.zeros(shape=(np.sum(forming_bonds), 2))
+                nonzeros = np.transpose(forming_bonds.nonzero())
+                new_bonds = np.zeros(shape=nonzeros.shape)
                 counter = 0
 
-                for j in range(forming_bonds.shape[0]):
-                    for k in range(forming_bonds.shape[1]):
-                        new_bonds[counter:counter+forming_bonds[j, k]] = [[z_vec[j], th_vec[k]]]
-                        counter += forming_bonds[j, k]
+                for j, k in nonzeros:
+                    new_bonds[counter:counter+forming_bonds[j, k]] = [[z_vec[j+1], th_vec[k+1]]]
+                    counter += forming_bonds[j, k]
 
         # Update the bond array
         if binding is 'both' or binding is 'off':
@@ -126,8 +126,8 @@ def stochastic_reactions(init=None, L=2.5, T=0.4, M=100, N=100, time_steps=1000,
 def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0.1, eta=0.1,
                   delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact'):
 
-    z_vec = np.linspace(-L, L, 2*M+2)
-    th_vec = np.linspace(-np.pi/2, np.pi/2, N+2)
+    z_vec = np.linspace(-L, L, 2*M+1)
+    th_vec = np.linspace(-np.pi/2, np.pi/2, N+1)
     z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
     h = z_vec[1] - z_vec[0]
     nu = th_vec[1] - th_vec[0]
@@ -146,21 +146,21 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
     t = [0]
     if ztype is 'cont_exact':
         # For continuous z
-        expected_coeffs = kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
-            erf(np.sqrt(eta/2)*(np.sin(th_vec) + z_vec[-1])) - erf(np.sqrt(eta/2)*(np.sin(th_vec) + z_vec[0]))
+        expected_coeffs = kap*np.exp(-eta/2*(1 - np.cos(th_vec[1:-1]) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
+            erf(np.sqrt(eta/2)*(np.sin(th_vec[1:-1]) + z_vec[-2])) - erf(np.sqrt(eta/2)*(np.sin(th_vec[1:-1]) + z_vec[1]))
         )
-        a = (z_vec[0] - th_vec)/np.sqrt(1/eta)
-        b = (z_vec[-1] - th_vec)/np.sqrt(1/eta)
+        a = (z_vec[1] - th_vec)/np.sqrt(1/eta)
+        b = (z_vec[-2] - th_vec)/np.sqrt(1/eta)
     elif ztype is 'cont_approx':
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
         # expected_coeffs = kap*np.trapz(np.exp(-eta/2*l_matrix**2), z_vec, axis=0)
-        expected_coeffs = kap*h*np.sum(np.exp(-eta/2*l_matrix**2), axis=0)
-        a = (z_vec[0] - th_vec)/np.sqrt(1/eta)
-        b = (z_vec[-1] - th_vec)/np.sqrt(1/eta)
+        expected_coeffs = kap*np.trapz(np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2), z_vec[1:-1], axis=0)
+        a = (z_vec[1] - th_vec)/np.sqrt(1/eta)
+        b = (z_vec[-2] - th_vec)/np.sqrt(1/eta)
     elif ztype is 'discrete':
         # For discrete z
         l_matrix = length(z_mesh, th_mesh, d_prime=d_prime)
-        expected_coeffs = h*kap*np.exp(-eta/2*l_matrix**2)
+        expected_coeffs = h*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2)
 
     while t[-1] < T:
         break_rates = np.array([])
@@ -172,20 +172,20 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
 
         if binding is 'both' or binding is 'on':
             # Reclassify theta bins
-            bin_list = ((bond_list[:, 1] + np.pi/2)/nu).astype(dtype=int)  # I might not need this list
-
-            bond_lengths = length(bond_list[:, 0], bond_list[:, 1], d_prime=d_prime)
+            bin_list = ((bond_list[:, 1] + np.pi/2)/nu + .5).astype(dtype=int)  # I might not need this list
+            #
+            # bond_lengths = length(bond_list[:, 0], bond_list[:, 1], d_prime=d_prime)
 
             # Decide which bonds form
             bond_counts = np.bincount(bin_list)
-            bond_counts = np.append(bond_counts, values=np.zeros(shape=N+2-bond_counts.shape[0]))
+            bond_counts = np.append(bond_counts, values=np.zeros(shape=N-bond_counts.shape[0]))
             if saturation:
                 if ztype is 'cont_exact' or ztype is 'cont_approx':
                     # Continuous z formulation
                     form_rates = expected_coeffs*(bond_max - bond_counts)  # Calculate the expected values
                 elif ztype is 'discrete':
                     # Discrete z formulation
-                    form_rates = expected_coeffs*(bond_max - bond_counts)
+                    form_rates = expected_coeffs*(bond_max - bond_counts[None, 1:])
             else:
                 if ztype is 'cont_exact' or ztype is 'cont_approx':
                     # Continuous z formulation
@@ -209,11 +209,11 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
             if j < break_rates.shape[0]:
                 bond_list = np.delete(arr=bond_list, obj=j, axis=0)
             else:
-                index = j - break_rates.shape[0]
+                index = j + 1 - break_rates.shape[0]
                 new_bonds = np.zeros(shape=(1, 2))
                 new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index], loc=np.sin(th_vec[index]), scale=np.sqrt(1/eta))
                 # new_bonds[0, 0] = np.random.normal(loc=np.sin(th_vec[j - break_rates.shape[0]]), scale=np.sqrt(1/eta))
-                new_bonds[0, 1] = th_vec[j - break_rates.shape[0]]
+                new_bonds[0, 1] = th_vec[index]
                 bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
         elif ztype is 'discrete':
             # Discrete z formulation
@@ -231,8 +231,8 @@ def ssa_reactions(init=None, L=2.5, T=0.4, M=100, N=100, bond_max=100, d_prime=0
             else:
                 index = j - break_rates.shape[0]
                 new_bonds = np.zeros(shape=(1, 2))
-                new_bonds[0, 0] = z_mesh.ravel(order='F')[index]
-                new_bonds[0, 1] = th_mesh.ravel(order='F')[index]
+                new_bonds[0, 0] = z_mesh[1:-1, 1:-1].ravel(order='F')[index]
+                new_bonds[0, 1] = th_mesh[1:-1, 1:-1].ravel(order='F')[index]
                 bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
         # Store the bond list
@@ -244,8 +244,8 @@ def pde_reactions(init=None, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime
                   eta=0.1, delta=3.0, kap=1.0, saturation=True, binding='both'):
 
     # Numerical Parameters
-    z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+2),
-                                  np.linspace(-np.pi/2, np.pi/2, N+2),
+    z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
+                                  np.linspace(-np.pi/2, np.pi/2, N+1),
                                   indexing='ij')
 
     t = np.linspace(0, T, time_steps+1)
@@ -253,7 +253,7 @@ def pde_reactions(init=None, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime
     nu = th_mesh[0, 1] - th_mesh[0, 0]
     dt = t[1]-t[0]
 
-    m_mesh = np.zeros(shape=(2*M+2, N+2, time_steps+1))  # Bond densities are initialized to zero
+    m_mesh = np.zeros(shape=(2*M+1, N+1, time_steps+1))  # Bond densities are initialized to zero
     if init is 'sat':
         m_mesh[:, :, 0] = 0.2
     elif init is not None:
@@ -267,38 +267,40 @@ def pde_reactions(init=None, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime
     off = binding is 'both' or binding is 'off'
     if saturation:
         for i in range(time_steps):
-            m_mesh[:, :, i+1] = (m_mesh[:, :, i] + form*dt*kap*np.exp(-eta/2*l_matrix**2) *
-                                 (1 - np.tile(np.trapz(y=m_mesh[:, :, i], x=z_mesh[:, 0],
-                                                       axis=0), reps=(2*M+2, 1)))) /\
-                                 (1 + off*dt*np.exp(delta*l_matrix))
+            m_mesh[1:-1, 1:-1, i+1] = (m_mesh[1:-1, 1:-1, i] + form*dt*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2) *
+                                 (1 - np.tile(np.trapz(y=m_mesh[:, 1:-1, i], x=z_mesh[:, 0],
+                                                       axis=0), reps=(2*M-1, 1)))) /\
+                                 (1 + off*dt*np.exp(delta*l_matrix[1:-1, 1:-1]))
     else:
         for i in range(time_steps):
-            m_mesh[:, :, i+1] = (m_mesh[:, :, i] + form*dt*kap*np.exp(-eta/2*l_matrix**2)) /\
-                                 (1 + off*dt*np.exp(delta*l_matrix))
+            m_mesh[1:-1, 1:-1, i+1] = (m_mesh[1:-1, 1:-1, i] + form*dt*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2)) /\
+                                 (1 + off*dt*np.exp(delta*l_matrix[1:-1, 1:-1]))
 
     return z_mesh, th_mesh, m_mesh, t
 
 
-trials = 10
+trials = 100
 fix_master_list = []
 var_master_list = []
 t_list = []
 
 # Parameters
 delta = 3
-T = 1.5
+T = .4
 init = None
-sat = True
-binding = 'both'
-M, N = 31, 62
-bond_max = 100
+sat = False
+binding = 'on'
+M, N = 128, 128
+time_steps = 1000
+bond_max = 10
 L = 2.5
-ztype = 'cont_exact'
+ztype = 'discrete'
+nu = np.pi/N
 
 for i in range(trials):
     start = timer()
-    bond_list, ts = stochastic_reactions(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, delta=delta, saturation=sat,
-                                         binding=binding, ztype=ztype)
+    bond_list, ts = stochastic_reactions(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, time_steps=time_steps,
+                                         delta=delta, saturation=sat, binding=binding, ztype=ztype)
     fix_master_list.append(bond_list)
     end = timer()
     print('{:d} of {:d} fixed time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
@@ -313,12 +315,12 @@ for i in range(trials):
     var_master_list.append(bond_list)
     end = timer()
     print('{:d} of {:d} variable time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
-z_mesh, th_mesh, m_mesh, tp = pde_reactions(init=init, L=L, T=T, M=M, N=N, delta=delta, saturation=sat,
-                                            binding=binding)
+z_mesh, th_mesh, m_mesh, tp = pde_reactions(init=init, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta,
+                                            saturation=sat, binding=binding)
 
 fix_sto_count = np.zeros(shape=(trials, tp.shape[0]))
 var_sto_count = np.zeros(shape=(trials, tp.shape[0]))
-var_sto_count1 = np.zeros(shape=(trials, tp.shape[0]))
+# var_sto_count1 = np.zeros(shape=(trials, tp.shape[0]))
 
 for i in range(trials):
     for j in range(len(fix_master_list[i])):
@@ -330,9 +332,6 @@ for i in range(trials):
         temp_sto_count[j] = var_master_list[i][j].shape[0]
     var_sto_count[i, :] = temp_sto_count[np.searchsorted(t_list[i], tp, side='right')-1]
 
-# for i in range(trials):
-#     var_sto_count[i, :] = np.arange(t_list1[i].shape[0])[np.searchsorted(t_list1[i], tp, side='right')-1]
-
 avg_fix_sto_count = np.mean(fix_sto_count, axis=0)
 std_fix_sto_count = np.std(fix_sto_count, axis=0)
 avg_var_sto_count = np.mean(var_sto_count, axis=0)
@@ -340,16 +339,25 @@ std_var_sto_count = np.std(var_sto_count, axis=0)
 
 pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
 
-plt.plot(tp[1:], (avg_fix_sto_count*np.pi/((N+2)*bond_max) - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
-plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max) -
+# Define parameter array and filename, and save the count data
+# The time is included to prevent overwriting an existing file
+par_array = np.array([delta, T, init, sat, binding, M, N, bond_max, L, ztype])
+file_path = './data/sta_rxns/'
+file_name = 'M{0:d}_N{1:d}_ztype{2:s}_binding{3:s}_{4:s}.npz'.format(M, N, ztype, binding, strftime('%y%m%d-%H%M%S'))
+np.savez(file_path+file_name, par_array, fix_sto_count, var_sto_count, pde_count, tp,
+         par_array=par_array, fix_sto_count=fix_sto_count, var_sto_count=var_sto_count, pde_count=pde_count, tp=tp)
+print('Data saved in file {:s}'.format(file_name))
+
+plt.plot(tp[1:], (avg_fix_sto_count*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
+plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
                   pde_count)[1:]/pde_count[1:], 'b:',
-         tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max) -
+         tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
                   pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
 
-plt.plot(tp[1:], (avg_var_sto_count*np.pi/((N+2)*bond_max) - pde_count)[1:]/pde_count[1:], 'r', label='Variable Step')
-plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max) -
+plt.plot(tp[1:], (avg_var_sto_count*nu/bond_max - pde_count)[1:]/pde_count[1:], 'r', label='Variable Step')
+plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max -
                   pde_count)[1:]/pde_count[1:], 'r:',
-         tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max) -
+         tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max -
                   pde_count)[1:]/pde_count[1:], 'r:', linewidth=0.5)
 
 plt.plot(tp, np.zeros(shape=tp.shape), 'k')
@@ -360,13 +368,13 @@ elif ztype is 'discrete':
     plt.title('Relative error of the stochastic simulation with discrete z')
 plt.show()
 
-plt.plot(tp, avg_fix_sto_count*np.pi/((N+2)*bond_max), 'b', label='Fixed Step')
-plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max))[1:], 'b:',
-         tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max))[1:], 'b:',
+plt.plot(tp, avg_fix_sto_count*nu/bond_max, 'b', label='Fixed Step')
+plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
+         tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
          linewidth=0.5)
-plt.plot(tp, avg_var_sto_count*np.pi/((N+2)*bond_max), 'r', label='Variable Step')
-plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max))[1:], 'r:',
-         tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*np.pi/((N+2)*bond_max))[1:], 'r:',
+plt.plot(tp, avg_var_sto_count*nu/bond_max, 'r', label='Variable Step')
+plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
+         tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
          linewidth=0.5)
 plt.plot(tp, pde_count, 'k', label='PDE Solution')
 
