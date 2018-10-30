@@ -17,15 +17,22 @@ def write_pde_data(M, N, time_steps, eta_v=0.01, gamma=20.0):
             return
 
     start = timer()
-    v, om, m_mesh, t = time_dependent(M=M, N=N, time_steps=time_steps, eta_v=eta_v, eta_om=eta_v, gamma=gamma)
+    v, om, m_mesh, t = time_dependent(M=M, N=N, time_steps=time_steps, eta_v=eta_v, eta_om=eta_v, gamma=gamma,
+                                      save_m=True)
     end = timer()
 
     print('It took {:g} seconds to solve the deterministic problem for the current parameters'.
           format(end - start))
-    np.savez(file_str, v, om, m_mesh, t, v=v, om=om, m_mesh=m_mesh, t=t)
+
+    start = timer()
+    np.savez_compressed(file_str, v, om, m_mesh, t, v=v, om=om, m_mesh=m_mesh, t=t)
+    end = timer()
+    print('And {:g} seconds to compress and save the data'.format(end-start))
 
 
 if __name__ == '__main__':
-    j = 8
-    write_pde_data(M=2**j, N=2**j, time_steps=25*2**j)
+    top = 7
+    bottom = 2
+    for j in range(bottom, top+1):
+        write_pde_data(M=2**j, N=2**j, time_steps=25*2**j, gamma=0)
     print('Done!')
