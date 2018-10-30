@@ -10,17 +10,19 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
     # This function runs a stochastic simulation using a variable timestep #
     ########################################################################
     
-    th_vec = np.linspace(-np.pi/2, np.pi/2, num=N+1)[:-1]
+    th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
-    th_vec += nu/2
 
     bond_list = np.empty(shape=(0, 2))
 
-    expected_coeffs = kap*np.exp(-eta/2*(1 - np.cos(th_vec) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
-        erf(np.sqrt(eta/2)*(np.sin(th_vec) + L)) - erf(np.sqrt(eta/2)*(np.sin(th_vec) - L))
-    )
-    a = (-L - th_vec)/np.sqrt(1/eta)
-    b = (L - th_vec)/np.sqrt(1/eta)
+    def coeffs_and_bounds(bins):
+        coeffs = kap*np.exp(-eta/2*(1 - np.cos(bins) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
+            erf(np.sqrt(eta/2)*(np.sin(bins) + L)) - erf(np.sqrt(eta/2)*(np.sin(bins) - L))
+        )
+        coeffs = (bins > -np.pi/2)*(bins < np.pi/2)*coeffs
+        a = (-L - bins)/np.sqrt(1/eta)
+        b = (L - bins)/np.sqrt(1/eta)
+        return coeffs, a, b
 
     om_f = gamma
     v_f = (1 + d_prime)*gamma
@@ -28,27 +30,23 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
     v, om = np.array([v_f]), np.array([om_f])
     master_list = [bond_list]
     t = np.array([0])
-    i = 0
 
     start = timer()
     while t[-1] < T:
-        # Reclassify theta bins
-        bin_list = ((bond_list[:, 1] + np.pi/2)/nu).astype(dtype=int)  # I might not need this list
-        break_indices = np.where(bin_list < 0)
-        break_indices = np.append(arr=break_indices, values=np.where(bin_list >= N))
-        break_indices = np.append(arr=break_indices, values=np.where(bond_list[:, 0] > L))
-        break_indices = np.append(arr=break_indices, values=np.where(bond_list[:, 0] < -L))
-        bin_list = bin_list[bin_list >= 0]  # I need to make sure bonds with attachments theta < -pi/2 break always
-        bin_list = bin_list[bin_list < N]
+        # Generate list of breaking indices
+        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] < -np.pi/2)
+        break_indices = np.append(break_indices, values=np.where(th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
+        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] > L))
+        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] < -L))
 
-        bond_lengths = length(bond_list[:, 0], bond_list[:, 1], d_prime=d_prime)
+        bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1].astype(int)], d_prime=d_prime)
 
         # Decide which bonds break
         break_rates = np.exp(delta*bond_lengths)
 
         # Decide which bonds form
-        bond_counts = np.bincount(bin_list)  # I need this column to be dtype=int, maybe use a separate array
-        bond_counts = np.append(bond_counts, values=np.zeros(shape=N-bond_counts.shape[0]))
+        bond_counts = np.bincount(bond_list[:, 1].astype(int), minlength=2*N)
+        expected_coeffs, a, b = coeffs_and_bounds(th_vec)
         form_rates = expected_coeffs*(bond_max - bond_counts)  # Calculate the expected values
 
         all_rates = np.append(break_rates, form_rates)
@@ -60,7 +58,9 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         j = np.searchsorted(a=sum_rates, v=r[1]*a0)
 
         bond_list[:, 0] += -dt*v[-1]  # Update z positions
-        bond_list[:, 1] += -dt*om[-1]  # Update theta positions
+        th_vec += -dt*om[-1]  # Update theta bin positions
+        th_vec = ((th_vec + np.pi) % (2*np.pi)) - np.pi  # Make sure bin positions are in [-pi, pi)
+
         t = np.append(t, t[-1]+dt)
 
         if j < break_rates.shape[0]:
@@ -69,8 +69,7 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
             index = j - break_rates.shape[0]
             new_bonds = np.zeros(shape=(1, 2))
             new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index], loc=np.sin(th_vec[index]), scale=np.sqrt(1/eta))
-            # new_bonds[0, 0] = np.random.normal(loc=np.sin(th_vec[j - break_rates.shape[0]]), scale=np.sqrt(1/eta))
-            new_bonds[0, 1] = th_vec[j - break_rates.shape[0]]
+            new_bonds[0, 1] = index
             bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
         # Update the bond array
@@ -79,10 +78,10 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
 
         # Calculate forces and torques
         zs = bond_list[:, 0]
-        thetas = bond_list[:, 1]
-        force = nu/bond_max*np.sum(a=zs-np.sin(thetas))
-        torque = nu/bond_max*np.sum(a=(1-np.cos(thetas)+d_prime)*np.sin(thetas) +
-                                     (np.sin(thetas)-zs)*np.cos(thetas))
+        thetas = bond_list[:, 1].astype(int)
+        force = nu/bond_max*np.sum(a=zs-np.sin(th_vec[thetas]))
+        torque = nu/bond_max*np.sum(a=(1-np.cos(th_vec[thetas])+d_prime)*np.sin(th_vec[thetas]) +
+                                     (np.sin(th_vec[thetas])-zs)*np.cos(th_vec[thetas]))
 
         v, om = np.append(arr=v, values=v_f + force/eta_v), np.append(arr=om, values=om_f + torque/eta_om)
     return v, om, master_list, t
