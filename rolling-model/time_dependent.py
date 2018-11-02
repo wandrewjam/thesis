@@ -62,25 +62,24 @@ def time_dependent(expt='unbound', L=2.5, T=.4, M=100, N=100, time_steps=1000, d
 
     for i in range(time_steps):
         if save_m:
-            m_mesh[1:-1, 1:-1, i+1] = (m_mesh[1:-1, 1:-1, i] + om[i]*dt/nu*(m_mesh[1:-1, 2:, i] -
-                                                                            m_mesh[1:-1, 1:-1, i]) +
-                                       v[i]*dt/h*(m_mesh[2:, 1:-1, i] - m_mesh[1:-1, 1:-1, i]) +
-                                       dt*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2) *
-                                       (1 - saturation*h*np.tile(np.sum(m_mesh[1:-1, 1:-1, i], axis=0),
-                                                                 reps=(2*M-1, 1)))) / \
-                                      (1 + dt*np.exp(delta*l_matrix[1:-1, 1:-1]))
+            m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om[i]*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
+                                       v[i]*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
+                                       dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
+                                       (1 - saturation*np.tile(np.trapz(m_mesh[:, :-1, i], z_mesh[:, 0], axis=0),
+                                                                 reps=(2*M, 1)))) / \
+                                      (1 + dt*np.exp(delta*l_matrix[:-1, :-1]))
         else:
-            m_mesh[1:-1, 1:-1] = (m_mesh[1:-1, 1:-1] + om[i]*dt/nu*(m_mesh[1:-1, 2:] - m_mesh[1:-1, 1:-1]) +
-                                  v[i]*dt/h*(m_mesh[2:, 1:-1] - m_mesh[1:-1, 1:-1]) +
-                                  dt*kap*np.exp(-eta/2*l_matrix[1:-1, 1:-1]**2) *
-                                  (1 - saturation*h*np.tile(np.sum(m_mesh[1:-1, 1:-1], axis=0), reps=(2*M-1, 1)))) / \
-                                 (1 + dt*np.exp(delta*l_matrix[1:-1, 1:-1]))
+            m_mesh[:-1, :-1] = (m_mesh[:-1, :-1] + om[i]*dt/nu*(m_mesh[:-1, 1:] - m_mesh[:-1, :-1]) +
+                                  v[i]*dt/h*(m_mesh[1:, :-1] - m_mesh[:-1, :-1]) +
+                                  dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
+                                  (1 - saturation*np.tile(np.trapz(m_mesh[:, :-1], z_mesh[:, 0], axis=0), reps=(2*M, 1)))) / \
+                                 (1 + dt*np.exp(delta*l_matrix[:-1, :-1]))
         if save_m:
-            f_prime = nd_force(m_mesh[1:-1, 1:-1, i+1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1])
-            tau = nd_torque(m_mesh[1:-1, 1:-1, i+1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1], d_prime)
+            f_prime = nd_force(m_mesh[:, :, i+1], z_mesh, th_mesh)  # Corrected (?) force calculations
+            tau = nd_torque(m_mesh[:, :, i+1], z_mesh, th_mesh, d_prime)
         else:
-            f_prime = nd_force(m_mesh[1:-1, 1:-1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1])
-            tau = nd_torque(m_mesh[1:-1, 1:-1], z_mesh[1:-1, 1:-1], th_mesh[1:-1, 1:-1], d_prime)
+            f_prime = nd_force(m_mesh, z_mesh, th_mesh)
+            tau = nd_torque(m_mesh, z_mesh, th_mesh, d_prime)
         v[i+1], om[i+1] = v_f[i] + f_prime/eta_v, om_f[i] + tau/eta_om
 
     # fig = plt.figure()
