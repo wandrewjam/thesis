@@ -1,3 +1,23 @@
+# local .gitignore file for thesis repository
+
+# User-specified ignores
+########################
+# Documents
+*.pdf
+*.pages
+*.DS_Store
+*.idea
+library.bib
+
+# Folders
+literature_repository/*
+rolling-model/write-up/*
+rolling-model/data/*
+rolling-model/plots/*
+
+
+# Copied from github/gitignore/Python.gitignore
+###############################################
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
