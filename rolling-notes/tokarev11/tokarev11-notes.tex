@@ -1,0 +1,255 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+letterpaper, % Alternatively letterpaper for US letter
+twocolumn, % Alternatively onecolumn
+landscape % Alternatively portrait
+]{article}
+
+\usepackage{amsmath}
+\input{structure.tex} % Input the file specifying the document layout and structure
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\articletitle{Platelet Adhesion from Shear Blood Flow is Controlled by
+Near-Wall Rebounding Collisions with Erythrocytes} % The title of the article
+\articlecitation{\cite{tokarev11pas}} % The BibTeX citation key from your bibliography
+
+\datenotesstarted{March 28, 2017} % The date when these notes were first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes were lasted updated (automatically the current date)
+
+\docauthor{Andrew Watson} % Your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%----------------------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE NOTES
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+
+Hematocrit and wall shear rate are both known to affect platelet
+adhesion. Transport of platelets to the vessel wall involves
+platelet-platelet collisions, platelet-RBC collisions, and Brownian
+diffusion. The claim that previous models of platelet transport and
+adhesion only account for Brownian diffusion and model adhesion as a
+one-step process. The authors developed a model that more explicitly
+included platelet diffusion in the bulk due to collisions with other
+blood cells, and using a multi-step model of platelet adhesion to the
+wall. Their goal was to describe platelet adhesion as a function of
+hematocrit, wall shear rate, and RBC and platelet size.
+
+Their model describes an experimental setup where whole blood is
+perfused through a flow chamber at a prescribed shear rate, and on the
+bottom of the flow chamber is some immobilized agonist. Then the mean
+surface density of platelets is measured as a function of time.
+
+Their model describes the following processes:
+\begin{enumerate}
+\item Transport within the flow---both advection in the direction of
+  fluid flow, and diffusion due to collisions with blood cells
+\item Near-wall and wall processes:
+  \begin{enumerate}
+  \item Collision of a platelet in the RBC depleted zone with an RBC
+    at the edge of the DZ, pushing the platelet into the wall
+  \item Capture of the platelet on the wall (i.e. formation of
+    GP1b-vWF bonds)
+  \item Deceleration of the captured platelet relative to the flow
+    (although later they will assume the deceleration to 0 velocity is
+    instantaneous)
+  \item Either detachment of the platelet, or stable adhesion
+  \end{enumerate}
+\end{enumerate}
+
+%------------------------------------------------
+
+\section{Mathematical Model} % Numbered section
+
+They assume 2D Poiseuille flow between stationary plates at a distance
+of $2H$ (equations (1) and (2)).
+% \begin{equation}
+%   \label{eq:velocity_profile}
+%   u(y) = \dot{\gamma}_w y \left(1 - \frac{y}{2H}\right).
+% \end{equation}
+Platelet concentration is $P$, and is advected in the direction of the
+flow, and diffuses according to a nonlinear diffusion term (equation (3)).
+% \begin{equation}
+%   \label{eq:plt_conc_bulk}
+%   \frac{\partial P}{\partial t} u(y) \frac{\partial P}{\partial x} =
+%   \nabla\left(D(P)\nabla P\right).
+% \end{equation}
+
+The platelet diffusion coefficient includes terms that describe
+collisions with RBCs, collisions with other platelets, and Brownian
+diffusion.
+% \begin{equation}
+%   \label{eq:diff_coeff}
+%   D(P) = k_{ZC} \left(\frac{d_\textit{RBC}}{2}\right)^2 \dot{\gamma}
+%   \Phi_\textit{RBC}(1 - \Phi_\textit{RBC})^{0.8} + k_{ZC}
+%   \left(\frac{d_P}{2}\right)^2 \dot{\gamma}V_P P + D_\textit{Br}.
+% \end{equation}
+In equation (4), $d_\textit{RBC}$ and $d_P$ are the RBC and platelet
+diameters, and $\Phi_\textit{RBC}$ and $V_P P$ are the RBC and
+platelet volume fractions (parameter values are given in Tables S1 and
+S2 of the Supporting Material). They cite Ref. 32 in their paper for
+the first two terms of this diffusion coefficient. They also assume
+that $\Phi_\textit{RBC}$ is constant throughout the domain, which they
+justify in Supplement 1. Essentially their argument is that the RBC DZ
+is small enough to ignore, and throughout the rest of the blood vessel
+RBC volume fraction is constant.
+
+They assume that $D\nabla P \cdot n = 0$ along the top wall and at the
+outflow. They assume that $P = P_0$ at the inflow, and equation (5)
+gives the BC at the active wall ($y=0$). $M(x)$ is the concentration
+of stably adhered platelets, and is governed by equation (7). Here
+$R(x)$ is the surface concentration of captured platelets and
+$k_\textit{bind}$ is the adhesion rate constant. 
+% Their boundary conditions are as follows:
+% \begin{align}
+%   \label{eq:BCs_top_right}
+%   \left.D(P) \frac{\partial P}{\partial y}\right|_{y = 2H} = D(P)
+%     \left.\frac{\partial P}{\partial x}\right|_{x = L} = 0 \\
+%   \label{eq:BC_inflow}
+%   \left. P \right|_{x = 0} = P_0 \\
+%   \label{eq:BC_bottom}
+%   \left. D(P) \frac{\partial P}{\partial y} \right|_{y = 0} = \frac{dM}{dt}
+% \end{align}
+% where $\frac{dM}{dt} = k_\textit{bind} R(x)$ is the overall adhesion
+% rate. Then $R(x)$ is surface concentration of captured platelets and
+% $k_\textit{bind}$ is the adhesion rate constant ($k_\textit{bind} =
+% 1/T_a$ where $T_a$ is the activation time of the relevant integrin.
+
+They model $R$ with the advection reaction equation (8).
+% \begin{equation}
+%   \label{eq:plt_conc_wall}
+%   \frac{\partial R}{t} + w \frac{\partial R}{\partial x} = \alpha J(x)
+%   \Omega(x) - (k_\textit{bind} + k_\textit{det})R.
+% \end{equation}
+Note $R(x)$ is not a function of $y$, and only applies at $y=0$. $w$
+is the velocity of a captured platelet, $J(x)$ is the platelet flux
+toward the wall, $\Omega(x)$ is the proportion of uncovered surface,
+and $\alpha$ is the probability that a platelet colliding with the
+wall is captured. 
+
+They then argue that $w$ is small, and the timescale of adhesion is
+much shorter than the timescale of the experiment, and so they assume
+that $R$ is in quasi-steady-state (equation (9)).
+% \begin{equation}
+%   \label{eq:qss_R}
+%   R \approx \frac{\alpha J(x) \Omega(x)}{k_\textit{bind} + k_\textit{det}}.
+% \end{equation}
+Their expression for $J$ (given in equations (10) and (11)) is derived
+in Supplement 2.
+
+They assumed that $\alpha$ was independent of $\dot{\gamma}_w$, and
+that $k_\textit{bind}$ was a decreasing linear function of
+$\dot{\gamma}_w$ (equation (12)). They also assumed that
+$k_\textit{det}$ is proportional to $\dot{\gamma}_w$. Then using
+equations (7), (9), (12), and (13) they found an effective binding
+rate constant $k_\textit{eff}$ that depends on $\dot{\gamma}_w$, $\Phi_\textit{RBC}$,
+$d_\textit{RBC}$, and $d_P$. The surface availability function is
+given by equation (16). For most of their analysis, they averaged $M$
+over the length of the channel, and assumed that it was independent of
+$x$. 
+
+They also came up with a reduced model where they :
+\begin{enumerate}
+\item ignored platelet movement in the bulk and just used $P|_{y=0} =
+  P_0$
+\item assumed $\Omega(x) \equiv 1$
+\item eliminated the second term in $Q$, that is they ignored flux of
+  platelets to the surface due to collisions with other platelets.
+\end{enumerate}
+Equations (17)--(19) describe the reduced model. In the reduced model,
+$M^0$ grows linearly in time, proportional to $P_0$ and
+$k_\textit{eff}^0$ which is the reduced $k_\textit{eff}$ parameter.
+
+The parameters given in Tables S1 and S2 are fixed in the model. The
+parameters they estimated were $\alpha$, $k_a =
+\frac{k_\textit{bind}^0}{\delta}$, $\xi = \frac{\beta}{\delta}$,
+$k_1$ and $k_2$. 
+
+
+% %------------------------------------------------
+
+% \section{Results Overview}
+
+% Nulla facilisi. Sed mauris purus, imperdiet at varius porta, sagittis at nisl. Etiam efficitur, purus eget venenatis consectetur, nunc lorem tristique enim, vitae sagittis dolor purus id mauris. Aliquam purus urna, facilisis vel mi vel, sagittis fringilla ante. Integer tincidunt, arcu vel faucibus fringilla, orci massa dignissim lorem, finibus luctus metus nibh vulputate ex. Vivamus dui orci, mattis pretium ipsum quis, rutrum bibendum lorem. Proin a suscipit lorem. Sed quis nulla a velit accumsan mattis sed vitae leo. Proin in orci vestibulum, tristique orci vitae, dictum lacus. Duis quis ipsum volutpat, volutpat lorem eu, elementum est. Sed sed magna non est luctus venenatis eget at ipsum. Cras felis turpis, sollicitudin sit amet sem sed, pharetra pretium dolor.
+
+% \begin{enumerate}
+% \item First item in a list
+% \item Second item in a list
+% \item Third item in a list
+% \item Fourth item in a list
+% \item Fifth item in a list
+% \end{enumerate}
+
+% Nunc non massa eu leo sagittis aliquet. Sed commodo turpis eget est elementum, cursus cursus tortor congue. Aenean feugiat auctor tortor, vel vestibulum est feugiat et. Duis convallis volutpat cursus. Morbi fermentum facilisis enim dignissim facilisis. Aenean mattis lorem sed velit gravida facilisis. In in leo nec tortor pellentesque mollis. Curabitur eget porta metus, non consectetur augue. Fusce condimentum sit amet enim a sagittis. Aliquam erat volutpat. Phasellus interdum consequat condimentum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur egestas justo porttitor, commodo tellus in, consectetur dui.
+
+% \begin{description}
+% \item[First] First description
+% \item[Second] Second description
+% \item[Third] Third description
+% \item[Fourth] Fourth description
+% \item[Fifth] Fifth description
+% \end{description}
+
+% %------------------------------------------------
+
+% \section{Discussion/Conclusions Overview}
+
+% Donec ultrices odio in rhoncus rutrum. Nunc tristique venenatis nisl in aliquam. Aenean vulputate nisl quis nibh dapibus cursus. Suspendisse ornare mauris lorem, sit amet gravida massa luctus ac. Nullam facilisis sodales erat in porttitor. Curabitur vitae leo tellus. Pellentesque fermentum, lorem id tempus blandit, massa quam condimentum dolor, et vestibulum mi eros sit amet orci. Quisque velit quam, ullamcorper eu pretium porttitor, scelerisque sit amet odio. Suspendisse quis tincidunt velit. 
+
+% %------------------------------------------------
+
+% \section*{Article Evaluation}
+
+% I found their approach of subjecting helpless animals to long-term pain stimuli and monitoring depressive behaviours afterwards both novel and interesting.
+
+% %----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography title
+
+\bibliography{sample} % Input your bibliography file
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

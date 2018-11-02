@@ -1,0 +1,552 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+letterpaper, % Alternatively letterpaper for US letter
+twocolumn, % Alternatively onecolumn
+landscape % Alternatively portrait
+]{article}
+
+\usepackage{amsmath, textgreek}
+\newcommand{\inta}[1]{\textalpha\textsubscript{#1}}
+\newcommand{\intb}[1]{\textbeta\textsubscript{#1}}
+
+\input{structure.tex} % Input the file specifying the document layout and structure
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\articletitle{Receptor-mediated cell mechanosensing} % The title of
+                                % the article
+\articlecitation{\cite{Chen2017}} % The BibTeX citation key from your
+                                % bibliography 
+
+\datenotesstarted{April 6, 2018} % The date when these notes were
+                                % first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes
+                                % were lasted updated (automatically
+                                % the current date)
+
+\docauthor{Andrew Watson} % Your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%----------------------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE NOTES
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+\label{sec:introduction}
+
+\begin{itemize}
+\item It is important for cells to be able to sense and respond to
+  mechanical signals from their surroundings. 
+\item Mechanosensitive structures exist across multiple scales in
+  organisms. This review is concerned with cellular and molecular
+  scales, and specifically receptor-mediated mechanosensing.
+\item Receptor-mediated mechanosensing is important in many cellular
+  processes, including activation, differentiation, proliferation,
+  apoptosis, cell spreading, migration, and others.
+\item Receptors and intracellular molecules involved in mechanosensing
+  can be found by altering their concentration or activity somehow,
+  which affects how the cell responds to a mechanical stimulus.
+\item Intracellular forces can also be transferred to an extracellular
+  substrate through receptors, affecting the cell's response as well.
+\item In reality, mechanosensing is a complex process that involves
+  many receptors as well as crosstalk between the cell and the
+  substrate. However in this review, they simplify the problem and
+  only look at one direction of the signaling through a single
+  receptor.
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Four-step model for mechanosensing}
+
+\begin{itemize}
+\item When a receptor binds to an immobilized ligand and force is
+  exerted on the receptor-ligand bond, mechanosensing can be
+  initiated.
+\item There are 4 steps in transferring this mechanical signal to the
+  inside of the cell:
+  \begin{enumerate}
+  \item Mechanopresentation---mechanical cues are presented to the
+    receptor. The ligand must be bound to a surface and able to support
+    a force. Soluble ligands cannot transduce force. The
+    mechanopresenter is a ligand anchored to a surface.
+  \item Mechanoreception---the ligand transmits force to the binding site
+    of a cell surface receptor. This force may alter the bond between
+    the ligand and receptor. The mechanoreceptor binds to the
+    mechanopresenter.
+  \item Mechanotransmission---the force is communicated from the binding
+    site towards the cell interior. The mechanotransmitter is
+    responsible for propagating the force signal. It may transmit
+    mechanical force across the membrane, or it may propagate
+    information in another way (e.g. force-induced conformational
+    change). 
+  \item Mechanotransduction---the mechanical cue is translated into a
+    biochemical signal. Often either the receptor or a linked subunit
+    undergoes a conformational change in this step. The
+    mechanotransducer is the structure(s) undergoing a mechanical
+    change to initiate a chemical signal. 
+  \end{enumerate}
+\item An important role of mechanotransduction is distinguishing
+  between different types of forces. The mechanotransducer may respond
+  to one type of force and not others (digital mechanism) or its
+  response may scale with the strength of the mechanical force (analog
+  mechanism). 
+\item The difference between the mechanotransmitter and
+  mechanotransducer is that the mechanotransducer translates the
+  mechanical signal into a chemical one, whereas the
+  mechanotransmitter does not.
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Kinetic and Mechanical Aspects}
+\label{sec:kinet-mech-aspects}
+
+\subsection{Kinetic constraints}
+\label{sec:kinetic-constraints}
+
+\begin{itemize}
+\item Bond kinetics are affected by mechanical forces, and so play a
+  role in mechanopresentation and mechanoreception. In particular,
+  kinetics modulate the magnitude, duration, and frequency of force,
+  and place a constraint on presentation and reception.
+\item The off rate of a single bond can increase with applied force
+  (slip bond), decrease with applied force (catch bond), or be
+  independent of force (ideal bond). The type of receptor-ligand bond
+  that forms influences the magnitude and lifetime of mechanical
+  signals communicated to the mechanoreceptor. For example, the amount
+  of Ca$^{++}$ signaling induced by TCR and GP1b depends on the amount
+  of force applied to these receptors from their ligands.
+\end{itemize}
+
+\subsection{Mechanical changes}
+\label{sec:mechanical-changes}
+
+\begin{itemize}
+\item Mechanically-triggered conformational changes can play an
+  important role in a mechanosensor, and these changes fall into 6
+  different types:
+  \begin{enumerate}
+  \item Deformation---e.g. membrane ion channels which open in
+    response to an increase in membrane tension.
+  \item Relative displacement---force can induce displacement of two
+    subunits of transmembrane channels.
+  \item Hinge movement---for proteins consisting of two globular
+    domains connected by a hinge region (like integrins and
+    selectins), pulling force can promote hinge opening.
+  \item Unfolding/unmasking---force can cause proteins to unfold,
+    revealing previously hidden active sites. Examples include GP1b,
+    talin, vinculin, fibronectin, and vWF.
+  \item Translocation/rotation---force applied to proteins
+    noncovalently complexed with other proteins can lead to relative
+    movement and breaking bonds on the trailing edge and forming bonds
+    on the leading edge. Examples of translocation are linear
+    molecular motors like myosin, kinesin, and dyneine. Examples of
+    rotation are ATP synthases.
+  \item Cluster rearrangement---force acting on proteins in a cluster
+    trigger the proteins to change their arrangement through their
+    mutual interactions. An example is integrins in a focal adhesion,
+    which alter the cytoskeleton through interactions between integrin
+    tails and actin.
+  \end{enumerate}
+\item The choice of conformational change to employ depends on the
+  physiological function of the mechanotransducer. For example,
+  cluster rearrangement in integrins can induce changes in the
+  cytoskeleton. However, a single GP1b cannot trigger actin
+  rearrangement.
+\item Mechanical signals can be important in other steps of
+  mechanosensing as well. For example, vWF only exposes its A1 binding
+  sites when exposed to a high enough shear. This modulates the
+  mechanopresentation of A1 to GP1b molecules.
+\item Kinetics and mechanics can be coupled at the level of a single
+  receptor. For example, force applied to the leucine-rich repeat
+  domain (LRRD) in GP1b can strengthen the GP1b-A1 bond, increasing
+  its lifetime. Also, only abruptly increasing force can cause this
+  strengthening; constantly applied force cannot.
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Nanotools for studying mechanosensing}
+\label{sec:nanot-study-mech}
+
+\subsection{Dynamic force spectroscopy}
+\label{sec:dynam-force-spectr}
+
+\begin{itemize}
+\item Dynamic force spectroscopy (DFS) uses ultrasensitive force
+  probes like atomic force microscopy (AFM), optical tweezers,
+  magnetic tweezers, and biomembrane force probes (BFPs). These
+  instruments have very fine resolution in space, time, and force
+  scales. 
+\item In DFS, ligands immobilized to a substrate are brought into
+  contact with a mechanoreceptor to facilitate binding. Then a
+  piconewton-level pulling force is applied to the bond through one of
+  the above mechanisms. Force-ramp experiments involve increasing the
+  force until the bond breaks, while force-clamp experiments ramp the
+  force to a pre-defined amount, and then the force is held there
+  until the bond breaks. These experiments can be used to determine
+  the force dependence of receptor-ligand off rates, or protein
+  conformational changes or unfolding.
+\item DFS experiments combined with real-time imaging of intracellular
+  signaling events allows experimentalists to directly observe the
+  intracellular response of mechanotransducers to force. For example,
+  prolonged forces applied to the GP1b-A1 bond have been observed to
+  initiate Ca$^{++}$ in platelets.
+\end{itemize}
+
+\subsection{Magnetic twisting cytometry}
+\label{sec:magn-twist-cytom}
+
+\begin{itemize}
+\item This technique involves a magnetic bead coated with ligand and
+  bound to multiple receptors on a cell surface. This is a
+  high-throughput method, using many beads bound to the surfaces of
+  many cells.
+\item This allows experimentalists to measure cell stiffness. These
+  kinds of experiments provided evidence of mechanosensing by
+  integrins, as the cell stiffened in response to an applied torque.
+\end{itemize}
+
+\subsection{Microscopic probes for cell traction and internal force}
+\label{sec:micr-prob-cell}
+
+\begin{itemize}
+\item Two aspects of mechanosensing: environment exerting force on a
+  cell, and a cell producing force to sense mechanical properties of
+  its surroundings.  % I read the first page of this, come back to
+                     % finish taking notes (reading about traction
+                     % force microscopy)
+\item The force probes described in previous sections provide no
+  information on if the cell is actively exerting force. 
+\item Traction force microscopy measures bulk traction forces
+  generated by adherent cells. Cells are seeded onto a ligand-coated
+  substrate which contains markers that can be tracked
+  microscopically. By observing the displacement of these markers, the
+  force exerted by the cell can be calculated.
+\item Traction force microscopy has been an important tool in learning
+  about focal adhesions.
+\item When combined with live-cell imaging, this can be used to
+  visualize the dynamics of traction forces and molecular signals.
+\item A second class of force probes involves inserting a polymer
+  between the cell and substrate to either limit the tension
+  experienced by the cell, or report the tension generated by the
+  cell.
+\item Tension gauge tethers (TGT) are designed to rupture above a
+  certain force, and thereby limiting the amount of tension the cell
+  can generate. This provides information on how much tension is
+  required to support certain force-dependent functions.
+\item Molecular tension-based fluorescence microscopy probes unfold
+  and fluoresce when tension is applied above a certain
+  threshold. This unfolding is reversible, and so is doesn't affect
+  cell functions.
+\item A third class of probes is similar to the DNA-based probes, but
+  using flexible peptides which fluoresce under applied tension. These
+  can be used to moniter both extracellular and intracellular forces,
+  and have been inserted along the cytoplasmic tails of \inta{L} and
+  \intb{2} to show that force is transduced through the \intb{}
+  subunit in migrating cells.
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Platelet mechanosensing via single GP1b}
+
+\begin{itemize}
+\item vWF is mechanosensitive, it requires a pulling force to unfurl
+  the molecule and expose the GP1b binding sites. In the vWF-GP1b
+  mechanosensing system, vWF is the mechanopresenter.
+\item Once vWF is immobilized on vessel walls, it is subjected to
+  higher shear rates near the vessel wall. Once vWF is bound to GP1b,
+  intracellular Ca$^{++}$ release is triggered, which signals integrin
+  \inta{IIb}\intb{3} to activate.
+\item Upon vascular injury, vWF adsorbs to the subendothelium, and
+  fluid forces extend the vWF multimer, exposing the A1 binding site
+  for GP1b. The GP1B-A1 bond has fast association and dissociation
+  constants. Fast association allows for the capture of fast-flowing
+  platelets, and fast dissociation allows for rolling along the
+  surface. 
+\item Physical transport in the bulk drives platelets to collide with
+  the vessel wall, bringing GP1b and vWF close enough to form
+  bonds. Three steps of the transport regulate GP1b-vWF association:
+  \begin{enumerate}
+  \item tethering of the platelet to the vascular surface,
+  \item Brownian motion of the platelet, and
+  \item rotational diffusion of the interacting molecules.
+  \end{enumerate}
+\item The GP1b-vWF bond acts as a catch bond below 22 pN, and as a
+  slip bond above that. 2B mutant vWF forms slip bonds only with
+  GP1b. 
+\item Collagen-vWF interaction also activates vWF, in addition to
+  providing an anchor point for vWF. vWF is initially captured through
+  A3 binding with collagen, but further collagen binding with A1 can
+  increase its affinity for GP1b binding.
+\item Increased flow enhances platelet capture on vWF through three
+  mechanisms:
+  \begin{enumerate}
+  \item Exposure of vWF-A1 binding sites on immobilized vWF
+  \item Increase in the number of platelets that collide with the wall
+  \item Longer association times of GP1b and vWF-A1 through catch bond
+    behavior
+  \end{enumerate}
+\item There are two domains in GP1b that extend when the molecule is
+  pulled on: the LRRD (leucine-rich repeat domain) and the MSD
+  (mechanosensitive domain).
+\item These two domains have different unfolding lengths, and respond
+  differently to different force waveforms. Ramped force (a quick
+  increase in force application) unfolds both LRRD and MSD, whereas
+  clamped force (a constant force applied for a long time) only
+  unfolds MSD.
+\item Unfolding of the MSD allows for transmission of the mechanical
+  signal along the receptor. 
+\item The unfolding frequency of MSD depends on the level of applied
+  force in the same way as GP1b-vWF binding kinetics. This is true in
+  both normal vWF and 2B vWD mutants. This suggests a coupling between
+  unbinding kinetics and unfolding kinetics.
+\item Experiments show that LRRD unfolding prolongs the A1-GP1b bond
+  lifetime, perhaps by exposing additional binding sites within the
+  LRRD region. 
+\item Unfolding of MSD requires sustained force, and it cannot occur
+  after vWF unbinds and force is no longer being applied along the
+  molecule. There is cooperativity between LRRD and MSD
+  unfolding. LRRD unfolding lengthens the lifetime of the GP1b-vWF
+  bond, which increases the probability of MSD unfolding.
+\item Unfolding of MSD results in intracellular signaling. In mutation
+  experiments, mutations that unfolded the MSD triggered intracellular
+  signaling even in the absence of ligand binding.
+\item Two types of intracellular Ca$^{++}$ signaling have been
+  observed in platelets with a single GP1b-vWF bond:
+  \begin{enumerate}
+  \item \inta{} type, which features an initial latent phase followed
+    by a high spike with a quick decay, and 
+  \item \intb{} type, which features fluctuating sinals around the
+    baseline or gradually increasing signals to an intermediate level
+    followed by a gradual decay to baseline. 
+  \end{enumerate}
+\item MSD unfolding is required to trigger \inta{}-type calcium
+  signaling. It has also been found that constant force at an optimum
+  level triggers maximum Ca$^{++}$ release, no transient force.
+\item Patients with vWD have increased bleeding relative to
+  controls. This provides a possible explanation for that phenotype.
+  In vWD, the GP1b-A1 bond is converted to a slip bond, therefore the
+  bond lifetime is relatively shorter under force, and maximum
+  Ca$^{++}$ release cannot be triggered.
+\item In summary, the 4 steps of mechanosensing in the vWF-GP1b system
+  are as follows:
+  \begin{enumerate}
+  \item Mechanopresentation: vWF undergoes local and global
+    conformational changes in response to force resulting in increased
+    binding affinity to GP1b.
+  \item Mechanoreception: LRRD binds to the vWF-A1 region. This domain
+    can then unfold under force, stabilizing the bond and increasing
+    its lifetime.
+  \item Mechanotransmission: Force propagates from the LRRD along the
+    MP stalk, inducing unfolding of MSD.
+  \item Mechanotransduction: Exposure of the Trigger sequence within
+    the MSD and association of 14-3-3{\textzeta} to GP1b allows the
+    mechanical signal to be converted into a chemical one.
+  \item GP1b may represent a more general class of
+    mechanoreceptors. For example, Notch receptors (involved in
+    cell-cell communication) form catch-slip bonds with their ligands,
+    they transmit mechanical signals along a polypeptide sequence, and
+    force induces unfolding of a juxtamembrane MSD, similar to GP1b.
+  \end{enumerate}
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Integrin-Mediated Cell Adhesion and Mechanosensing} 
+
+\begin{itemize}
+\item Integrins are involved in cellular processes involving adhesion,
+  spreading migration, proliferation, and differentiation. They have a
+  long-known role in force transmission from the ECM across the cell
+  membrane. 
+\item Integrins are heterodimers comprised an \inta{} subunit and an
+  \intb{} subunit. Each of these subunits has a large head, a long
+  leg, a single pass TMD (transmembrane domain), and a short CT
+  (cytoplasmic tail). The heads and upper legs of the two subunits
+  connect to form the headpiece.
+\item Resting integrins have a bent conformation with a closed
+  headpiece. When activated, a series of conformational changes happen
+  resulting in extension of the headpiece.
+\item In inside-out signaling, intracellular activation signals can
+  trigger the integrin to adopt an open conformation. Specifically,
+  talin, kindlin, and other adaptors bind to the \intb{}CT to induce a
+  conformational change. 
+\item These steps can also run in reverse in outside-in
+  signaling. They analyze outside-in signaling in their 4 step
+  framework. 
+\item The ECM is a major mechanical environment that is sensed by many
+  integrins. Stiffness of the ECM can affect cell functions.
+\item Cells can also modify the ECM as a response of
+  mechanosensing. For example, fibrin networks stiffen under
+  deformation. 
+\item Several integrins can form catch-slip bonds (though not
+  \inta{IIb}\intb{3}) 
+\item Integrins can exist in 3 different global conformations:
+  \begin{enumerate}
+  \item bent with a closed headpiece, 
+  \item extended with a closed headpiece, and 
+  \item extended with an open headpiece.
+  \end{enumerate}
+\item Integrin conformation can regulate force transmission across the
+  cell membrane, and force also affects integrin conformation. Tension
+  increases the frequency of unbending, and decreases the frequency of
+  bending. 
+\item Structural analysis and MD simulations suggest a ``cytoskeletal
+  force model,'' where lateral pulling due to retrograde actin flow
+  could pull apart the \inta{} and \intb{} tails to stabilize the
+  extended-open conformation.
+\item Integrin binding affinity and conformation are closely
+  related. The bent conformation has a low affinity for the integrin's
+  ligand, and upon activation the hybrid domain swings out, opening
+  the headpiece and allowing for high-affinity binding. 
+\item Opening of the integrin headpiece is allosterically associated
+  with ectodomain extension. However, locking the integrin headpiece
+  in a closed position suppresses high-affinity binding, independent
+  of whether the ectodomain is bent or extended.
+\item Many studies support this model, however some evidence
+  contradicts it. For example, a high-affinity bent conformation in
+  \intb{2} integrins has been found, implying that ectodomain
+  extension is not necessarily required for integrin activation.
+\item Given the relationship between integrin conformation, binding
+  affinity, and force, there may be a regulatory feedback loop in the
+  mechanoreception and mechanotransmission steps of integrin
+  signaling.
+\item Mechanotransduction involves the recruitment and phosphorylation
+  of kinases. Two examples:
+  \begin{enumerate}
+  \item FAK (focal adhesion kinase) is phosphorylated by integrin
+    signaling and regulates Rho-family GTPase activation, which
+    mediates cell migration.
+  \item SFKs (Src family of tyrosine kinases) are phosphorylated
+    downstream of integrin activation, and contribute to the formation
+    of integrin-mediated firm adhesion.
+  \end{enumerate}
+\item It was previously thought that clustering of integrins was
+  required for induction of these signals, but more recent studies
+  have found that single integrins can produce these signals as well.
+\item They provide three models of single-integrin
+  mechanotransduction:
+  \begin{enumerate}
+  \item \cite{Zhu2008b} found that a combination of lateral and
+    tensile forces on the \intb{} leg of an extended integrin causes
+    headpiece opening. Therefore it is possible that a pulling force
+    on an integrin which is out of line with its cytoplasmic anchor
+    could cause \inta{}\intb{} separation, which may then open up
+    binding sites on the \intb{} CT.
+  \item Talin binding to the integrin \intb{} CT is the final step of
+    integrin activation. The talin head associates with the CT, and
+    its tail associates with actin, and the sequences in between are
+    susceptible to conformational change under pulling force. In
+    outside-in signaling, force that is transmitted through the
+    \intb{} CT can unfold the attached talin, exposing binding sites
+    for vinculin. It has been found that integrin-ligand engagement on
+    a soft substrate fails to extend talin, but on stiff substrates
+    talin is able to unfold before ligand unbinding.
+  \item Other intracellular molecules may change conformation or
+    function when force is propagated to the cell interior. For
+    example, vinculin unfolds to expose hidden motifs, Src is
+    activated, myosin translocates on actin, as well as other
+    responses. Vinculin and Src are important in focal adhesion
+    maturation, and myosin translocation is important for cell
+    deformation. 
+  \end{enumerate}
+\item Organized into the 4-step model, integrin mechanosensing looks
+  like this:
+  \begin{enumerate}
+  \item Mechanopresentation: the integrin headpiece binds to its
+    ligand, and force is applied to the bond.
+  \item Mechanoreception: the ligand binding site recieves the ligand
+    together with force, and binding kinetics respond accordingly. 
+  \item Mechanotransmission: force propagates along the integrin, and
+    can unbend the hinge region, and cause hybrid domain swing-out to
+    open the headpiece. Force may propagate onto talin or other
+    cytoplasmic molecules without these integrin conformational
+    changes. 
+  \item Mechanotransduction: head opening results in \inta{}\intb{} CT
+    separation, exposing binding sites for signaling molecules. 
+  \end{enumerate}
+\end{itemize}
+
+%------------------------------------------------
+
+\section{Other Cell Mechanosensing Models}
+
+\begin{itemize}
+\item The mechanotransduction step in any model is important, because
+  it converts mechanical signals into biochemical signals.
+\item This review only addresses monovalent molecular interactions,
+  but multivalent interactions are important as well. In particular,
+  fibrinogen and vWF molecules contain multiple receptor binding
+  sites, and therefore can interact with several receptors at once.
+\item This complicates things. Association and dissociation of
+  complexed bonds follow multistep kinetic mechanisms involving
+  intermediate steps. The force may be distributed unevenly across
+  different receptors. Additionally, overall bond lifetime is probably
+  prolonged, because once a receptor and ligand unbind, they remain in
+  close proximity to each other.
+\end{itemize}
+
+%------------------------------------------------
+
+\section*{Summary}
+
+This paper presents a general 4-step model of mechanosensing, and then
+interprets 3 different mechanosensing systems within this model
+framework. It also summarizes available biophysical probes that allow
+experimentalists to test different aspects of these mechanosensing
+systems. 
+
+%-------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%-------------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography
+                                % title
+
+\bibliography{/Users/andrewwork/thesis/library.bib} % Input your
+                                % bibliography file 
+
+%-------------------------------------------------------------------------
+
+\end{document}

@@ -1,0 +1,184 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+letterpaper, % Alternatively letterpaper for US letter
+twocolumn, % Alternatively onecolumn
+landscape % Alternatively portrait
+]{article}
+
+\usepackage{amsmath}
+
+
+\input{structure.tex} % Input the file specifying the document layout
+                      % and structure
+\newcommand{\kom}{k_\textit{off, mut}}
+\newcommand{\kow}{k_\textit{off, wt}}
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\articletitle{Alterations in the intrinsic properties of the
+  GPIb$\alpha$-vWF tether bond define the kinetics of the
+  platelet-type von Willebrand disease mutation, Gly233Val} % The title of the article
+\articlecitation{\cite{doggett03aip}} % The BibTeX citation key from your bibliography
+
+\datenotesstarted{March 28, 2018} % The date when these notes were first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes were lasted updated (automatically the current date)
+
+\docauthor{Andrew Watson} % Your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%----------------------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE NOTES
+%----------------------------------------------------------------------------------------
+
+\section{Introduction} 
+
+In their previous paper, Doggett et al compared the kinetic properties
+of the GP1b-vWF bond with wild type vWF and with 2B mutated vWF
+\cite{doggett02slk}. 
+In this paper, they study adhesion of platelets donated from patients
+with Platelet-type von Willebrand disease (PT-vWD). These patients are
+heterozygous for a mutation in the GP1b receptors, therefore theirpa
+platelets have both wild-type and mutant GP1b receptors. The authors
+developed three hypothetical models of platelet binding to account for
+this heterogeneous population of GP1b:
+\begin{enumerate}
+\item All tethering events are mediated by a single mutant GP1b-vWF
+  bond. \label{item:model1}
+\item All tethering events are mediated by a single GP1b-vWF bond,
+  which can either be wild-type or mutant. \label{item:model2}
+\item Tethering can be mediated by multiple GP1b-vWF bonds of either
+  type. \label{item:model3}
+\end{enumerate}
+
+%------------------------------------------------
+
+\section{Models} 
+
+In Model \ref{item:model1}, the pause time represents the length of
+time it takes for a single mutant GP1b and vWF to dissociate. Assume
+dissociation is a 1st order reaction with rate $k_\textit{off,
+  mut}$. Then the pause times are exponentially distributed with
+$\langle t \rangle = 1/\kom$ (i.e. $P(t) = \kom \exp(-\kom t)$). For
+this model, the statistical estimate of $\kom$ is simply $\kom =
+1/\langle t \rangle$. 
+
+For Model \ref{item:model2}, a fraction $q$ of GP1b-vWF bonds are with
+wild-type GP1b and $1-q$ of GP1b-vWF bonds are with mutant GP1b. The
+pause time represents the length of time it takes one of these bonds
+to dissociate, and if we assume first-order kinetics for both of these
+bonds, then the pause time distribution is given by $P(t) = q\kow
+\exp(-\kow t) + (1-q) \kom \exp(-\kom t)$. Aside: the parameter $q$ depends
+(not explicitly) on the $k_\textit{on}$ rates of both receptors, and
+their relative levels of expression. They take $\kow = 3.5
+\exp\left(\frac{\sigma F_b}{k T}\right)$ from 
+\cite{doggett02slk}. 
+Then to estimate $\kom$, they solved 
+\begin{equation*}
+  \sum{i=1}^N \frac{(1-q)\exp(-\kom t_i)(1 - \kom t_i)}{q \kow
+    \exp(-\kow t_i) + (1-q) \kom \exp(-\kom t_i)} = 0.
+\end{equation*}
+Values of $q$ were sampled over the range of possible values ($0 \le q
+\le 1$) and a value of $\kom$ was calculated for each value of
+$q$. Then they selected the $(q, \kom)$ pair that gave the best fit to
+the data.
+
+For Model \ref{item:model3}, multiple bonds of either type can
+form. In this case, the distribution of pause times doesn't have a
+simple expression, so they used MC simulations for many different $(q,
+\kom)$ pairs and selected the one with the best fit. 
+
+As in \cite{doggett02slk},
+the simulation starts with a single GP1b-vWF bond. The GP1b in this
+bond is wild-type with probability $q$ and mutant with probability
+$1-q$. Then 4 (or 5) things can happen in a time interval $dt$:
+\begin{enumerate}
+\item A WT GP1b-vWF bond can break ($P_1 dt = \kow n_{wt} dt$),
+\item A mutant GP1b-vWF bond can break ($P_2 dt = \kom n_{mut} dt$),
+\item A WT GP1b-vWF bond can form ($P_3 dt = k_\textit{on, wt} X_{A1}
+  X_{wt} dt$),
+\item A mutant GP1b-vWF bond can form ($P_4 dt = k_\textit{on, mut}
+  X_{A1} X_{mut} dt$),
+\item if there are no bonds, the bead can leave ($P_5 dt = \gamma_w
+  \delta_{n, 0} dt$). It isn't clear if this is part of their
+  simulation, but it is includeded in their previous paper.
+\end{enumerate}
+
+%------------------------------------------------
+
+\section{Results Overview}
+
+Similar to their previous paper, they collected data on platelet
+accumulation, translocation velocity, frequency of bead thethering,
+and pause times at variable wall shear rates. They estimated $\kom$
+for each shear rate based on Model \ref{item:model1}, and then
+estimated $k_\textit{off}^0$ and $\sigma$, the parameters in the Bell
+model:
+\begin{equation*}
+  k_\textit{off}(F) = k_\textit{off}^0 \exp\left(\frac{\sigma F}{kT}\right).
+\end{equation*}
+
+In comparing their three hypothetical models, they found that Model
+\ref{item:model1} was most consistent with the experimental
+data. Finally they compared the kinetic parameters of the GP1b-vWF
+bond in 2B vWD with PT vWD and found no significant difference between
+these two bonds.
+
+%------------------------------------------------
+
+\section*{Summary}
+
+This paper extends the analysis developed in \cite{doggett02slk}
+to the case where there are two different receptors in a
+platelet. While I'm not so interested in the biological conclusions of
+this paper, this framework may be useful in modeling platelet priming
+by agonists that act through multiple receptors.
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography title
+
+\bibliography{sample} % Input your bibliography file
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

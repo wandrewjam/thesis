@@ -1,0 +1,123 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+letterpaper, % Alternatively letterpaper for US letter
+twocolumn, % Alternatively onecolumn
+landscape % Alternatively portrait
+]{article}
+
+\input{structure.tex} % Input the file specifying the document layout and structure
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\articletitle{Assessing transient and persistent pain in animals} % The title of the article
+\articlecitation{\cite{dubner1999assessing}} % The BibTeX citation key from your bibliography
+
+\datenotesstarted{March 28, 2018} % The date when these notes were first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes were lasted updated (automatically the current date)
+
+\docauthor{Andrew Watson} % Your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%----------------------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE NOTES
+%----------------------------------------------------------------------------------------
+
+\section*{Introduction} % Unnumbered section
+
+Leukocytes use selectins to bind to sites of injury or inflammation,
+and have an analogous role to GP1b in platelets. Rolling of leukocytes
+is caused by rapid formation and breakage of selectin-glycoprotein
+bonds and is important for firm adhesion (which requires the
+activation of integrins). Estimates of typical dissociation rates of
+selectins range from \textasciitilde 0.7 s$^{-1}$ to more than 10
+s$^{-1}$. The authors expected to find similar rates for GP1b. 
+
+However, previous estimates of $k_\tn{off}$ for GP1b were much lower:
+0.0038 s$^{-1}$. These estimates were based on equilibrium binding of
+GP1b. The authors' goal was to estimate the off-rate of GP1b-A1 bonds
+using a kinetic analysis of platelets in flow.
+
+%------------------------------------------------
+
+\section{Results Overview}
+
+First they confirm that platelets rapidly bind to injured endothelium
+and translocate in vivo. They found that platelet-vessel wall
+interaction times were less than 1 second. They also observed
+translocating platelets, and found only a few firm adhesions ($<
+15\%$).
+
+Next they looked at the effects of varying wall shear rate. Platelets
+transiently interacted with wild-type vWF above wall shear stresses of 0.73
+dyn/cm$^2$ (73 s$^{-1}$ wall shear rate). The vWF with type 2B
+mutation allowed transient binding at any shear rate, and there was no
+apparent dependence on the shear rate. They found that when the shear
+rate dropped below the threshold necessary to support transient
+adhesions, platelets were released from the wall in less than 1 s, and
+platelets began binding again almost immediately after the
+above-threshold shear rate was established. 
+%------------------------------------------------
+
+\section{Methodology Overview} % Numbered section
+
+%------------------------------------------------
+
+\section{Discussion/Conclusions Overview}
+
+Donec ultrices odio in rhoncus rutrum. Nunc tristique venenatis nisl in aliquam. Aenean vulputate nisl quis nibh dapibus cursus. Suspendisse ornare mauris lorem, sit amet gravida massa luctus ac. Nullam facilisis sodales erat in porttitor. Curabitur vitae leo tellus. Pellentesque fermentum, lorem id tempus blandit, massa quam condimentum dolor, et vestibulum mi eros sit amet orci. Quisque velit quam, ullamcorper eu pretium porttitor, scelerisque sit amet odio. Suspendisse quis tincidunt velit. 
+
+%------------------------------------------------
+
+\section*{Article Evaluation}
+
+I found their approach of subjecting helpless animals to long-term pain stimuli and monitoring depressive behaviours afterwards both novel and interesting.
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography title
+
+\bibliography{sample} % Input your bibliography file
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
