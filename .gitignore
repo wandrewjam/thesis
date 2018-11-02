@@ -153,6 +153,7 @@ dmypy.json
 *.cb
 *.cb2
 .*.lb
+*.rel
 
 ## Intermediate documents:
 *.dvi
