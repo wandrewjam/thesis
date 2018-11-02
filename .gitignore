@@ -5,15 +5,20 @@
 # Documents
 *.pdf
 *.pages
+*.numbers
 *.DS_Store
 *.idea
+*.png
+*.tiff
 library.bib
+ss*.txt
 
 # Folders
 literature_repository/*
 rolling-model/write-up/*
 rolling-model/data/*
 rolling-model/plots/*
+_data/*
 
 
 # Copied from github/gitignore/Python.gitignore
