@@ -286,113 +286,115 @@ def pde_reactions(init=None, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime
     return z_mesh, th_mesh, m_mesh, t
 
 
-trials = 100
-fix_master_list = []
-var_master_list = []
-t_list = []
+if __name__ == '__main__':
+    trials = int(input('Number of trials: '))
+    fix_master_list = []
+    var_master_list = []
+    t_list = []
 
-# This code works for both, on-only cases, discrete. It 'seems' to work for both on and off reactions as well
-# It also works for the continuous z case, on-only both saturation cases. The breaking seems to be wrong in both cases. Why???
+    # This code works for both, on-only cases, discrete. It 'seems' to work for both on and off reactions as well
+    # It also works for the continuous z case, on-only both saturation cases. The breaking seems to be wrong in both cases. Why???
 
-# This seems to work for the variable time-step algo for on/off with saturation, but not the fixed time-step. (Both discrete and continuous z cases)
-# Parameters
-delta = 3
-T = 2
-init = None
-sat = True
-binding = 'both'
-M, N = 128, 128
-time_steps = 1000
-bond_max = 10
-L = 2.5
-ztype = 'cont_exact'
-nu = np.pi/N
+    # This seems to work for the variable time-step algo for on/off with saturation, but not the fixed time-step. (Both discrete and continuous z cases)
+    # Parameters
+    delta = 3
+    T = 1
+    init = None
+    sat = True
+    binding = 'both'
+    M = int(input('M: '))
+    N = int(input('N: '))
+    time_steps = int(input('time steps: '))
+    bond_max = 10
+    L = 2.5
+    ztype = 'cont_exact'
+    nu = np.pi/N
 
-for i in range(trials):
-    start = timer()
-    bond_list, ts = stochastic_reactions(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, time_steps=time_steps,
-                                         delta=delta, saturation=sat, binding=binding, ztype=ztype)
-    fix_master_list.append(bond_list)
-    end = timer()
-    print('{:d} of {:d} fixed time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
+    for i in range(trials):
+        start = timer()
+        bond_list, ts = stochastic_reactions(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, time_steps=time_steps,
+                                             delta=delta, saturation=sat, binding=binding, ztype=ztype)
+        fix_master_list.append(bond_list)
+        end = timer()
+        print('{:d} of {:d} fixed time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
 
-for i in range(trials):
-    start = timer()
-    bond_list, ts = ssa_reactions(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, delta=delta, saturation=sat,
-                                  binding=binding, ztype=ztype)
-    t_list.append(ts)
-    # ts = ssa_reactions1(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, delta=delta, saturation=sat, binding=binding)
-    # t_list1.append(ts)
-    var_master_list.append(bond_list)
-    end = timer()
-    print('{:d} of {:d} variable time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
-z_mesh, th_mesh, m_mesh, tp = pde_reactions(init=init, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta,
-                                            saturation=sat, binding=binding)
+    for i in range(trials):
+        start = timer()
+        bond_list, ts = ssa_reactions(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, delta=delta, saturation=sat,
+                                      binding=binding, ztype=ztype)
+        t_list.append(ts)
+        # ts = ssa_reactions1(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, delta=delta, saturation=sat, binding=binding)
+        # t_list1.append(ts)
+        var_master_list.append(bond_list)
+        end = timer()
+        print('{:d} of {:d} variable time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
+    z_mesh, th_mesh, m_mesh, tp = pde_reactions(init=init, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta,
+                                                saturation=sat, binding=binding)
 
-fix_sto_count = np.zeros(shape=(trials, tp.shape[0]))
-var_sto_count = np.zeros(shape=(trials, tp.shape[0]))
-# var_sto_count1 = np.zeros(shape=(trials, tp.shape[0]))
+    fix_sto_count = np.zeros(shape=(trials, tp.shape[0]))
+    var_sto_count = np.zeros(shape=(trials, tp.shape[0]))
+    # var_sto_count1 = np.zeros(shape=(trials, tp.shape[0]))
 
-for i in range(trials):
-    for j in range(len(fix_master_list[i])):
-        fix_sto_count[i, j] = fix_master_list[i][j].shape[0]
+    for i in range(trials):
+        for j in range(len(fix_master_list[i])):
+            fix_sto_count[i, j] = fix_master_list[i][j].shape[0]
 
-for i in range(trials):
-    temp_sto_count = np.zeros(shape=len(var_master_list[i]))
-    for j in range(len(var_master_list[i])):
-        temp_sto_count[j] = var_master_list[i][j].shape[0]
-    var_sto_count[i, :] = temp_sto_count[np.searchsorted(t_list[i], tp, side='right')-1]
+    for i in range(trials):
+        temp_sto_count = np.zeros(shape=len(var_master_list[i]))
+        for j in range(len(var_master_list[i])):
+            temp_sto_count[j] = var_master_list[i][j].shape[0]
+        var_sto_count[i, :] = temp_sto_count[np.searchsorted(t_list[i], tp, side='right')-1]
 
-avg_fix_sto_count = np.mean(fix_sto_count, axis=0)
-std_fix_sto_count = np.std(fix_sto_count, axis=0)
-avg_var_sto_count = np.mean(var_sto_count, axis=0)
-std_var_sto_count = np.std(var_sto_count, axis=0)
+    avg_fix_sto_count = np.mean(fix_sto_count, axis=0)
+    std_fix_sto_count = np.std(fix_sto_count, axis=0)
+    avg_var_sto_count = np.mean(var_sto_count, axis=0)
+    std_var_sto_count = np.std(var_sto_count, axis=0)
 
-pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
+    pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
 
-# Define parameter array and filename, and save the count data
-# The time is included to prevent overwriting an existing file
-par_array = np.array([delta, T, init, sat, binding, M, N, bond_max, L, ztype])
-file_path = './data/sta_rxns/'
-file_name = 'M{0:d}_N{1:d}_ztype{2:s}_binding{3:s}_{4:s}.npz'.format(M, N, ztype, binding, strftime('%y%m%d-%H%M%S'))
-np.savez(file_path+file_name, par_array, fix_sto_count, var_sto_count, pde_count, tp,
-         par_array=par_array, fix_sto_count=fix_sto_count, var_sto_count=var_sto_count, pde_count=pde_count, tp=tp)
-print('Data saved in file {:s}'.format(file_name))
+    # Define parameter array and filename, and save the count data
+    # The time is included to prevent overwriting an existing file
+    par_array = np.array([delta, T, init, sat, binding, M, N, bond_max, L, ztype])
+    file_path = './data/sta_rxns/'
+    file_name = 'M{0:d}_N{1:d}_ztype{2:s}_binding{3:s}_trials{4:d}.npz'.format(M, N, ztype, binding, trials)
+    np.savez_compressed(file_path+file_name, par_array, fix_sto_count, var_sto_count, pde_count, tp,
+             par_array=par_array, fix_sto_count=fix_sto_count, var_sto_count=var_sto_count, pde_count=pde_count, tp=tp)
+    print('Data saved in file {:s}'.format(file_name))
 
-plt.plot(tp, (avg_fix_sto_count*nu/bond_max - pde_count)/pde_count, 'b', label='Fixed Step')
-plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
-                  pde_count)[1:]/pde_count[1:], 'b:',
-         tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
-                  pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
+    plt.plot(tp, (avg_fix_sto_count*nu/bond_max - pde_count)/pde_count, 'b', label='Fixed Step')
+    plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
+                      pde_count)[1:]/pde_count[1:], 'b:',
+             tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
+                      pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
 
-plt.plot(tp[1:], (avg_var_sto_count*nu/bond_max - pde_count)[1:]/pde_count[1:], 'r', label='Variable Step')
-plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max -
-                  pde_count)[1:]/pde_count[1:], 'r:',
-         tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max -
-                  pde_count)[1:]/pde_count[1:], 'r:', linewidth=0.5)
+    plt.plot(tp[1:], (avg_var_sto_count*nu/bond_max - pde_count)[1:]/pde_count[1:], 'r', label='Variable Step')
+    plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max -
+                      pde_count)[1:]/pde_count[1:], 'r:',
+             tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max -
+                      pde_count)[1:]/pde_count[1:], 'r:', linewidth=0.5)
 
-plt.plot(tp, np.zeros(shape=tp.shape), 'k')
-plt.legend()
-if ztype is 'cont_exact' or ztype is 'cont_approx':
-    plt.title('Relative error of the stochastic simulation with continuous z')
-elif ztype is 'discrete':
-    plt.title('Relative error of the stochastic simulation with discrete z')
-plt.show()
+    plt.plot(tp, np.zeros(shape=tp.shape), 'k')
+    plt.legend()
+    if ztype is 'cont_exact' or ztype is 'cont_approx':
+        plt.title('Relative error of the stochastic simulation with continuous z')
+    elif ztype is 'discrete':
+        plt.title('Relative error of the stochastic simulation with discrete z')
+    plt.show()
 
-plt.plot(tp, avg_fix_sto_count*nu/bond_max, 'b', label='Fixed Step')
-plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
-         tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
-         linewidth=0.5)
-plt.plot(tp, avg_var_sto_count*nu/bond_max, 'r', label='Variable Step')
-plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
-         tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
-         linewidth=0.5)
-plt.plot(tp, pde_count, 'k', label='PDE Solution')
+    plt.plot(tp, avg_fix_sto_count*nu/bond_max, 'b', label='Fixed Step')
+    plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
+             tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
+             linewidth=0.5)
+    plt.plot(tp, avg_var_sto_count*nu/bond_max, 'r', label='Variable Step')
+    plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
+             tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
+             linewidth=0.5)
+    plt.plot(tp, pde_count, 'k', label='PDE Solution')
 
-plt.legend()
-if ztype is 'cont_exact' or ztype is 'cont_approx':
-    plt.title('Bond quantities of the stochastic simulations with continuous z')
-elif ztype is 'discrete':
-    plt.title('Bond quantities of the stochastic simulations with discrete z')
-plt.show()
-plt.show()
+    plt.legend()
+    if ztype is 'cont_exact' or ztype is 'cont_approx':
+        plt.title('Bond quantities of the stochastic simulations with continuous z')
+    elif ztype is 'discrete':
+        plt.title('Bond quantities of the stochastic simulations with discrete z')
+    plt.show()
+    plt.show()
