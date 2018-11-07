@@ -112,7 +112,6 @@ def variable_z(theta, init=None, L=2.5, T=0.4, M=100, bond_max=100, d_prime=0.1,
 
     np.random.seed(seed)
     z_vec = np.linspace(-L, L, 2*M+1)[:-1]
-    bond_list = [np.zeros(shape=2*M+2)]
     h = z_vec[1] - z_vec[0]
     z_vec += h/2
 
@@ -242,12 +241,12 @@ def pde_z(theta, init=None, L=2.5, T=.4, M=100, time_steps=1000, d_prime=0.1, et
 
 
 if __name__ == '__main__':
-    trials = int(input('Number of trials: '))
+    trials = int(raw_input('Number of trials: '))
     L = 2.5
-    M = int(input('M: '))
+    M = int(raw_input('M: '))
     theta = 0
     bond_max = 100
-    time_steps = int(input('time steps: '))
+    time_steps = int(raw_input('time steps: '))
     T = 2
     init = None
     binding = 'both'
@@ -257,7 +256,7 @@ if __name__ == '__main__':
 
     plot = raw_input('Do you want to plot results? y or n: ')
     while plot != 'y' and plot != 'n':
-        plot = input('Please enter \'y\' or \'n\'. Do you want to plot results? ')
+        plot = raw_input('Please enter \'y\' or \'n\'. Do you want to plot results? ')
 
     z_vec, m_mesh, tp = pde_z(theta, init=init, T=T, M=M, time_steps=time_steps, delta=delta,
                               saturation=sat, binding=binding)
@@ -317,7 +316,7 @@ if __name__ == '__main__':
                  tp, (fixed_avg - 2*fixed_std/np.sqrt(trials))/bond_max, 'b:', linewidth=.5)
         plt.plot(tp, (var_avg + 2*var_std/np.sqrt(trials))/bond_max, 'b:',
                  tp, (var_avg - 2*var_std/np.sqrt(trials))/bond_max, 'b:', linewidth=.5)
-        plt.plot(tp, pde_count, 'k', label='pde_countinistic')
+        plt.plot(tp, pde_count, 'k', label='Deterministic')
         plt.legend(loc='best')
         plt.title('Bond numbers for each algorithm for a single receptor')
         plt.show()
