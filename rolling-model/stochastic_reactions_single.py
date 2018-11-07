@@ -255,7 +255,7 @@ if __name__ == '__main__':
     ztype = 'cont_exact'
     delta = 3
 
-    plot = input('Do you want to plot results? y or n: ')
+    plot = raw_input('Do you want to plot results? y or n: ')
     while plot != 'y' and plot != 'n':
         plot = input('Please enter \'y\' or \'n\'. Do you want to plot results? ')
 
