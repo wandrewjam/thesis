@@ -242,25 +242,45 @@ def pde_z(theta, init=None, L=2.5, T=.4, M=100, time_steps=1000, d_prime=0.1, et
 
 
 def count_fixed(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
-            delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact', seed=None):
+                delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact', seed=None, **kwargs):
     start = timer()
     master_list, t = fixed_z(theta, init, L, T, M, time_steps, bond_max, d_prime,
                              eta, delta, kap, saturation, binding, ztype, seed)
     count = [master_list[i].shape[0] for i in range(len(master_list))]
     end = timer()
-    print('Completed one fixed run. This run took {:g} seconds.'.format(end-start))
+
+    if 'k' in kwargs and 'trials' in kwargs:
+        print('Completed {:d} of {:d} fixed runs. This run took {:g} seconds.'.format(kwargs['k']+1, kwargs['trials'],
+                                                                                      end-start))
+    elif 'k' in kwargs:
+        print('Completed {:d} fixed runs so far. This run took {:g} seconds.'.format(kwargs['k']+1, end-start))
+    elif 'trials' in kwargs:
+        print('Completed one of {:d} fixed runs. This run took {:g} seconds.'.format(kwargs['trials'], end-start))
+    else:
+        print('Completed one fixed run. This run took {:g} seconds.'.format(end-start))
+
     return np.array(count)
 
 
-def count_variable(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1, delta=3.0, kap=1.0,
-               saturation=True, binding='both', ztype='cont_exact', seed=None):
+def count_variable(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
+                   delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact', seed=None, **kwargs):
     start = timer()
     master_list, t = variable_z(theta, init, L, T, M, bond_max, d_prime, eta,
                                 delta, kap, saturation, binding, ztype, seed)
     t_sample = np.linspace(0, T, num=time_steps+1)
     count = [master_list[i].shape[0] for i in range(len(master_list))]
     end = timer()
-    print('Completed one variable run. This run took {:g} seconds.'.format(end-start))
+
+    if 'k' in kwargs and 'trials' in kwargs:
+        print('Completed {:d} of {:d} variable runs. This run took {:g} seconds.'.format(kwargs['k']+1, kwargs['trials'],
+                                                                                      end-start))
+    elif 'k' in kwargs:
+        print('Completed {:d} variable runs so far. This run took {:g} seconds.'.format(kwargs['k']+1, end-start))
+    elif 'trials' in kwargs:
+        print('Completed one of {:d} variable runs. This run took {:g} seconds.'.format(kwargs['trials'], end-start))
+    else:
+        print('Completed one variable run. This run took {:g} seconds.'.format(end-start))
+
     return np.array(count)[np.searchsorted(t, t_sample, side='right')-1]
 
 
@@ -289,13 +309,15 @@ if __name__ == '__main__':
     fixed_result = [pool.apply_async(count_fixed, args=(theta, ), kwds={'init': init, 'T': T, 'M': M,
                                                                         'time_steps': time_steps, 'bond_max': bond_max,
                                                                         'delta': delta, 'saturation': sat,
-                                                                        'binding': binding, 'ztype': ztype})
-                    for _ in range(trials)]
+                                                                        'binding': binding, 'ztype': ztype, 'k': k,
+                                                                        'trials': trials})
+                    for k in range(trials)]
     var_result = [pool.apply_async(count_variable, args=(theta, ), kwds={'init': init, 'T': T, 'M': M,
                                                                          'time_steps': time_steps, 'bond_max': bond_max,
                                                                          'delta': delta, 'saturation': sat,
-                                                                         'binding': binding, 'ztype': ztype})
-                  for _ in range(trials)]
+                                                                         'binding': binding, 'ztype': ztype, 'k': k,
+                                                                         'trials': trials})
+                  for k in range(trials)]
 
     fixed_result = [f.get() for f in fixed_result]
     var_result = [v.get() for v in var_result]
@@ -323,9 +345,11 @@ if __name__ == '__main__':
         plt.plot(tp[1:], (fixed_avg/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed time step')
         plt.plot(tp[1:], (var_avg/bond_max - pde_count)[1:]/pde_count[1:], 'g', label='Variable time step')
         plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))/bond_max - pde_count)[1:]/pde_count[1:], 'b:',
-                 tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))/bond_max - pde_count)[1:]/pde_count[1:], 'b:', linewidth=.5)
+                 tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))/bond_max - pde_count)[1:]/pde_count[1:], 'b:',
+                 linewidth=.5)
         plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))/bond_max - pde_count)[1:]/pde_count[1:], 'g:',
-                 tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))/bond_max - pde_count)[1:]/pde_count[1:], 'g:', linewidth=.5)
+                 tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))/bond_max - pde_count)[1:]/pde_count[1:], 'g:',
+                 linewidth=.5)
         plt.plot(tp, np.zeros(shape=tp.shape), 'k')
         plt.legend(loc='best')
         plt.title('Relative errors for the stochastic algorithms for a single receptor')
