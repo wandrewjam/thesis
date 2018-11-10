@@ -26,7 +26,7 @@ def fixed_z(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100
         # Handle a bad init input
         print('Error: Unknown initial distribution')
         return -1
-    master_list = [bond_list]
+    bond_numbers = [bond_list.shape[0]]
 
     t = np.linspace(0, T, time_steps+1)
     dt = t[1]-t[0]
@@ -104,8 +104,8 @@ def fixed_z(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100
             bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
         # Store the bond list
-        master_list.append(bond_list)
-    return master_list, t
+        bond_numbers.append(bond_list.shape[0])
+    return bond_numbers, t
 
 
 def variable_z(theta, init=None, L=2.5, T=0.4, M=100, bond_max=100, d_prime=0.1, eta=0.1, delta=3.0, kap=1.0,
@@ -124,7 +124,7 @@ def variable_z(theta, init=None, L=2.5, T=0.4, M=100, bond_max=100, d_prime=0.1,
         # Handle a bad init input
         print('Error: Unknown initial distribution')
         return -1
-    master_list = [bond_list]
+    bond_numbers = [bond_list.shape[0]]
 
     t = np.array([0])
 
@@ -207,8 +207,8 @@ def variable_z(theta, init=None, L=2.5, T=0.4, M=100, bond_max=100, d_prime=0.1,
                 bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
         # Store the bond list
-        master_list.append(bond_list)
-    return master_list, t
+        bond_numbers.append(bond_list.shape[0])
+    return bond_numbers, t
 
 
 def pde_z(theta, init=None, L=2.5, T=.4, M=100, time_steps=1000, d_prime=0.1, eta=0.1, delta=3.0,
@@ -219,9 +219,12 @@ def pde_z(theta, init=None, L=2.5, T=.4, M=100, time_steps=1000, d_prime=0.1, et
     t = np.linspace(0, T, time_steps+1)
     dt = t[1]-t[0]
 
-    m_mesh = np.zeros(shape=(2*M+1, time_steps+1))  # Bond densities are initialized to zero
+    m_mesh = np.zeros(shape=2*M+1)  # Bond densities are initialized to zero
+    bond_numbers = np.zeros(shape=time_steps+1)
+
     if init == 'sat':
-        m_mesh[:, :, 0] = 1/(2*L)
+        m_mesh = 1/(2*L)
+        bond_numbers[0] = np.trapz(m_mesh, z_vec)
     elif init is not None:
         # Handle a bad init input
         print('Error: Unknown initial distribution')
@@ -233,20 +236,17 @@ def pde_z(theta, init=None, L=2.5, T=.4, M=100, time_steps=1000, d_prime=0.1, et
     off = binding == 'both' or binding == 'off'
     sat = saturation
     for i in range(time_steps):
-        m_mesh[:, i+1] = (m_mesh[:, i] + on*dt*kap*np.exp(-eta/2*l_matrix**2) *
-                             (1 - sat*np.tile(np.trapz(y=m_mesh[:, i], x=z_vec,
-                                                       axis=0), reps=(2*M+1)))) /\
-                             (1 + off*dt*np.exp(delta*l_matrix))
-
-    return z_vec, m_mesh, t
+        m_mesh = (m_mesh + on*dt*kap*np.exp(-eta/2*l_matrix**2) * (1 - sat*np.tile(
+            np.trapz(y=m_mesh, x=z_vec), reps=(2*M+1)))) / (1 + off*dt*np.exp(delta*l_matrix))
+        bond_numbers[i+1] = np.trapz(m_mesh, z_vec)
+    return z_vec, bond_numbers, t
 
 
 def count_fixed(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
                 delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact', seed=None, **kwargs):
     start = timer()
-    master_list, t = fixed_z(theta, init, L, T, M, time_steps, bond_max, d_prime,
-                             eta, delta, kap, saturation, binding, ztype, seed)
-    count = [master_list[i].shape[0] for i in range(len(master_list))]
+    count, t = fixed_z(theta, init, L, T, M, time_steps, bond_max, d_prime, eta, delta,
+                       kap, saturation, binding, ztype, seed)
     end = timer()
 
     if 'k' in kwargs and 'trials' in kwargs:
@@ -265,10 +265,9 @@ def count_fixed(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max
 def count_variable(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
                    delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact', seed=None, **kwargs):
     start = timer()
-    master_list, t = variable_z(theta, init, L, T, M, bond_max, d_prime, eta,
+    count, t = variable_z(theta, init, L, T, M, bond_max, d_prime, eta,
                                 delta, kap, saturation, binding, ztype, seed)
     t_sample = np.linspace(0, T, num=time_steps+1)
-    count = [master_list[i].shape[0] for i in range(len(master_list))]
     end = timer()
 
     if 'k' in kwargs and 'trials' in kwargs:
@@ -302,8 +301,8 @@ if __name__ == '__main__':
     while plot != 'y' and plot != 'n':
         plot = raw_input('Please enter \'y\' or \'n\'. Do you want to plot results? ')
 
-    z_vec, m_mesh, tp = pde_z(theta, init=init, T=T, M=M, time_steps=time_steps, delta=delta,
-                              saturation=sat, binding=binding)
+    z_vec, pde_count, tp = pde_z(theta, init=init, T=T, M=M, time_steps=time_steps, delta=delta,
+                                 saturation=sat, binding=binding)
 
     pool = mp.Pool(processes=4)
     fixed_result = [pool.apply_async(count_fixed, args=(theta, ), kwds={'init': init, 'T': T, 'M': M,
@@ -329,8 +328,6 @@ if __name__ == '__main__':
     var_avg = np.mean(var_arr, axis=0)
     fixed_std = np.std(fixed_arr, axis=0)
     var_std = np.std(var_arr, axis=0)
-
-    pde_count = np.trapz(m_mesh, z_vec, axis=0)
 
     # Define parameter array and filename, and save the count data
     # The time is included to prevent overwriting an existing file
