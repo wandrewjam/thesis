@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 trials = int(raw_input('trials: '))
-data_path = raw_input('filename: ')
-load_data = np.load('./data/sta_rxns/'+data_path)
+filename = raw_input('filename: ')
+load_data = np.load('./data/sta_rxns/'+filename)
 
 par_array = load_data['par_array']
 fixed_arr = load_data['fixed_array']
