@@ -266,7 +266,7 @@ def count_variable(theta, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_
                    delta=3.0, kap=1.0, saturation=True, binding='both', ztype='cont_exact', seed=None, **kwargs):
     start = timer()
     count, t = variable_z(theta, init, L, T, M, bond_max, d_prime, eta,
-                                delta, kap, saturation, binding, ztype, seed)
+                          delta, kap, saturation, binding, ztype, seed)
     t_sample = np.linspace(0, T, num=time_steps+1)
     end = timer()
 
@@ -333,7 +333,8 @@ if __name__ == '__main__':
     # The time is included to prevent overwriting an existing file
     par_array = np.array([delta, T, init, sat, binding, M, bond_max, trials, L, ztype])
     file_path = './data/sta_rxns/'
-    file_name = 'singlerec_M{0:d}_theta{1:g}_trials{2:d}_{3:s}.npz'.format(M, theta, trials, strftime('%d%m%y'))
+    file_name = 'singlerec_M{0:d}_theta{1:g}_trials{2:d}_ztype{3:s}_{4:s}.npz'.format(M, theta, trials, ztype,
+                                                                                      strftime('%d%m%y'))
     np.savez_compressed(file_path+file_name, par_array, fixed_arr, var_arr, pde_count, tp, par_array=par_array,
                         fixed_array=fixed_arr, var_array=var_arr, pde_count=pde_count, tp=tp)
     print('Data saved in file {:s}'.format(file_name))
