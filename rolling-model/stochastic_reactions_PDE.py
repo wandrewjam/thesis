@@ -1,13 +1,15 @@
+import multiprocessing as mp
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import erf
 from scipy.stats import truncnorm
 from constructA import length, nd_force, nd_torque
 from timeit import default_timer as timer
+from time import strftime
 
 
-def fixed_motion(L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
-                 delta=3.0, kap=1.0, gamma=20.0, saturation=True, binding='both'):
+def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
+                 delta=3.0, kap=1.0, saturation=True, binding='both'):
 
     # Full Model
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
@@ -18,6 +20,9 @@ def fixed_motion(L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1
     t = np.linspace(0, T, time_steps+1)
     dt = t[1]-t[0]
 
+    theta_arr = np.zeros(shape=(2*N, time_steps+1))
+    theta_arr[:, 0] = th_vec
+
     def coeffs_and_bounds(bins):
         coeffs = kap*np.exp(-eta/2*(1 - np.cos(bins) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
             erf(np.sqrt(eta/2)*(np.sin(bins) + L)) - erf(np.sqrt(eta/2)*(np.sin(bins) - L))
@@ -27,10 +32,8 @@ def fixed_motion(L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1
         b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
-    om = gamma
-    v = (1 + d_prime)*gamma
-    on = (binding is 'both') or (binding is 'on')
-    off = (binding is 'both') or (binding is 'on')
+    on = (binding == 'both') or (binding == 'on')
+    off = (binding == 'both') or (binding == 'on')
 
     master_list = [bond_list]
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
@@ -39,6 +42,7 @@ def fixed_motion(L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1
         bond_list[:, 0] += -dt*v  # Update z positions
         th_vec += -dt*om  # Update theta bin positions
         th_vec = ((th_vec + np.pi) % (2*np.pi)) - np.pi  # Make sure bin positions are in [-pi, pi)
+        theta_arr[:, i+1] = th_vec
 
         # Generate list of breaking indices
         break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] < -np.pi/2)
@@ -89,11 +93,12 @@ def fixed_motion(L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1
     return master_list, t, forces, torques
 
 
-def variable_motion(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
-                    delta=3.0, kap=1.0, gamma=20, saturation=True, binding='both'):
+def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
+                    delta=3.0, kap=1.0, saturation=True, binding='both'):
 
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
+    theta_list = [th_vec]
 
     bond_list = np.empty(shape=(0, 2))
 
@@ -106,10 +111,8 @@ def variable_motion(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
-    om = gamma
-    v = (1 + d_prime)*gamma
-    on = (binding is 'both') or (binding is 'on')
-    off = (binding is 'both') or (binding is 'on')
+    on = (binding == 'both') or (binding == 'on')
+    off = (binding == 'both') or (binding == 'on')
 
     master_list = [bond_list]
     t = np.array([0])
@@ -143,6 +146,7 @@ def variable_motion(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         bond_list[:, 0] += -dt*v  # Update z positions
         th_vec += -dt*om  # Update theta bin positions
         th_vec = ((th_vec + np.pi) % (2*np.pi)) - np.pi  # Make sure bin positions are in [-pi, pi)
+        theta_list.append(th_vec)
 
         t = np.append(t, t[-1]+dt)
 
@@ -169,8 +173,8 @@ def variable_motion(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
     return master_list, t, forces, torques
 
 
-def pde_motion(L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
-               delta=3.0, kap=1.0, gamma=20.0, saturation=True, binding='both'):
+def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
+               delta=3.0, kap=1.0, saturation=True, binding='both'):
     # Numerical Parameters
     z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
                                   np.linspace(-np.pi/2, np.pi/2, N+1),
@@ -181,10 +185,8 @@ def pde_motion(L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
     nu = th_mesh[0, 1] - th_mesh[0, 0]
     dt = t[1]-t[0]
 
-    om = gamma
-    v = (1 + d_prime)*gamma
-    on = (binding is 'both') or (binding is 'on')
-    off = (binding is 'both') or (binding is 'on')
+    on = (binding == 'both') or (binding == 'on')
+    off = (binding == 'both') or (binding == 'on')
 
     m_mesh = np.zeros(shape=(2*M+1, N+1, time_steps+1))  # Bond densities are initialized to zero
     l_matrix = length(z_mesh, th_mesh, d_prime)
@@ -210,140 +212,190 @@ def pde_motion(L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
     return z_mesh, th_mesh, m_mesh, t, forces, torques
 
 
-trials = 100
-fix_master_list = []
-var_master_list = []
-t_list = []
-
-# Parameters
-gamma = 18
-delta = 3
-T = 0.4
-init = None
-sat = True
-binding = 'both'
-M, N = 128, 128
-time_steps = 1000
-bond_max = 10
-L = 2.5
-nu = np.pi/N
-
-f_forces, f_torques = np.zeros(shape=(trials, time_steps+1)), np.zeros(shape=(trials, time_steps+1))
-v_forces, v_torques = np.zeros(shape=(trials, time_steps+1)), np.zeros(shape=(trials, time_steps+1))
-
-z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = pde_motion(L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta,
-                                                              gamma=gamma, saturation=sat, binding=binding)
-
-for i in range(trials):
+def count_fixed(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1, delta=3.0,
+                kap=1.0, saturation=True, binding='both', **kwargs):
     start = timer()
-    bond_list, ts, f_forces[i, :], f_torques[i, :] = fixed_motion(L=L, T=T, N=N, time_steps=time_steps,
-                                                                  bond_max=bond_max, delta=delta, gamma=gamma,
-                                                                  saturation=sat, binding=binding)
-    fix_master_list.append(bond_list)
+    master_list, t, forces, torques = fixed_motion(v, om, L, T, N, time_steps, bond_max, d_prime, eta,
+                                                                delta, kap, saturation, binding)
+    count = [master_list[i].shape[0] for i in range(len(master_list))]
     end = timer()
-    print('{:d} of {:d} fixed time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
 
-for i in range(trials):
+    if 'k' in kwargs and 'trials' in kwargs:
+        print('Completed {:d} of {:d} fixed runs. This run took {:g} seconds.'.format(kwargs['k']+1, kwargs['trials'],
+                                                                                      end-start))
+    elif 'k' in kwargs:
+        print('Completed {:d} fixed runs so far. This run took {:g} seconds.'.format(kwargs['k']+1, end-start))
+    elif 'trials' in kwargs:
+        print('Completed one of {:d} fixed runs. This run took {:g} seconds.'.format(kwargs['trials'], end-start))
+    else:
+        print('Completed one fixed run. This run took {:g} seconds.'.format(end-start))
+
+    return count, forces, torques
+
+
+def count_variable(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=.1, eta=.1,
+                   delta=3.0, kap=1.0, saturation=True, binding='both', **kwargs):
     start = timer()
-    bond_list, ts, forces, torques = variable_motion(L=L, T=T, N=N, bond_max=bond_max, delta=delta, gamma=gamma,
-                                                     saturation=sat, binding=binding)
-    t_list.append(ts)
-    # ts = ssa_reactions1(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, delta=delta, saturation=sat, binding=binding)
-    # t_list1.append(ts)
-    v_forces[i, :] = forces[np.searchsorted(ts, tp, side='right')-1]
-    v_torques[i, :] = torques[np.searchsorted(ts, tp, side='right')-1]
-    var_master_list.append(bond_list)
-
+    master_list, t, forces, torques = variable_motion(v, om, L, T, N, bond_max, d_prime, eta,
+                                                      delta, kap, saturation, binding)
+    t_sample = np.linspace(0, T, num=time_steps+1)
+    count = [master_list[i].shape[0] for i in range(len(master_list))]
     end = timer()
-    print('{:d} of {:d} variable time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
 
-fix_sto_count = np.zeros(shape=(trials, tp.shape[0]))
-var_sto_count = np.zeros(shape=(trials, tp.shape[0]))
-var_sto_count1 = np.zeros(shape=(trials, tp.shape[0]))
+    if 'k' in kwargs and 'trials' in kwargs:
+        print('Completed {:d} of {:d} variable runs. This run took {:g} seconds.'.format(kwargs['k']+1, kwargs['trials'],
+                                                                                      end-start))
+    elif 'k' in kwargs:
+        print('Completed {:d} variable runs so far. This run took {:g} seconds.'.format(kwargs['k']+1, end-start))
+    elif 'trials' in kwargs:
+        print('Completed one of {:d} variable runs. This run took {:g} seconds.'.format(kwargs['trials'], end-start))
+    else:
+        print('Completed one variable run. This run took {:g} seconds.'.format(end-start))
 
-for i in range(trials):
-    for j in range(len(fix_master_list[i])):
-        fix_sto_count[i, j] = fix_master_list[i][j].shape[0]
+    indices = np.searchsorted(t, t_sample, side='right') - 1
+    return np.array(count)[indices], np.array(forces)[indices], np.array(torques)[indices]
 
-for i in range(trials):
-    temp_sto_count = np.zeros(shape=len(var_master_list[i]))
-    for j in range(len(var_master_list[i])):
-        temp_sto_count[j] = var_master_list[i][j].shape[0]
-    var_sto_count[i, :] = temp_sto_count[np.searchsorted(t_list[i], tp, side='right')-1]
 
-avg_fix_sto_count = np.mean(fix_sto_count, axis=0)
-std_fix_sto_count = np.std(fix_sto_count, axis=0)
-avg_var_sto_count = np.mean(var_sto_count, axis=0)
-std_var_sto_count = np.std(var_sto_count, axis=0)
+if __name__ == '__main__':
+    trials = int(raw_input('Number of trials: '))
+    fix_master_list = []
+    var_master_list = []
+    t_list = []
 
-avg_fix_sto_force = np.mean(f_forces, axis=0)
-std_fix_sto_force = np.std(f_forces, axis=0)
-avg_var_sto_force = np.mean(v_forces, axis=0)
-std_var_sto_force = np.std(v_forces, axis=0)
+    # Parameters
+    M = int(raw_input('M: '))
+    N = int(raw_input('N: '))
+    v = float(raw_input('v: '))
+    om = float(raw_input('om: '))
+    delta = 3
+    T = 1
+    init = None
+    sat = True
+    binding = 'both'
+    time_steps = int(raw_input('time steps: '))
+    bond_max = 10
+    L = 2.5
+    nu = np.pi/N
 
-avg_fix_sto_torqu = np.mean(f_torques, axis=0)
-std_fix_sto_torqu = np.std(f_torques, axis=0)
-avg_var_sto_torqu = np.mean(v_torques, axis=0)
-std_var_sto_torqu = np.std(v_torques, axis=0)
+    f_forces, f_torques = np.zeros(shape=(trials, time_steps+1)), np.zeros(shape=(trials, time_steps+1))
+    v_forces, v_torques = np.zeros(shape=(trials, time_steps+1)), np.zeros(shape=(trials, time_steps+1))
 
-pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
+    z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
+                                                                  delta=delta, saturation=sat, binding=binding)
 
-plt.plot(tp[1:], (avg_fix_sto_count*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
-plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
-                  pde_count)[1:]/pde_count[1:], 'b:',
-         tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max -
-                  pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
+    pool = mp.Pool(processes=4)
+    fixed_result = [pool.apply_async(count_fixed, args=(v, om),
+                                      kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'bond_max': bond_max,
+                                            'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
+                                            'trials': trials}
+                                      ) for k in range(trials)]
+    var_result = [pool.apply_async(count_variable, args=(v, om),
+                                    kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'bond_max': bond_max,
+                                          'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
+                                          'trials': trials}
+                                    ) for k in range(trials)]
 
-plt.plot(tp[1:], (avg_var_sto_count*nu/bond_max - pde_count)[1:]/pde_count[1:], 'r', label='Variable Step')
-plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max -
-                  pde_count)[1:]/pde_count[1:], 'r:',
-         tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max -
-                  pde_count)[1:]/pde_count[1:], 'r:', linewidth=0.5)
+    fixed_forces = [f.get()[1] for f in fixed_result]  # Get the forces
+    var_forces = [var.get()[1] for var in var_result]
 
-plt.plot(tp, np.zeros(shape=tp.shape), 'k')
-plt.legend()
-plt.title('Relative error of the stochastic simulation with fixed motion')
-plt.show()
+    fixed_torques = [f.get()[2] for f in fixed_result]  # Get the torques
+    var_torques = [var.get()[2] for var in var_result]
 
-plt.plot(tp, avg_fix_sto_count*nu/bond_max, 'b', label='Fixed Step')
-plt.plot(tp[1:], ((avg_fix_sto_count + 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
-         tp[1:], ((avg_fix_sto_count - 2*std_fix_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
-         linewidth=0.5)
-plt.plot(tp, avg_var_sto_count*nu/bond_max, 'r', label='Variable Step')
-plt.plot(tp[1:], ((avg_var_sto_count + 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
-         tp[1:], ((avg_var_sto_count - 2*std_var_sto_count/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
-         linewidth=0.5)
-plt.plot(tp, pde_count, 'k', label='PDE Solution')
-plt.legend()
-plt.title('Bond quantities of the stochastic simulations with fixed motion')
-plt.show()
+    fixed_result = [f.get()[0] for f in fixed_result]  # Get the bond counts
+    var_result = [var.get()[0] for var in var_result]
 
-ind = 100
-plt.plot(tp[ind:], (avg_fix_sto_force - d_forces)[ind:]/d_forces[ind:], 'b', label='Fixed Step')
-plt.plot(tp[ind:], ((avg_fix_sto_force + 2*std_fix_sto_force/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
-         tp[ind:], ((avg_fix_sto_force - 2*std_fix_sto_force/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
-         linewidth=0.5)
+    fixed_arr = np.vstack(fixed_result)
+    var_arr = np.vstack(var_result)
 
-plt.plot(tp[ind:], (avg_var_sto_force - d_forces)[ind:]/d_forces[ind:], 'r', label='Variable Step')
-plt.plot(tp[ind:], ((avg_var_sto_force + 2*std_var_sto_force/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'r:',
-         tp[ind:], ((avg_var_sto_force - 2*std_var_sto_force/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'r:',
-         linewidth=0.5)
+    ffo_arr = np.vstack(fixed_forces)
+    vfo_arr = np.vstack(var_forces)
 
-plt.plot(tp, np.zeros(shape=tp.shape), 'k')
-plt.legend()
-plt.title('Relative error of the forces of the stochastic simulation with fixed motion')
-plt.show()
+    fto_arr = np.vstack(fixed_torques)
+    vto_arr = np.vstack(var_torques)
 
-plt.plot(tp, avg_fix_sto_force, 'b', label='Fixed Step')
-plt.plot(tp, (avg_fix_sto_force + 2*std_fix_sto_force/np.sqrt(trials)), 'b:',
-         tp, (avg_fix_sto_force - 2*std_fix_sto_force/np.sqrt(trials)), 'b:', linewidth=0.5)
+    fixed_avg = np.mean(fixed_arr, axis=0)
+    fixed_std = np.std(fixed_arr, axis=0)
+    var_avg = np.mean(var_arr, axis=0)
+    var_std = np.std(var_arr, axis=0)
 
-plt.plot(tp, avg_var_sto_force, 'r', label='Variable Step')
-plt.plot(tp, (avg_var_sto_force + 2*std_var_sto_force/np.sqrt(trials)), 'r:',
-         tp, (avg_var_sto_force - 2*std_var_sto_force/np.sqrt(trials)), 'r:', linewidth=0.5)
+    ffo_avg = np.mean(ffo_arr, axis=0)
+    ffo_std = np.std(ffo_arr, axis=0)
+    vfo_avg = np.mean(vfo_arr, axis=0)
+    vfo_std = np.std(vfo_arr, axis=0)
 
-plt.plot(tp, d_forces, 'k')
-plt.legend()
-plt.title('Relative error of the forces of the stochastic simulation with fixed motion')
-plt.show()
+    fto_avg = np.mean(fto_arr, axis=0)
+    fto_std = np.std(fto_arr, axis=0)
+    vto_avg = np.mean(vto_arr, axis=0)
+    vto_std = np.std(vto_arr, axis=0)
+
+    pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
+
+    # Define parameter array and filename, and save the count data
+    # The time is included to prevent overwriting an existing file
+    par_array = np.array([delta, T, init, sat, binding, M, bond_max, L])
+    file_path = './data/sta_rxns/'
+    file_name = 'multimov_M{0:d}_N{1:d}_v{2:g}_om{3:g}_trials{4:d}_{5:s}.npz'.format(M, N, v, om, trials,
+                                                                                     strftime('%d%m%y'))
+    np.savez_compressed(file_path+file_name, par_array, fixed_arr, var_arr, pde_count, tp, par_array=par_array,
+                        fixed_array=fixed_arr, var_array=var_arr, pde_count=pde_count, tp=tp)
+    print('Data saved in file {:s}'.format(file_name))
+
+    plt.plot(tp[1:], (fixed_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
+    plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))*nu/bond_max -
+                      pde_count)[1:]/pde_count[1:], 'b:',
+             tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max -
+                      pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
+
+    plt.plot(tp[1:], (var_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'r', label='Variable Step')
+    plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max -
+                      pde_count)[1:]/pde_count[1:], 'r:',
+             tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max -
+                      pde_count)[1:]/pde_count[1:], 'r:', linewidth=0.5)
+
+    plt.plot(tp, np.zeros(shape=tp.shape), 'k')
+    plt.legend()
+    plt.title('Relative error of the stochastic simulation with fixed motion')
+    plt.show()
+
+    plt.plot(tp, fixed_avg*nu/bond_max, 'b', label='Fixed Step')
+    plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
+             tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
+             linewidth=0.5)
+    plt.plot(tp, var_avg*nu/bond_max, 'r', label='Variable Step')
+    plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
+             tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
+             linewidth=0.5)
+    plt.plot(tp, pde_count, 'k', label='PDE Solution')
+    plt.legend()
+    plt.title('Bond quantities of the stochastic simulations with fixed motion')
+    plt.show()
+
+    ind = 100
+    plt.plot(tp[ind:], (ffo_avg - d_forces)[ind:]/d_forces[ind:], 'b', label='Fixed Step')
+    plt.plot(tp[ind:], ((ffo_avg + 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
+             tp[ind:], ((ffo_avg - 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
+             linewidth=0.5)
+
+    plt.plot(tp[ind:], (vfo_avg - d_forces)[ind:]/d_forces[ind:], 'r', label='Variable Step')
+    plt.plot(tp[ind:], ((vfo_avg + 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'r:',
+             tp[ind:], ((vfo_avg - 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'r:',
+             linewidth=0.5)
+
+    plt.plot(tp, np.zeros(shape=tp.shape), 'k')
+    plt.legend()
+    plt.title('Relative error of the forces of the stochastic simulation with fixed motion')
+    plt.show()
+
+    plt.plot(tp, ffo_avg, 'b', label='Fixed Step')
+    plt.plot(tp, (ffo_avg + 2*ffo_std/np.sqrt(trials)), 'b:',
+             tp, (ffo_avg - 2*ffo_std/np.sqrt(trials)), 'b:', linewidth=0.5)
+
+    plt.plot(tp, vfo_avg, 'r', label='Variable Step')
+    plt.plot(tp, (vfo_avg + 2*vfo_std/np.sqrt(trials)), 'r:',
+             tp, (vfo_avg - 2*vfo_std/np.sqrt(trials)), 'r:', linewidth=0.5)
+
+    plt.plot(tp, d_forces, 'k')
+    plt.legend()
+    plt.title('Relative error of the forces of the stochastic simulation with fixed motion')
+    plt.show()
 
