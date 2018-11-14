@@ -49,6 +49,7 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_pr
         break_indices = np.append(break_indices, values=np.where(th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
         break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] > L))
         break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] < -L))
+        # break_indices = []
 
         bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1].astype(int)], d_prime=d_prime)
 
@@ -124,6 +125,8 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1
         break_indices = np.append(break_indices, values=np.where(th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
         break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] > L))
         break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] < -L))
+
+        # break_indices = []
 
         bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1].astype(int)], d_prime=d_prime)
 
@@ -212,6 +215,46 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, e
     return z_mesh, th_mesh, m_mesh, t, forces, torques
 
 
+def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
+             delta=3.0, kap=1.0, saturation=True, binding='both'):
+
+    # Full Model
+    z_vec = np.linspace(-L, L, 2*M+1)
+    th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
+    h = z_vec[1] - z_vec[0]
+    nu = th_vec[1] - th_vec[0]
+    z_mesh, th_mesh = np.meshgrid(z_vec, th_vec, indexing='ij')
+
+    t = np.linspace(0, T, time_steps+1)
+    dt = t[1]-t[0]
+
+    theta_arr = np.zeros(shape=(2*N, time_steps+1))
+    theta_arr[:, 0] = th_vec
+
+    on = (binding == 'both') or (binding == 'on')
+    off = (binding == 'both') or (binding == 'on')
+
+    m_mesh = np.zeros(shape=(2*M+1, 2*N, time_steps+1))  # Bond densities are initialized to zero
+    forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
+    l_new = length(z_mesh, th_mesh, d_prime)
+    for i in range(time_steps):
+        # bond_list[:, 0] += -dt*v  # Update z positions
+        th_mesh += -dt*om  # Update theta bin positions
+        th_mesh = ((th_mesh + np.pi) % (2*np.pi)) - np.pi  # Make sure bin positions are in [-pi, pi)
+        theta_arr[:, i+1] = th_mesh[0, :]
+
+        l_old = np.copy(l_new)
+        l_new = length(z_mesh, th_mesh, d_prime)
+
+        m_mesh[:-1, :, i+1] = (m_mesh[:-1, :, i] + v*dt/h*(m_mesh[1:, :, i] - m_mesh[:-1, :, i]) +
+                               on*dt*kap*np.exp(-eta/2*l_old[:-1, :]**2) *
+                               (1 - saturation*np.tile(np.trapz(m_mesh[:, :, i], z_vec, axis=0), reps=(2*M, 1)))) / \
+                              (1 + dt*np.exp(delta*l_new[:-1, :]))
+        m_mesh[:, :, i+1] = np.where((-np.pi/2 < th_mesh) * (th_mesh < np.pi/2), m_mesh[:, :, i+1], 0)
+
+    return z_mesh, th_mesh, m_mesh, forces, torques
+
+
 def count_fixed(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1, delta=3.0,
                 kap=1.0, saturation=True, binding='both', **kwargs):
     start = timer()
@@ -277,13 +320,19 @@ if __name__ == '__main__':
     L = 2.5
     nu = np.pi/N
 
+    proc = int(raw_input('Number of processes: '))
+
     f_forces, f_torques = np.zeros(shape=(trials, time_steps+1)), np.zeros(shape=(trials, time_steps+1))
     v_forces, v_torques = np.zeros(shape=(trials, time_steps+1)), np.zeros(shape=(trials, time_steps+1))
 
     z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
                                                                   delta=delta, saturation=sat, binding=binding)
+    m_bins = pde_bins(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta, saturation=sat, binding=binding)[2]
 
-    pool = mp.Pool(processes=4)
+    pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
+    bin_count = np.sum(np.trapz(m_bins[:, :, :], z_mesh[:, 0], axis=0), axis=0)
+
+    pool = mp.Pool(processes=proc)
     fixed_result = [pool.apply_async(count_fixed, args=(v, om),
                                       kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'bond_max': bond_max,
                                             'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
@@ -328,16 +377,16 @@ if __name__ == '__main__':
     vto_avg = np.mean(vto_arr, axis=0)
     vto_std = np.std(vto_arr, axis=0)
 
-    pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
-
     # Define parameter array and filename, and save the count data
     # The time is included to prevent overwriting an existing file
-    par_array = np.array([delta, T, init, sat, binding, M, bond_max, L])
+    par_array = np.array([delta, T, init, sat, binding, M, N, bond_max, L])
     file_path = './data/sta_rxns/'
     file_name = 'multimov_M{0:d}_N{1:d}_v{2:g}_om{3:g}_trials{4:d}_{5:s}.npz'.format(M, N, v, om, trials,
                                                                                      strftime('%d%m%y'))
-    np.savez_compressed(file_path+file_name, par_array, fixed_arr, var_arr, pde_count, tp, par_array=par_array,
-                        fixed_array=fixed_arr, var_array=var_arr, pde_count=pde_count, tp=tp)
+    np.savez_compressed(file_path+file_name, par_array, fixed_arr, var_arr, pde_count, ffo_arr, fto_arr, vfo_arr,
+                        vto_arr, bin_count, tp, par_array=par_array, fixed_array=fixed_arr, var_array=var_arr,
+                        pde_count=pde_count, ffo_arr=ffo_arr, fto_arr=fto_arr, vfo_arr=vfo_arr, vto_arr=vto_arr,
+                        bin_count=bin_count, tp=tp)
     print('Data saved in file {:s}'.format(file_name))
 
     plt.plot(tp[1:], (fixed_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
@@ -346,11 +395,13 @@ if __name__ == '__main__':
              tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max -
                       pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
 
-    plt.plot(tp[1:], (var_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'r', label='Variable Step')
+    plt.plot(tp[1:], (var_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'g', label='Variable Step')
     plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max -
-                      pde_count)[1:]/pde_count[1:], 'r:',
+                      pde_count)[1:]/pde_count[1:], 'g:',
              tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max -
-                      pde_count)[1:]/pde_count[1:], 'r:', linewidth=0.5)
+                      pde_count)[1:]/pde_count[1:], 'g:', linewidth=0.5)
+
+    plt.plot(tp[1:], (bin_count*nu - pde_count)[1:]/pde_count[1:], 'r', label='PDE with bins')
 
     plt.plot(tp, np.zeros(shape=tp.shape), 'k')
     plt.legend()
@@ -361,10 +412,13 @@ if __name__ == '__main__':
     plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
              tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
              linewidth=0.5)
-    plt.plot(tp, var_avg*nu/bond_max, 'r', label='Variable Step')
-    plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
-             tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'r:',
+
+    plt.plot(tp, var_avg*nu/bond_max, 'g', label='Variable Step')
+    plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'g:',
+             tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'g:',
              linewidth=0.5)
+
+    plt.plot(tp, bin_count*nu, 'r', label='PDE with bins')
     plt.plot(tp, pde_count, 'k', label='PDE Solution')
     plt.legend()
     plt.title('Bond quantities of the stochastic simulations with fixed motion')
@@ -376,9 +430,9 @@ if __name__ == '__main__':
              tp[ind:], ((ffo_avg - 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
              linewidth=0.5)
 
-    plt.plot(tp[ind:], (vfo_avg - d_forces)[ind:]/d_forces[ind:], 'r', label='Variable Step')
-    plt.plot(tp[ind:], ((vfo_avg + 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'r:',
-             tp[ind:], ((vfo_avg - 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'r:',
+    plt.plot(tp[ind:], (vfo_avg - d_forces)[ind:]/d_forces[ind:], 'g', label='Variable Step')
+    plt.plot(tp[ind:], ((vfo_avg + 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'g:',
+             tp[ind:], ((vfo_avg - 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'g:',
              linewidth=0.5)
 
     plt.plot(tp, np.zeros(shape=tp.shape), 'k')
@@ -390,9 +444,9 @@ if __name__ == '__main__':
     plt.plot(tp, (ffo_avg + 2*ffo_std/np.sqrt(trials)), 'b:',
              tp, (ffo_avg - 2*ffo_std/np.sqrt(trials)), 'b:', linewidth=0.5)
 
-    plt.plot(tp, vfo_avg, 'r', label='Variable Step')
-    plt.plot(tp, (vfo_avg + 2*vfo_std/np.sqrt(trials)), 'r:',
-             tp, (vfo_avg - 2*vfo_std/np.sqrt(trials)), 'r:', linewidth=0.5)
+    plt.plot(tp, vfo_avg, 'g', label='Variable Step')
+    plt.plot(tp, (vfo_avg + 2*vfo_std/np.sqrt(trials)), 'g:',
+             tp, (vfo_avg - 2*vfo_std/np.sqrt(trials)), 'g:', linewidth=0.5)
 
     plt.plot(tp, d_forces, 'k')
     plt.legend()
