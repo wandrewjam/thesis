@@ -296,41 +296,25 @@ def count_variable(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_
         print('Completed one variable run. This run took {:g} seconds.'.format(end-start))
 
     indices = np.searchsorted(t, t_sample, side='right') - 1
-    return np.array(count)[indices], np.array(forces)[indices], np.array(torques)[indices]
+    return np.array(count)[indices], np.array(forces)[indices], np.array(torques)[indices], t
 
 
-if __name__ == '__main__':
+def simulate_fixed():
     trials = int(raw_input('Number of trials: '))
-    fix_master_list = []
-    var_master_list = []
-    t_list = []
-
-    # Parameters
-    M = int(raw_input('M: '))
     N = int(raw_input('N: '))
     v = float(raw_input('v: '))
     om = float(raw_input('om: '))
+    time_steps = int(raw_input('time steps: '))
+    proc = int(raw_input('Number of processes: '))
+
     delta = 3
     T = 1
     init = None
     sat = True
     binding = 'both'
-    time_steps = int(raw_input('time steps: '))
     bond_max = 10
     L = 2.5
     nu = np.pi/N
-
-    proc = int(raw_input('Number of processes: '))
-
-    f_forces, f_torques = np.zeros(shape=(trials, time_steps+1)), np.zeros(shape=(trials, time_steps+1))
-    v_forces, v_torques = np.zeros(shape=(trials, time_steps+1)), np.zeros(shape=(trials, time_steps+1))
-
-    z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
-                                                                  delta=delta, saturation=sat, binding=binding)
-    m_bins = pde_bins(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta, saturation=sat, binding=binding)[2]
-
-    pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
-    bin_count = np.sum(np.trapz(m_bins[:, :, :], z_mesh[:, 0], axis=0), axis=0)
 
     pool = mp.Pool(processes=proc)
     fixed_result = [pool.apply_async(count_fixed, args=(v, om),
@@ -338,118 +322,302 @@ if __name__ == '__main__':
                                             'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
                                             'trials': trials}
                                       ) for k in range(trials)]
-    var_result = [pool.apply_async(count_variable, args=(v, om),
-                                    kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'bond_max': bond_max,
-                                          'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
-                                          'trials': trials}
-                                    ) for k in range(trials)]
 
     fixed_forces = [f.get()[1] for f in fixed_result]  # Get the forces
-    var_forces = [var.get()[1] for var in var_result]
-
     fixed_torques = [f.get()[2] for f in fixed_result]  # Get the torques
-    var_torques = [var.get()[2] for var in var_result]
-
     fixed_result = [f.get()[0] for f in fixed_result]  # Get the bond counts
-    var_result = [var.get()[0] for var in var_result]
 
     fixed_arr = np.vstack(fixed_result)
-    var_arr = np.vstack(var_result)
-
     ffo_arr = np.vstack(fixed_forces)
-    vfo_arr = np.vstack(var_forces)
-
     fto_arr = np.vstack(fixed_torques)
-    vto_arr = np.vstack(var_torques)
 
-    fixed_avg = np.mean(fixed_arr, axis=0)
-    fixed_std = np.std(fixed_arr, axis=0)
-    var_avg = np.mean(var_arr, axis=0)
-    var_std = np.std(var_arr, axis=0)
-
-    ffo_avg = np.mean(ffo_arr, axis=0)
-    ffo_std = np.std(ffo_arr, axis=0)
-    vfo_avg = np.mean(vfo_arr, axis=0)
-    vfo_std = np.std(vfo_arr, axis=0)
-
-    fto_avg = np.mean(fto_arr, axis=0)
-    fto_std = np.std(fto_arr, axis=0)
-    vto_avg = np.mean(vto_arr, axis=0)
-    vto_std = np.std(vto_arr, axis=0)
+    tp = np.linspace(0, T, num=time_steps+1)
 
     # Define parameter array and filename, and save the count data
     # The time is included to prevent overwriting an existing file
-    par_array = np.array([delta, T, init, sat, binding, M, N, bond_max, L])
-    file_path = './data/sta_rxns/'
-    file_name = 'multimov_M{0:d}_N{1:d}_v{2:g}_om{3:g}_trials{4:d}_{5:s}.npz'.format(M, N, v, om, trials,
-                                                                                     strftime('%d%m%y'))
-    np.savez_compressed(file_path+file_name, par_array, fixed_arr, var_arr, pde_count, ffo_arr, fto_arr, vfo_arr,
-                        vto_arr, bin_count, tp, par_array=par_array, fixed_array=fixed_arr, var_array=var_arr,
-                        pde_count=pde_count, ffo_arr=ffo_arr, fto_arr=fto_arr, vfo_arr=vfo_arr, vto_arr=vto_arr,
-                        bin_count=bin_count, tp=tp)
+    par_array = np.array([delta, T, init, sat, binding, N, bond_max, L])
+    file_path = './data/mov_rxns/'
+    file_name = 'multimov_fixed_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om, trials, strftime('%d%m%y'))
+    np.savez_compressed(file_path+file_name, par_array, fixed_arr, ffo_arr, fto_arr, tp, par_array=par_array,
+                        fixed_array=fixed_arr, ffo_arr=ffo_arr, fto_arr=fto_arr, tp=tp)
+    print('Data saved in file {:s}'.format(file_name))
+    return
+
+
+def simulate_variable():
+    trials = int(raw_input('Number of trials: '))
+    N = int(raw_input('N: '))
+    v = float(raw_input('v: '))
+    om = float(raw_input('om: '))
+    time_steps = int(raw_input('time steps: '))
+    proc = int(raw_input('Number of processes: '))
+
+    delta = 3
+    T = 1
+    init = None
+    sat = True
+    binding = 'both'
+    bond_max = 10
+    L = 2.5
+    nu = np.pi/N
+
+    pool = mp.Pool(processes=proc)
+    var_result = [pool.apply_async(count_variable, args=(v, om),
+                                   kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'bond_max': bond_max,
+                                         'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
+                                         'trials': trials}
+                                   ) for k in range(trials)]
+
+    var_forces = [var.get()[1] for var in var_result]  # Get the forces
+    var_torques = [var.get()[2] for var in var_result]
+
+    # Store the variable time steps
+    variable_times = [var.get()[3] for var in var_result]
+    var_result = [var.get()[0] for var in var_result]
+
+    var_arr = np.vstack(var_result)
+    vfo_arr = np.vstack(var_forces)
+    vto_arr = np.vstack(var_torques)
+
+    tp = np.linspace(0, T, num=time_steps+1)
+
+    # Define parameter array and filename, and save the count data
+    # The time is included to prevent overwriting an existing file
+    par_array = np.array([delta, T, init, sat, binding, N, bond_max, L])
+    file_path = './data/mov_rxns/'
+    file_name = 'multimov_var_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om, trials, strftime('%d%m%y'))
+    np.savez_compressed(file_path+file_name, par_array, var_arr, vfo_arr, vto_arr, tp, par_array=par_array,
+                        var_array=var_arr, vfo_arr=vfo_arr, vto_arr=vto_arr, tp=tp)
+
+    # Save the variable time steps
+    np.savez_compressed(file_path+'variable_times_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.
+                        format(N, v, om, trials, strftime('%d%m%y')), *variable_times)
     print('Data saved in file {:s}'.format(file_name))
 
-    plt.plot(tp[1:], (fixed_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
-    plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))*nu/bond_max -
-                      pde_count)[1:]/pde_count[1:], 'b:',
-             tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max -
-                      pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
+    return
 
-    plt.plot(tp[1:], (var_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'g', label='Variable Step')
-    plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max -
-                      pde_count)[1:]/pde_count[1:], 'g:',
-             tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max -
-                      pde_count)[1:]/pde_count[1:], 'g:', linewidth=0.5)
 
-    plt.plot(tp[1:], (bin_count*nu - pde_count)[1:]/pde_count[1:], 'r', label='PDE with bins')
+def simulate_pde():
+    M = int(raw_input('M: '))
+    N = int(raw_input('N: '))
+    v = float(raw_input('v: '))
+    om = float(raw_input('om: '))
+    time_steps = int(raw_input('time steps: '))
 
-    plt.plot(tp, np.zeros(shape=tp.shape), 'k')
-    plt.legend()
-    plt.title('Relative error of the stochastic simulation with fixed motion')
-    plt.show()
+    delta = 3
+    T = 1
+    init = None
+    sat = True
+    binding = 'both'
+    L = 2.5
 
-    plt.plot(tp, fixed_avg*nu/bond_max, 'b', label='Fixed Step')
-    plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
-             tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
-             linewidth=0.5)
+    z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
+                                                                  delta=delta, saturation=sat, binding=binding)
+    pde_count = np.trapz(np.trapz(m_mesh, z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
 
-    plt.plot(tp, var_avg*nu/bond_max, 'g', label='Variable Step')
-    plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'g:',
-             tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'g:',
-             linewidth=0.5)
+    # Define parameter array and filename, and save the count data
+    # The time is included to prevent overwriting an existing file
+    par_array = np.array([delta, T, init, sat, binding, M, N, L])
+    file_path = './data/mov_rxns/'
+    file_name = 'multimov_pde_M{0:d}_N{1:d}_v{2:g}_om{3:g}_{4:s}.npz'.format(M, N, v, om, strftime('%d%m%y'))
+    np.savez_compressed(file_path+file_name, par_array, pde_count, d_forces, d_torques, tp, par_array=par_array,
+                        pde_count=pde_count, d_forces=d_forces, d_torques=d_torques, tp=tp)
 
-    plt.plot(tp, bin_count*nu, 'r', label='PDE with bins')
-    plt.plot(tp, pde_count, 'k', label='PDE Solution')
-    plt.legend()
-    plt.title('Bond quantities of the stochastic simulations with fixed motion')
-    plt.show()
+    print('Data saved in file {:s}'.format(file_name))
 
-    ind = 100
-    plt.plot(tp[ind:], (ffo_avg - d_forces)[ind:]/d_forces[ind:], 'b', label='Fixed Step')
-    plt.plot(tp[ind:], ((ffo_avg + 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
-             tp[ind:], ((ffo_avg - 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
-             linewidth=0.5)
+    return
 
-    plt.plot(tp[ind:], (vfo_avg - d_forces)[ind:]/d_forces[ind:], 'g', label='Variable Step')
-    plt.plot(tp[ind:], ((vfo_avg + 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'g:',
-             tp[ind:], ((vfo_avg - 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'g:',
-             linewidth=0.5)
 
-    plt.plot(tp, np.zeros(shape=tp.shape), 'k')
-    plt.legend()
-    plt.title('Relative error of the forces of the stochastic simulation with fixed motion')
-    plt.show()
+def simulate_pde_bins():
+    M = int(raw_input('M: '))
+    N = int(raw_input('N: '))
+    v = float(raw_input('v: '))
+    om = float(raw_input('om: '))
+    time_steps = int(raw_input('time steps: '))
 
-    plt.plot(tp, ffo_avg, 'b', label='Fixed Step')
-    plt.plot(tp, (ffo_avg + 2*ffo_std/np.sqrt(trials)), 'b:',
-             tp, (ffo_avg - 2*ffo_std/np.sqrt(trials)), 'b:', linewidth=0.5)
+    delta = 3
+    T = 1
+    init = None
+    sat = True
+    binding = 'both'
+    L = 2.5
 
-    plt.plot(tp, vfo_avg, 'g', label='Variable Step')
-    plt.plot(tp, (vfo_avg + 2*vfo_std/np.sqrt(trials)), 'g:',
-             tp, (vfo_avg - 2*vfo_std/np.sqrt(trials)), 'g:', linewidth=0.5)
+    z_mesh, th_mesh, m_bins, b_forces, b_torques = pde_bins(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
+                                                            delta=delta, saturation=sat, binding=binding)
+    bin_count = np.sum(np.trapz(m_bins, z_mesh[:, 0], axis=0), axis=0)
 
-    plt.plot(tp, d_forces, 'k')
-    plt.legend()
-    plt.title('Relative error of the forces of the stochastic simulation with fixed motion')
-    plt.show()
+    # Define parameter array and filename, and save the count data
+    # The time is included to prevent overwriting an existing file
+    par_array = np.array([delta, T, init, sat, binding, M, N, L])
+    file_path = './data/mov_rxns/'
+    file_name = 'multimov_bins_pde_M{0:d}_N{1:d}_v{2:g}_om{3:g}_{4:s}.npz'.format(M, N, v, om, strftime('%d%m%y'))
+    np.savez_compressed(file_path+file_name, par_array, bin_count, b_forces, b_torques, par_array=par_array,
+                        bin_count=bin_count, b_forces=b_forces, b_torques=b_torques)
+
+    print('Data saved in file {:s}'.format(file_name))
+
+    return
+
+
+if __name__ == '__main__':
+
+    simulate_fixed()
+    simulate_variable()
+    simulate_pde()
+    simulate_pde_bins()
+
+    # trials = int(raw_input('Number of trials: '))
+    #
+    # # Parameters
+    # M = int(raw_input('M: '))
+    # N = int(raw_input('N: '))
+    # v = float(raw_input('v: '))
+    # om = float(raw_input('om: '))
+    # delta = 3
+    # T = 1
+    # init = None
+    # sat = True
+    # binding = 'both'
+    # time_steps = int(raw_input('time steps: '))
+    # bond_max = 10
+    # L = 2.5
+    # nu = np.pi/N
+    #
+    # proc = int(raw_input('Number of processes: '))
+    #
+    # z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
+    #                                                               delta=delta, saturation=sat, binding=binding)
+    # m_bins = pde_bins(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta, saturation=sat, binding=binding)[2]
+    #
+    # pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
+    # bin_count = np.sum(np.trapz(m_bins[:, :, :], z_mesh[:, 0], axis=0), axis=0)
+    #
+    # pool = mp.Pool(processes=proc)
+    # fixed_result = [pool.apply_async(count_fixed, args=(v, om),
+    #                                   kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'bond_max': bond_max,
+    #                                         'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
+    #                                         'trials': trials}
+    #                                   ) for k in range(trials)]
+    # var_result = [pool.apply_async(count_variable, args=(v, om),
+    #                                 kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'bond_max': bond_max,
+    #                                       'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
+    #                                       'trials': trials}
+    #                                 ) for k in range(trials)]
+    #
+    # fixed_forces = [f.get()[1] for f in fixed_result]  # Get the forces
+    # var_forces = [var.get()[1] for var in var_result]
+    #
+    # fixed_torques = [f.get()[2] for f in fixed_result]  # Get the torques
+    # var_torques = [var.get()[2] for var in var_result]
+    #
+    # # Store the variable time steps
+    # variable_times = [var.get()[3] for var in var_result]
+    #
+    # fixed_result = [f.get()[0] for f in fixed_result]  # Get the bond counts
+    # var_result = [var.get()[0] for var in var_result]
+    #
+    # fixed_arr = np.vstack(fixed_result)
+    # var_arr = np.vstack(var_result)
+    #
+    # ffo_arr = np.vstack(fixed_forces)
+    # vfo_arr = np.vstack(var_forces)
+    #
+    # fto_arr = np.vstack(fixed_torques)
+    # vto_arr = np.vstack(var_torques)
+    #
+    # fixed_avg = np.mean(fixed_arr, axis=0)
+    # fixed_std = np.std(fixed_arr, axis=0)
+    # var_avg = np.mean(var_arr, axis=0)
+    # var_std = np.std(var_arr, axis=0)
+    #
+    # ffo_avg = np.mean(ffo_arr, axis=0)
+    # ffo_std = np.std(ffo_arr, axis=0)
+    # vfo_avg = np.mean(vfo_arr, axis=0)
+    # vfo_std = np.std(vfo_arr, axis=0)
+    #
+    # fto_avg = np.mean(fto_arr, axis=0)
+    # fto_std = np.std(fto_arr, axis=0)
+    # vto_avg = np.mean(vto_arr, axis=0)
+    # vto_std = np.std(vto_arr, axis=0)
+    #
+    # # Define parameter array and filename, and save the count data
+    # # The time is included to prevent overwriting an existing file
+    # par_array = np.array([delta, T, init, sat, binding, M, N, bond_max, L])
+    # file_path = './data/sta_rxns/'
+    # file_name = 'multimov_M{0:d}_N{1:d}_v{2:g}_om{3:g}_trials{4:d}_{5:s}.npz'.format(M, N, v, om, trials,
+    #                                                                                  strftime('%d%m%y'))
+    # np.savez_compressed(file_path+file_name, par_array, fixed_arr, var_arr, pde_count, ffo_arr, fto_arr, vfo_arr,
+    #                     vto_arr, bin_count, tp, par_array=par_array, fixed_array=fixed_arr, var_array=var_arr,
+    #                     pde_count=pde_count, ffo_arr=ffo_arr, fto_arr=fto_arr, vfo_arr=vfo_arr, vto_arr=vto_arr,
+    #                     bin_count=bin_count, tp=tp)
+    #
+    # # Save the variable time steps
+    # np.savez_compressed(file_path+'variable_times_M{0:d}_N{1:d}_v{2:g}_om{3:g}_trials{4:d}_{5:s}.npz'.
+    #                     format(M, N, v, om, trials, strftime('%d%m%y')), *variable_times)
+    # print('Data saved in file {:s}'.format(file_name))
+
+    # Plot the results
+    # plt.plot(tp[1:], (fixed_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
+    # plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))*nu/bond_max -
+    #                   pde_count)[1:]/pde_count[1:], 'b:',
+    #          tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max -
+    #                   pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
+    #
+    # plt.plot(tp[1:], (var_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'g', label='Variable Step')
+    # plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max -
+    #                   pde_count)[1:]/pde_count[1:], 'g:',
+    #          tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max -
+    #                   pde_count)[1:]/pde_count[1:], 'g:', linewidth=0.5)
+    #
+    # plt.plot(tp[1:], (bin_count*nu - pde_count)[1:]/pde_count[1:], 'r', label='PDE with bins')
+    #
+    # plt.plot(tp, np.zeros(shape=tp.shape), 'k')
+    # plt.legend()
+    # plt.title('Relative error of the stochastic simulation with fixed motion')
+    # plt.show()
+    #
+    # plt.plot(tp, fixed_avg*nu/bond_max, 'b', label='Fixed Step')
+    # plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
+    #          tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max)[1:], 'b:',
+    #          linewidth=0.5)
+    #
+    # plt.plot(tp, var_avg*nu/bond_max, 'g', label='Variable Step')
+    # plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'g:',
+    #          tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max)[1:], 'g:',
+    #          linewidth=0.5)
+    #
+    # plt.plot(tp, bin_count*nu, 'r', label='PDE with bins')
+    # plt.plot(tp, pde_count, 'k', label='PDE Solution')
+    # plt.legend()
+    # plt.title('Bond quantities of the stochastic simulations with fixed motion')
+    # plt.show()
+    #
+    # ind = 100
+    # plt.plot(tp[ind:], (ffo_avg - d_forces)[ind:]/d_forces[ind:], 'b', label='Fixed Step')
+    # plt.plot(tp[ind:], ((ffo_avg + 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
+    #          tp[ind:], ((ffo_avg - 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
+    #          linewidth=0.5)
+    #
+    # plt.plot(tp[ind:], (vfo_avg - d_forces)[ind:]/d_forces[ind:], 'g', label='Variable Step')
+    # plt.plot(tp[ind:], ((vfo_avg + 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'g:',
+    #          tp[ind:], ((vfo_avg - 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'g:',
+    #          linewidth=0.5)
+    #
+    # plt.plot(tp, np.zeros(shape=tp.shape), 'k')
+    # plt.legend()
+    # plt.title('Relative error of the forces of the stochastic simulation with fixed motion')
+    # plt.show()
+    #
+    # plt.plot(tp, ffo_avg, 'b', label='Fixed Step')
+    # plt.plot(tp, (ffo_avg + 2*ffo_std/np.sqrt(trials)), 'b:',
+    #          tp, (ffo_avg - 2*ffo_std/np.sqrt(trials)), 'b:', linewidth=0.5)
+    #
+    # plt.plot(tp, vfo_avg, 'g', label='Variable Step')
+    # plt.plot(tp, (vfo_avg + 2*vfo_std/np.sqrt(trials)), 'g:',
+    #          tp, (vfo_avg - 2*vfo_std/np.sqrt(trials)), 'g:', linewidth=0.5)
+    #
+    # plt.plot(tp, d_forces, 'k')
+    # plt.legend()
+    # plt.title('Relative error of the forces of the stochastic simulation with fixed motion')
+    # plt.show()
 
