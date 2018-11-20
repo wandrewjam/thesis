@@ -270,6 +270,7 @@ if __name__ == '__main__':
     sat = True
     ztype = 'cont_exact'
     delta = 3
+    proc = int(raw_input('Number of processes: '))
 
     plot = raw_input('Do you want to plot results? y or n: ')
     while plot != 'y' and plot != 'n':
@@ -278,7 +279,7 @@ if __name__ == '__main__':
     z_vec, m_mesh, tp = pde_z(theta, v, om, init=init, T=T, M=M, time_steps=time_steps, delta=delta,
                               saturation=sat, binding=binding)
 
-    pool = mp.Pool(processes=4)
+    pool = mp.Pool(processes=proc)
     fixed_result = [pool.apply_async(count_fixed, args=(theta, v, om),
                                      kwds={'init': init, 'T': T, 'M': M, 'time_steps': time_steps, 'bond_max': bond_max,
                                            'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
