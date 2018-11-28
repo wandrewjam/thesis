@@ -3,10 +3,13 @@ from stochastic_model_ssa import *
 from sampling import *
 import matplotlib.pyplot as plt
 from timeit import default_timer as timer
+from guppy import hpy
+from memory_profiler import profile
 
 ##################### Check the forces! Compare with the known solutions #############################
 
 
+@profile
 def stochastic_comparison(num_iterations=100, num_samples=200, M=100, N=100, time_steps=1000, bond_max=100,
                           kap=1.0, delta=3.0, eta_v=.01, eta_om=.01, gamma=20.0, plot=True):
     v3_sampled = np.zeros(shape=(num_iterations, num_samples))
@@ -15,8 +18,8 @@ def stochastic_comparison(num_iterations=100, num_samples=200, M=100, N=100, tim
     v1_array, om1_array = np.zeros(shape=(num_iterations, time_steps+1)), np.zeros(shape=(num_iterations, time_steps+1))
     v2_array, om2_array = np.zeros(shape=(num_iterations, time_steps+1)), np.zeros(shape=(num_iterations, time_steps+1))
     v3_list, om3_list, t3_list = [], [], []
-    n1_array, n2_array, n3_list = np.zeros(shape=(num_iterations, time_steps+1)), \
-                                  np.zeros(shape=(num_iterations, time_steps+1)), []
+    n1_array = np.zeros(shape=(num_iterations, time_steps+1))
+    n2_array, n3_list = np.zeros(shape=(num_iterations, time_steps+1)), []
 
     for i in range(num_iterations):
         start = timer()
@@ -75,5 +78,7 @@ def stochastic_comparison(num_iterations=100, num_samples=200, M=100, N=100, tim
 
 if __name__ == '__main__':
     exp = 8
-    stochastic_comparison(M=2**exp, N=2**exp, time_steps=2000, bond_max=10, gamma=20.0, num_iterations=100)
+    stochastic_comparison(M=2**exp, N=2**exp, time_steps=2000, bond_max=10, gamma=20.0, num_iterations=1)
     print('Done!')
+    h = hpy()
+    print h.heap()
