@@ -10,7 +10,7 @@ from scipy.stats import truncnorm
 from time import strftime
 
 
-def fixed_z(theta, v, om, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
+def fixed_z(theta, v, om, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=10, d_prime=0.1, eta=0.1,
             delta=3.0, kap=1.0, saturation=True, binding='both', seed=None):
 
     np.random.seed(seed)
@@ -88,8 +88,8 @@ def fixed_z(theta, v, om, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_
     return master_list, t, theta_pos
 
 
-def variable_z(theta, v, om, init=None, L=2.5, T=0.4, M=100, bond_max=100, d_prime=0.1, eta=0.1, delta=3.0, kap=1.0,
-               saturation=True, binding='both', seed=None):
+def variable_z(theta, v, om, min_step=None, init=None, L=2.5, T=0.4, M=100, bond_max=10, d_prime=0.1, eta=0.1,
+               delta=3.0, kap=1.0, saturation=True, binding='both', seed=None):
 
     np.random.seed(seed)
     z_vec = np.linspace(-L, L, 2*M+1)[:-1]
@@ -137,7 +137,7 @@ def variable_z(theta, v, om, init=None, L=2.5, T=0.4, M=100, bond_max=100, d_pri
         sum_rates = np.cumsum(all_rates)
         if sum_rates[-1] == 0:
             # Specify a time step if the cumulative rate is 0
-            dt = .001
+            dt = min_step
             bond_list[:, 0] += -dt*v
             theta += -dt*om
             theta = ((theta + np.pi) % (2*np.pi)) - np.pi  # Make sure theta position is in [-pi, pi)
@@ -147,20 +147,26 @@ def variable_z(theta, v, om, init=None, L=2.5, T=0.4, M=100, bond_max=100, d_pri
 
             r = np.random.rand(2)
             dt = 1/a0*np.log(1/r[0])
-            j = np.searchsorted(a=sum_rates, v=r[1]*a0)
-            t = np.append(t, t[-1]+dt)
-
-            bond_list[:, 0] += -dt*v
-            theta += -dt*om
-            theta = ((theta + np.pi) % (2*np.pi)) - np.pi  # Make sure theta position is in [-pi, pi)
-
-            if j < break_rates.shape[0]:
-                bond_list = np.delete(arr=bond_list, obj=j, axis=0)
+            if dt > min_step:
+                t = np.append(t, t[-1]+min_step)
+                bond_list[:, 0] += -min_step*v
+                theta += -min_step*om
+                theta = ((theta + np.pi) % (2*np.pi)) - np.pi  # Make sure theta position is in [-pi, pi)
             else:
-                index = j - break_rates.shape[0]
-                new_bonds = np.zeros(shape=(1, 1))
-                new_bonds[0, 0] = truncnorm.rvs(a=a, b=b, loc=np.sin(theta), scale=np.sqrt(1/eta))
-                bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
+                j = np.searchsorted(a=sum_rates, v=r[1]*a0)
+                t = np.append(t, t[-1]+dt)
+
+                bond_list[:, 0] += -dt*v
+                theta += -dt*om
+                theta = ((theta + np.pi) % (2*np.pi)) - np.pi  # Make sure theta position is in [-pi, pi)
+
+                if j < break_rates.shape[0]:
+                    bond_list = np.delete(arr=bond_list, obj=j, axis=0)
+                else:
+                    index = j - break_rates.shape[0]
+                    new_bonds = np.zeros(shape=(1, 1))
+                    new_bonds[0, 0] = truncnorm.rvs(a=a, b=b, loc=np.sin(theta), scale=np.sqrt(1/eta))
+                    bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
         # Store the bond list
         master_list.append(bond_list)
@@ -201,7 +207,7 @@ def pde_z(theta, v, om, init=None, L=2.5, T=.4, M=100, time_steps=1000, d_prime=
     return z_vec, m_mesh, t
 
 
-def count_fixed(theta, v, om, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
+def count_fixed(theta, v, om, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=10, d_prime=0.1, eta=0.1,
                 delta=3.0, kap=1.0, saturation=True, binding='both', seed=None, **kwargs):
 
     start = timer()
@@ -223,12 +229,12 @@ def count_fixed(theta, v, om, init=None, L=2.5, T=0.4, M=100, time_steps=1000, b
     return np.array(count), np.array(theta_fixed)
 
 
-def count_variable(theta, v, om, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
+def count_variable(theta, v, om, init=None, L=2.5, T=0.4, M=100, time_steps=1000, bond_max=10, d_prime=0.1, eta=0.1,
                    delta=3.0, kap=1.0, saturation=True, binding='both', seed=None, **kwargs):
     start = timer()
-    master_list, t, theta_var = variable_z(theta, v, om, init, L, T, M, bond_max, d_prime, eta,
-                                delta, kap, saturation, binding, seed)
     t_sample = np.linspace(0, T, num=time_steps+1)
+    master_list, t, theta_var = variable_z(theta, v, om, T/time_steps, init, L, T, M, bond_max, d_prime,
+                                           eta, delta, kap, saturation, binding, seed)
     count = [master_list[i].shape[0] for i in range(len(master_list))]
     end = timer()
 
@@ -259,7 +265,7 @@ if __name__ == '__main__':
         theta = np.pi/2
     else:
         theta = 0
-    bond_max = 100
+    bond_max = 10
     time_steps = int(raw_input('time steps: '))
     if om > 0:
         T = np.pi/om
@@ -270,6 +276,7 @@ if __name__ == '__main__':
     sat = True
     ztype = 'cont_exact'
     delta = 3
+    proc = int(raw_input('Number of processes: '))
 
     plot = raw_input('Do you want to plot results? y or n: ')
     while plot != 'y' and plot != 'n':
@@ -278,7 +285,7 @@ if __name__ == '__main__':
     z_vec, m_mesh, tp = pde_z(theta, v, om, init=init, T=T, M=M, time_steps=time_steps, delta=delta,
                               saturation=sat, binding=binding)
 
-    pool = mp.Pool(processes=4)
+    pool = mp.Pool(processes=proc)
     fixed_result = [pool.apply_async(count_fixed, args=(theta, v, om),
                                      kwds={'init': init, 'T': T, 'M': M, 'time_steps': time_steps, 'bond_max': bond_max,
                                            'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
