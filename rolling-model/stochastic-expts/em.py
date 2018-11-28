@@ -11,8 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # np.random.seed(100)
-lam, mu, Xzero = 2, 1, 1
-T, N = 1, 2**8
+lam, mu, Xzero = 2., 1., 1.
+T, N = 1., 2**6
 dt = T/N
 t = np.linspace(start=0, stop=T, num=N+1)
 dW = np.random.normal(loc=0, scale=np.sqrt(dt), size=N)

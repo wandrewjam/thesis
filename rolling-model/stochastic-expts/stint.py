@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # np.random.seed(100)
-T, N = 1, 500
+T, N = 1., 500
 dt = T/N
 
 dW = np.random.normal(loc=0, scale=np.sqrt(dt), size=N)
