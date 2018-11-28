@@ -8,12 +8,16 @@ from timeit import default_timer as timer
 from time import strftime
 
 
+"""" NOTE: Currently this code simulates the sliding window experiment """
+
+
 def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
                  delta=3.0, kap=1.0, saturation=True, binding='both'):
 
     # Full Model
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
+    th_vec += nu/2
 
     bond_list = np.empty(shape=(0, 2))
 
@@ -34,6 +38,9 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_pr
 
     on = (binding == 'both') or (binding == 'on')
     off = (binding == 'both') or (binding == 'on')
+
+    on = np.zeros(shape=2*N)
+    on[N: 5*N//4] = 1
 
     master_list = [bond_list]
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
@@ -115,6 +122,9 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1
     on = (binding == 'both') or (binding == 'on')
     off = (binding == 'both') or (binding == 'on')
 
+    on = np.zeros(shape=2*N)
+    on[N: 5*N//4] = 1
+
     master_list = [bond_list]
     t = np.array([0])
     forces, torques = np.array([0]), np.array([0])
@@ -188,6 +198,8 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, e
     nu = th_mesh[0, 1] - th_mesh[0, 0]
     dt = t[1]-t[0]
 
+    left, right = -om*t, np.pi/4 - om*t
+
     on = (binding == 'both') or (binding == 'on')
     off = (binding == 'both') or (binding == 'on')
 
@@ -203,6 +215,9 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, e
         print('Warning: the CFL condition for z is not satisfied!')
 
     for i in range(time_steps):
+        # This line forces all bonds to form in the sliding window
+        on = (th_mesh[0, :] > left) * (th_mesh[0, :] < right)
+
         m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
                                  v*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
                                  on*dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
@@ -234,6 +249,9 @@ def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta
     on = (binding == 'both') or (binding == 'on')
     off = (binding == 'both') or (binding == 'on')
 
+    on = np.zeros(shape=2*N)
+    on[N: 5*N//4] = 1
+
     m_mesh = np.zeros(shape=(2*M+1, 2*N, time_steps+1))  # Bond densities are initialized to zero
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
     l_new = length(z_mesh, th_mesh, d_prime)
@@ -249,7 +267,7 @@ def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta
         m_mesh[:-1, :, i+1] = (m_mesh[:-1, :, i] + v*dt/h*(m_mesh[1:, :, i] - m_mesh[:-1, :, i]) +
                                on*dt*kap*np.exp(-eta/2*l_old[:-1, :]**2) *
                                (1 - saturation*np.tile(np.trapz(m_mesh[:, :, i], z_vec, axis=0), reps=(2*M, 1)))) / \
-                              (1 + dt*np.exp(delta*l_new[:-1, :]))
+                              (1 + dt*off*np.exp(delta*l_new[:-1, :]))
         m_mesh[:, :, i+1] = np.where((-np.pi/2 < th_mesh) * (th_mesh < np.pi/2), m_mesh[:, :, i+1], 0)
 
     return z_mesh, th_mesh, m_mesh, forces, torques
@@ -337,7 +355,11 @@ def simulate_fixed():
     # The time is included to prevent overwriting an existing file
     par_array = np.array([delta, T, init, sat, binding, N, bond_max, L])
     file_path = './data/mov_rxns/'
-    file_name = 'multimov_fixed_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om, trials, strftime('%d%m%y'))
+    # file_name = 'multimov_fixed_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om, trials, strftime('%d%m%y'))
+
+    # This filename specifies the
+    file_name = 'multimov_window_fixed_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om,
+                                                                                      trials, strftime('%d%m%y'))
     np.savez_compressed(file_path+file_name, par_array, fixed_arr, ffo_arr, fto_arr, tp, par_array=par_array,
                         fixed_array=fixed_arr, ffo_arr=ffo_arr, fto_arr=fto_arr, tp=tp)
     print('Data saved in file {:s}'.format(file_name))
@@ -462,9 +484,9 @@ def simulate_pde_bins():
 if __name__ == '__main__':
 
     simulate_fixed()
-    simulate_variable()
-    simulate_pde()
-    simulate_pde_bins()
+    # simulate_variable()
+    # simulate_pde()
+    # simulate_pde_bins()
 
     # trials = int(raw_input('Number of trials: '))
     #
