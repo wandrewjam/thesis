@@ -5,7 +5,7 @@ if __name__ == '__main__':
     data_folder = './data/mov_rxns/'
 
     # Load PDE data
-    data_pde = np.load(data_folder + 'multimov_pde_M512_N512_v0_om5_trials10000_201118.npz')
+    data_pde = np.load(data_folder + 'multimov_pde_M512_N512_v0_om5_201118.npz')
 
     # Load fixed time step data
     data_fixed = np.load(data_folder + 'multimov_fixed_N512_v0_om5_trials10000_191118.npz')
@@ -23,8 +23,8 @@ if __name__ == '__main__':
     tp = data_pde['tp']
     pde_count = data_pde['pde_count']
     bin_count = data_bins['bin_count']
-    fixed_arr = data_fixed['fixed_arr']
-    var_arr = data_var['var_arr']
+    fixed_arr = data_fixed['fixed_array']
+    var_arr = data_var['var_array']
 
     fixed_avg = np.mean(fixed_arr, axis=0)
     var_avg = np.mean(var_arr, axis=0)
@@ -45,9 +45,10 @@ if __name__ == '__main__':
 
 
     plt.plot(tp, np.zeros(shape=tp.shape), 'k', label='Reference line')
+    plt.ylim((-.02, .02))
     plt.legend(loc='best')
     plt.xlabel('Nondimensional time')
-    plt.ylabel('Relative error')
+    plt.ylabel('Relative error in bond number')
     plt.show()
 
     plt.plot(tp, fixed_avg*nu/bond_max, 'b', label='Fixed time step')
