@@ -368,24 +368,6 @@ if __name__ == '__main__':
     fixed_arr = np.vstack(fixed_result)
     var_arr = np.vstack(var_result)
 
-    # for i in range(trials):
-    #     start = timer()
-    #     bond_list, ts = stochastic_reactions(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, time_steps=time_steps,
-    #                                          delta=delta, saturation=sat, binding=binding, ztype=ztype)
-    #     fix_master_list.append(bond_list)
-    #     end = timer()
-    #     print('{:d} of {:d} fixed time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
-
-    # for i in range(trials):
-    #     start = timer()
-    #     bond_list, ts = ssa_reactions(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, delta=delta, saturation=sat,
-    #                                   binding=binding, ztype=ztype)
-    #     t_list.append(ts)
-    #     # ts = ssa_reactions1(init=init, L=L, T=T, M=M, N=N, bond_max=bond_max, delta=delta, saturation=sat, binding=binding)
-    #     # t_list1.append(ts)
-    #     var_master_list.append(bond_list)
-    #     end = timer()
-    #     print('{:d} of {:d} variable time-step runs completed. This run took {:g} seconds.'.format(i+1, trials, end-start))
     fixed_avg = np.mean(fixed_arr, axis=0)
     var_avg = np.mean(var_arr, axis=0)
     fixed_std = np.std(fixed_arr, axis=0)
@@ -393,27 +375,6 @@ if __name__ == '__main__':
 
     z_mesh, th_mesh, pde_count, tp = pde_reactions(init=init, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta,
                                                    saturation=sat, binding=binding)
-
-    # fix_sto_count = np.zeros(shape=(trials, tp.shape[0]))
-    # var_sto_count = np.zeros(shape=(trials, tp.shape[0]))
-    # # var_sto_count1 = np.zeros(shape=(trials, tp.shape[0]))
-    #
-    # for i in range(trials):
-    #     for j in range(len(fix_master_list[i])):
-    #         fix_sto_count[i, j] = fix_master_list[i][j].shape[0]
-    #
-    # for i in range(trials):
-    #     temp_sto_count = np.zeros(shape=len(var_master_list[i]))
-    #     for j in range(len(var_master_list[i])):
-    #         temp_sto_count[j] = var_master_list[i][j].shape[0]
-    #     var_sto_count[i, :] = temp_sto_count[np.searchsorted(t_list[i], tp, side='right')-1]
-    #
-    # avg_fix_sto_count = np.mean(fix_sto_count, axis=0)
-    # std_fix_sto_count = np.std(fix_sto_count, axis=0)
-    # avg_var_sto_count = np.mean(var_sto_count, axis=0)
-    # std_var_sto_count = np.std(var_sto_count, axis=0)
-
-    # pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
 
     # Define parameter array and filename, and save the count data
     # The time is included to prevent overwriting an existing file
