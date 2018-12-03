@@ -575,7 +575,7 @@ def simulate_pde_bins():
 
 if __name__ == '__main__':
 
-    window_reactions(v=5, om=5, N=128, time_steps=1000, trials=100, proc=4)
+    window_reactions(v=0, om=5, N=128, time_steps=1000, trials=100, proc=4)
     # simulate_variable()
     # simulate_pde()
     # simulate_pde_bins()
