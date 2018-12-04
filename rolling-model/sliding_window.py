@@ -167,7 +167,7 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
         all_rates = np.append(break_rates, form_rates)
         sum_rates = np.cumsum(all_rates)
 
-        if all_rates[-1] == 0:
+        if sum_rates[-1] == 0:
             dt = T/1000
             bond_list[:, 0] += -dt*v
             th_vec += -dt*om
@@ -239,7 +239,8 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
 
     m_mesh = np.zeros(shape=(2*M+1, N+1, time_steps+1))  # Bond densities are initialized to zero
     if init == 'window':
-        m_mesh[:, N//2:3*N//4, 0] = 1/(2*L)
+        m_mesh[:-1, N//2:3*N//4, 0] = 2/(4*L-h)  # Weird correction factor
+                                                 # for exact agreement with stochastic codes
 
     l_matrix = length(z_mesh, th_mesh, d_prime)
 
@@ -256,11 +257,11 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
         if binding == 'none':
             on = 0
         else:
-            on = (th_mesh[0, :] > left) * (th_mesh[0, :] < right)
+            on = (th_mesh > left[i]) * (th_mesh < right[i])
 
         m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
                                  v*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
-                                 on*dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
+                                 on[:-1, :-1]*dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
                                  (1 - saturation*np.tile(np.trapz(m_mesh[:, :-1, i], z_mesh[:, 0], axis=0), reps=(2*M, 1)))) /\
                                   (1 + off*dt*np.exp(delta*l_matrix[:-1, :-1]))
 
@@ -295,7 +296,8 @@ def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
 
     m_mesh = np.zeros(shape=(2*M+1, 2*N, time_steps+1))  # Bond densities are initialized to zero
     if init == 'window':
-        m_mesh[:, N:5*N//4, 0] = 1/(2*L)
+        m_mesh[:-1, N:5*N//4, 0] = 2/(4*L-h)  # Weird correction factor
+                                              # for exact agreement with stochastic codes
 
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
     l_new = length(z_mesh, th_mesh, d_prime)
@@ -371,9 +373,9 @@ def window_reactions(v, om, N, time_steps, trials, proc):
 
     delta = 3
     T = np.pi/om  # The time for all bonds to leave the domain
-    init = 'window'
+    init = None
     sat = True
-    binding = 'none'
+    binding = 'both'
     bond_max = 10
     L = 2.5
     nu = np.pi/N
@@ -432,14 +434,14 @@ def window_reactions(v, om, N, time_steps, trials, proc):
                   / np.sqrt(trials))*nu/bond_max, 'b--',
              tp, (np.mean(fixed_arr, axis=0) - 3*np.std(fixed_arr, axis=0)
                   / np.sqrt(trials))*nu/bond_max, 'b--', linewidth=.5)
-    plt.plot(tp, np.mean(var_arr, axis=0)*nu/bond_max, 'r',
+    plt.plot(tp, np.mean(var_arr, axis=0)*nu/bond_max, 'g',
              label='Variable time step')
     plt.plot(tp, (np.mean(var_arr, axis=0) + 3*np.std(var_arr, axis=0)
-                  / np.sqrt(trials))*nu/bond_max, 'r--',
+                  / np.sqrt(trials))*nu/bond_max, 'g--',
              tp, (np.mean(var_arr, axis=0) - 3*np.std(var_arr, axis=0)
-                  / np.sqrt(trials))*nu/bond_max, 'r--', linewidth=.5)
+                  / np.sqrt(trials))*nu/bond_max, 'g--', linewidth=.5)
     plt.plot(t, pde_count, label='PDE')
-    plt.plot(t, bin_count*nu, label='PDE with bins')
+    plt.plot(t, bin_count*nu, 'r', label='PDE with bins')
     plt.legend(loc='best')
     plt.show()
 
