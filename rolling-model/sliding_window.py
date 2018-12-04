@@ -445,18 +445,21 @@ def window_reactions(v, om, N, time_steps, trials, proc):
     plt.legend(loc='best')
     plt.show()
 
-    # # Define parameter array and filename, and save the count data
-    # # The time is included to prevent overwriting an existing file
-    # par_array = np.array([delta, T, init, sat, binding, N, bond_max, L])
-    # file_path = './data/mov_rxns/'
-    # # file_name = 'multimov_fixed_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om, trials, strftime('%d%m%y'))
-    #
-    # # This filename specifies the
-    # file_name = 'multimov_window_fixed_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om,
-    #                                                                                   trials, strftime('%d%m%y'))
-    # np.savez_compressed(file_path+file_name, par_array, fixed_arr, ffo_arr, fto_arr, tp, par_array=par_array,
-    #                     fixed_array=fixed_arr, ffo_arr=ffo_arr, fto_arr=fto_arr, tp=tp)
-    # print('Data saved in file {:s}'.format(file_name))
+    # Define parameter array and filename, and save the count data
+    # The time is included to prevent overwriting an existing file
+    par_array = np.array([delta, T, init, sat, binding, N, bond_max, L])
+    file_path = './data/mov_rxns/'
+    # file_name = 'multimov_fixed_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om, trials, strftime('%d%m%y'))
+
+    # This filename specifies the
+    file_name = 'multimov_window_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om,
+                                                                                      trials, strftime('%d%m%y'))
+    np.savez_compressed(file_path+file_name,
+                        par_array, fixed_arr, var_arr, pde_count, bin_count, tp,
+                        par_array=par_array, fixed_array=fixed_arr,
+                        var_arr=var_arr, pde_count=pde_count, bin_count=bin_count,
+                        tp=tp)
+    print('Data saved in file {:s}'.format(file_name))
     return
 
 
@@ -576,8 +579,14 @@ def simulate_pde_bins():
 
 
 if __name__ == '__main__':
-
-    window_reactions(v=0, om=5, N=128, time_steps=1000, trials=100, proc=4)
+    v = float(raw_input('v: '))
+    om = float(raw_input('om: '))
+    N = int(raw_input('N: '))
+    time_steps = int(raw_input('time steps: '))
+    trials = int(raw_input('trials: '))
+    proc = int(raw_input('processes: '))
+    window_reactions(v=v, om=om, N=N, time_steps=time_steps, trials=trials,
+                     proc=proc)
     # simulate_variable()
     # simulate_pde()
     # simulate_pde_bins()
