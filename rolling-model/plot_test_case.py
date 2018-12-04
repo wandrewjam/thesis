@@ -10,7 +10,10 @@ if __name__ == '__main__':
     om = float(raw_input('om: '))
 
     filename = raw_input('filename: ')
-    load_data = np.load('./data/mov_rxns/'+filename)
+    if filename[0] == 's':
+        load_data = np.load('./data/sta_rxns/'+filename)
+    elif filename[0] == 'm':
+        load_data = np.load('./data/mov_rxns/'+filename)
     bond_max = int(raw_input('bond max: '))
 
     par_array = load_data['par_array']
