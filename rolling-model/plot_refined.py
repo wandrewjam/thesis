@@ -43,8 +43,9 @@ if __name__ == '__main__':
              tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max - pde_count)[1:]/pde_count[1:], 'g:',
              linewidth=.5)
 
-
+    plt.plot(tp[1:], (bin_count*nu - pde_count)[1:]/pde_count[1:], 'r', label='PDE with bins')
     plt.plot(tp, np.zeros(shape=tp.shape), 'k', label='Reference line')
+
     plt.ylim((-.02, .02))
     plt.legend(loc='best')
     plt.xlabel('Nondimensional time')
@@ -59,6 +60,7 @@ if __name__ == '__main__':
     plt.plot(tp, (var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max, 'g:',
              tp, (var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max, 'g:', linewidth=.5)
 
+    plt.plot(tp, bin_count*nu, 'r', label='PDE with bins')
     plt.plot(tp, pde_count, 'k', label='Deterministic')
     plt.legend(loc='best')
     plt.xlabel('Nondimensional time')
