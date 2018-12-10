@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 M = 512
 up_data = np.load('./data/mov_rxns/multimov_pdeup_M{:d}_N{:d}_v0_om5_201118.npz'
                   .format(M, M))
-# bw_data = np.load('./data/mov_rxns/multimov_pdebw_M{:d}_N{:d}_v0_om5_101218.npz'
-#                   .format(M, M))
+bw_data = np.load('./data/mov_rxns/multimov_pdebw_M{:d}_N{:d}_v0_om5_101218.npz'
+                  .format(M, M))
 bn_data = np.load('./data/mov_rxns/multimov_bins_pde_M{:d}_N{:d}_v0_om5_251118'
                   '.npz'.format(M, M))
 
 up_count = up_data['pde_count']
-# bw_count = bw_data['pde_count']
+bw_count = bw_data['pde_count']
 bn_count = bn_data['bin_count']
 nu = np.pi/M
 
