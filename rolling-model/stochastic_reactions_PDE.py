@@ -8,11 +8,57 @@ from timeit import default_timer as timer
 from time import strftime
 
 
-"""" NOTE: Currently this code simulates the sliding window experiment """
+def _up(bond_mesh, vel, dx, dt, axis):
+    if axis == 0:
+        return vel*dt/dx*(bond_mesh[1:, :-1] - bond_mesh[:-1, :-1])
+    elif axis == 1:
+        return vel*dt/dx*(bond_mesh[:-1, 1:] - bond_mesh[:-1, :-1])
 
 
-def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,
-                 delta=3.0, kap=1.0, saturation=True, binding='both'):
+def _bw(bond_mesh, vel, dx, dt, axis):
+    if axis == 0:
+        return vel*dt/(2*dx)*(-3*bond_mesh[:-2, :-1] + 4*bond_mesh[1:-1, :-1]
+                              - bond_mesh[2:, :-1]) + (vel*dt/dx)**2/2\
+               * (bond_mesh[:-2, :-1] - 2*bond_mesh[1:-1, :-1]
+                  + bond_mesh[2:, :-1])
+    elif axis == 1:
+        return vel*dt/(2*dx)*(-3*bond_mesh[:-1, :-2] + 4*bond_mesh[:-1, 1:-1]
+                              - bond_mesh[:-1, 2:]) + (vel*dt/dx)**2/2\
+               * (bond_mesh[:-1, :-2] - 2*bond_mesh[:-1, 1:-1]
+                  + bond_mesh[:-1, 2:])
+
+
+def _form(bond_mesh, form_rate, h, dt, sat):
+    sat_term = (1 - sat*np.tile(np.trapz(bond_mesh[:, :-1], dx=h, axis=0),
+                                reps=(bond_mesh.shape[0]-1, 1)))
+    return dt*form_rate*sat_term
+
+
+def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
+                   scheme):
+    new_bonds = np.copy(bond_mesh)
+    if scheme == 'up':
+        new_bonds[:-1, :-1] += _up(bond_mesh, v, h, dt, axis=0)
+        new_bonds[:-1, :-1] += _up(bond_mesh, om, nu, dt, axis=1)
+        new_bonds[:-1, :-1] += _form(bond_mesh, form_rate[:-1, :-1], h, dt,
+                                     sat)
+        new_bonds[:-1, :-1] /= (1 + dt*break_rate[:-1, :-1])
+    elif scheme == 'bw':
+        new_bonds[:-2, :-1] += _bw(bond_mesh, v, h, dt, axis=0)
+        new_bonds[:-1, :-2] += _bw(bond_mesh, om, nu, dt, axis=1)
+        new_bonds[-2, :-1] += np.squeeze(_up(bond_mesh[-2:, :], v, h, dt,
+                                             axis=0))
+        new_bonds[:-1, -2] += np.squeeze(_up(bond_mesh[:, -2:], om, nu, dt,
+                                              axis=1))
+        new_bonds[:-1, :-1] += _form(bond_mesh, form_rate[:-1, :-1], h, dt,
+                                     sat)
+        new_bonds[:-1, :-1] /= (1 + dt*break_rate[:-1, :-1])
+    return new_bonds
+
+
+def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
+                 d_prime=0.1, eta=0.1, delta=3.0, kap=1.0, saturation=True,
+                 binding='both'):
 
     # Full Model
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
@@ -38,9 +84,6 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_pr
 
     on = (binding == 'both') or (binding == 'on')
     off = (binding == 'both') or (binding == 'on')
-
-    on = np.zeros(shape=2*N)
-    on[N: 5*N//4] = 1
 
     master_list = [bond_list]
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
@@ -101,8 +144,9 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_pr
     return master_list, t, forces, torques
 
 
-def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
-                    delta=3.0, kap=1.0, saturation=True, binding='both'):
+def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
+                    eta=.1, delta=3.0, kap=1.0, saturation=True,
+                    binding='both'):
 
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
@@ -121,9 +165,6 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1
 
     on = (binding == 'both') or (binding == 'on')
     off = (binding == 'both') or (binding == 'on')
-
-    on = np.zeros(shape=2*N)
-    on[N: 5*N//4] = 1
 
     master_list = [bond_list]
     t = np.array([0])
@@ -186,8 +227,9 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1
     return master_list, t, forces, torques
 
 
-def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
-               delta=3.0, kap=1.0, saturation=True, binding='both'):
+def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
+               eta=0.1, delta=3.0, kap=1.0, sat=True, binding='both',
+               scheme='up'):
     # Numerical Parameters
     z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
                                   np.linspace(-np.pi/2, np.pi/2, N+1),
@@ -198,13 +240,13 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, e
     nu = th_mesh[0, 1] - th_mesh[0, 0]
     dt = t[1]-t[0]
 
-    left, right = -om*t, np.pi/4 - om*t
-
     on = (binding == 'both') or (binding == 'on')
     off = (binding == 'both') or (binding == 'on')
 
     m_mesh = np.zeros(shape=(2*M+1, N+1, time_steps+1))  # Bond densities are initialized to zero
     l_matrix = length(z_mesh, th_mesh, d_prime)
+    form_rate = on*kap*np.exp(-eta/2*l_matrix**2)
+    break_rate = off*np.exp(delta*l_matrix)
 
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
 
@@ -215,14 +257,8 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, e
         print('Warning: the CFL condition for z is not satisfied!')
 
     for i in range(time_steps):
-        # This line forces all bonds to form in the sliding window
-        on = (th_mesh[0, :] > left) * (th_mesh[0, :] < right)
-
-        m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
-                                 v*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
-                                 on*dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
-                                 (1 - saturation*np.tile(np.trapz(m_mesh[:, :-1, i], z_mesh[:, 0], axis=0), reps=(2*M, 1)))) /\
-                                  (1 + off*dt*np.exp(delta*l_matrix[:-1, :-1]))
+        m_mesh[:, :, i+1] = _eulerian_step(m_mesh[:, :, i], v, om, h, nu, dt,
+                                           form_rate, break_rate, sat, scheme)
 
         forces[i+1] = nd_force(m_mesh[:, :, i+1], z_mesh, th_mesh)  # Changed force calculations to integrate over all z and th meshes
         torques[i+1] = nd_torque(m_mesh[:, :, i+1], z_mesh, th_mesh, d_prime)
@@ -248,9 +284,6 @@ def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta
 
     on = (binding == 'both') or (binding == 'on')
     off = (binding == 'both') or (binding == 'on')
-
-    on = np.zeros(shape=2*N)
-    on[N: 5*N//4] = 1
 
     m_mesh = np.zeros(shape=(2*M+1, 2*N, time_steps+1))  # Bond densities are initialized to zero
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
@@ -425,6 +458,7 @@ def simulate_pde():
     v = float(raw_input('v: '))
     om = float(raw_input('om: '))
     time_steps = int(raw_input('time steps: '))
+    scheme = raw_input('scheme: ')
 
     delta = 3
     T = 1
@@ -433,17 +467,21 @@ def simulate_pde():
     binding = 'both'
     L = 2.5
 
-    z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
-                                                                  delta=delta, saturation=sat, binding=binding)
+    z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = (
+        pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
+                   delta=delta, sat=sat, binding=binding, scheme=scheme)
+    )
     pde_count = np.trapz(np.trapz(m_mesh, z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
 
     # Define parameter array and filename, and save the count data
     # The time is included to prevent overwriting an existing file
     par_array = np.array([delta, T, init, sat, binding, M, N, L])
     file_path = './data/mov_rxns/'
-    file_name = 'multimov_pde_M{0:d}_N{1:d}_v{2:g}_om{3:g}_{4:s}.npz'.format(M, N, v, om, strftime('%d%m%y'))
-    np.savez_compressed(file_path+file_name, par_array, pde_count, d_forces, d_torques, tp, par_array=par_array,
-                        pde_count=pde_count, d_forces=d_forces, d_torques=d_torques, tp=tp)
+    file_name = ('multimov_pde{0:s}_M{1:d}_N{2:d}_v{3:g}_om{4:g}_{5:s}.npz'
+                 .format(scheme, M, N, v, om, strftime('%d%m%y')))
+    np.savez_compressed(file_path+file_name, par_array, pde_count, d_forces,
+                        d_torques, tp, par_array=par_array, pde_count=pde_count,
+                        d_forces=d_forces, d_torques=d_torques, tp=tp)
 
     print('Data saved in file {:s}'.format(file_name))
 
@@ -483,9 +521,9 @@ def simulate_pde_bins():
 
 if __name__ == '__main__':
 
-    simulate_fixed()
+    # simulate_fixed()
     # simulate_variable()
-    # simulate_pde()
+    simulate_pde()
     # simulate_pde_bins()
 
     # trials = int(raw_input('Number of trials: '))
@@ -507,8 +545,10 @@ if __name__ == '__main__':
     #
     # proc = int(raw_input('Number of processes: '))
     #
-    # z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
-    #                                                               delta=delta, saturation=sat, binding=binding)
+    # z_mesh, th_mesh, m_mesh, tp, d_forces, d_torques = (
+    #     pde_motion(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
+    #                delta=delta, sat=sat, binding=binding, scheme='bw')
+    # )
     # m_bins = pde_bins(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta, saturation=sat, binding=binding)[2]
     #
     # pde_count = np.trapz(np.trapz(m_mesh[:, :, :], z_mesh[:, 0], axis=0), th_mesh[0, :], axis=0)
@@ -525,13 +565,13 @@ if __name__ == '__main__':
     #                                       'delta': delta, 'saturation': sat, 'binding': binding, 'k': k,
     #                                       'trials': trials}
     #                                 ) for k in range(trials)]
-    #
+
     # fixed_forces = [f.get()[1] for f in fixed_result]  # Get the forces
     # var_forces = [var.get()[1] for var in var_result]
     #
     # fixed_torques = [f.get()[2] for f in fixed_result]  # Get the torques
     # var_torques = [var.get()[2] for var in var_result]
-    #
+
     # # Store the variable time steps
     # variable_times = [var.get()[3] for var in var_result]
     #
@@ -540,18 +580,18 @@ if __name__ == '__main__':
     #
     # fixed_arr = np.vstack(fixed_result)
     # var_arr = np.vstack(var_result)
-    #
+
     # ffo_arr = np.vstack(fixed_forces)
     # vfo_arr = np.vstack(var_forces)
     #
     # fto_arr = np.vstack(fixed_torques)
     # vto_arr = np.vstack(var_torques)
-    #
+
     # fixed_avg = np.mean(fixed_arr, axis=0)
     # fixed_std = np.std(fixed_arr, axis=0)
     # var_avg = np.mean(var_arr, axis=0)
     # var_std = np.std(var_arr, axis=0)
-    #
+
     # ffo_avg = np.mean(ffo_arr, axis=0)
     # ffo_std = np.std(ffo_arr, axis=0)
     # vfo_avg = np.mean(vfo_arr, axis=0)
@@ -561,7 +601,7 @@ if __name__ == '__main__':
     # fto_std = np.std(fto_arr, axis=0)
     # vto_avg = np.mean(vto_arr, axis=0)
     # vto_std = np.std(vto_arr, axis=0)
-    #
+
     # # Define parameter array and filename, and save the count data
     # # The time is included to prevent overwriting an existing file
     # par_array = np.array([delta, T, init, sat, binding, M, N, bond_max, L])
@@ -578,20 +618,20 @@ if __name__ == '__main__':
     #                     format(M, N, v, om, trials, strftime('%d%m%y')), *variable_times)
     # print('Data saved in file {:s}'.format(file_name))
 
-    # Plot the results
-    # plt.plot(tp[1:], (fixed_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b', label='Fixed Step')
+    # # Plot the results
+    # plt.plot(tp[1:], (fixed_avg*nu/bond_max - pde_count)[1:]/pde_count[-1], 'b', label='Fixed Step')
     # plt.plot(tp[1:], ((fixed_avg + 2*fixed_std/np.sqrt(trials))*nu/bond_max -
-    #                   pde_count)[1:]/pde_count[1:], 'b:',
+    #                   pde_count)[1:]/pde_count[-1], 'b:',
     #          tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max -
-    #                   pde_count)[1:]/pde_count[1:], 'b:', linewidth=0.5)
+    #                   pde_count)[1:]/pde_count[-1], 'b:', linewidth=0.5)
     #
-    # plt.plot(tp[1:], (var_avg*nu/bond_max - pde_count)[1:]/pde_count[1:], 'g', label='Variable Step')
+    # plt.plot(tp[1:], (var_avg*nu/bond_max - pde_count)[1:]/pde_count[-1], 'g', label='Variable Step')
     # plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))*nu/bond_max -
-    #                   pde_count)[1:]/pde_count[1:], 'g:',
+    #                   pde_count)[1:]/pde_count[-1], 'g:',
     #          tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))*nu/bond_max -
-    #                   pde_count)[1:]/pde_count[1:], 'g:', linewidth=0.5)
+    #                   pde_count)[1:]/pde_count[-1], 'g:', linewidth=0.5)
     #
-    # plt.plot(tp[1:], (bin_count*nu - pde_count)[1:]/pde_count[1:], 'r', label='PDE with bins')
+    # plt.plot(tp[1:], (bin_count*nu - pde_count)[1:]/pde_count[-1], 'r', label='PDE with bins')
     #
     # plt.plot(tp, np.zeros(shape=tp.shape), 'k')
     # plt.legend()
@@ -614,15 +654,14 @@ if __name__ == '__main__':
     # plt.title('Bond quantities of the stochastic simulations with fixed motion')
     # plt.show()
     #
-    # ind = 100
-    # plt.plot(tp[ind:], (ffo_avg - d_forces)[ind:]/d_forces[ind:], 'b', label='Fixed Step')
-    # plt.plot(tp[ind:], ((ffo_avg + 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
-    #          tp[ind:], ((ffo_avg - 2*ffo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'b:',
+    # plt.plot(tp, (ffo_avg - d_forces)/d_forces[-1], 'b', label='Fixed Step')
+    # plt.plot(tp[1:], ((ffo_avg + 2*ffo_std/np.sqrt(trials)) - d_forces)[1:]/d_forces[-1], 'b:',
+    #          tp[1:], ((ffo_avg - 2*ffo_std/np.sqrt(trials)) - d_forces)[1:]/d_forces[-1], 'b:',
     #          linewidth=0.5)
     #
-    # plt.plot(tp[ind:], (vfo_avg - d_forces)[ind:]/d_forces[ind:], 'g', label='Variable Step')
-    # plt.plot(tp[ind:], ((vfo_avg + 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'g:',
-    #          tp[ind:], ((vfo_avg - 2*vfo_std/np.sqrt(trials)) - d_forces)[ind:]/d_forces[ind:], 'g:',
+    # plt.plot(tp, (vfo_avg - d_forces)/d_forces[-1], 'g', label='Variable Step')
+    # plt.plot(tp[1:], ((vfo_avg + 2*vfo_std/np.sqrt(trials)) - d_forces)[1:]/d_forces[-1], 'g:',
+    #          tp[1:], ((vfo_avg - 2*vfo_std/np.sqrt(trials)) - d_forces)[1:]/d_forces[-1], 'g:',
     #          linewidth=0.5)
     #
     # plt.plot(tp, np.zeros(shape=tp.shape), 'k')
