@@ -26,7 +26,8 @@ numerical_parameters = {
     'L': 2.5,
     'T': 1,
     'bond_max': 10,
-    'save_bond_history': False
+    'save_bond_history': False,
+    'scheme': 'up'
 }
 
 # Merge the two dictionaries.
