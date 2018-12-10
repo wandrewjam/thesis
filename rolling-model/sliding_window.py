@@ -1,6 +1,8 @@
 import multiprocessing as mp
 import numpy as np
+from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
+from matplotlib import animation
 from scipy.special import erf
 from scipy.stats import truncnorm
 from constructA import length, nd_force, nd_torque
@@ -52,6 +54,7 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
 
     master_list = [bond_list]
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
+    fluxes = np.zeros(shape=time_steps+1)
 
     for i in range(time_steps):
         bond_list[:, 0] += -dt*v  # Update z positions
@@ -60,10 +63,17 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
         theta_arr[:, i+1] = th_vec
 
         # Generate list of breaking indices
-        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] < -np.pi/2)
-        break_indices = np.append(break_indices, values=np.where(th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
+        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] <
+                                 -np.pi/2)
+        break_indices = np.append(break_indices, values=np.where(
+            th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
+        th_flux = break_indices.shape[0]
         break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] > L))
         break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] < -L))
+        tot_flux = break_indices.shape[0]
+        z_flux = tot_flux - th_flux
+
+        fluxes[i+1] = om*th_flux + v*z_flux
         # break_indices = []
 
         bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1].astype(int)], d_prime=d_prime)
@@ -88,9 +98,9 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
 
         # Choose lengths, add to new bond array
         for j in np.where(forming_bonds)[0]:
-            new_bonds[counter:counter+forming_bonds[j], 0] = truncnorm.rvs(a=a[j], b=b[j], loc=np.sin(th_vec[j]),
-                                                                           scale=np.sqrt(1/eta),
-                                                                           size=forming_bonds[j])
+            new_bonds[counter:counter+forming_bonds[j], 0] = truncnorm.rvs(
+                a=a[j], b=b[j], loc=np.sin(th_vec[j]), scale=np.sqrt(1/eta),
+                size=forming_bonds[j])
             new_bonds[counter:counter+forming_bonds[j], 1] = j
             counter += forming_bonds[j]
 
@@ -106,12 +116,12 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
         torques[i+1] = nu/bond_max*np.sum(a=(1-np.cos(th_vec[thetas])+d_prime)*np.sin(th_vec[thetas]) +
                                      (np.sin(th_vec[thetas])-zs)*np.cos(th_vec[thetas]))
 
-    return master_list, t, forces, torques
+    return master_list, t, forces, torques, fluxes
 
 
-def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
-                    eta=.1, delta=3.0, kap=1.0, saturation=True, init=None,
-                    binding='both'):
+def variable_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
+                    d_prime=.1, eta=.1, delta=3.0, kap=1.0, saturation=True,
+                    init=None, binding='both'):
 
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
@@ -144,17 +154,27 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
     master_list = [bond_list]
     t = np.array([0])
     forces, torques = np.array([0]), np.array([0])
+    fluxes = np.array([0])
 
     while t[-1] < T:
         # Generate list of breaking indices
-        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] < -np.pi/2)
-        break_indices = np.append(break_indices, values=np.where(th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
-        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] > L))
-        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] < -L))
+        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] <
+                                 -np.pi/2)
+        break_indices = np.append(break_indices, values=np.where(
+            th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
+        th_flux = break_indices.shape[0]
+        break_indices = np.append(break_indices, values=np.where(
+            bond_list[:, 0] > L))
+        break_indices = np.append(break_indices, values=np.where(
+            bond_list[:, 0] < -L))
+        tot_flux = break_indices.shape[0]
+        z_flux = tot_flux - th_flux
+        fluxes = np.append(fluxes, om*th_flux + v*z_flux)
 
         # break_indices = []
 
-        bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1].astype(int)], d_prime=d_prime)
+        bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1]
+                              .astype(int)], d_prime=d_prime)
 
         # Decide which bonds break
         break_rates = off*np.exp(delta*bond_lengths)
@@ -168,7 +188,7 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
         sum_rates = np.cumsum(all_rates)
 
         if sum_rates[-1] == 0:
-            dt = T/1000
+            dt = T/time_steps
             bond_list[:, 0] += -dt*v
             th_vec += -dt*om
             th_vec = ((th_vec + np.pi) % (2*np.pi)) - np.pi
@@ -217,12 +237,12 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
             torques = np.append(torques, nu/bond_max*np.sum(a=(1-np.cos(th_vec[thetas])+d_prime)*np.sin(th_vec[thetas]) +
                                                               (np.sin(th_vec[thetas])-zs)*np.cos(th_vec[thetas])))
 
-    return master_list, t, forces, torques
+    return master_list, t, forces, torques, fluxes
 
 
 def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
                eta=0.1, delta=3.0, kap=1.0, saturation=True, init=None,
-               binding='both'):
+               binding='both', scheme='upwind'):
     # Numerical Parameters
     z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
                                   np.linspace(-np.pi/2, np.pi/2, N+1),
@@ -245,6 +265,7 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
     l_matrix = length(z_mesh, th_mesh, d_prime)
 
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
+    fluxes = np.zeros(shape=time_steps+1)
 
     # Check for the CFL condition
     if om*dt/nu > 1:
@@ -258,17 +279,59 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
             on = 0
         else:
             on = (th_mesh > left[i]) * (th_mesh < right[i])
+            on = on[:-1, :-1]
 
-        m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
-                                 v*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
-                                 on[:-1, :-1]*dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
-                                 (1 - saturation*np.tile(np.trapz(m_mesh[:, :-1, i], z_mesh[:, 0], axis=0), reps=(2*M, 1)))) /\
-                                  (1 + off*dt*np.exp(delta*l_matrix[:-1, :-1]))
+        if scheme == 'up':
+            m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
+                                     v*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
+                                     on*dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
+                                     (1 - saturation*np.tile(np.trapz(m_mesh[:, :-1, i], z_mesh[:, 0], axis=0), reps=(2*M, 1)))) /\
+                                      (1 + off*dt*np.exp(delta*l_matrix[:-1, :-1]))
+        elif scheme == 'bw':
+            # Beam-Warming update for most of the mesh
+            # m_mesh[:-2, :-2, i+1] = (
+            #     (1 - dt/2*(3*(v/h + om/nu) + dt*(v**2/h**2 + om**2/nu**2)))
+            #     * m_mesh[:-2, :-2, i] + dt * (
+            #             v/h * ((2 - v*dt/h)*m_mesh[1:-1, :-2, i]
+            #                    - (1 - v*dt/h)/2*m_mesh[2:, :-2, i])
+            #             + om/nu * ((2 - om*dt/nu)*m_mesh[:-2, 1:-1, i]
+            #                        - (1 - om*dt/nu)/2*m_mesh[:-2, 2:, i])
+            #     )
+            # )
+            m_mesh[:-2, :-2, i+1] = (
+                    m_mesh[:-2, :-2, i]
+                    + v*dt/(2*h) * (-3*m_mesh[:-2, :-2, i]
+                                    + 4*m_mesh[1:-1, :-2, i]
+                                    - m_mesh[2:, :-2, i])
+                    + om*dt/(2*nu) * (-3*m_mesh[:-2, :-2, i]
+                                      + 4*m_mesh[:-2, 1:-1, i]
+                                      - m_mesh[:-2, 2:, i])
+                    + (v*dt/h)**2/2 * (m_mesh[:-2, :-2, i]
+                                       - 2*m_mesh[1:-1, :-2, i]
+                                       + m_mesh[2:, :-2, i])
+                    + (om*dt/nu)**2/2 * (m_mesh[:-2, :-2, i]
+                                         - 2*m_mesh[:-2, 1:-1, i]
+                                         + m_mesh[:-2, 2:, i])
+            )
+            m_mesh[-2, :-1, i+1] = m_mesh[-2, :-1, i]\
+                                   + v*dt/h*(m_mesh[-1, :-1, i]
+                                             - m_mesh[-2, :-1, i])
+            m_mesh[:-2, -2, i+1] = m_mesh[:-2, -2, i]\
+                                   + om*dt/nu*(m_mesh[:-2, -1, i]
+                                               - m_mesh[:-2, -2, i])
+            m_mesh[:-1, :-1, i+1] += on*dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2)\
+                * (1 - saturation*np.tile(np.trapz(m_mesh[:, :-1, i],
+                                                   z_mesh[:, 0], axis=0),
+                                          reps=(2*M, 1)))
+            m_mesh[:-1, :-1, i+1] /= (1 + off*dt*np.exp(delta*l_matrix[:-1,
+                                                              :-1]))
 
         forces[i+1] = nd_force(m_mesh[:, :, i+1], z_mesh, th_mesh)  # Changed force calculations to integrate over all z and th meshes
         torques[i+1] = nd_torque(m_mesh[:, :, i+1], z_mesh, th_mesh, d_prime)
+        fluxes[i+1] = (om*np.trapz(m_mesh[:, 0, i], z_mesh[:, 0])
+                       + v*np.trapz(m_mesh[0, :, i], th_mesh[0, :]))
 
-    return z_mesh, th_mesh, m_mesh, t, forces, torques
+    return z_mesh, th_mesh, m_mesh, t, forces, torques, fluxes
 
 
 def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
@@ -300,6 +363,7 @@ def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
                                               # for exact agreement with stochastic codes
 
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
+    fluxes = np.zeros(shape=time_steps+1)
     l_new = length(z_mesh, th_mesh, d_prime)
     for i in range(time_steps):
         # bond_list[:, 0] += -dt*v  # Update z positions
@@ -314,55 +378,89 @@ def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
                                on*dt*kap*np.exp(-eta/2*l_old[:-1, :]**2) *
                                (1 - saturation*np.tile(np.trapz(m_mesh[:, :, i], z_vec, axis=0), reps=(2*M, 1)))) / \
                               (1 + dt*off*np.exp(delta*l_new[:-1, :]))
-        m_mesh[:, :, i+1] = np.where((-np.pi/2 < th_mesh) * (th_mesh < np.pi/2), m_mesh[:, :, i+1], 0)
+        m_mesh[:, :, i+1] = np.where((-np.pi/2 <= th_mesh) * (th_mesh < np.pi/2), m_mesh[:, :, i+1], 0)
 
-    return z_mesh, th_mesh, m_mesh, forces, torques
+        ind = np.nonzero((-np.pi/2 <= theta_arr[:, i])
+                         * (-np.pi/2 + om*dt > theta_arr[:, i]))
+        fluxes[i+1] = (om*np.sum(np.trapz(m_mesh[:, ind, i], z_mesh[:, 0],
+                                          axis=0))
+                       + v*nu*np.sum(m_mesh[0, :, i]))
+    return z_mesh, theta_arr, m_mesh, forces, torques, fluxes
 
 
 def count_fixed(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
                 d_prime=0.1, eta=0.1, delta=3.0, kap=1.0, saturation=True, init=None,
                 binding='both', **kwargs):
     start = timer()
-    master_list, t, forces, torques = fixed_motion(v, om, L, T, N, time_steps, bond_max, d_prime, eta,
-                                                                delta, kap, saturation, init, binding)
-    count = [master_list[i].shape[0] for i in range(len(master_list))]
+    master_list, t, forces, torques, flux = (
+        fixed_motion(v, om, L, T, N, time_steps, bond_max, d_prime, eta, delta,
+                     kap, saturation, init, binding)
+    )
     end = timer()
 
-    if 'k' in kwargs and 'trials' in kwargs:
-        print('Completed {:d} of {:d} fixed runs. This run took {:g} seconds.'.format(kwargs['k']+1, kwargs['trials'],
-                                                                                      end-start))
-    elif 'k' in kwargs:
-        print('Completed {:d} fixed runs so far. This run took {:g} seconds.'.format(kwargs['k']+1, end-start))
-    elif 'trials' in kwargs:
-        print('Completed one of {:d} fixed runs. This run took {:g} seconds.'.format(kwargs['trials'], end-start))
+    if 'th_count' in kwargs:
+        if kwargs['th_count']:
+            count = [np.bincount(master_list[i][:, 1].astype(int),
+                                 minlength=2*N)
+                     for i in range(len(master_list))]
+        else:
+            count = [master_list[i].shape[0] for i in range(len(master_list))]
     else:
-        print('Completed one fixed run. This run took {:g} seconds.'.format(end-start))
+        count = [master_list[i].shape[0] for i in range(len(master_list))]
 
-    return count, forces, torques
+    if 'k' in kwargs and 'trials' in kwargs:
+        print('Completed {:d} of {:d} fixed runs. This run took {:g} seconds.'
+              .format(kwargs['k']+1, kwargs['trials'], end-start))
+    elif 'k' in kwargs:
+        print('Completed {:d} fixed runs so far. This run took {:g} seconds.'
+              .format(kwargs['k']+1, end-start))
+    elif 'trials' in kwargs:
+        print('Completed one of {:d} fixed runs. This run took {:g} seconds.'
+              .format(kwargs['trials'], end-start))
+    else:
+        print('Completed one fixed run. This run took {:g} seconds.'
+              .format(end-start))
+
+    return count, forces, torques, flux
 
 
 def count_variable(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
                    d_prime=.1, eta=.1, delta=3.0, kap=1.0, saturation=True,
                    init=None, binding='both', **kwargs):
     start = timer()
-    master_list, t, forces, torques = variable_motion(v, om, L, T, N, bond_max, d_prime, eta,
-                                                      delta, kap, saturation, init, binding)
+    master_list, t, forces, torques, flux = (
+        variable_motion(v, om, L, T, N, time_steps, bond_max, d_prime, eta, delta, kap,
+                        saturation, init, binding)
+    )
     t_sample = np.linspace(0, T, num=time_steps+1)
-    count = [master_list[i].shape[0] for i in range(len(master_list))]
     end = timer()
 
-    if 'k' in kwargs and 'trials' in kwargs:
-        print('Completed {:d} of {:d} variable runs. This run took {:g} seconds.'.format(kwargs['k']+1, kwargs['trials'],
-                                                                                      end-start))
-    elif 'k' in kwargs:
-        print('Completed {:d} variable runs so far. This run took {:g} seconds.'.format(kwargs['k']+1, end-start))
-    elif 'trials' in kwargs:
-        print('Completed one of {:d} variable runs. This run took {:g} seconds.'.format(kwargs['trials'], end-start))
+    if 'th_count' in kwargs:
+        if kwargs['th_count']:
+            count = [np.bincount(master_list[i][:, 1].astype(int),
+                                 minlength=2*N)
+                     for i in range(len(master_list))]
+        else:
+            count = [master_list[i].shape[0] for i in range(len(master_list))]
     else:
-        print('Completed one variable run. This run took {:g} seconds.'.format(end-start))
+        count = [master_list[i].shape[0] for i in range(len(master_list))]
+
+    if 'k' in kwargs and 'trials' in kwargs:
+        print('Completed {:d} of {:d} variable runs. This run took {:g} '
+              'seconds.'.format(kwargs['k']+1, kwargs['trials'], end-start))
+    elif 'k' in kwargs:
+        print('Completed {:d} variable runs so far. This run took {:g} '
+              'seconds.'.format(kwargs['k']+1, end-start))
+    elif 'trials' in kwargs:
+        print('Completed one of {:d} variable runs. This run took {:g} '
+              'seconds.'.format(kwargs['trials'], end-start))
+    else:
+        print('Completed one variable run. This run took {:g} seconds.'
+              .format(end-start))
 
     indices = np.searchsorted(t, t_sample, side='right') - 1
-    return np.array(count)[indices], np.array(forces)[indices], np.array(torques)[indices], t
+    return (np.array(count)[indices], np.array(forces)[indices],
+            np.array(torques)[indices], t, np.array(flux)[indices])
 
 
 def window_reactions(v, om, N, time_steps, trials, proc):
@@ -373,77 +471,132 @@ def window_reactions(v, om, N, time_steps, trials, proc):
 
     delta = 3
     T = np.pi/om  # The time for all bonds to leave the domain
-    init = None
+    init = 'window'
     sat = True
-    binding = 'both'
+    binding = 'none'
     bond_max = 10
     L = 2.5
     nu = np.pi/N
+    th_count = True
 
     pool = mp.Pool(processes=proc)
     fixed_result = [pool.apply_async(
         count_fixed, args=(v, om),
         kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'init': init,
               'bond_max': bond_max, 'delta': delta, 'saturation': sat,
-              'binding': binding, 'k': k, 'trials': trials}
+              'binding': binding, 'th_count': th_count, 'k': k,
+              'trials': trials}
     ) for k in range(trials)]
 
     # fixed_forces = [f.get()[1] for f in fixed_result]  # Get the forces
     # fixed_torques = [f.get()[2] for f in fixed_result]  # Get the torques
+    fixed_fluxes = [f.get()[-1] for f in fixed_result]
     fixed_result = [f.get()[0] for f in fixed_result]  # Get the bond counts
 
     var_result = [pool.apply_async(
         count_variable, args=(v, om),
         kwds={'L': L, 'T': T, 'N': N, 'time_steps': time_steps, 'init': init,
               'bond_max': bond_max, 'delta': delta, 'saturation': sat,
-              'binding': binding, 'k': k, 'trials': trials}
+              'binding': binding, 'th_count': th_count, 'k': k,
+              'trials': trials}
     ) for k in range(trials)]
 
     # var_forces = [f.get()[1] for f in var_result]  # Get the forces
     # var_torques = [f.get()[2] for f in var_result]  # Get the torques
+    var_fluxes = [f.get()[-1] for f in var_result]
     var_result = [f.get()[0] for f in var_result]  # Get the bond counts
 
-    fixed_arr = np.vstack(fixed_result)
-    # ffo_arr = np.vstack(fixed_forces)
-    # fto_arr = np.vstack(fixed_torques)
+    fixed_arr = np.stack(fixed_result, axis=-1)
+    ffl_arr = np.stack(fixed_fluxes, axis=-1)
+    # ffo_arr = np.stack(fixed_forces, axis=-1)
+    # fto_arr = np.stack(fixed_torques, axis=-1)
 
-    var_arr = np.vstack(var_result)
-    # vfo_arr = np.vstack(var_forces)
-    # vto_arr = np.vstack(var_torques)
+    var_arr = np.stack(var_result, axis=-1)
+    vfl_arr = np.stack(var_fluxes, axis=-1)
+    # vfo_arr = np.stack(var_forces, axis=-1)
+    # vto_arr = np.stack(var_torques, axis=-1)
 
     tp = np.linspace(0, T, num=time_steps+1)
 
-    z_mesh, th_mesh, m_mesh, t, forces, torques = pde_motion(
+    z_mesh, th_mesh, m_mesh, t, forces, torques, pde_fluxes = pde_motion(
+        v, om, L=L, T=T, M=N, N=N, time_steps=time_steps, delta=delta,
+        saturation=sat, init=init, binding=binding, scheme='up'
+    )
+
+    z_bins, th_bins, m_bins, forces, torques, bin_fluxes = pde_bins(
         v, om, L=L, T=T, M=N, N=N, time_steps=time_steps, delta=delta,
         saturation=sat, init=init, binding=binding
     )
+    if th_count:
+        pde_count = np.trapz(m_mesh, z_mesh[:, 0], axis=0)
 
-    z_bins, th_bins, m_bins, forces, torques = pde_bins(
-        v, om, L=L, T=T, M=N, N=N, time_steps=time_steps, delta=delta,
-        saturation=sat, init=init, binding=binding
-    )
+        bin_count = np.trapz(m_bins, z_mesh[:, 0], axis=0)
 
-    pde_count = np.trapz(np.trapz(m_mesh, z_mesh[:, 0], axis=0), th_mesh[0, :],
-                         axis=0)
+        pde_flux_int = cumtrapz(pde_fluxes, t)
+        bin_flux_int = cumtrapz(bin_fluxes, t)
+        fix_flux_int = cumtrapz(np.mean(ffl_arr/bond_max, axis=-1), t)
+        var_flux_int = cumtrapz(np.mean(vfl_arr/bond_max, axis=-1), t)
+    else:
+        pde_count = np.trapz(np.trapz(m_mesh, z_mesh[:, 0], axis=0), th_mesh[0, :],
+                             axis=0)
 
-    bin_count = np.sum(np.trapz(m_bins, z_bins[:, 0], axis=0), axis=0)
+        bin_count = np.sum(np.trapz(m_bins, z_bins[:, 0], axis=0), axis=0)
 
-    plt.plot(tp, np.mean(fixed_arr, axis=0)*nu/bond_max, 'b',
-             label='Fixed time step')
-    plt.plot(tp, (np.mean(fixed_arr, axis=0) + 3*np.std(fixed_arr, axis=0)
-                  / np.sqrt(trials))*nu/bond_max, 'b--',
-             tp, (np.mean(fixed_arr, axis=0) - 3*np.std(fixed_arr, axis=0)
-                  / np.sqrt(trials))*nu/bond_max, 'b--', linewidth=.5)
-    plt.plot(tp, np.mean(var_arr, axis=0)*nu/bond_max, 'g',
-             label='Variable time step')
-    plt.plot(tp, (np.mean(var_arr, axis=0) + 3*np.std(var_arr, axis=0)
-                  / np.sqrt(trials))*nu/bond_max, 'g--',
-             tp, (np.mean(var_arr, axis=0) - 3*np.std(var_arr, axis=0)
-                  / np.sqrt(trials))*nu/bond_max, 'g--', linewidth=.5)
-    plt.plot(t, pde_count, label='PDE')
-    plt.plot(t, bin_count*nu, 'r', label='PDE with bins')
-    plt.legend(loc='best')
-    plt.show()
+        # pde_count_tot = cumtrapz(pde_count, t)
+        # bin_count_tot = cumtrapz(bin_count, t)
+
+    if th_count:
+        fig, ax = plt.subplots(ncols=2, figsize=(14, 9))
+
+        ims = []
+        for i in range(time_steps+1):
+            shift = -np.argmin(th_bins[:, i])
+            im = ax[0].plot(th_mesh[0, :], pde_count[:, i], 'k')
+            im.append(ax[0].step(np.roll(th_bins[:, i], shift=shift),
+                                 np.roll(bin_count[:, i], shift=shift), 'r')[0])
+            im.append(ax[0].step(np.roll(th_bins[:, i], shift=shift),
+                                 np.roll(np.mean(fixed_arr/float(bond_max),
+                                                 axis=-1)[i, :], shift=shift),
+                                 'b')[0])
+            im.append(ax[0].step(np.roll(th_bins[:, i], shift=shift),
+                                 np.roll(np.mean(var_arr/float(bond_max),
+                                                 axis=-1)[i, :], shift=shift),
+                                 'g')[0])
+
+            im.append(ax[1].plot(t[:i], pde_flux_int[:i], 'k')[0])
+            im.append(ax[1].plot(t[:i], bin_flux_int[:i], 'r')
+                      [0])
+            im.append(ax[1].plot(t[:i], fix_flux_int[:i], 'b')[0])
+            im.append(ax[1].plot(t[:i], var_flux_int[:i], 'g')[0])
+            ims.append(im)
+
+        ani = animation.ArtistAnimation(fig,  ims, interval=25, blit=True, repeat_delay=1000)
+
+        ax[0].set_xlabel('$\\theta$ position')
+        ax[0].set_ylabel('Bond density')
+        ax[0].set_title('Bond density evolution')
+        plt.show()
+
+    else:
+        plt.plot(tp, np.mean(fixed_arr, axis=-1)*nu/bond_max, 'b',
+                 label='Fixed time step')
+        plt.plot(tp, (np.mean(fixed_arr, axis=-1) + 3*np.std(fixed_arr, axis=-1)
+                      / np.sqrt(trials))*nu/bond_max, 'b--',
+                 tp, (np.mean(fixed_arr, axis=-1) - 3*np.std(fixed_arr, axis=-1)
+                      / np.sqrt(trials))*nu/bond_max, 'b--', linewidth=.5)
+        plt.plot(tp, np.mean(var_arr, axis=-1)*nu/bond_max, 'g',
+                 label='Variable time step')
+        plt.plot(tp, (np.mean(var_arr, axis=-1) + 3*np.std(var_arr, axis=-1)
+                      / np.sqrt(trials))*nu/bond_max, 'g--',
+                 tp, (np.mean(var_arr, axis=-1) - 3*np.std(var_arr, axis=-1)
+                      / np.sqrt(trials))*nu/bond_max, 'g--', linewidth=.5)
+        plt.plot(t, pde_count, label='PDE')
+        plt.plot(t, bin_count*nu, 'r', label='PDE with bins')
+
+        plt.xlabel('Nondimensional time')
+        plt.ylabel('Bond quantity')
+        plt.legend(loc='best')
+        plt.show()
 
     # Define parameter array and filename, and save the count data
     # The time is included to prevent overwriting an existing file
@@ -451,9 +604,14 @@ def window_reactions(v, om, N, time_steps, trials, proc):
     file_path = './data/mov_rxns/'
     # file_name = 'multimov_fixed_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om, trials, strftime('%d%m%y'))
 
-    # This filename specifies the
-    file_name = 'multimov_window_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'.format(N, v, om,
-                                                                                      trials, strftime('%d%m%y'))
+    # This filename specifies the window experiment
+    if th_count:
+        file_name = ('multimov_thwindow_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'
+                     .format(N, v, om, trials, strftime('%d%m%y')))
+    else:
+        file_name = ('multimov_window_N{:d}_v{:g}_om{:g}_trials{:d}_{:s}.npz'
+                     .format(N, v, om, trials, strftime('%d%m%y')))
+
     np.savez_compressed(file_path+file_name,
                         par_array, fixed_arr, var_arr, pde_count, bin_count, tp,
                         par_array=par_array, fixed_array=fixed_arr,
@@ -579,12 +737,18 @@ def simulate_pde_bins():
 
 
 if __name__ == '__main__':
-    v = float(raw_input('v: '))
-    om = float(raw_input('om: '))
-    N = int(raw_input('N: '))
-    time_steps = int(raw_input('time steps: '))
-    trials = int(raw_input('trials: '))
-    proc = int(raw_input('processes: '))
+    # v = float(raw_input('v: '))
+    # om = float(raw_input('om: '))
+    # N = int(raw_input('N: '))
+    # time_steps = int(raw_input('time steps: '))
+    # trials = int(raw_input('trials: '))
+    # proc = int(raw_input('processes: '))
+    v = 0
+    om = 5
+    N = 64
+    time_steps = 100
+    trials = 4
+    proc = 4
     window_reactions(v=v, om=om, N=N, time_steps=time_steps, trials=trials,
                      proc=proc)
     # simulate_variable()
