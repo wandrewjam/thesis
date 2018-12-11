@@ -35,7 +35,7 @@ def _form(bond_mesh, form_rate, h, dt, sat):
 
 
 def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
-                   scheme):
+                   scheme, forcing):
     new_bonds = np.copy(bond_mesh)
     if scheme == 'up':
         new_bonds[:-1, :-1] += _up(bond_mesh, v, h, dt, axis=0)
@@ -43,6 +43,7 @@ def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
         new_bonds[:-1, :-1] += _form(bond_mesh, form_rate[:-1, :-1], h, dt,
                                      sat)
         new_bonds[:-1, :-1] /= (1 + dt*break_rate[:-1, :-1])
+        new_bonds[:-1, :-1] += forcing[:-1, :-1]
     elif scheme == 'bw':
         new_bonds[:-2, :-1] += _bw(bond_mesh, v, h, dt, axis=0)
         new_bonds[:-1, :-2] += _bw(bond_mesh, om, nu, dt, axis=1)
@@ -53,6 +54,7 @@ def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
         new_bonds[:-1, :-1] += _form(bond_mesh, form_rate[:-1, :-1], h, dt,
                                      sat)
         new_bonds[:-1, :-1] /= (1 + dt*break_rate[:-1, :-1])
+        new_bonds[:-1, :-1] += forcing[:-1, :-1]
     return new_bonds
 
 
@@ -229,7 +231,7 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
 
 def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
                eta=0.1, delta=3.0, kap=1.0, sat=True, binding='both',
-               scheme='up'):
+               scheme='up', forcing=None):
     # Numerical Parameters
     z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
                                   np.linspace(-np.pi/2, np.pi/2, N+1),
@@ -256,9 +258,17 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
     if v*dt/h > 1:
         print('Warning: the CFL condition for z is not satisfied!')
 
+    if forcing is None:
+        def forcing(z_mesh, th_mesh, t):
+            return np.zeros(shape=z_mesh.shape + t.shape)
+
+    force_mesh = forcing(z_mesh, th_mesh, t)
+
     for i in range(time_steps):
         m_mesh[:, :, i+1] = _eulerian_step(m_mesh[:, :, i], v, om, h, nu, dt,
-                                           form_rate, break_rate, sat, scheme)
+                                           form_rate, break_rate, sat, scheme,
+                                           forcing=(force_mesh[:, :, i] +
+                                                    force_mesh[:, :, i+1])/2.)
 
         forces[i+1] = nd_force(m_mesh[:, :, i+1], z_mesh, th_mesh)  # Changed force calculations to integrate over all z and th meshes
         torques[i+1] = nd_torque(m_mesh[:, :, i+1], z_mesh, th_mesh, d_prime)
@@ -267,7 +277,8 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
 
 
 def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
-             delta=3.0, kap=1.0, saturation=True, binding='both'):
+             delta=3.0, kap=1.0, saturation=True, binding='both',
+             forcing=None):
 
     # Full Model
     z_vec = np.linspace(-L, L, 2*M+1)
@@ -288,6 +299,11 @@ def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta
     m_mesh = np.zeros(shape=(2*M+1, 2*N, time_steps+1))  # Bond densities are initialized to zero
     forces, torques = np.zeros(shape=time_steps+1), np.zeros(shape=time_steps+1)
     l_new = length(z_mesh, th_mesh, d_prime)
+
+    if forcing is None:
+        def forcing(z_mesh, th_mesh, t):
+            return np.zeros(shape=z_mesh.shape + t.shape)
+
     for i in range(time_steps):
         # bond_list[:, 0] += -dt*v  # Update z positions
         th_mesh += -dt*om  # Update theta bin positions
