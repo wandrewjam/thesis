@@ -1,117 +1,102 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from stochastic_reactions_PDE import pde_motion, pde_bins
 from constructA import length
+from timeit import default_timer as timer
 
 
-def pde_only(L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
-             delta=3.0, kap=1.0, v=18, om=17, saturation=True):
+# Code to analyze convergence of the deterministic schemes with
+# prescribed motion
 
-    # Numerical Parameters
-    z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
-                                  np.linspace(-np.pi/2, np.pi/2, N+1),
-                                  indexing='ij')
+# I need to be more intelligent about choosing a true solution. This
+# forcing function is too large in the corners to expect reasonable
+# convergence
+def _forcing(z_mesh, th_mesh, t, v, om):
+    L = 2.5
+    kappa, eta = 1, .1
+    d, delta = .1, 3
+    l_mesh = length(z_mesh, th_mesh, d_prime=d)[:, :]
+    prod = (z_mesh - L)*(z_mesh + L + .5)*(th_mesh-np.pi/2)*(th_mesh+np.pi)/10
+    integral = 4*t/(1 + 4*t)*(th_mesh-np.pi/2)*(th_mesh + np.pi)/10*(325./12)
 
-    t = np.linspace(0, T, time_steps+1)
-    h = z_mesh[1, 0] - z_mesh[0, 0]
-    nu = th_mesh[0, 1] - th_mesh[0, 0]
-    dt = t[1]-t[0]
-
-    m_mesh = np.zeros(shape=(2*M+1, N+1, time_steps+1))  # Bond densities are initialized to zero
-    l_matrix = length(z_mesh, th_mesh, d_prime)
-
-    # Check for the CFL condition
-
-    if om*dt/nu > 1:
-        print('Warning: the CFL condition for theta is not satisfied!')
-    if v*dt/h > 1:
-        print('Warning: the CFL condition for z is not satisfied!')
-
-    for i in range(time_steps):
-        if saturation:
-            m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
-                                     v*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
-                                     dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2) *
-                                     (1 - h*np.tile(np.sum(m_mesh[:-1, :-1, i], axis=0), reps=(2*M, 1)))) /\
-                                    (1 + dt*np.exp(delta*l_matrix[:-1, :-1]))
-        else:
-            m_mesh[:-1, :-1, i+1] = (m_mesh[:-1, :-1, i] + om*dt/nu*(m_mesh[:-1, 1:, i] - m_mesh[:-1, :-1, i]) +
-                                     v*dt/h*(m_mesh[1:, :-1, i] - m_mesh[:-1, :-1, i]) +
-                                     dt*kap*np.exp(-eta/2*l_matrix[:-1, :-1]**2)) /\
-                                    (1 + dt*np.exp(delta*l_matrix[:-1, :-1]))
-
-    return m_mesh, t
+    return (-kappa*np.exp(-eta/2*l_mesh**2)*(1 - integral)
+            - 16*t*prod/(1 + 4*t)**2 + 4*prod/(1 + 4*t) + 4*t*prod/(1 + 4*t)
+            * np.exp(delta*l_mesh) - 4*v*t/(1 + 4*t)*(th_mesh - np.pi/2)
+            * (th_mesh + np.pi)/10 * (2*z_mesh + 0.5)
+            - 4*om*t/(1 + 4*t)*(z_mesh - L)*(z_mesh + L + .5)/10*(th_mesh
+                                                                  + np.pi/2))
 
 
-L, T = 2.5, 0.4
-top = 7
-m_M, m_N, m_time = list(), list(), list()
-t_M, t_N, t_time = list(), list(), list()
-M_tot, N_tot, time_tot = list(), list(), list()
-err = np.zeros(shape=(top-1, 3))
-
-# Compute the "exact" solution first
-m_fine, t_fine = pde_only(L=L, T=T, M=2**top, N=2**top, time_steps=25*2**top)
-
-for j in range(1, top):
-    temp_m, temp_t = pde_only(L=L, T=T, M=2**j, N=2**top, time_steps=25*2**top)
-    m_M.append(temp_m)
-    t_M.append(temp_t)
-
-    temp_m, temp_t = pde_only(L=L, T=T, M=2**top, N=2**j, time_steps=25*2**top)
-    m_N.append(temp_m)
-    t_N.append(temp_t)
-
-    temp_m, temp_t = pde_only(L=L, T=T, M=2**j, N=2**j, time_steps=25*2**j)
-    m_time.append(temp_m)
-    t_time.append(temp_t)
-
-for j in range(1, top):
-    # Compute the L2 error for each time step
-    l2M = L * 2**(-j) * np.sum((m_M[j-1] - m_fine[::2**(top-j), :, :])**2, axis=(0, 1))
-    l2N = np.pi * 2**(-j) * np.sum((m_N[j-1] - m_fine[:, ::2**(top-j), :])**2, axis=(0, 1))
-    l2time = L * np.pi* 2**(-2*j) * np.sum((m_time[j-1] - m_fine[::2**(top-j), ::2**(top-j), ::2**(top-j)])**2,
-                                           axis=(0, 1))
-
-    # Compute the L2 error across time steps
-    err[j-1, 0] = np.sqrt(np.sum(l2M[1:] * (t_M[j-1][1:] - t_M[j-1][:-1])))
-    err[j-1, 1] = np.sqrt(np.sum(l2N[1:] * (t_N[j-1][1:] - t_M[j-1][:-1])))
-    err[j-1, 2] = np.sqrt(np.sum(l2time[1:] * (t_time[j-1][1:] - t_time[j-1][:-1])))
-
-    # Calculate the total number of bonds in each result
-    M_tot.append(np.trapz(np.trapz(m_M[j-1], np.linspace(-L, L, 2**(j+1)+1), axis=0),
-                          np.linspace(-np.pi/2, np.pi/2, 2**top+1), axis=0))
-    N_tot.append(np.trapz(np.trapz(m_N[j-1], np.linspace(-L, L, 2**(top+1)+1), axis=0),
-                          np.linspace(-np.pi/2, np.pi/2, 2**j+1), axis=0))
-    time_tot.append(np.trapz(np.trapz(m_time[j-1], np.linspace(-L, L, 2**(j+1)+1), axis=0),
-                    np.linspace(-np.pi/2, np.pi/2, 2**j+1), axis=0))
-
-steps = 2**np.arange(start=1, stop=top)
-q = np.mean(np.log2(err[:-1, :]/err[1:, :]), axis=0)
-C = np.max(err*steps[:, None]**q[None, :], axis=0)
-
-print(q)
-
-fig, ax = plt.subplots(ncols=3, figsize=(15, 8))
-
-for j in range(3):
-    ax[j].loglog(steps, err[:, j])
-    ax[j].loglog(steps, C[j]/steps**q[j], 'k--')
-    ax[j].set_xlabel('Steps')
-    ax[j].text(steps[1], C[j]/steps[1]**q[j], '$q = {:g}$'.format(q[j]))
-
-ax[0].set_title('Convergence in $h$ ($z$ discretization)')
-ax[1].set_title('Convergence in $\\nu$ ($\\theta$ discretization)')
-ax[2].set_title('Convergence in $dt$')
-for a in ax:
-    a.grid(True, which='both')
-    a.set_ylabel('Error')
-
-fig1, ax1 = plt.subplots(ncols=3, figsize=(15, 8))
-for j in range(1, top):
-    ax1[0].plot(t_M[j-1], M_tot[j-1], label='M = {:d}'.format(2**j))
-    ax1[1].plot(t_N[j-1], N_tot[j-1], label='N = {:d}'.format(2**j))
-    ax1[2].plot(t_time[j-1], time_tot[j-1], label='Time steps = {:d}'.format(25*2**j))
-plt.legend()
-plt.show()
+def _true(z_mesh, th_mesh, t):
+    prod = (z_mesh - 2.5)*(z_mesh + 3)*(th_mesh - np.pi/2)*(th_mesh + np.pi)/10
+    return 4*t*prod/(1 + 4*t)
 
 
+def _err_estimate(approx, true, L=2.5, T=1, bins=False):
+    z_steps, th_steps, t_steps = approx.shape
+    z_mesh = np.linspace(-L, L, num=z_steps)
+    t_mesh = np.linspace(0, T, num=t_steps)
+    if bins:
+        nu = 2*np.pi/th_steps
+        return np.sqrt(
+            np.trapz(nu*np.sum(np.trapz((approx-true)**2, z_mesh, axis=0),
+                               axis=0), t_mesh)
+        )
+    else:
+        th_mesh = np.linspace(-np.pi/2, np.pi/2, num=th_steps)
+        return np.sqrt(
+            np.trapz(np.trapz(np.trapz((approx-true)**2, z_mesh, axis=0),
+                              th_mesh, axis=0), t_mesh)
+        )
+
+
+def conv_study(v, om, top, L=2.5, T=1):
+    exponents = np.arange(top) + 1
+    Ms, Ns = 2**exponents, 2**exponents
+    steps = Ms/2*np.maximum(v, om)
+
+    def forcing(z_mesh, th_mesh, t):
+        return _forcing(z_mesh[:, :, None], th_mesh[:, :, None], t[None, None, :], v, om)
+
+    up_results, bw_results, bn_results = list(), list(), list()
+    for i in range(top):
+        up_results.append(pde_motion(v, om, T=T, M=Ms[i], N=Ns[i],
+                                     time_steps=steps[i], scheme='up')[2])
+        bw_results.append(pde_motion(v, om, T=T, M=Ms[i], N=Ns[i],
+                                     time_steps=steps[i], scheme='bw')[2])
+        bn_results.append(pde_bins(v, om, T=T, M=Ms[i], N=Ns[i],
+                                   time_steps=steps[i])[2])
+
+    up_errs, bw_errs, bn_errs = list(), list(), list()
+    for i in range(top-1):
+        skip = 2**(top - i - 1)
+
+        up_errs.append(
+            _err_estimate(up_results[i], up_results[-1][::skip, ::skip, ::skip],
+                          L, T)
+        )
+        bw_errs.append(
+            _err_estimate(bw_results[i], bw_results[-1][::skip, ::skip, ::skip],
+                          L, T)
+        )
+        bn_errs.append(
+            _err_estimate(bn_results[i], bn_results[-1][::skip, ::skip, ::skip],
+                          L, T, bins=True)
+        )
+
+    return 1./Ms, up_errs, bw_errs, bn_errs
+
+
+if __name__ == '__main__':
+    v, om = 5, 0
+    top = 7
+    steps, up_errs, bw_errs, bn_errs = conv_study(v, om, top)
+
+    steps = steps[:-1]
+    plt.loglog(steps, up_errs, label='Upwind scheme')
+    plt.loglog(steps, bw_errs, label='Beam-Warming scheme')
+    plt.loglog(steps, bn_errs, label='Semi-lagrangian scheme')
+    plt.legend()
+    plt.show()
+
+    np.savez_compressed('./data/conv_data/det_schemes_conv1.npz')
