@@ -89,7 +89,7 @@ def conv_study(v, om, top, L=2.5, T=1):
 
 if __name__ == '__main__':
     v, om = 5, 0
-    top = 7
+    top = 9
     steps, up_errs, bw_errs, bn_errs = conv_study(v, om, top)
 
     steps = steps[:-1]
