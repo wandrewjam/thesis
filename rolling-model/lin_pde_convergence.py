@@ -53,7 +53,7 @@ def _err_estimate(approx, true, L=2.5, T=1, bins=False):
 def conv_study(v, om, top, L=2.5, T=1):
     exponents = np.arange(top) + 1
     Ms, Ns = 2**exponents, 2**exponents
-    steps = Ms/2*np.maximum(v, om)
+    steps = np.ceil(Ms/2*np.maximum(v, om)).astype(int)
 
     def forcing(z_mesh, th_mesh, t):
         return _forcing(z_mesh[:, :, None], th_mesh[:, :, None], t[None, None, :], v, om)
