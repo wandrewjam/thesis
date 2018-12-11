@@ -24,17 +24,17 @@ def rel_err(count):
     return (count - bw_count)/bw_count[-1]
 
 
-plt.plot(tp, np.zeros(shape=tp.shape), 'k', label='Reference line')
 plt.plot(tp, rel_err(up_count), label='Eulerian upwind')
-plt.plot(tp, rel_err(bn_count*nu), label='Semi-lagrangian')
+plt.plot(tp, rel_err(bn_count*nu), label='Semi-lagrangian', alpha=.5)
+plt.plot(tp, np.zeros(shape=tp.shape), 'k', label='Reference line')
 plt.xlabel('Nondimensional time')
 plt.ylabel('Error relative to Eulerian Beam-Warming scheme')
 plt.legend()
 plt.show()
 
-plt.plot(tp, bw_count, 'k', label='Eulerian Beam-Warming')
 plt.plot(tp, up_count, label='Eulerian upwind')
 plt.plot(tp, bn_count*nu, label='Semi-lagrangian')
+plt.plot(tp, bw_count, 'k', label='Eulerian Beam-Warming')
 plt.xlabel('Nondimensional time')
 plt.ylabel('Bond quantity')
 plt.legend()
