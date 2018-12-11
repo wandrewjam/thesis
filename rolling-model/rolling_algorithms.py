@@ -55,14 +55,13 @@ def _cfl_check(v_f, om_f, dt, h, nu, scheme):
 
 
 def _generate_coordinate_arrays(M, N, time_steps, L, T, d):
-    z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
-                                  np.linspace(-np.pi/2, np.pi/2, N+1),
-                                  indexing='ij')
-    l_mesh = length(z_mesh, th_mesh, d)
+    z_mesh = np.linspace(-L, L, 2*M+1)
+    th_mesh = np.linspace(-np.pi/2, np.pi/2, N+1)
+    l_mesh = length(z_mesh, th_mesh[None, :], d)
     t = np.linspace(0, T, time_steps+1)
-    h = z_mesh[1, 0] - z_mesh[0, 0]
-    nu = th_mesh[0, 1] - th_mesh[0, 0]
-    dt = t[1]-t[0]
+    h = z_mesh[1] - z_mesh[0]
+    nu = th_mesh[1] - th_mesh[0]
+    dt = t[1] - t[0]
 
     return z_mesh, th_mesh, l_mesh, t, h, nu, dt
 
@@ -127,7 +126,7 @@ def pde_eulerian(M, N, time_steps, m0, **kwargs):
              + om*dt/nu*(bond_mesh[:-1, 1:] - bond_mesh[:-1, :-1])
              + v*dt/h*(bond_mesh[1:, :-1] - bond_mesh[:-1, :-1])
              + dt*form_rate*(1 - sat*np.tile(np.trapz(bond_mesh[:, :-1],
-                                                      z_mesh[:, 0], axis=0),
+                                                      z_mesh, axis=0),
                                              reps=(2*M, 1))))
             / (1 + dt*break_rate)
         )
