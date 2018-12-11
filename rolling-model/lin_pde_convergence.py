@@ -88,8 +88,10 @@ def conv_study(v, om, top, L=2.5, T=1):
 
 
 if __name__ == '__main__':
-    v, om = 5, 0
-    top = 7
+    in_str = raw_input('Enter v, om, and top: ')
+    in_str = in_str.split()
+    v, om = float(in_str[0]), float(in_str[1])
+    top = int(in_str[2])
     steps, up_errs, bw_errs, bn_errs = conv_study(v, om, top)
 
     steps = steps[:-1]
