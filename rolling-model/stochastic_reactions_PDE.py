@@ -362,7 +362,7 @@ def count_variable(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_
     else:
         print('Completed one variable run. This run took {:g} seconds.'.format(end-start))
 
-    indices = np.searchsorted(t, t_sample, side='right') - 1
+    indices = np.searchsorted(t, t_sample, side='left')
     return np.array(count)[indices], np.array(forces)[indices], np.array(torques)[indices], t
 
 
@@ -538,9 +538,9 @@ def simulate_pde_bins():
 if __name__ == '__main__':
 
     # simulate_fixed()
-    # simulate_variable()
-    simulate_pde()
-    # simulate_pde_bins()
+    simulate_variable()
+    # simulate_pde()
+    simulate_pde_bins()
 
     # trials = int(raw_input('Number of trials: '))
     #
