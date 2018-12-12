@@ -3,13 +3,10 @@ from stochastic_model_ssa import *
 from sampling import *
 import matplotlib.pyplot as plt
 from timeit import default_timer as timer
-from guppy import hpy
-from memory_profiler import profile
 
 ##################### Check the forces! Compare with the known solutions #############################
 
 
-@profile
 def stochastic_comparison(num_iterations=100, num_samples=200, M=100, N=100,
                           time_steps=1000, bond_max=100, kap=1.0, delta=3.0,
                           eta_v=.01, eta_om=.01, gamma=20.0, plot=True):
@@ -90,9 +87,9 @@ def stochastic_comparison(num_iterations=100, num_samples=200, M=100, N=100,
 
 
 if __name__ == '__main__':
-    exp = 8
-    stochastic_comparison(M=2**exp, N=2**exp, time_steps=2000, bond_max=10,
-                          gamma=20.0, num_iterations=1)
+    exp = 7
+    eta_v = float(raw_input('eta_v and eta_om: '))
+    stochastic_comparison(M=2**exp, N=2**exp, time_steps=1000, bond_max=10,
+                          gamma=20.0, num_iterations=1, eta_v=eta_v,
+                          eta_om=eta_v)
     print('Done!')
-    h = hpy()
-    print h.heap()
