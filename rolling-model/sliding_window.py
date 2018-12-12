@@ -10,9 +10,6 @@ from timeit import default_timer as timer
 from time import strftime
 
 
-# NOTE: Currently this code simulates the sliding window experiment #
-
-
 def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
                  d_prime=0.1, eta=0.1, delta=3.0, kap=1.0, saturation=True,
                  init=None, binding='both'):
@@ -20,7 +17,6 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
     # Full Model
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
-    th_vec += nu/2
 
     if init == 'window':
         bond_list = np.hstack((np.random.uniform(low=-L, high=L,
@@ -458,7 +454,7 @@ def count_variable(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
         print('Completed one variable run. This run took {:g} seconds.'
               .format(end-start))
 
-    indices = np.searchsorted(t, t_sample, side='right') - 1
+    indices = np.searchsorted(t, t_sample, side='left')
     return (np.array(count)[indices], np.array(forces)[indices],
             np.array(torques)[indices], t, np.array(flux)[indices])
 
@@ -477,7 +473,7 @@ def window_reactions(v, om, N, time_steps, trials, proc):
     bond_max = 10
     L = 2.5
     nu = np.pi/N
-    th_count = True
+    th_count = False
 
     pool = mp.Pool(processes=proc)
     fixed_result = [pool.apply_async(
