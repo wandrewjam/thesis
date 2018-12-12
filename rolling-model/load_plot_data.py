@@ -3,15 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from time_dependent import time_dependent
 
-N = 256
+N = 2**7
 bond_max = 10
 eta_om = .01
 gamma = 20.0
-num_iterations = 100
+num_iterations = 1
 
 L = 2.5
-M = 256
-time_steps = 2000
+M = 2**7
+time_steps = 1000
 z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1), np.linspace(-np.pi/2, np.pi/2, N+1),
                               indexing='ij')
 
