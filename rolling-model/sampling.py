@@ -13,7 +13,7 @@ def sample_position(t, v, t_samp=None):
     pos = np.cumsum(v[1:]*(t[1:] - t[:-1]))
     if t_samp is None:
         t_samp = np.linspace(start=0, stop=np.max(t), num=100)
-        return np.insert(arr=pos[np.searchsorted(t, t_samp, side='right')-1], obj=0, values=0), t_samp
+        return np.insert(arr=pos[np.searchsorted(t, t_samp, side='left')], obj=0, values=0), t_samp
     else:
-        return np.insert(arr=pos[np.searchsorted(t, t_samp, side='right')-1], obj=0, values=0)
+        return np.insert(arr=pos[np.searchsorted(t, t_samp, side='left')], obj=0, values=0)
 
