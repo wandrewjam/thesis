@@ -536,11 +536,16 @@ def simulate_pde_bins():
 
 
 if __name__ == '__main__':
+    input = raw_input('Which algorithm? ')
 
-    # simulate_fixed()
-    simulate_variable()
-    # simulate_pde()
-    simulate_pde_bins()
+    if input == 'fixed':
+        simulate_fixed()
+    elif input == 'var':
+        simulate_variable()
+    elif input == 'pde':
+        simulate_pde()
+    elif input == 'bins':
+        simulate_pde_bins()
 
     # trials = int(raw_input('Number of trials: '))
     #
