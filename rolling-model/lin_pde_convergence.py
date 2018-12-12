@@ -104,4 +104,6 @@ if __name__ == '__main__':
     plt.show()
 
     np.savez_compressed('./data/conv_data/det_schemes_conv_v{:g}_om{:g}.npz'
-                        .format(v, om))
+                        .format(v, om), steps, up_errs, bw_errs, bn_errs,
+                        steps=steps, up_errs=up_errs, bw_errs=bw_errs,
+                        bn_errs=bn_errs)
