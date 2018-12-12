@@ -56,7 +56,8 @@ def conv_study(v, om, top, L=2.5, T=1):
     steps = np.ceil(Ms/2*np.maximum(v, om)).astype(int)
 
     def forcing(z_mesh, th_mesh, t):
-        return _forcing(z_mesh[:, :, None], th_mesh[:, :, None], t[None, None, :], v, om)
+        return _forcing(z_mesh[:, :, None], th_mesh[:, :, None], t[None, None,
+                                                                 :], v, om)
 
     up_results, bw_results, bn_results = list(), list(), list()
     for i in range(top):
@@ -102,4 +103,5 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
 
-    np.savez_compressed('./data/conv_data/det_schemes_conv1.npz')
+    np.savez_compressed('./data/conv_data/det_schemes_conv_v{:g}_om{:g}.npz'
+                        .format(v, om))
