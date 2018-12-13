@@ -220,9 +220,11 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
         # Calculate forces and torques
         zs = bond_list[:, 0]
         thetas = bond_list[:, 1].astype(int)
-        forces = np.append(forces, nu/bond_max*np.sum(a=zs-np.sin(th_vec[thetas])))
-        torques = np.append(torques, nu/bond_max*np.sum(a=(1-np.cos(th_vec[thetas])+d_prime)*np.sin(th_vec[thetas]) +
-                                                          (np.sin(th_vec[thetas])-zs)*np.cos(th_vec[thetas])))
+        forces = np.append(forces, nu/bond_max*np.sum(
+            a=zs - np.sin(th_vec[thetas])))
+        torques = np.append(torques, nu/bond_max*np.sum(
+            a=(1 - np.cos(th_vec[thetas]) + d_prime)*np.sin(th_vec[thetas])
+            + (np.sin(th_vec[thetas]) - zs)*np.cos(th_vec[thetas])))
 
     return master_list, t, forces, torques
 
