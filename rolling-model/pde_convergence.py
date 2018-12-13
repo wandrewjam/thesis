@@ -23,7 +23,7 @@ for j in range(bottom, top):
     M = 2**j
     N = 2**j
     time_steps = 25*2**j
-    file_str = './data/PDEdata_M{:d}_N{:d}_tsteps{:d}_eta{:g}_gamma{:g}_1order.npz'.format(
+    file_str = './data/conv_data/PDEdata_M{:d}_N{:d}_tsteps{:d}_eta{:g}_gamma{:g}_1order.npz'.format(
             M, N, time_steps, eta_v, gamma)
 
     data = np.load(file_str)
@@ -38,7 +38,7 @@ M = 2**top
 N = 2**top
 time_steps = 25*2**top
 
-file_str = './data/PDEdata_M{:d}_N{:d}_tsteps{:d}_eta{:g}_gamma{:g}_1order.npz'.format(
+file_str = './data/conv_data/PDEdata_M{:d}_N{:d}_tsteps{:d}_eta{:g}_gamma{:g}_1order.npz'.format(
         M, N, time_steps, eta_v, gamma)
 data_fine = np.load(file_str)
 v_fine, om_fine, m_fine, t_fine = data_fine['v'], data_fine['om'], data_fine['m_mesh'], data_fine['t']
