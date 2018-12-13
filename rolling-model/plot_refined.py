@@ -11,14 +11,14 @@ if __name__ == '__main__':
     # data_fixed = np.load(data_folder + 'multimov_fixed_N512_v0_om5_trials10000_191118.npz')
 
     # Load variable time step data
-    data_var = np.load(data_folder + 'multimov_var_N64_v0_om5_trials100_121218.npz')
+    data_var = np.load(data_folder + 'multimov_var_N512_v0_om5_trials1000_121218.npz')
 
     # Load PDE bins data
-    data_bins = np.load(data_folder + 'multimov_bins_pde_M64_N64_v0_om5_121218.npz')
+    data_bins = np.load(data_folder + 'multimov_bins_pde_M512_N512_v0_om5_121218.npz')
 
     bond_max = 10
-    trials = 100
-    N = 64
+    trials = 1000
+    N = 512
 
     tp = data_var['tp']
     # pde_count = data_pde['pde_count']
@@ -38,9 +38,9 @@ if __name__ == '__main__':
     #          tp[1:], ((fixed_avg - 2*fixed_std/np.sqrt(trials))*nu/bond_max - pde_count)[1:]/pde_count[1:], 'b:',
     #          linewidth=.5)
 
-    plt.plot(tp[1:], (var_avg/bond_max - bin_count)[1:]/bin_count[1:], 'g', label='Variable time step')
-    plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))/bond_max - bin_count)[1:]/bin_count[1:], 'g:',
-             tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))/bond_max - bin_count)[1:]/bin_count[1:], 'g:',
+    plt.plot(tp, (var_avg/bond_max - bin_count)/bin_count[-1], 'g', label='Variable time step')
+    plt.plot(tp[1:], ((var_avg + 2*var_std/np.sqrt(trials))/bond_max - bin_count)[1:]/bin_count[-1], 'g:',
+             tp[1:], ((var_avg - 2*var_std/np.sqrt(trials))/bond_max - bin_count)[1:]/bin_count[-1], 'g:',
              linewidth=.5)
 
     # plt.plot(tp[1:], (bin_count*nu - pde_count)[1:]/pde_count[1:], 'r', label='PDE with bins')
