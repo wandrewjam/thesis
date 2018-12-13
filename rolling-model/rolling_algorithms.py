@@ -87,7 +87,11 @@ def _upwind(v, om, bond_mesh, v_f, om_f, form_rate, break_rate,
 
     if save_bond_history:
         for i in range(time_steps + 1):
-            bond_mesh[:, :, i+1] = _upwind_step()
+            bond_mesh[:, :, i+1] = _upwind_step(bond_mesh[:, :, i])
+
+    else:
+        for i in range(time_steps + 1):
+            bond_mesh = _upwind_step(bond_mesh)
 
     return v, om, bond_mesh, forces, torques
 
