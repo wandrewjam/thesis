@@ -45,7 +45,7 @@ def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0,
 def nd_torque(m_mesh, z_mesh, th_mesh, d_prime=0):
     # Function to calculate net torque given a distribution of bonds, m
     tau = trapz(trapz(((1 - np.cos(th_mesh) + d_prime)*np.sin(th_mesh) +
-                       (np.sin(th_mesh) - z_mesh))*m_mesh, x=z_mesh,
+                       (np.sin(th_mesh) - z_mesh)*np.cos(th_mesh))*m_mesh, x=z_mesh,
                       axis=0), x=th_mesh[0,])
     return tau
 
