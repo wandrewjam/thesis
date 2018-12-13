@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from time_dependent import time_dependent
 
-N = 2**5
+exp = int(raw_input('exponent: '))
+N = 2**exp
 bond_max = 10
 eta_om = .01
 gamma = 20.0
@@ -11,8 +12,8 @@ num_iterations = 5
 nu = np.pi/N
 
 L = 2.5
-M = 2**5
-time_steps = 10*2**5
+M = 2**exp
+time_steps = 10*2**exp
 z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
                               np.linspace(-np.pi/2, np.pi/2, N+1),
                               indexing='ij')
