@@ -8,7 +8,7 @@ N = 2**exp
 bond_max = 10
 eta_om = .01
 gamma = 20.0
-num_iterations = 5
+num_iterations = 10000
 nu = np.pi/N
 
 L = 2.5
