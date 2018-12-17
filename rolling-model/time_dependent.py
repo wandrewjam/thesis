@@ -79,6 +79,7 @@ def time_dependent(expt='unbound', L=2.5, T=.4, M=100, N=100, time_steps=1000,
         m_mesh = np.zeros(shape=(2*M+1, N+1, time_steps+1))  # Bond densities are initialized to zero
     else:
         m_mesh = np.zeros(shape=(2*M+1, N+1))
+        bond_counts = np.zeros(shape=time_steps+1)
 
     if expt == 'unbound':
         # Initialize platelet velocities to fluid velocities (initial bond density is zero)
@@ -93,6 +94,8 @@ def time_dependent(expt='unbound', L=2.5, T=.4, M=100, N=100, time_steps=1000,
             m_mesh[:, :, 0] = m.reshape(2*M+1, -1, order='F')  # Reshape the m vector into an array
         else:
             m_mesh = m.reshape(2*M+1, -1, order='F')
+            bond_counts[0] = np.trapz(np.trapz(m_mesh, z_mesh[:, 0], axis=0),
+                                      th_mesh[0, :])
         # Note, the platelet velocities are already initialized to zero
         # plt.pcolormesh(z_mesh, th_mesh, m_mesh[:, :, 0])
         # plt.colorbar()
@@ -121,77 +124,76 @@ def time_dependent(expt='unbound', L=2.5, T=.4, M=100, N=100, time_steps=1000,
             f_prime = nd_force(m_mesh[:, :, i+1], z_mesh, th_mesh)
             tau = nd_torque(m_mesh[:, :, i+1], z_mesh, th_mesh, d_prime)
             v[i+1], om[i+1] = v_f[i] + f_prime/eta_v, om_f[i] + tau/eta_om
+
+        return v, om, m_mesh, t
     else:
         for i in range(time_steps):
             m_mesh = _eulerian_step(m_mesh, v[i], om[i], h, nu, dt, form_rate,
                                     break_rate, sat, scheme)
 
+            bond_counts = np.trapz(np.trapz(m_mesh, z_mesh[:, 0], axis=0),
+                                   th_mesh[0, :])
             f_prime = nd_force(m_mesh, z_mesh, th_mesh)
             tau = nd_torque(m_mesh, z_mesh, th_mesh, d_prime)
             v[i+1], om[i+1] = v_f[i] + f_prime/eta_v, om_f[i] + tau/eta_om
 
-
-    # fig = plt.figure()
-    #
-    # ims = []
-    # norm = Normalize(vmin=0, vmax=np.max(m_mesh))
-    # for i in range(time_steps//10+1):
-    #     im = plt.pcolormesh(z_mesh, th_mesh, m_mesh[:, :, 10*i], animated=True, norm=norm)
-    #     ims.append([im])
-    #
-    # ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
-    # plt.colorbar()
-    # plt.xlabel('$z$ position')
-    # plt.ylabel('$\\theta$ position')
-    # plt.title('Bond density ($m$) evolution')
-    # plt.show()
-    #
-    # if save_movie:
-    #     ani.save('mov1.mp4')
-    #
-    # plt.plot(t, v)
-    # plt.xlabel('Nondimensional time ($s$)')
-    # plt.ylabel('ND linear velocity ($v$)')
-    # plt.show()
-    #
-    # plt.plot(t, om)
-    # plt.xlabel('Nondimensional time ($s$)')
-    # plt.ylabel('ND angular velocity ($\\omega$)')
-    # plt.show()
-
-    return v, om, m_mesh, t
+        return v, om, bond_counts, t
 
 
 if __name__ == '__main__':
-    up_results = time_dependent(M=2**6, N=2**6, time_steps=10*2**6, save_m=True,
-                                scheme='up')
-    bw_results = time_dependent(M=2**6, N=2**6, time_steps=10*2**6, save_m=True,
-                                scheme='bw')
+    exp = int(raw_input('exponent: '))
 
-    z_vec = np.linspace(-2.5, 2.5, num=2**7+1)
-    th_vec = np.linspace(-np.pi/2, np.pi/2, num=2**6+1)
+    M, N = 2**exp, 2**exp
+    time_steps = 20*2**exp
+    eta_om = 0.01
+    gamma = 20.0
 
-    up_quant = np.trapz(np.trapz(up_results[2], z_vec, axis=0), th_vec, axis=0)
-    bw_quant = np.trapz(np.trapz(bw_results[2], z_vec, axis=0), th_vec, axis=0)
+    up_v, up_om, up_counts, up_t = (
+        time_dependent(M=M, N=N, time_steps=time_steps, eta_v=eta_om,
+                       eta_om=eta_om, gamma=gamma, save_m=False, scheme='up')
+    )
 
-    fig, ax = plt.subplots(ncols=3, figsize=(12, 6))
-    ax[0].plot(up_results[-1], up_results[0], label='Upwind scheme')
-    ax[0].plot(bw_results[-1], bw_results[0], label='Beam-Warming scheme')
-    ax[0].legend()
-    ax[0].set_xlabel('Nondimensional time')
-    ax[0].set_ylabel('Translation velocity ($v$)')
+    np.savez_compressed('./data/up_M{:d}_N{:d}_eta{:g}_gamma{:g}'.format(
+        M, N, eta_om, gamma), up_v, up_om, up_counts, up_t, v=up_v, om=up_om,
+        counts=up_counts, t=up_t)
+    print('Saved upwind data in ./data/up_M{:d}_N{:d}_eta{:g}_gamma{:g}.npz'
+          .format(M, N, eta_om, gamma))
 
-    ax[1].plot(up_results[-1], up_results[1], label='Upwind scheme')
-    ax[1].plot(bw_results[-1], bw_results[1], label='Beam-Warming scheme')
-    ax[1].legend()
-    ax[1].set_xlabel('Nondimensional time')
-    ax[1].set_ylabel('Rotation velocity ($\\omega$)')
+    bw_v, bw_om, bw_counts, bw_t = (
+        time_dependent(M=M, N=N, time_steps=time_steps, eta_v=eta_om,
+                       eta_om=eta_om, gamma=gamma, save_m=False, scheme='bw')
+    )
 
-    ax[2].plot(up_results[-1], up_quant, label='Upwind scheme')
-    ax[2].plot(bw_results[-1], bw_quant, label='Beam-Warming scheme')
-    ax[2].legend()
-    ax[2].set_xlabel('Nondimensional time')
-    ax[2].set_ylabel('Bond quantity')
+    np.savez_compressed('./data/bw_M{:d}_N{:d}_eta{:g}_gamma{:g}'.format(
+        M, N,eta_om, gamma), bw_v, bw_om, bw_counts, bw_t, v=bw_v, om=bw_om,
+        counts=bw_counts, t=bw_t)
+    print('Saved B-W data in ./data/bw_M{:d}_N{:d}_eta{:g}_gamma{:g}'
+          .format(M, N, eta_om, gamma))
 
-    plt.tight_layout()
-    plt.show()
+    # z_vec = np.linspace(-2.5, 2.5, num=2**7+1)
+    # th_vec = np.linspace(-np.pi/2, np.pi/2, num=2**6+1)
+    #
+    # up_quant = np.trapz(np.trapz(up_results[2], z_vec, axis=0), th_vec, axis=0)
+    # bw_quant = np.trapz(np.trapz(bw_results[2], z_vec, axis=0), th_vec, axis=0)
+    #
+    # fig, ax = plt.subplots(ncols=3, figsize=(12, 6))
+    # ax[0].plot(up_results[-1], up_results[0], label='Upwind scheme')
+    # ax[0].plot(bw_results[-1], bw_results[0], label='Beam-Warming scheme')
+    # ax[0].legend()
+    # ax[0].set_xlabel('Nondimensional time')
+    # ax[0].set_ylabel('Translation velocity ($v$)')
+    #
+    # ax[1].plot(up_results[-1], up_results[1], label='Upwind scheme')
+    # ax[1].plot(bw_results[-1], bw_results[1], label='Beam-Warming scheme')
+    # ax[1].legend()
+    # ax[1].set_xlabel('Nondimensional time')
+    # ax[1].set_ylabel('Rotation velocity ($\\omega$)')
+    #
+    # ax[2].plot(up_results[-1], up_quant, label='Upwind scheme')
+    # ax[2].plot(bw_results[-1], bw_quant, label='Beam-Warming scheme')
+    # ax[2].legend()
+    # ax[2].set_xlabel('Nondimensional time')
+    # ax[2].set_ylabel('Bond quantity')
+    #
+    # plt.tight_layout()
+    # plt.show()
