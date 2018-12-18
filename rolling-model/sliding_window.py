@@ -10,6 +10,25 @@ from timeit import default_timer as timer
 from time import strftime
 
 
+def frac(th_mesh, nu):
+    assert nu > 0  # Checks that nu is valid
+
+    def ramp(th):
+        return ((np.pi + nu)/2 - np.abs(th))/nu
+
+    th_vec = th_mesh.flatten(order='F')
+    fraction = np.piecewise(th_vec,
+                            [np.pi/2 + nu/2 <= np.abs(th_vec),
+                             np.abs(np.pi/2 - np.abs(th_vec)) <= nu/2,
+                             np.abs(th_vec) <= (np.pi - nu)/2],
+                            [0, ramp, 1])
+
+    # Makes sure factor is in the correct range
+    assert np.min(fraction) >= 0 and np.max(fraction) <= 1
+
+    return fraction.reshape(th_mesh.shape, order='F')
+
+
 def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
                  d_prime=0.1, eta=0.1, delta=3.0, kap=1.0, saturation=True,
                  init=None, binding='both'):
@@ -117,7 +136,7 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
 
 def variable_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
                     d_prime=.1, eta=.1, delta=3.0, kap=1.0, saturation=True,
-                    init=None, binding='both'):
+                    init=None, binding='both', correct=True):
 
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
@@ -153,22 +172,6 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
     fluxes = np.array([0])
 
     while t[-1] < T:
-        # Generate list of breaking indices
-        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] <
-                                 -np.pi/2)
-        break_indices = np.append(break_indices, values=np.where(
-            th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
-        th_flux = break_indices.shape[0]
-        break_indices = np.append(break_indices, values=np.where(
-            bond_list[:, 0] > L))
-        break_indices = np.append(break_indices, values=np.where(
-            bond_list[:, 0] < -L))
-        tot_flux = break_indices.shape[0]
-        z_flux = tot_flux - th_flux
-        fluxes = np.append(fluxes, om*th_flux + v*z_flux)
-
-        # break_indices = []
-
         bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1]
                               .astype(int)], d_prime=d_prime)
 
@@ -191,9 +194,34 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
 
             t = np.append(t, t[-1]+dt)
 
-            bond_list = np.delete(arr=bond_list, obj=break_indices, axis=0)
-            master_list.append(bond_list)
+            # Generate list of breaking indices
+            break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] <
+                                     -(np.pi+nu)/2)
+            break_indices = np.append(break_indices, values=np.where(
+                th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
+            th_flux = break_indices.shape[0]
+            break_indices = np.append(break_indices, values=np.where(
+                bond_list[:, 0] > L))
+            break_indices = np.append(break_indices, values=np.where(
+                bond_list[:, 0] < -L))
 
+            # Randomly select bonds to advect out of the domain
+            if correct:
+                last_bin = np.nonzero((th_vec < -(np.pi-nu)/2)
+                                      * (th_vec > -(np.pi + nu)/2))
+                fraction = dt*om/(nu*frac(th_vec[last_bin] + dt*om, nu))
+                assert 0 < fraction < 1
+
+                lbin_rows = np.where(bond_list[:, 1].astype(int) == last_bin)[1]
+                r_advect = np.random.binomial(1, fraction, size=lbin_rows.shape)
+                break_indices = np.append(break_indices,
+                                          values=lbin_rows[np.nonzero(r_advect)])
+                bond_list = np.delete(arr=bond_list, obj=break_indices, axis=0)
+                master_list.append(bond_list)
+
+            tot_flux = break_indices.shape[0]
+            z_flux = tot_flux - th_flux
+            fluxes = np.append(fluxes, dt*om/nu*th_flux + v*z_flux)
             zs = bond_list[:, 0]
             thetas = bond_list[:, 1].astype(int)
             forces = np.append(forces, nu/bond_max*np.sum(a=zs-np.sin(th_vec[thetas])))
@@ -212,6 +240,35 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
             theta_list.append(th_vec)
 
             t = np.append(t, t[-1]+dt)
+
+            # Generate list of breaking indices
+            break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] <
+                                     -(np.pi+nu)/2)
+            break_indices = np.append(break_indices, values=np.where(
+                th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
+            th_flux = break_indices.shape[0]
+            break_indices = np.append(break_indices, values=np.where(
+                bond_list[:, 0] > L))
+            break_indices = np.append(break_indices, values=np.where(
+                bond_list[:, 0] < -L))
+
+            # Randomly select bonds to advect out of the domain
+            if correct:
+                last_bin = np.nonzero((th_vec < -(np.pi-nu)/2)
+                                      * (th_vec > -(np.pi + nu)/2))
+                fraction = dt*om/(nu*frac(th_vec[last_bin] + dt*om, nu))
+                assert 0 < fraction < 1
+
+                lbin_rows = np.where(bond_list[:, 1].astype(int) == last_bin)[1]
+                r_advect = np.random.binomial(1, fraction, size=lbin_rows.shape)
+                break_indices = np.append(break_indices,
+                                          values=lbin_rows[np.nonzero(r_advect)])
+                bond_list = np.delete(arr=bond_list, obj=break_indices, axis=0)
+                master_list.append(bond_list)
+
+            tot_flux = break_indices.shape[0]
+            z_flux = tot_flux - th_flux
+            fluxes = np.append(fluxes, om*th_flux + v*z_flux)
 
             if j < break_rates.shape[0]:
                 break_indices = np.append(break_indices, j)
@@ -454,7 +511,7 @@ def count_variable(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
         print('Completed one variable run. This run took {:g} seconds.'
               .format(end-start))
 
-    indices = np.searchsorted(t, t_sample, side='left')
+    indices = np.searchsorted(t, t_sample, side='right') - 1
     return (np.array(count)[indices], np.array(forces)[indices],
             np.array(torques)[indices], t, np.array(flux)[indices])
 
@@ -742,7 +799,7 @@ if __name__ == '__main__':
     v = 0
     om = 5
     N = 64
-    time_steps = 100
+    time_steps = 1000
     trials = 4
     proc = 4
     window_reactions(v=v, om=om, N=N, time_steps=time_steps, trials=trials,
