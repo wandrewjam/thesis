@@ -56,6 +56,39 @@ def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
     return new_bonds
 
 
+def frac(th_mesh, nu):
+    assert nu > 0  # Checks that nu is valid
+
+    def ramp(th):
+        return ((np.pi + nu)/2 - np.abs(th))/nu
+
+    th_vec = th_mesh.flatten(order='F')
+    fraction = np.piecewise(th_vec,
+                            [np.pi/2 + nu/2 <= np.abs(th_vec),
+                             np.abs(np.pi/2 - np.abs(th_vec)) <= nu/2,
+                             np.abs(th_vec) <= (np.pi - nu)/2],
+                            [0, ramp, 1])
+
+    # Makes sure factor is in the correct range
+    assert np.min(fraction) >= 0 and np.max(fraction) <= 1
+
+    return fraction.reshape(th_mesh.shape, order='F')
+
+
+def correction(th_mesh, nu, om, dt):
+    assert nu > 0 and dt > 0
+
+    factor = np.piecewise(th_mesh,
+                          [(th_mesh <= -(np.pi + nu)/2) + (th_mesh >= np.pi/2),
+                           (-(np.pi - nu)/2 <= th_mesh) * (th_mesh < np.pi/2),
+                           (-(np.pi + nu)/2 < th_mesh) * (-(np.pi - nu)/2 <
+                                                          th_mesh)],
+                          [0, 1, lambda x:(1 - dt*om/(nu*frac(x + dt*om, nu)))]
+                          )
+    assert np.min(factor) >= 0 and np.max(factor) <= 1
+    return factor
+
+
 def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
                  d_prime=0.1, eta=0.1, delta=3.0, kap=1.0, saturation=True,
                  binding='both'):
@@ -146,7 +179,7 @@ def fixed_motion(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100,
 
 def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
                     eta=.1, delta=3.0, kap=1.0, saturation=True,
-                    binding='both'):
+                    binding='both', correct=True):
 
     th_vec = np.linspace(-np.pi, np.pi, num=2*N+1)[:-1]
     nu = th_vec[1] - th_vec[0]
@@ -171,17 +204,9 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
     forces, torques = np.array([0]), np.array([0])
 
     while t[-1] < T:
-        # Generate list of breaking indices
-        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] < -np.pi/2)
-        break_indices = np.append(break_indices, values=np.where(th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
-        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] > L))
-        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] < -L))
-
-        # break_indices = []
-
         bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1].astype(int)], d_prime=d_prime)
 
-        # Decide which bonds break
+        # Calculate breaking rates
         break_rates = off*np.exp(delta*bond_lengths)
 
         # Decide which bonds form
@@ -204,12 +229,36 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
 
         t = np.append(t, t[-1]+dt)
 
+        # Generate list of breaking indices
+        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)]
+                                 < -(np.pi+nu)/2)
+        break_indices = np.append(break_indices, values=np.where(
+            th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
+        break_indices = np.append(break_indices, values=np.where(
+            bond_list[:, 0] > L))
+        break_indices = np.append(break_indices, values=np.where(
+            bond_list[:, 0] < -L))
+
+        # Randomly select bonds to advect out of the domain
+        if correct:
+            last_bin = np.nonzero((th_vec < -(np.pi-nu)/2)
+                                  * (th_vec > -(np.pi + nu)/2))
+            fraction = dt*om/(nu*frac(th_vec[last_bin] + dt*om, nu))
+            assert 0 < fraction < 1
+
+            lbin_rows = np.where(bond_list[:, 1].astype(int) == last_bin)[1]
+            r_advect = np.random.binomial(1, fraction, size=lbin_rows.shape)
+            break_indices = np.append(break_indices,
+                                      values=lbin_rows[np.nonzero(r_advect)])
+
         if j < break_rates.shape[0]:
             break_indices = np.append(break_indices, j)
         else:
             index = j - break_rates.shape[0]
             new_bonds = np.zeros(shape=(1, 2))
-            new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index], loc=np.sin(th_vec[index]), scale=np.sqrt(1/eta))
+            new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index],
+                                            loc=np.sin(th_vec[index]),
+                                            scale=np.sqrt(1/eta))
             new_bonds[0, 1] = index
             bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
@@ -268,8 +317,9 @@ def pde_motion(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
     return z_mesh, th_mesh, m_mesh, t, forces, torques
 
 
-def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta=0.1,
-             delta=3.0, kap=1.0, saturation=True, binding='both'):
+def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1,
+             eta=0.1, delta=3.0, kap=1.0, saturation=True, binding='both',
+             correct=True):
 
     # Full Model
     z_vec = np.linspace(-L, L, 2*M+1)
@@ -300,13 +350,29 @@ def pde_bins(v, om, L=2.5, T=.4, M=100, N=100, time_steps=1000, d_prime=0.1, eta
         l_old = np.copy(l_new)
         l_new = length(z_mesh, th_mesh, d_prime)
 
-        m_mesh[:-1, :, i+1] = (m_mesh[:-1, :, i] + v*dt/h*(m_mesh[1:, :, i] - m_mesh[:-1, :, i]) +
-                               on*dt*kap*np.exp(-eta/2*l_old[:-1, :]**2) *
-                               (1 - saturation*np.tile(np.trapz(m_mesh[:, :, i], z_vec, axis=0), reps=(2*M, 1)))) / \
-                              (1 + dt*off*np.exp(delta*l_new[:-1, :]))
-        m_mesh[:, :, i+1] = np.where((-np.pi/2 < th_mesh) * (th_mesh < np.pi/2), m_mesh[:, :, i+1], 0)
+        m_mesh[:-1, :, i+1] = (
+                (m_mesh[:-1, :, i]
+                 + v*dt/h*(m_mesh[1:, :, i] - m_mesh[:-1, :, i])
+                 + on*dt*kap*np.exp(-eta/2*l_old[:-1, :]**2)
+                 * (frac(th_mesh[:-1, :], nu) - saturation*np.tile(
+                            np.trapz(m_mesh[:, :, i], z_vec, axis=0),
+                            reps=(2*M, 1))))
+                / (1 + dt*off*np.exp(delta*l_new[:-1, :])))
+        if correct:
+            m_mesh[:, :, i+1] = np.where((-(np.pi+nu)/2 < th_mesh)
+                                         * (th_mesh < np.pi/2),
+                                         m_mesh[:, :, i+1], 0)
+            indices = np.where((-(np.pi+nu)/2 < th_mesh[0, :])
+                               * (th_mesh[0, :] < -(np.pi-nu)/2))
+            m_mesh[:, indices, i+1] -= (dt*om/(nu*frac(th_mesh[:, indices]
+                                                       + dt*om, nu))
+                                        * m_mesh[:, indices, i])
+        else:
+            m_mesh[:, :, i+1] = np.where((-np.pi/2 < th_mesh) *
+                                         (th_mesh < np.pi/2),
+                                         m_mesh[:, :, i+1], 0)
 
-    return z_mesh, th_mesh, m_mesh, forces, torques
+    return z_mesh, th_mesh, m_mesh, forces, torques, t
 
 
 def count_fixed(v, om, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1, delta=3.0,
@@ -439,6 +505,9 @@ def simulate_variable():
 
     tp = np.linspace(0, T, num=time_steps+1)
 
+    plt.plot(tp, np.mean(var_arr, axis=0)*nu/bond_max)
+    plt.show()
+
     # Define parameter array and filename, and save the count data
     # The time is included to prevent overwriting an existing file
     par_array = np.array([delta, T, init, sat, binding, N, bond_max, L])
@@ -505,38 +574,79 @@ def simulate_pde_bins():
     binding = 'both'
     L = 2.5
 
-    z_mesh, th_mesh, m_bins, b_forces, b_torques = pde_bins(
+    z_mesh, th_mesh, m_bins, b_forces, b_torques, t_bins = pde_bins(
         v, om, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta,
-        saturation=sat, binding=binding
+        saturation=sat, binding=binding, correct=True
     )
 
+    m_orig = pde_bins(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
+                      delta=delta, saturation=sat, binding=binding,
+                      correct=False)[2]
+
     bin_count = np.sum(np.trapz(m_bins, z_mesh[:, 0], axis=0), axis=0)
+    ori_count = np.sum(np.trapz(m_orig, z_mesh[:, 0], axis=0), axis=0)
 
-    # Define parameter array and filename, and save the count data
-    # The time is included to prevent overwriting an existing file
-    par_array = np.array([delta, T, init, sat, binding, M, N, L])
-    file_path = './data/mov_rxns/'
-    file_name = 'multimov_bins_pde_M{0:d}_N{1:d}_v{2:g}_om{3:g}_{4:s}.npz'.format(M, N, v, om, strftime('%d%m%y'))
-    np.savez_compressed(file_path+file_name, par_array, bin_count, b_forces, b_torques, par_array=par_array,
-                        bin_count=bin_count, b_forces=b_forces, b_torques=b_torques)
+    plt.plot(t_bins, bin_count, t_bins, ori_count)
+    plt.show()
 
-    print('Data saved in file {:s}'.format(file_name))
+    # # Define parameter array and filename, and save the count data
+    # # The time is included to prevent overwriting an existing file
+    # par_array = np.array([delta, T, init, sat, binding, M, N, L])
+    # file_path = './data/mov_rxns/'
+    # file_name = 'multimov_bins_pde_M{0:d}_N{1:d}_v{2:g}_om{3:g}_{4:s}.npz'.format(M, N, v, om, strftime('%d%m%y'))
+    # np.savez_compressed(file_path+file_name, par_array, bin_count, b_forces, b_torques, par_array=par_array,
+    #                     bin_count=bin_count, b_forces=b_forces, b_torques=b_torques)
+    #
+    # print('Data saved in file {:s}'.format(file_name))
 
     return
 
 
 if __name__ == '__main__':
-    input = raw_input('Which algorithm? ')
+    simulate_variable()
+    # input = raw_input('Which algorithm? ')
+    #
+    # if input == 'fixed':
+    #     simulate_fixed()
+    # elif input == 'var':
+    #     simulate_variable()
+    # elif input == 'pde':
+    #     simulate_pde()
+    # elif input == 'bins':
+    #     simulate_pde_bins()
+    #
+    # print('Done!')
 
-    if input == 'fixed':
-        simulate_fixed()
-    elif input == 'var':
-        simulate_variable()
-    elif input == 'pde':
-        simulate_pde()
-    elif input == 'bins':
-        simulate_pde_bins()
+    # M, N, L = 32, 32, 2.5
+    # T, time_steps = .4, 1280
+    # v, om = 0, 5
+    # delta = 3
+    # sat = True
+    # binding = 'both'
+    # nu = np.pi/N
+    #
+    # z_mesh, th_mesh, m_bins, b_forces, b_torques, t_bins = pde_bins(
+    #     v, om, L=L, T=T, M=M, N=N, time_steps=time_steps, delta=delta,
+    #     saturation=sat, binding=binding, correct=True
+    # )
+    #
+    # m_orig = pde_bins(v, om, L=L, T=T, M=M, N=N, time_steps=time_steps,
+    #                   delta=delta, saturation=sat, binding=binding,
+    #                   correct=False)[2]
+    #
+    # bwz_mesh, bwth_mesh, m_bw = pde_motion(v, om, L=L, T=T, M=M, N=N,
+    #                                        time_steps=time_steps, delta=delta,
+    #                                        sat=sat, binding=binding,
+    #                                        scheme='bw')[:3]
+    #
+    # bin_count = nu*np.sum(np.trapz(m_bins, z_mesh[:, 0], axis=0), axis=0)
+    # ori_count = nu*np.sum(np.trapz(m_orig, z_mesh[:, 0], axis=0), axis=0)
+    # bw_count = np.trapz(np.trapz(m_bw, bwz_mesh[:, 0], axis=0), bwth_mesh[0, :], axis=0)
+    #
+    # plt.plot(t_bins, bin_count, t_bins, ori_count, t_bins, bw_count)
+    # plt.show()
 
+    ###############################
     # trials = int(raw_input('Number of trials: '))
     #
     # # Parameters
