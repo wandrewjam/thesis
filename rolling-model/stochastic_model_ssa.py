@@ -4,8 +4,28 @@ from scipy.stats import truncnorm
 from timeit import default_timer as timer
 
 
+def frac(th_mesh, nu):
+    assert nu > 0  # Checks that nu is valid
+
+    def ramp(th):
+        return ((np.pi + nu)/2 - np.abs(th))/nu
+
+    th_vec = th_mesh.flatten(order='F')
+    fraction = np.piecewise(th_vec,
+                            [np.pi/2 + nu/2 <= np.abs(th_vec),
+                             np.abs(np.pi/2 - np.abs(th_vec)) <= nu/2,
+                             np.abs(th_vec) <= (np.pi - nu)/2],
+                            [0, ramp, 1])
+
+    # Makes sure factor is in the correct range
+    assert np.min(fraction) >= 0 and np.max(fraction) <= 1
+
+    return fraction.reshape(th_mesh.shape, order='F')
+
+
 def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
-                         delta=3.0, kap=1.0, eta_v=.01, eta_om=.01, gamma=20):
+                         delta=3.0, kap=1.0, eta_v=.01, eta_om=.01, gamma=20,
+                         correct=True):
     ########################################################################
     # This function runs a stochastic simulation using a variable timestep #
     ########################################################################
@@ -33,12 +53,6 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
 
     start = timer()
     while t[-1] < T:
-        # Generate list of breaking indices
-        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)] < -np.pi/2)
-        break_indices = np.append(break_indices, values=np.where(th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
-        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] > L))
-        break_indices = np.append(break_indices, values=np.where(bond_list[:, 0] < -L))
-
         bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1].astype(int)], d_prime=d_prime)
 
         # Decide which bonds break
@@ -63,12 +77,36 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
 
         t = np.append(t, t[-1]+dt)
 
+        # Generate list of breaking indices
+        break_indices = np.where(th_vec[bond_list[:, 1].astype(int)]
+                                 < -(np.pi+nu)/2)
+        break_indices = np.append(break_indices, values=np.where(
+            th_vec[bond_list[:, 1].astype(int)] > np.pi/2))
+        break_indices = np.append(break_indices, values=np.where(
+            bond_list[:, 0] > L))
+        break_indices = np.append(break_indices, values=np.where(
+            bond_list[:, 0] < -L))
+
+        # Randomly select bonds to advect out of the domain
+        if correct:
+            last_bin = np.nonzero((th_vec < -(np.pi-nu)/2)
+                                  * (th_vec > -(np.pi + nu)/2))
+            fraction = dt*om/(nu*frac(th_vec[last_bin] + dt*om, nu))
+            assert 0 < fraction < 1
+
+            lbin_rows = np.where(bond_list[:, 1].astype(int) == last_bin)[1]
+            r_advect = np.random.binomial(1, fraction, size=lbin_rows.shape)
+            break_indices = np.append(break_indices,
+                                      values=lbin_rows[np.nonzero(r_advect)])
+
         if j < break_rates.shape[0]:
             break_indices = np.append(break_indices, j)
         else:
             index = j - break_rates.shape[0]
             new_bonds = np.zeros(shape=(1, 2))
-            new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index], loc=np.sin(th_vec[index]), scale=np.sqrt(1/eta))
+            new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index],
+                                            loc=np.sin(th_vec[index]),
+                                            scale=np.sqrt(1/eta))
             new_bonds[0, 1] = index
             bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
@@ -80,8 +118,11 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         zs = bond_list[:, 0]
         thetas = bond_list[:, 1].astype(int)
         force = nu/bond_max*np.sum(a=zs-np.sin(th_vec[thetas]))
-        torque = nu/bond_max*np.sum(a=(1-np.cos(th_vec[thetas])+d_prime)*np.sin(th_vec[thetas]) +
-                                     (np.sin(th_vec[thetas])-zs)*np.cos(th_vec[thetas]))
+        torque = nu/bond_max*np.sum(
+            a=((1-np.cos(th_vec[thetas]) + d_prime) * np.sin(th_vec[thetas])
+               + (np.sin(th_vec[thetas])-zs) * np.cos(th_vec[thetas]))
+        )
 
-        v, om = np.append(arr=v, values=v_f + force/eta_v), np.append(arr=om, values=om_f + torque/eta_om)
+        v = np.append(arr=v, values=v_f + force/eta_v)
+        om = np.append(arr=om, values=om_f + torque/eta_om)
     return v, om, master_list, t
