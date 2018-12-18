@@ -2,6 +2,7 @@ from constructA import *
 from scipy.special import erf
 from scipy.stats import truncnorm
 from timeit import default_timer as timer
+import matplotlib.pyplot as plt
 
 
 def frac(th_mesh, nu):
@@ -23,7 +24,7 @@ def frac(th_mesh, nu):
     return fraction.reshape(th_mesh.shape, order='F')
 
 
-def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
+def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=10, d_prime=.1, eta=.1,
                          delta=3.0, kap=1.0, eta_v=.01, eta_om=.01, gamma=20,
                          correct=True):
     ########################################################################
@@ -91,7 +92,7 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         if correct:
             last_bin = np.nonzero((th_vec < -(np.pi-nu)/2)
                                   * (th_vec > -(np.pi + nu)/2))
-            fraction = dt*om/(nu*frac(th_vec[last_bin] + dt*om, nu))
+            fraction = dt*om[-1]/(nu*frac(th_vec[last_bin] + dt*om[-1], nu))
             assert 0 < fraction < 1
 
             lbin_rows = np.where(bond_list[:, 1].astype(int) == last_bin)[1]
@@ -126,3 +127,10 @@ def stochastic_model_ssa(L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1, eta=.1,
         v = np.append(arr=v, values=v_f + force/eta_v)
         om = np.append(arr=om, values=om_f + torque/eta_om)
     return v, om, master_list, t
+
+
+if __name__ == '__main__':
+    v, om, master_list, t = stochastic_model_ssa(N=64)
+
+    plt.plot(t, v)
+    plt.show()
