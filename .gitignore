@@ -19,7 +19,7 @@ rolling-model/write-up/*
 rolling-model/data/*
 rolling-model/plots/*
 _data/*
-
+shek-pres/*
 
 # Copied from github/gitignore/Python.gitignore
 ###############################################
