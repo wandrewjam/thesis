@@ -1,0 +1,189 @@
+\documentclass{article}
+% \let\bb\enumerate
+% \let\ee\endenumerate
+% \let\bd\description
+% \let\ed\enddescription
+% \let\ii\item
+\let\ds\displaystyle
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{textgreek}
+\usepackage{tabu}
+\pagestyle{empty} 
+\bibliographystyle{plain}
+
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+
+%\font\cj=msbm10 at 12pt
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+\def\and{\wedge}
+\newcommand{\inv}{^{-1}}
+
+\input{/Users/andrewwork/thesis/model_defs.tex}
+
+%\def\ior{\vee} %this line can cause problems (in tables, nested
+                %lists, others?), comment out if necessary
+%\topmargin -.5in 
+\begin{document}
+\pagestyle{empty}
+
+
+\begin{center}
+{\Large Parameter Estimates}
+\end{center}
+
+There are 13 dimensional parameters in the dimensional version of the
+PDE model, listed in Table \ref{tab:dim_pars}.
+
+\begin{table}[h]
+  \centering
+  \begin{tabu}{c|X|X|X}
+    Symbol & Description & Estimate & Source \\ \hline
+    $\radius$ & Platelet radius & 1 {\textmugreek}m & None \\
+    $\separation$ & Wall separation distance & 0.1 {\textmugreek}m
+                                    & None \\
+    $\stiffness$ & Bond stiffness & 100 dyne/cm & \cite{Bhatia2003} \\
+    $\boltzmann$ & Boltzmann constant & $1.38 \times 10^{-23}$ J/K
+                                    & None \\
+    $\temp$ & Blood temperature & 310 K & None \\
+    $\onConst$ & Maximum bond on rate & 10--1000 s$\inv$
+                                    & \cite{Bhatia2003} \\
+    $\offConst$ & Unstressed bond off rate & 0.1--1 s$\inv$
+                                    & \cite{Bhatia2003} (for
+                                      selectin-sLe\textsuperscript{x}
+                                      binding and
+                                      \textbeta\textsubscript{2}-ICAM
+                                      binding) \\
+    $\refForce$ & Characteristic breaking force & 0.01 pN$\inv$
+                                    & Estimated below \\
+    $\receptorDensity$ & Angular receptor density
+                         & 1,600--16,000 OR $800w$--$8000w$
+                           receptors/radian & Estimated below \\
+    $\appliedRot$ & Fluid-imposed rotation rate & $\gamma$ s$\inv$ &
+    \\
+    $\appliedVel$ & Fluid-imposed translation velocity
+                         & $(R + d)\gamma$ {\textmugreek}m/s & \\
+    $\velFriction$ & Translational drag coefficient
+                         & $6 \times 10^{-5}$ g/s & Estimated below \\
+    $\rotFriction$ & Rotational drag coefficient
+                         & $8 \times 10^{-5}$
+                           {\textmugreek}m\textsuperscript{2}g/s
+                                    & Estimated below \\
+  \end{tabu}
+  \caption{Dimensional parameters in the PDE model}
+  \label{tab:dim_pars}
+\end{table}
+
+\section{Estimates for model parameters}
+\label{sec:estim-model-param}
+
+\subsection{Characteristic breaking force}
+\label{sec:char-break-force}
+
+$\refForce$ is equivalent to $\compliance/(\boltzmann\temp)$ in
+\cite{Pospieszalska2009} and \cite{Sundd2011}, where $\compliance$ is
+the reactive compliance and is estimated at 0.4 angstroms in
+\cite{Bhatia2003}. Then converting units as needed:
+\begin{align*}
+  &\compliance = 0.4 \text{ angstroms} = 4 \times 10^{-5}
+    \text{{\textmugreek}m} \text{, and} \\
+  &\boltzmann = 1.38 \times 10^{-23} \text{N}\cdot\text{m}/\text{K} =
+    1.38 \times 10^{-5} \text{pN}\cdot\text{{\textmugreek}m}/\text{K}.
+\end{align*}
+Finally, $\refForce = \frac{\compliance}{\boltzmann\cdot\temp} =
+\frac{4 \times 10^{-5}}{310 \cdot 1.38 \times 10^{-5}} \text{pN}\inv =
+9.35 \times 10^{-3} \text{pN}\inv$.
+
+\subsection{Angular receptor density}
+\label{sec:ang-rec-dens}
+
+$\receptorDensity$ is related to the number of receptors on the
+surface of the platelet, but it is not clear how. Obviously in reality
+the receptors are distributed over a 2D surface, but in the model the
+platelet is 2D and its surface is 1D. There are between $10^4$ and $10^5$
+integrin receptors on the surface of a platelet
+\cite{Burkhart2012}. If we assume all of these are on the surface of
+our 2D platelet, that gives a range of 1,600--16,000 for $\receptorDensity$. 
+
+If we assume the reactive region is a narrow strip down the centerline
+of the platelet of width $\width$, then $\receptorDensity$ is found by
+first calculating the number of receptors in that reactive
+strip. Approximating the reactive region with a cylinder of radius
+$\radius$ and height $\width$ gives a surface area of
+$2\pi\width\radius$. The surface density of receptors is given by
+$\receptorNumber/(4\pi\radius^2)$, and so there are
+$\receptorNumber\cdot\width/(2\radius)$ total receptors in the
+reactive strip. After dividing by $2\pi$ to get the angular density of
+receptors, we end up with $\receptorDensity =
+\receptorNumber\cdot\width/(4\pi\radius)$. With our estimates of
+$\receptorNumber$ and $\radius$ above, this gives us a range for
+$\receptorDensity$ of $796\width$--$7960\width$.
+
+\subsection{Drag coefficients}
+\label{sec:drag-coefficients}
+
+For simplicity, I use the Stokes drag coefficients:
+$6\pi\viscosity\radius$ and $8\pi\viscosity\radius^3$. With the
+viscosity of blood around 3–4 cP, this gives drag coefficients of $6
+\times 10^{-5}$ g/s and $8 \times 10^{-5}$
+\textmugreek\textsuperscript{2}g/s respectively.
+
+\section{Nondimensional Parameters}
+\label{sec:nd-params}
+
+There are 8 parameters in the nondimensional PDE rolling model, listed
+in Table
+
+\begin{table}
+  \centering
+  \begin{tabular}{c|c|l|l}
+    Parameter & Definition & Value & Description \\ \hline
+    $\ndSeparation$ & $\separation = \radius\ndSeparation$ & 0.1
+                                   & cell-surface separation \\
+    $\ndAppliedRot$ & $\appliedRot = \ndAppliedRot\offConst$
+                           & $0.1\gamma$--$\gamma$ & Fluid-imposed
+                                                     rotation rate \\
+    $\ndAppliedVel$ & $\appliedVel = \ndAppliedVel\radius\offConst$
+                           & $0.1\gamma$--$\gamma$
+                                   & Fluid-imposed translation
+                                     velocity \\
+    $\ndOnConst$ & $\ndOnConst = \frac{\radius\onConst}{\offConst}$
+                           & $10$--$10^4$ & Maximum relative on rate \\
+    $\onForceScale$ & $\onForceScale =
+                    \frac{\stiffness\radius^2}{\boltzmann\temp}$
+                           & $2 \times 10^7$ & Length dependence of on
+                                               rate \\
+    $\offForceScale$ & $\offForceScale = \stiffness\radius/\refForce$
+                           & 1000 & Length dependence of off rate \\
+    $\ndVelFriction$ & $\ndVelFriction =
+                     \frac{\offConst}{\stiffness\receptorDensity}
+                     \velFriction$ & $4 \times 10^{-12}$--$4 \times
+                                     10^{-10}$
+                                   & Translational drag coefficient \\
+    $\ndRotFriction$ & $\ndRotFriction =
+                     \frac{\offConst}{\stiffness\receptorDensity
+                                      \radius^2}\rotFriction$
+                           & $5 \times 10^{-12}$--$5 \times 10^{-10}$
+                                   & Rotational drag coefficient
+  \end{tabular}
+  \caption{Nondimensional parameters}
+  \label{tab:nd-params}
+\end{table}
+
+\bibliography{/Users/andrewwork/thesis/library.bib}
+
+\end{document}

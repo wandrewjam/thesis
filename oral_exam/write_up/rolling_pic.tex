@@ -1,0 +1,29 @@
+\documentclass{minimal}
+\usepackage{tikz}
+
+\input{/Users/andrewwork/thesis/model_defs.tex}
+
+\begin{document}
+\begin{tikzpicture}
+  \newcommand{\dist}{0.5}
+  \newcommand{\Length}{2.5}
+  \newcommand{\slope}{0.5}
+  \newcommand{\buff}{0.1}
+
+  % Draws the wall and the platelet
+  \draw (-\Length, 0) -- (\Length, 0);
+  \draw (0, 1+\dist) circle [radius = 1];
+  \draw[<->] (0, 0) -- node[right] {$\separation$} (0, \dist);
+  \draw[->] (1+\buff, 1+\dist) -- node[above] {$\appliedVel$}
+            (\Length-\buff, 1+\dist);
+
+  % Computations necessary to draw the applied rotation annotation
+  \draw[->] (0, 2+\buff+\dist) arc [start angle=90, end angle=45,
+                                    radius=1+\buff]
+                               node[midway] {$\appliedRot$};
+
+  % Draws the arrows showing the shear flow
+  \foreach \y in {0.5, 1, 1.5, 2, 2.5}
+     \draw[->] (-\Length, \y) -- (-\Length + \slope*\y, \y);
+\end{tikzpicture}
+\end{document}
