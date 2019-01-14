@@ -15,11 +15,11 @@ ss*.txt
 
 # Folders
 literature_repository/*
-rolling-model/write-up/*
 rolling-model/data/*
 rolling-model/plots/*
 _data/*
 shek-pres/*
+oral_exam/new-2017-03-12
 
 # Copied from github/gitignore/Python.gitignore
 ###############################################
