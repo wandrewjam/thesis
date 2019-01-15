@@ -23,8 +23,21 @@ from constructA import nd_force, nd_torque, length
 
 def _handle_velocities(v_f, om_f):
     """
-    This function converts a scalar v_f and om_f to an array of
-    floats, if necessary
+    Converts a scalar v_f and om_f to an array of floats
+
+    Parameters
+    ----------
+    v_f : int, float, or ndarray
+        Applied fluid translational velocity
+    om_f : int, float, or ndarray
+        Applied fluid rotational velocity
+
+    Returns
+    -------
+    v_f array : ndarray
+        Array of v_f values for each time step in the simulation
+    om_f array : ndarray
+        Array of om_f values for each time step in the simulation
     """
 
     if type(v_f) is float or int:
@@ -36,7 +49,7 @@ def _handle_velocities(v_f, om_f):
 
 
 def _cfl_check(v_f, om_f, dt, h, nu, scheme):
-    """ This function checks the CFL condition """
+    """ Checks the CFL condition """
 
     if scheme == 'up':
         z_check, om_check = np.max(v_f)*dt/h, np.max(om_f)*dt/nu
@@ -55,6 +68,8 @@ def _cfl_check(v_f, om_f, dt, h, nu, scheme):
 
 
 def _generate_coordinate_arrays(M, N, time_steps, L, T, d):
+    """ Generates numerical meshes needed by deterministic algorithms"""
+
     z_mesh = np.linspace(-L, L, 2*M+1)
     th_mesh = np.linspace(-np.pi/2, np.pi/2, N+1)
     l_mesh = length(z_mesh, th_mesh[None, :], d)
@@ -81,7 +96,7 @@ def _initialize_unknowns(v_f, om_f, m0, time_steps, save_bond_history):
 
 def _upwind(v, om, bond_mesh, v_f, om_f, form_rate, break_rate,
             save_bond_history):
-    """ This function carries out the upwind scheme """
+    """ Carries out the upwind scheme """
 
     time_steps = v.shape[0]
 
@@ -97,7 +112,7 @@ def _upwind(v, om, bond_mesh, v_f, om_f, form_rate, break_rate,
 
 
 def pde_eulerian(M, N, time_steps, m0, **kwargs):
-    """This is a function to solve the full eulerian PDE model."""
+    """ Solves the full eulerian PDE model """
 
     # Define the problem parameters.
     (v_f, om_f, kappa, eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
