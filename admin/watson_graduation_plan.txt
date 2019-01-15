@@ -13,19 +13,21 @@ results from our collaborators.
 
 Research Schedule:
 
-	Spring 2019
-		- Pass Oral Exam (tentatively scheduled for March)
-		- Extend rolling model to 3D
-		- Find realistic parameter values and compare with data from collaborators
-	Summer 2019
-		- Teaching
-		- Add multiple receptors to rolling model
-	Fall 2019 and Spring 2020
-		- Teaching
-		- Include intracellular dynamics (can be as simple or as complex as 
-		  necessary, depending on the experimental data)
-		- Compare with experimental results on velocity distributions, pause 
-		  times/distance between pauses
-		- Prepare dissertation
-	Summer 2020
-		- Thesis defense
+   Spring 2019
+      - Pass Oral Exam (tentatively scheduled for March)
+      - Extend rolling model to 3D
+      - Find realistic parameter values and compare with data from collaborators
+   Summer 2019
+      - Teaching
+      - Add multiple receptors to rolling model
+   Fall 2019 and Spring 2020
+      - Teaching
+      - Include intracellular dynamics (can be as simple or as complex as 
+        necessary, depending on the experimental data)
+      - Compare with experimental results on velocity distributions, pause 
+        times/distance between pauses
+      - Prepare dissertation
+      - Applying for jobs (Spring)
+   Summer 2020
+      - Thesis defense
+      - Applying for jobs
