@@ -45,7 +45,7 @@ def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
         new_bonds[-2, :-1] += np.squeeze(_up(bond_mesh[-2:, :], v, h, dt,
                                              axis=0))
         new_bonds[:-1, -2] += np.squeeze(_up(bond_mesh[:, -2:], om, nu, dt,
-                                              axis=1))
+                                             axis=1))
         new_bonds[:-1, :-1] += _form(bond_mesh, form_rate[:-1, :-1], h, dt,
                                      sat)
         new_bonds[:-1, :-1] /= (1 + dt*break_rate[:-1, :-1])
