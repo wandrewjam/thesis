@@ -1,5 +1,5 @@
 import numpy as np
-from constructA import nd_force
+from utils import nd_force
 from scipy.stats import truncnorm
 
 # A script to test the force functions

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import erf
 from scipy.stats import truncnorm
-from constructA import length
+from utils import length
 
 
 def fixed_z(j, init=None, L=2.5, T=0.4, N=100, time_steps=1000, bond_max=100, d_prime=0.1, eta=0.1,

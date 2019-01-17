@@ -3,7 +3,7 @@
 import multiprocessing as mp
 import numpy as np
 import matplotlib.pyplot as plt
-from constructA import length
+from utils import length
 from timeit import default_timer as timer
 from scipy.special import erf
 from scipy.stats import truncnorm

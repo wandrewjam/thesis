@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from scipy.special import erf
 from scipy.stats import truncnorm
-from constructA import length, nd_force, nd_torque
+from utils import length, nd_force, nd_torque
 from timeit import default_timer as timer
 from time import strftime
 

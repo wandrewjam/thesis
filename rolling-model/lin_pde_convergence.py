@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from stochastic_reactions_PDE import pde_motion, pde_bins
-from constructA import length
+from utils import length
 from timeit import default_timer as timer
 
 

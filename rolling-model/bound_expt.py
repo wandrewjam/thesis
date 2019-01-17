@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from time_dependent import time_dependent
-from constructA import length
+from utils import length
 
 L, T = 2.5, 0.4
 M, N, time_steps = 100, 100, 1000

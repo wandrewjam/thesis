@@ -1,4 +1,4 @@
-from constructA import *
+from utils import *
 from scipy.special import erf
 from scipy.stats import truncnorm
 from timeit import default_timer as timer
