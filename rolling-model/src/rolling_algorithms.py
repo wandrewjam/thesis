@@ -54,37 +54,27 @@ def _handle_velocities(v_f, om_f):
 def _cfl_check(v_f, om_f, dt, h, nu, scheme):
     """ Checks the CFL condition """
 
-    if scheme[1] == 'up':
+    if scheme == 'up':
         z_check, om_check = np.max(v_f)*dt/h, np.max(om_f)*dt/nu
-    elif scheme[1] == 'bw':
+    elif scheme == 'bw':
         z_check, om_check = np.max(v_f)*dt/(2*h), np.max(om_f)*dt/(2*nu)
     else:
         raise Exception('the parameter \'scheme\' is not valid')
 
-    if z_check > 1 and scheme[0] == 'sl':
+    if z_check > 1 and om_check > 1:
+        raise ValueError('the CFL conditions for both theta and z are not '
+                         'satisfied')
+    elif z_check > 1:
         raise ValueError('the CFL condition for z is not satisfied')
-
-    if scheme[0] == 'eu':
-        if z_check > 1 and om_check > 1:
-            raise ValueError('the CFL conditions for both theta and z are not '
-                             'satisfied')
-        elif z_check > 1:
-            raise ValueError('the CFL condition for z is not satisfied')
-        elif om_check > 1:
-            raise ValueError('the CFL condition for theta is not satisfied')
+    elif om_check > 1:
+        raise ValueError('the CFL condition for theta is not satisfied')
 
 
-def _generate_coordinate_arrays(M, N, time_steps, L, T, d, alg):
+def _generate_coordinate_arrays(M, N, time_steps, L, T, d):
     """ Generates numerical meshes needed by deterministic algorithms"""
 
     z_mesh = np.linspace(-L, L, 2*M+1)
-
-    if alg == 'eu':
-        th_mesh = np.linspace(-np.pi/2, np.pi/2, N+1)
-    elif alg == 'sl':
-        th_mesh = np.linspace(-np.pi, np.pi, 2*N + 1)[:-1]
-    else:
-        raise Exception('Invalid value for paramter alg')
+    th_mesh = np.linspace(-np.pi/2, np.pi/2, N+1)
 
     l_mesh = length(z_mesh[:, None], th_mesh[None, :], d)
     t_mesh = np.linspace(0, T, time_steps+1)
@@ -228,7 +218,7 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, v_f,
         raise Exception('bond_mesh has an invalid number of dimensions')
 
 
-def pde_solve(M, N, time_steps, m0, scheme='eu-up', **kwargs):
+def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
     """ Solves the full eulerian PDE model """
 
     # Define the problem parameters
@@ -238,9 +228,8 @@ def pde_solve(M, N, time_steps, m0, scheme='eu-up', **kwargs):
     v_f, om_f = _handle_velocities(v_f, om_f)
 
     # Define coordinate meshes and mesh widths
-    scheme = scheme.split('-')
     (z_mesh, th_mesh, l_mesh, t_mesh, h, nu, dt) = (
-        _generate_coordinate_arrays(M, N, time_steps, L, T, d, scheme[0])
+        _generate_coordinate_arrays(M, N, time_steps, L, T, d)
     )
 
     # Check for the CFL condition
@@ -272,7 +261,7 @@ def pde_semilagrangian(M, N, time_steps, m0, **kwargs):
 
     # Define coordinate meshes and mesh widths
     (z_mesh, th_mesh, l_mesh, t_mesh, h, nu, dt) = (
-        _generate_coordinate_arrays(M, N, time_steps, L, T, d, alg='sl')
+        _generate_coordinate_arrays(M, N, time_steps, L, T, d)
     )
 
     # Check for the CFL condition
