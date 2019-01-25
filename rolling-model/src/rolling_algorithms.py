@@ -250,24 +250,6 @@ def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
     return bond_mesh, v, om, t_mesh
 
 
-def pde_semilagrangian(M, N, time_steps, m0, **kwargs):
-    """ Solves the semi-lagrangian PDE model """
-
-    # Define the problem parameters
-    (v_f, om_f, kappa, eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
-     save_bond_history) = set_parameters(**kwargs)
-
-    v_f, om_f = _handle_velocities(v_f, om_f)
-
-    # Define coordinate meshes and mesh widths
-    (z_mesh, th_mesh, l_mesh, t_mesh, h, nu, dt) = (
-        _generate_coordinate_arrays(M, N, time_steps, L, T, d)
-    )
-
-    # Check for the CFL condition
-    _cfl_check(v_f, om_f, dt, h, nu, scheme)
-
-
 if __name__ == '__main__':
     M, N = 32, 32
     time_steps = 2000
