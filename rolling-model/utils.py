@@ -6,9 +6,31 @@ from scipy.sparse.linalg import spsolve
 from scipy.integrate import trapz
 
 
-def length(z_mesh, th_mesh, d_prime=0):
-    return np.sqrt((1 - np.cos(th_mesh) + d_prime)**2 +
-                   (np.sin(th_mesh) - z_mesh)**2)
+def length(z, th, d=0):
+    """
+    Computes the distance between z and theta
+
+    Parameters
+    ----------
+    z, th : array_like
+        Coordinate arrays specifying points on the wall and the platelet,
+        respectively.
+    d : float
+        The minimum separation distance between the platelet and wall.
+
+    Returns
+    -------
+    output : array_like
+        Returns the distance(s) between z and theta. If z and theta are
+        both scalars, then a scalar is returned. Otherwise an array is
+        returned.
+
+    Raises
+    ------
+    ValueError
+        If z and th cannot be broadcast to a single shape.
+    """
+    return np.sqrt((1 - np.cos(th) + d)**2 + (np.sin(th) - z)**2)
 
 
 def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0,
@@ -43,7 +65,6 @@ def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0,
 
 
 def nd_torque(m_mesh, z_mesh, th_mesh, d_prime=0):
-    # Function to calculate net torque given a distribution of bonds, m
     tau = trapz(trapz(((1 - np.cos(th_mesh) + d_prime)*np.sin(th_mesh) +
                        (np.sin(th_mesh) - z_mesh)*np.cos(th_mesh))*m_mesh, x=z_mesh,
                       axis=0), x=th_mesh[0,])
