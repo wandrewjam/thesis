@@ -16,10 +16,11 @@ The four algorithms are named as follows:
 
 import numpy as np
 from scipy.integrate import simps
+from scipy.special import erf
+from scipy.stats import truncnorm
 import matplotlib.pyplot as plt
 from default_values import *
 from utils import nd_force, nd_torque, length
-
 
 def _handle_velocities(v_f, om_f):
     """
@@ -91,12 +92,17 @@ def _initialize_unknowns(v_f, om_f, m0, time_steps, save_bond_history):
     v[0], om[0] = v_f[0], om_f[0]
 
     if save_bond_history:
-        bond_mesh = np.zeros(shape=m0.shape+(time_steps,))
+        bond_mesh = np.zeros(shape=m0.shape+(time_steps+1,))
         bond_mesh[:, :, 0] = m0
     else:
         bond_mesh = np.copy(m0)
 
     return bond_mesh, v, om
+
+def _initialize_unknown_lists(v_f, om_f):
+    """ Initializes arrays for v, om, and bond_list """
+    v, om = np.array([v_f]), np.array([om_f])
+
 
 
 def _up(bond_mesh, vel, dx, dt, axis):
@@ -130,12 +136,13 @@ def _count_bonds(bond_mesh, z_mesh, th_mesh, scheme):
     if scheme == 'up':
         return np.trapz(np.trapz(bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
     elif scheme == 'bw':
-        return simps(simps(bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
+        return np.trapz(np.trapz(bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
     else:
         raise Exception('parameter \'scheme\' is invalid')
 
 
-def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat, scheme):
+def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
+                   scheme):
     new_bonds = np.copy(bond_mesh)
     if scheme == 'up':
         new_bonds[:-1, :-1] += _up(bond_mesh, v, h, dt, axis=0)
@@ -202,20 +209,23 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, v_f,
 
             v[i+1] = v_f[i] + current_force/eta_v
             om[i+1] = om_f[i] + current_torque/eta_om
-        return bond_counts, v, om
     elif bond_mesh.ndim == 3:
-        for i in range(t_mesh.shape[0]):
-            bond_mesh = _eulerian_step(bond_mesh, v[i], om[i], h, nu, dt,
-                                       form_rate, break_rate, sat, scheme)
+        for i in range(t_mesh.shape[0]-1):
+            bond_mesh[:, :, i+1] = _eulerian_step(bond_mesh[:, :, i], v[i],
+                                                  om[i], h, nu, dt, form_rate,
+                                                  break_rate, sat, scheme)
 
-            current_force = nd_force(bond_mesh, z_mesh, th_mesh)
-            current_torque = nd_torque(bond_mesh, z_mesh, th_mesh, d)
+            current_force = nd_force(bond_mesh[:, :, i+1], z_mesh[:, None],
+                                     th_mesh[None, :])
+            current_torque = nd_torque(bond_mesh[:, :, i+1], z_mesh[:, None],
+                                       th_mesh[None, :], d)
 
             v[i+1] = v_f[i] + current_force/eta_v
             om[i+1] = om_f[i] + current_torque/eta_om
-        return bond_mesh, v, om
+        bond_counts = _count_bonds(bond_mesh, z_mesh, th_mesh, scheme)
     else:
         raise Exception('bond_mesh has an invalid number of dimensions')
+    return bond_mesh, bond_counts, v, om
 
 
 def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
@@ -228,7 +238,7 @@ def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
     v_f, om_f = _handle_velocities(v_f, om_f)
 
     # Define coordinate meshes and mesh widths
-    (z_mesh, th_mesh, l_mesh, t_mesh, h, nu, dt) = (
+    z_mesh, th_mesh, l_mesh, t_mesh, h, nu, dt = (
         _generate_coordinate_arrays(M, N, time_steps, L, T, d)
     )
 
@@ -242,12 +252,41 @@ def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
     form_rate = on*kappa*np.exp(-eta/2*l_mesh**2)
     break_rate = off*np.exp(delta*l_mesh)
 
-    bond_mesh, v, om = _run_eulerian_model(
+    bond_mesh, bond_counts, v, om = _run_eulerian_model(
         bond_mesh, v, om, z_mesh, th_mesh, t_mesh, v_f, om_f, xi_v, xi_om,
         form_rate, break_rate, sat, d, scheme
     )
 
-    return bond_mesh, v, om, t_mesh
+    return bond_mesh, bond_counts, v, om, t_mesh
+
+
+def rolling_ssa(**kwargs):
+    """ Runs a single stochastic rolling simulation """
+
+    # Define the problem parameters
+    (v_f, om_f, kappa, eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
+     save_bond_history) = set_parameters(**kwargs)
+
+    v_f, om_f = _handle_velocities(v_f, om_f)
+
+    # Define the theta bin centers and bin width. The slice below
+    # selects only the th_mesh and nu outputs from the
+    # _generate_coordinate_arrays method.
+
+    th_mesh, nu = (
+        _generate_coordinate_arrays(M, N, time_steps, L, T, d)[1::4]
+    )
+
+    bond_list, v_list, om_list = _initialize_unknown_lists(v_f, om_f)
+
+    def coeffs_and_bounds(bins):
+        coeffs = kap*np.exp(-eta/2*(1 - np.cos(bins) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
+            erf(np.sqrt(eta/2)*(np.sin(bins) + L)) - erf(np.sqrt(eta/2)*(np.sin(bins) - L))
+        )
+        coeffs = (bins > -np.pi/2)*(bins < np.pi/2)*coeffs
+        a = (-L - np.sin(bins))/np.sqrt(1/eta)
+        b = (L - np.sin(bins))/np.sqrt(1/eta)
+        return coeffs, a, b
 
 
 if __name__ == '__main__':
@@ -257,15 +296,16 @@ if __name__ == '__main__':
     model_outputs = []
 
     for scheme in ['up', 'bw']:
-        model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme))
+        model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,
+                                          save_bond_history=True)[1:])
 
     fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(6, 8))
 
     for i in range(2):
-        bond_mesh, v, om, t_mesh = model_outputs[i]
+        bond_counts, v, om, t_mesh = model_outputs[i]
         ax[0].plot(t_mesh, v)
         ax[1].plot(t_mesh, om)
-        ax[2].plot(t_mesh, bond_mesh)
+        ax[2].plot(t_mesh, bond_counts)
     ax[2].set_xlabel('ND time ($s$)')
     ax[0].set_ylabel('ND translation velocity ($v$)')
     ax[1].set_ylabel('ND rotation rate ($\\omega$)')
