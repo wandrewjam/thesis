@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from default_values import *
 from utils import nd_force, nd_torque, length
 
+
 def _handle_velocities(v_f, om_f):
     """
     Converts a scalar v_f and om_f to an array of floats
@@ -88,6 +89,7 @@ def _generate_coordinate_arrays(M, N, time_steps, L, T, d):
 
 def _initialize_unknowns(v_f, om_f, m0, time_steps, save_bond_history):
     """ Initializes arrays of zeros for v, om, and m """
+
     v, om = np.zeros(shape=v_f.shape), np.zeros(shape=om_f.shape)
     v[0], om[0] = v_f[0], om_f[0]
 
@@ -99,10 +101,20 @@ def _initialize_unknowns(v_f, om_f, m0, time_steps, save_bond_history):
 
     return bond_mesh, v, om
 
-def _initialize_unknown_lists(v_f, om_f):
-    """ Initializes arrays for v, om, and bond_list """
-    v, om = np.array([v_f]), np.array([om_f])
 
+def _initialize_unknown_lists(v_f, om_f, save_bond_history):
+    """ Initializes arrays for v, om, and bond_list """
+
+    v, om = np.array([v_f]), np.array([om_f])
+    t_mesh = np.array([0])
+
+    if save_bond_history:
+        master_list = np.zeros(shape=0)
+        master_list = np.append(arr=master_list, values=np.zeros(shape=(0, 2)))
+    else:
+        master_list = np.zeros(shape=(0, 2))
+
+    return master_list, v, om, t_mesh
 
 
 def _up(bond_mesh, vel, dx, dt, axis):
@@ -129,6 +141,85 @@ def _form(bond_mesh, form_rate, h, dt, sat):
     sat_term = (1 - sat*np.tile(np.trapz(bond_mesh[:, :-1], dx=h, axis=0),
                                 reps=(bond_mesh.shape[0]-1, 1)))
     return dt*form_rate*sat_term
+
+
+def _frac(th_mesh, nu):
+    assert nu > 0  # Checks that nu is valid
+
+    def ramp(th):
+        return ((np.pi + nu)/2 - np.abs(th))/nu
+
+    th_vec = th_mesh.flatten(order='F')
+    fraction = np.piecewise(th_vec,
+                            [np.pi/2 + nu/2 <= np.abs(th_vec),
+                             np.abs(np.pi/2 - np.abs(th_vec)) <= nu/2,
+                             np.abs(th_vec) <= (np.pi - nu)/2],
+                            [0, ramp, 1])
+
+    # Makes sure factor is in the correct range
+    assert np.min(fraction) >= 0 and np.max(fraction) <= 1
+
+    return fraction.reshape(th_mesh.shape, order='F')
+
+
+def _find_rates(bond_lengths, on, off, bond_max, sat, expected_coeffs, delta):
+    """ Finds breaking and formation rates for the stochastic model"""
+
+    break_rates = off*np.exp(delta*bond_lengths)
+    form_rates = on*expected_coeffs*(bond_max - sat*bond_counts)
+    all_rates = np.append(break_rates, form_rates)
+
+    return all_rates
+
+
+def _get_next_reaction(all_rates):
+    """ Finds the next reaction to occur in the stochastic simulation """
+
+    sum_rates = np.cumsum(all_rates)
+    total_rate = sum_rates[-1]
+
+    r = np.random.rand(2)
+    dt = 1/total_rate * np.log(1/r[0])
+    j = np.searchsorted(a=sum_rates, v=r[1]*total_rate)
+
+    return dt, j
+
+
+def _update_bond_positions(bond_list, th_mesh, t_mesh, dt):
+    """ Updates bond positions and time mesh for ssa """
+
+    bond_list[:, 0] += -dt*v  # Doesn't handle the case v not constant
+    th_mesh += -dt*om  # Same here
+    th_mesh = ((th_mesh + np.pi) % (2*np.pi)) - np.pi  # Should I put
+                                            # this in its own function?
+    t_mesh = np.append(t_mesh, t_mesh[-1] + dt)
+
+    return bond_list, th_mesh, t_mesh
+
+
+def _advect_bonds_out(bond_list, th_mesh, nu, dt, om, L, correct_flux):
+    """ Breaks bonds that advect out of numerical domain """
+
+    break_indices = np.where(th_mesh[bond_list[:, 1].astype(int)]
+                             < -(np.pi + nu)/2)
+    break_indices = np.append(break_indices, values=np.where(
+        th_mesh[bond_list[:, 1].astype(int)] > np.pi/2))
+    break_indices = np.append(break_indices, values=np.where(
+        bond_list[:, 0] > L))
+    break_indices = np.append(break_indices, values=np.where(
+        bond_list[:, 0] < -L))
+
+    if correct_flux:
+        last_bin = np.nonzero((th_mesh < -(np.pi - nu)/2)
+                              * (th_mesh > -(np.pi + nu)/2))
+        fraction = dt*om/(nu*_frac(th_mesh[last_bin] + dt*om, nu))
+        assert 0 < fraction < 1
+
+        lbin_rows = np.where(bond_list[:, 1].astype(int) == last_bin)[1]
+        r_advect = np.random.binomial(1, fraction, size=lbin_rows.shape)
+        break_indices = np.append(break_indices,
+                                  values=lbin_rows[np.nonzero(r_advect)])
+    return break_indices
 
 
 def _count_bonds(bond_mesh, z_mesh, th_mesh, scheme):
@@ -163,9 +254,27 @@ def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
     return new_bonds
 
 
-def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, v_f,
-                        om_f, eta_v, eta_om, form_rate, break_rate, sat, d,
-                        scheme):
+def _update_bond_list(bond_list, th_mesh, j, break_indices, a, b, eta):
+    """ Updates the bond list """
+
+    if j < bond_list.shape[0]:
+        break_indices = np.append(break_indices, j)
+    else:
+        index = j - bond_list.shape[0]
+        new_bonds = np.zeros(shape=(1, 2))
+        new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index],
+                                        loc=np.sin(th_mesh[index]),
+                                        scale=np.sqrt(1/eta))
+        new_bonds[0, 1] = index
+        bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
+
+    bond_list = np.delete(arr=bond_list, obj=break_indices, axis=0)
+    return bond_list
+
+
+def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
+                        v_f, om_f, eta_v, eta_om, form_rate, break_rate, sat,
+                        d, scheme):
     """ Runs the Eulerian simulation
 
     This function actually carries out the eulerian timestepping procedure
@@ -228,6 +337,34 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, v_f,
     return bond_mesh, bond_counts, v, om
 
 
+def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
+                          bond_max, d, v_f, om_f, eta_v, eta_om, form_rate,
+                          break_rate, on, off, sat, correct_flux):
+    """ Runs the variable time-step stochastic algorithm """
+
+    if master_list.ndim == 2:  # Equivalent to 'not save_bond_history
+        while t_mesh[-1] < T:
+            bond_lengths = length(master_list[:, 0],
+                                  th_mesh[master_list[:, 1].astype(int)], d=d)
+
+            binned_bonds = np.bincount(master_list[:, 1].astype(int),
+                                       minlength=2*N)
+            expected_coeffs, a, b = coeffs_and_bounds(th_mesh)
+
+            all_rates = _find_rates(binned_bonds, bond_lengths,
+                                                  on, off, bond_max, sat,
+                                                  expected_coeffs)
+
+            dt, j = _get_next_reaction(all_rates)
+            master_list, th_mesh, t_mesh = (
+                _update_bond_positions(master_list, th_mesh, t_mesh, dt)
+            )
+
+            break_indices = _advect_bonds_out(master_list, th_mesh, nu, dt, om,
+                                              L, correct_flux)
+
+            master_list = _update_bond_list(master_list, j, break_indices)
+
 def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
     """ Solves the full eulerian PDE model """
 
@@ -253,8 +390,8 @@ def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
     break_rate = off*np.exp(delta*l_mesh)
 
     bond_mesh, bond_counts, v, om = _run_eulerian_model(
-        bond_mesh, v, om, z_mesh, th_mesh, t_mesh, v_f, om_f, xi_v, xi_om,
-        form_rate, break_rate, sat, d, scheme
+        bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt, v_f, om_f, xi_v,
+        xi_om, form_rate, break_rate, sat, d, scheme
     )
 
     return bond_mesh, bond_counts, v, om, t_mesh
@@ -277,7 +414,7 @@ def rolling_ssa(**kwargs):
         _generate_coordinate_arrays(M, N, time_steps, L, T, d)[1::4]
     )
 
-    bond_list, v_list, om_list = _initialize_unknown_lists(v_f, om_f)
+    master_list, v_list, om_list, t_mesh = _initialize_unknown_lists(v_f, om_f)
 
     def coeffs_and_bounds(bins):
         coeffs = kap*np.exp(-eta/2*(1 - np.cos(bins) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
@@ -288,6 +425,10 @@ def rolling_ssa(**kwargs):
         b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
+    master_list, bond_counts, v, om = _run_stochastic_model(
+
+    )
+
 
 if __name__ == '__main__':
     M, N = 32, 32
@@ -297,7 +438,7 @@ if __name__ == '__main__':
 
     for scheme in ['up', 'bw']:
         model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,
-                                          save_bond_history=True)[1:])
+                                          save_bond_history=False)[1:])
 
     fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(6, 8))
 
