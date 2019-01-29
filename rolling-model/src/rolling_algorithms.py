@@ -172,17 +172,23 @@ def _find_rates(bond_lengths, on, off, bond_max, sat, expected_coeffs, delta):
     return all_rates
 
 
-def _get_next_reaction(all_rates):
+def _get_next_reaction(all_rates, min_step):
     """ Finds the next reaction to occur in the stochastic simulation """
 
     sum_rates = np.cumsum(all_rates)
     total_rate = sum_rates[-1]
 
     r = np.random.rand(2)
-    dt = 1/total_rate * np.log(1/r[0])
-    j = np.searchsorted(a=sum_rates, v=r[1]*total_rate)
+    try:
+        dt = 1/total_rate * np.log(1/r[0])
+    except ZeroDivisionError:
+        dt = np.inf
 
-    return dt, j
+    if dt > min_step:
+        return min_step, None
+    else:
+        j = np.searchsorted(a=sum_rates, v=r[1]*total_rate)
+        return dt, j
 
 
 def _update_bond_positions(bond_list, th_mesh, t_mesh, dt):
@@ -222,6 +228,20 @@ def _advect_bonds_out(bond_list, th_mesh, nu, dt, om, L, correct_flux):
     return break_indices
 
 
+def _get_forces(bond_list, th_mesh, bond_max, nu, d):
+    """ Calculates the force and torque on a platelet """
+
+    zs = bond_list[:, 0]
+    thetas = bond_list[:, 1].astype(int)
+    force = nu/bond_max*np.sum(a=zs-np.sin(th_mesh[thetas]))
+    torque = nu/bond_max*np.sum(
+        a=((1-np.cos(th_mesh[thetas]) + d) * np.sin(th_mesh[thetas])
+           + (np.sin(th_mesh[thetas])-zs) * np.cos(th_mesh[thetas]))
+    )
+
+    return force, torque
+
+
 def _count_bonds(bond_mesh, z_mesh, th_mesh, scheme):
     """ Finds the total bond number in a given bond distribution """
     if scheme == 'up':
@@ -257,18 +277,20 @@ def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
 def _update_bond_list(bond_list, th_mesh, j, break_indices, a, b, eta):
     """ Updates the bond list """
 
-    if j < bond_list.shape[0]:
-        break_indices = np.append(break_indices, j)
-    else:
-        index = j - bond_list.shape[0]
-        new_bonds = np.zeros(shape=(1, 2))
-        new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index],
-                                        loc=np.sin(th_mesh[index]),
-                                        scale=np.sqrt(1/eta))
-        new_bonds[0, 1] = index
-        bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
+    if j is not None:  # First reaction occurs before min_step
+        if j < bond_list.shape[0]:
+            break_indices = np.append(break_indices, j)
+        else:
+            index = j - bond_list.shape[0]
+            new_bonds = np.zeros(shape=(1, 2))
+            new_bonds[0, 0] = truncnorm.rvs(a=a[index], b=b[index],
+                                            loc=np.sin(th_mesh[index]),
+                                            scale=np.sqrt(1/eta))
+            new_bonds[0, 1] = index
+            bond_list = np.append(arr=bond_list, values=new_bonds, axis=0)
 
-    bond_list = np.delete(arr=bond_list, obj=break_indices, axis=0)
+        bond_list = np.delete(arr=bond_list, obj=break_indices, axis=0)
+
     return bond_list
 
 
@@ -306,6 +328,7 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
 
     if bond_mesh.ndim == 2:  # Equivalent to 'not save_bond_history'
         bond_counts = np.zeros(shape=t_mesh.shape)
+        bond_counts[0] = _count_bonds(bond_mesh, z_mesh, th_mesh, scheme)
         for i in range(t_mesh.shape[0]-1):
             bond_mesh = _eulerian_step(bond_mesh, v[i], om[i], h, nu, dt,
                                        form_rate, break_rate, sat, scheme)
@@ -338,11 +361,13 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
 
 
 def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
-                          bond_max, d, v_f, om_f, eta_v, eta_om, form_rate,
-                          break_rate, on, off, sat, correct_flux):
+                          bond_max, d, v_f, om_f, eta_v, eta_om, eta, on, off,
+                          sat, correct_flux, min_step, coeffs_and_bounds):
     """ Runs the variable time-step stochastic algorithm """
 
     if master_list.ndim == 2:  # Equivalent to 'not save_bond_history
+        bond_counts = np.zeros(shape=0)
+        bond_counts = np.append(arr=bond_counts, values=master_list.shape[0])
         while t_mesh[-1] < T:
             bond_lengths = length(master_list[:, 0],
                                   th_mesh[master_list[:, 1].astype(int)], d=d)
@@ -351,11 +376,10 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
                                        minlength=2*N)
             expected_coeffs, a, b = coeffs_and_bounds(th_mesh)
 
-            all_rates = _find_rates(binned_bonds, bond_lengths,
-                                                  on, off, bond_max, sat,
-                                                  expected_coeffs)
+            all_rates = _find_rates(binned_bonds, bond_lengths, on, off,
+                                    bond_max, sat, expected_coeffs)
 
-            dt, j = _get_next_reaction(all_rates)
+            dt, j = _get_next_reaction(all_rates, min_step)
             master_list, th_mesh, t_mesh = (
                 _update_bond_positions(master_list, th_mesh, t_mesh, dt)
             )
@@ -363,7 +387,51 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             break_indices = _advect_bonds_out(master_list, th_mesh, nu, dt, om,
                                               L, correct_flux)
 
-            master_list = _update_bond_list(master_list, j, break_indices)
+            master_list = _update_bond_list(master_list, th_mesh, j,
+                                            break_indices, a, b, eta)
+
+            bond_counts = np.append(arr=bond_counts,
+                                    values=master_list.shape[0])
+            force, torque = _get_forces(master_list, th_mesh, bond_max, nu, d)
+            v = np.append(arr=v, values=v_f + force/eta_v)
+            om = np.append(arr=om, values=om_f + torque/eta_om)
+    elif master_list.ndim == 1:
+        while t_mesh[-1] < T:
+            bond_list = np.copy(master_list[-1])
+            assert bond_list.ndim == 2
+
+            bond_lengths = length(bond_list[:, 0],
+                                  th_mesh[bond_list[:, 1].astype(int)], d=d)
+
+            binned_bonds = np.bincount(bond_list[:, 1].astype(int),
+                                       minlength=2*N)
+            expected_coeffs, a, b = coeffs_and_bounds(th_mesh)
+
+            all_rates = _find_rates(binned_bonds, bond_lengths, on, off,
+                                    bond_max, sat, expected_coeffs)
+
+            dt, j = _get_next_reaction(all_rates, min_step)
+            bond_list, th_mesh, t_mesh = (
+                _update_bond_positions(bond_list, th_mesh, t_mesh, dt)
+            )
+
+            break_indices = _advect_bonds_out(bond_list, th_mesh, nu, dt, om,
+                                              L, correct_flux)
+
+            bond_list = _update_bond_list(bond_list, th_mesh, j,
+                                            break_indices, a, b, eta)
+
+            force, torque = _get_forces(bond_list, th_mesh, bond_max, nu, d)
+            v = np.append(arr=v, values=v_f + force/eta_v)
+            om = np.append(arr=om, values=om_f + torque/eta_om)
+            master_list = np.append(arr=master_list, values=bond_list)
+
+        bond_counts = np.array([bond_list.shape[0]
+                                for bond_list in master_list])
+    else:
+        raise Exception('master_list has an invalid number of dimensions')
+    return master_list, bond_counts, v, om
+
 
 def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
     """ Solves the full eulerian PDE model """
@@ -397,7 +465,7 @@ def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
     return bond_mesh, bond_counts, v, om, t_mesh
 
 
-def rolling_ssa(**kwargs):
+def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
     """ Runs a single stochastic rolling simulation """
 
     # Define the problem parameters
@@ -414,10 +482,10 @@ def rolling_ssa(**kwargs):
         _generate_coordinate_arrays(M, N, time_steps, L, T, d)[1::4]
     )
 
-    master_list, v_list, om_list, t_mesh = _initialize_unknown_lists(v_f, om_f)
+    master_list, v_list, om_list, t_mesh = _initialize_unknown_lists(v_f, om_f, save_bond_history)
 
     def coeffs_and_bounds(bins):
-        coeffs = kap*np.exp(-eta/2*(1 - np.cos(bins) + d_prime)**2)*np.sqrt(np.pi/(2*eta))*(
+        coeffs = kappa*np.exp(-eta/2*(1 - np.cos(bins) + d)**2)*np.sqrt(np.pi/(2*eta))*(
             erf(np.sqrt(eta/2)*(np.sin(bins) + L)) - erf(np.sqrt(eta/2)*(np.sin(bins) - L))
         )
         coeffs = (bins > -np.pi/2)*(bins < np.pi/2)*coeffs
@@ -426,7 +494,9 @@ def rolling_ssa(**kwargs):
         return coeffs, a, b
 
     master_list, bond_counts, v, om = _run_stochastic_model(
-
+        master_list, v, om, t_mesh, th_mesh, L, T, nu, bond_max, d, v_f, om_f,
+        xi_v, xi_om, eta, on, off, sat, correct_flux, min_step,
+        coeffs_and_bounds
     )
 
 
