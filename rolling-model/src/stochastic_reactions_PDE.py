@@ -204,7 +204,9 @@ def variable_motion(v, om, L=2.5, T=0.4, N=100, bond_max=100, d_prime=.1,
     forces, torques = np.array([0]), np.array([0])
 
     while t[-1] < T:
-        bond_lengths = length(bond_list[:, 0], th_vec[bond_list[:, 1].astype(int)], d_prime=d_prime)
+        bond_lengths = length(bond_list[:, 0],
+                              th_vec[bond_list[:, 1].astype(int)],
+                              d=d_prime)
 
         # Calculate breaking rates
         break_rates = off*np.exp(delta*bond_lengths)
