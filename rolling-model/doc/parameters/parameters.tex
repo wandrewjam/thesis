@@ -56,22 +56,18 @@ PDE model, listed in Table \ref{tab:dim_pars}.
     $\radius$ & Platelet radius & 1 {\textmugreek}m & None \\
     $\separation$ & Wall separation distance & 0.1 {\textmugreek}m
                                     & None \\
-    $\stiffness$ & Bond stiffness & 100 dyne/cm & \cite{Bhatia2003} \\
+    $\stiffness$ & Bond stiffness & 12 pN/nm & \cite{Litvinov2011} \\
     $\boltzmann$ & Boltzmann constant & $1.38 \times 10^{-23}$ J/K
                                     & None \\
     $\temp$ & Blood temperature & 310 K & None \\
     $\onConst$ & Maximum bond on rate & 10--1000 s$\inv$
                                     & \cite{Bhatia2003} \\
-    $\offConst$ & Unstressed bond off rate & 0.1--1 s$\inv$
-                                    & \cite{Bhatia2003} (for
-                                      selectin-sLe\textsuperscript{x}
-                                      binding and
-                                      \textbeta\textsubscript{2}-ICAM
-                                      binding) \\
+    $\offConst$ & Unstressed bond off rate & 0.2 s$\inv$
+                                    & \cite{Litvinov2011} \\
     $\refForce$ & Characteristic breaking force & 0.01 pN$\inv$
                                     & Estimated below \\
     $\receptorDensity$ & Angular receptor density
-                         & 1,600--16,000 OR $800w$--$8000w$
+                         & 10,00--13,000 OR $4,775w$--$6,366w$
                            receptors/radian & Estimated below \\
     $\appliedRot$ & Fluid-imposed rotation rate & $\gamma$ s$\inv$ &
     \\
@@ -114,10 +110,12 @@ Finally, $\refForce = \frac{\compliance}{\boltzmann\cdot\temp} =
 $\receptorDensity$ is related to the number of receptors on the
 surface of the platelet, but it is not clear how. Obviously in reality
 the receptors are distributed over a 2D surface, but in the model the
-platelet is 2D and its surface is 1D. There are between $10^4$ and $10^5$
-integrin receptors on the surface of a platelet
-\cite{Burkhart2012}. If we assume all of these are on the surface of
-our 2D platelet, that gives a range of 1,600--16,000 for $\receptorDensity$. 
+platelet is 2D and its surface is 1D. There are 60,000--80,000 
+\ITA{IIb}\ITB{3}  receptors on the surface of a platelet, and more are
+recruited after platelet activation
+\cite{Shattil1998,Litvinov2011}. If we assume all of these are on the
+surface of our 2D platelet, that gives a range of 10,000--13,000 for
+$\receptorDensity$. 
 
 If we assume the reactive region is a narrow strip down the centerline
 of the platelet of width $\width$, then $\receptorDensity$ is found by
@@ -131,7 +129,7 @@ reactive strip. After dividing by $2\pi$ to get the angular density of
 receptors, we end up with $\receptorDensity =
 \receptorNumber\cdot\width/(4\pi\radius)$. With our estimates of
 $\receptorNumber$ and $\radius$ above, this gives us a range for
-$\receptorDensity$ of $796\width$--$7960\width$.
+$\receptorDensity$ of $4,775\width$--$6,366\width$.
 
 \subsection{Drag coefficients}
 \label{sec:drag-coefficients}
@@ -146,7 +144,7 @@ viscosity of blood around 3–4 cP, this gives drag coefficients of $6
 \label{sec:nd-params}
 
 There are 8 parameters in the nondimensional PDE rolling model, listed
-in Table
+in Table \ref{tab:nd-params}.
 
 \begin{table}
   \centering
