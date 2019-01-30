@@ -11,7 +11,7 @@
 		Most hemocompatibility studies focus on local interactions and effects of the material on platelets. However recent work (cit: Dr. Hlady's work) has shown that nonlocal effects are also important in understanding platelet interactions with implanted biomaterials. In particular they have shown that platelet interactions with immobilized agonists may not cause the platelets to adhere at the site of interaction, but can nonetheless prime them for downstream adhesion and full activation. One possible example of this in a vascular graft is shown in Figure #. At either end of the implanted device, native tissue must be joined with the artificial device. At these points along the vessel wall the tissue is inflamed and anastomotic (source?), which could expose platelet agonists on the surface of the wall. Additionally the increased shear rate in the stenotic regions could act as a platelet agonist (source?). Therefore while platelets may not bind to a single inflamed region of the vessel, the upstream region may prime platelets for adhesion, and then more readily bind to the downstream inflamed region. It is also possible that the inflamed tissue or the biomaterial may not cause platelets to bind locally, but nonetheless partially activate platelets and cause them to adhere downstream somewhere in the circulation. 
 		
 	- Describe experimental setup, ongoing experiments, ...
-		In order to investigate nonlocal effects of priming, Dr. Hlady's group has designed a microfluidic(?) assay with two regions printed  with platelet agonists (see Figure whatever). The upstream agonist region will be called the priming region, and the downstream region with agonist will be called the capture region. In previous research, Dr. Hlady's group has found that all 3 immobilized platelet agonists tested (vWF, collagen, and fibrinogen) in the upstream region increased adhesion of platelets in the capture region relative to a nonreactive control (Colin's thesis, Corum paper). Also, recent unpublished work has shown similar results when the upstream agonist printing is replaced by a stenotic region with higher wall shear rates (reference Shek's work).
+		In order to investigate nonlocal effects of priming, Dr. Hlady's group has designed a microfluidic assay with two regions printed  with platelet agonists (see Figure whatever). The upstream agonist region will be called the priming region, and the downstream region with agonist will be called the capture region. In previous research, Dr. Hlady's group has found that all 3 immobilized platelet agonists tested (vWF, collagen, and fibrinogen) in the upstream region increased adhesion of platelets in the capture region relative to a nonreactive control (Colin's thesis, Corum paper). Also, recent unpublished work has shown similar results when the upstream agonist printing is replaced by a stenotic region with higher wall shear rates (reference Shek's work).
 	
 2. Contextualize rolling within blood clotting
 	- Process of clotting begins when agonists (vWF and collagen) are exposed on the ECs
@@ -84,8 +84,6 @@ The nondimensional bond length $\ell$ is given by $something$, and the nondimens
 ### Stochastic models
 does it make more sense to change the order of these?
 
-### Parameter estimates
-
 ## Results
 what results do I have?
 
@@ -94,3 +92,5 @@ what results do I have?
 ## Appendix 1: Nondimensionalization
 
 ## Appendix 2: Numerical Schemes
+
+## Appendix 3: Parameter Estimates
