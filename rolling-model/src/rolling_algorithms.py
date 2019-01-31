@@ -18,6 +18,7 @@ import numpy as np
 from scipy.integrate import simps
 from scipy.special import erf
 from scipy.stats import truncnorm
+from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 from default_values import *
 from utils import nd_force, nd_torque, length
@@ -72,11 +73,16 @@ def _cfl_check(v_f, om_f, dt, h, nu, scheme):
         raise ValueError('the CFL condition for theta is not satisfied')
 
 
-def _generate_coordinate_arrays(M, N, time_steps, L, T, d):
+def _generate_coordinate_arrays(M, N, time_steps, L, T, d, alg):
     """ Generates numerical meshes needed by deterministic algorithms"""
 
     z_mesh = np.linspace(-L, L, 2*M+1)
-    th_mesh = np.linspace(-np.pi/2, np.pi/2, N+1)
+    if alg == 'det':
+        th_mesh = np.linspace(-np.pi/2, np.pi/2, N+1)
+    elif alg == 'sto':
+        th_mesh = np.linspace(-np.pi, np.pi, 2*N+1)[:-1]
+    else:
+        raise Exception('parameter \'alg\' is not valid')
 
     l_mesh = length(z_mesh[:, None], th_mesh[None, :], d)
     t_mesh = np.linspace(0, T, time_steps+1)
@@ -105,7 +111,7 @@ def _initialize_unknowns(v_f, om_f, m0, time_steps, save_bond_history):
 def _initialize_unknown_lists(v_f, om_f, save_bond_history):
     """ Initializes arrays for v, om, and bond_list """
 
-    v, om = np.array([v_f]), np.array([om_f])
+    v, om = np.array([v_f[0]]), np.array([om_f[0]])
     t_mesh = np.array([0])
 
     if save_bond_history:
@@ -143,6 +149,21 @@ def _form(bond_mesh, form_rate, h, dt, sat):
     return dt*form_rate*sat_term
 
 
+def _interpolate_velocities(v_f, om_f, T):
+    """ Returns functions to interpolate fluid velocity data """
+
+    assert v_f.shape == om_f.shape
+
+    t_uniform = np.linspace(0, T, num=v_f.shape[0])
+
+    return (
+        interp1d(t_uniform, v_f, kind='linear', bounds_error=False,
+                 fill_value='extrapolate'),
+        interp1d(t_uniform, om_f, kind='linear', bounds_error=False,
+                 fill_value='extrapolate')
+    )
+
+
 def _frac(th_mesh, nu):
     assert nu > 0  # Checks that nu is valid
 
@@ -162,11 +183,11 @@ def _frac(th_mesh, nu):
     return fraction.reshape(th_mesh.shape, order='F')
 
 
-def _find_rates(bond_lengths, on, off, bond_max, sat, expected_coeffs, delta):
+def _find_rates(binned_bonds, bond_lengths, on, off, bond_max, sat, expected_coeffs, delta):
     """ Finds breaking and formation rates for the stochastic model"""
 
     break_rates = off*np.exp(delta*bond_lengths)
-    form_rates = on*expected_coeffs*(bond_max - sat*bond_counts)
+    form_rates = on*expected_coeffs*(bond_max - sat*binned_bonds)
     all_rates = np.append(break_rates, form_rates)
 
     return all_rates
@@ -191,7 +212,7 @@ def _get_next_reaction(all_rates, min_step):
         return dt, j
 
 
-def _update_bond_positions(bond_list, th_mesh, t_mesh, dt):
+def _update_bond_positions(bond_list, th_mesh, t_mesh, dt, v, om):
     """ Updates bond positions and time mesh for ssa """
 
     bond_list[:, 0] += -dt*v  # Doesn't handle the case v not constant
@@ -361,9 +382,12 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
 
 
 def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
-                          bond_max, d, v_f, om_f, eta_v, eta_om, eta, on, off,
-                          sat, correct_flux, min_step, coeffs_and_bounds):
+                          bond_max, d, v_f, om_f, eta_v, eta_om, eta, delta,
+                          on, off, sat, correct_flux, min_step,
+                          coeffs_and_bounds):
     """ Runs the variable time-step stochastic algorithm """
+
+    v_f_interp, om_f_interp = _interpolate_velocities(v_f, om_f, T)
 
     if master_list.ndim == 2:  # Equivalent to 'not save_bond_history
         bond_counts = np.zeros(shape=0)
@@ -377,11 +401,12 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             expected_coeffs, a, b = coeffs_and_bounds(th_mesh)
 
             all_rates = _find_rates(binned_bonds, bond_lengths, on, off,
-                                    bond_max, sat, expected_coeffs)
+                                    bond_max, sat, expected_coeffs, delta)
 
             dt, j = _get_next_reaction(all_rates, min_step)
             master_list, th_mesh, t_mesh = (
-                _update_bond_positions(master_list, th_mesh, t_mesh, dt)
+                _update_bond_positions(master_list, th_mesh, t_mesh, dt,
+                                       v[-1], om[-1])
             )
 
             break_indices = _advect_bonds_out(master_list, th_mesh, nu, dt, om,
@@ -393,8 +418,9 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             bond_counts = np.append(arr=bond_counts,
                                     values=master_list.shape[0])
             force, torque = _get_forces(master_list, th_mesh, bond_max, nu, d)
-            v = np.append(arr=v, values=v_f + force/eta_v)
-            om = np.append(arr=om, values=om_f + torque/eta_om)
+            v = np.append(arr=v, values=v_f_interp(t_mesh[-1]) + force/eta_v)
+            om = np.append(arr=om, values=om_f_interp(t_mesh[-1])
+                                          + torque/eta_om)
     elif master_list.ndim == 1:
         while t_mesh[-1] < T:
             bond_list = np.copy(master_list[-1])
@@ -422,8 +448,9 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
                                             break_indices, a, b, eta)
 
             force, torque = _get_forces(bond_list, th_mesh, bond_max, nu, d)
-            v = np.append(arr=v, values=v_f + force/eta_v)
-            om = np.append(arr=om, values=om_f + torque/eta_om)
+            v = np.append(arr=v, values=v_f_interp(t_mesh[-1]) + force/eta_v)
+            om = np.append(arr=om, values=om_f_interp(t_mesh[-1])
+                                          + torque/eta_om)
             master_list = np.append(arr=master_list, values=bond_list)
 
         bond_counts = np.array([bond_list.shape[0]
@@ -444,7 +471,7 @@ def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
 
     # Define coordinate meshes and mesh widths
     z_mesh, th_mesh, l_mesh, t_mesh, h, nu, dt = (
-        _generate_coordinate_arrays(M, N, time_steps, L, T, d)
+        _generate_coordinate_arrays(M, N, time_steps, L, T, d, 'det')
     )
 
     # Check for the CFL condition
@@ -478,11 +505,13 @@ def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
     # selects only the th_mesh and nu outputs from the
     # _generate_coordinate_arrays method.
 
-    th_mesh, nu = (
-        _generate_coordinate_arrays(M, N, time_steps, L, T, d)[1::4]
+    th_mesh, t_uniform, nu = (
+        _generate_coordinate_arrays(M, N, time_steps, L, T, d, 'sto')[1::2]
     )
 
-    master_list, v_list, om_list, t_mesh = _initialize_unknown_lists(v_f, om_f, save_bond_history)
+    master_list, v_list, om_list, t_mesh = (
+        _initialize_unknown_lists(v_f, om_f, save_bond_history)
+    )
 
     def coeffs_and_bounds(bins):
         coeffs = kappa*np.exp(-eta/2*(1 - np.cos(bins) + d)**2)*np.sqrt(np.pi/(2*eta))*(
@@ -493,11 +522,15 @@ def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
         b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
-    master_list, bond_counts, v, om = _run_stochastic_model(
-        master_list, v, om, t_mesh, th_mesh, L, T, nu, bond_max, d, v_f, om_f,
-        xi_v, xi_om, eta, on, off, sat, correct_flux, min_step,
-        coeffs_and_bounds
+    min_step = t_uniform[1] - t_uniform[0]
+    master_list, bond_counts, v, om = (
+        _run_stochastic_model(master_list, v_list, om_list, t_mesh, th_mesh, L,
+                              T, nu, bond_max, d, v_f, om_f, xi_v, xi_om, eta,
+                              delta, on, off, sat, correct_flux, min_step,
+                              coeffs_and_bounds)
     )
+
+    return master_list, bond_counts, v, om
 
 
 if __name__ == '__main__':
@@ -505,10 +538,17 @@ if __name__ == '__main__':
     time_steps = 2000
     m0 = np.zeros(shape=(2*M+1, N+1))
     model_outputs = []
+    bond_max = 10
+    correct_flux = True
 
     for scheme in ['up', 'bw']:
         model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,
                                           save_bond_history=False)[1:])
+
+    model_outputs.append(
+        rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux,
+                    save_bond_history=False)[1:]
+                         )
 
     fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(6, 8))
 
