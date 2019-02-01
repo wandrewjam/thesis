@@ -19,7 +19,7 @@ rolling-model/data/*
 rolling-model/plots/*
 _data/*
 shek-pres/*
-oral_exam/new-2017-03-12
+oral-exam/new-2017-03-12
 figures/
 
 # Copied from github/gitignore/Python.gitignore
