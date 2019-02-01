@@ -147,7 +147,7 @@ TEXFILES        = abstract.tex			\
 		  latex-processing.tex		\
 		  notation.tex
 
-THESIS		= sample-thesis-1
+THESIS		= oral-document
 
 TOPFILE		= $(THESIS).ltx
 
