@@ -21,6 +21,7 @@ _data/*
 shek-pres/*
 oral-exam/thesis-templates/
 figures/
+oral-exam/oral-doc/oral-document.bib
 
 # Copied from github/gitignore/Python.gitignore
 ###############################################
