@@ -1,0 +1,157 @@
+%%% -*-TeX-*-
+%%% ====================================================================
+%%% This style file redefines sectional headings to set them in the
+%%% official Utah red color (default, but changeable by the user by,
+%%% e.g.,
+%%%     \definecolor{utahheadingcolor} {rgb}  {0.0, 0.8, 0.0}
+%%% AFTER loading this package
+%%%
+%%% Usage:
+%%%
+%%%    \documentclass [11pt] {book}
+%%%    \usepackage    {uuthesis-base}
+%%%    \usepackage    {uuthesis-color}
+%%%
+%%% [27-Jan-2018] -- Version 2.00 for new 2018 book-style-based
+%%%                  dissertation and thesis design
+%%% [12-Mar-2017] -- Revise definition of newtheorem* from amsthm.sty to
+%%%                  remove unwanted space before the period following
+%%%                  the theorem heading when color headings are used.
+%%% [09-Mar-2017] -- Fix vertical spacing bug in \mainheadingtext: change
+%%%                  \color{...}{...} to {\color{...}{...}}
+%%% [30-Mar-2016] -- Fix bug in one \addtocontents command.
+%%% [22-Mar-2016] -- More cleanup of macro layout, and removal of debug
+%%%                  statements.
+%%% [17-Mar-2016] -- Further tweak to table of contents generation
+%%% [16-Mar-2016] -- Require rgb package too for convenient X11-style
+%%%                  color names
+%%% [05-Jan-2016] -- Version 1.00
+%%% ====================================================================
+
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{uuthesis-color}[2018/01/27 v2.00]
+
+\immediate \write16 {===============================================================================}%
+\immediate \write16 {}%
+\immediate \write16 {This is uuthesis-color.sty version 2.00 <27 January 2018>}%
+\immediate \write16 {}%
+\immediate \write16 {WARNING: Color in theses is still experimental, and subject to approval by}%
+\immediate \write16 {the University of Utah Thesis Office!  One of their concerns is that color}%
+\immediate \write16 {pages printed on black-and-white printers should not have text disappear}%
+\immediate \write16 {because it is too light to see against a white paper background.}%
+\immediate \write16 {===============================================================================}%
+
+\RequirePackage{color}%
+\RequirePackage{coloralias}%
+\RequirePackage{rgb}%
+
+\definecolor{utahblue}         {rgb}  {0.0, 0.0, 0.8}%
+\definecolor{utahgreen}        {rgb}  {0.0, 0.6, 0.0}%
+\definecolor{utahred}          {rgb}  {0.8, 0.0, 0.0} % official definition for University of Utah Printing Services
+\definecolor{utahheadingcolor} {rgb}  {0.8, 0.0, 0.0} % official definition for University of Utah Printing Services
+\definecolor{utahtheoremcolor} {rgb}  {0.0, 0.0, 0.8}
+
+%% The original of this definition is taken from amsthm.sty:157.
+%% We add color wrappers around the first and second arguments.
+\def\@begintheorem#1#2[#3]{%
+  \deferred@thm@head{\the\thm@headfont \thm@indent
+    \@ifempty{#1}{\let\thmname\@gobble}{\let\thmname\@iden}%
+    \@ifempty{#2}{\let\thmnumber\@gobble}{\let\thmnumber\@iden}%
+    \@ifempty{#3}{\let\thmnote\@gobble}{\let\thmnote\@iden}%
+    \thm@swap\swappedhead
+    \thmhead{\color{utahtheoremcolor}{#1}}%   theorem-like name
+            {\color{utahtheoremcolor}{#2}}%   theorem-like number
+            {#3}%                             optional numbered-within name
+    \the\thm@headpunct
+    \thmheadnl % possibly a newline.
+    \hskip\thm@headsep
+  }%
+  \ignorespaces}
+
+%%% Original definitions from uuthesis2e.cls
+%%% \def \fnum@figure {\bfseries Figure \thefigure}%
+%%% \def \fnum@table  {\bfseries Table  \thetable}%
+
+%%% Modified definitions with colored text
+\def \fnum@figure {\bfseries \color{utahheadingcolor}{Figure \thefigure}}%
+\def \fnum@table  {\bfseries \color{utahheadingcolor}{Table  \thetable}}%
+
+%% \let \old@makechapterhead = \@makechapterhead
+%% \renewcommand {\@makechapterhead} [1] {\old@makechapterhead{\color{utahheadingcolor}{#1}}}
+%% Revise definition from texlive/2018/texmf-dist/tex/latex/base/book.cls:375
+
+\def\@makechapterhead#1{%
+  \vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \if@mainmatter
+        \huge\bfseries \color{utahheadingcolor}{\@chapapp\space \thechapter}
+        \par\nobreak
+        \vskip 20\p@
+      \fi
+    \fi
+    \interlinepenalty\@M
+    \Huge \bfseries \color{utahheadingcolor}{#1}\par\nobreak
+    \vskip 40\p@
+  }}
+
+\let \old@makeschapterhead = \@makeschapterhead
+\renewcommand {\@makeschapterhead} [1] {\old@makeschapterhead{\color{utahheadingcolor}{#1}}}
+
+%%% Because we need to wrap color selection around both the section
+%%% title and the internally-generated section number, we cannot use
+%%% the "\let \oldmacro = \macro" trick above for easy introduction 
+%%% of color.  The original definition is found at
+%%% texlive-2018/texmf-dist/tex/latex/base/latex.ltx:5871
+
+\def\@sect#1#2#3#4#5#6[#7]#8{%
+  %% \typeout{DEBUG @sect: arg 1 = [#1]}%
+  %% \typeout{DEBUG @sect: arg 2 = [#2]}%
+  %% \typeout{DEBUG @sect: arg 3 = [#3]}%
+  %% \typeout{DEBUG @sect: arg 4 = [#4]}%
+  %% \typeout{DEBUG @sect: arg 5 = [#5]}%
+  %% \typeout{DEBUG @sect: arg 6 = [#6]}%
+  %% \typeout{DEBUG @sect: arg 7 = [#7]}%
+  %% \typeout{DEBUG @sect: arg 8 = [#8]}%
+  \ifnum #2>\c@secnumdepth
+    \let\@svsec\@empty
+  \else
+    \refstepcounter{#1}%
+    \protected@edef\@svsec{\@seccntformat{#1}\relax}%
+  \fi
+  \@tempskipa #5\relax
+  \ifdim \@tempskipa>\z@
+    \begingroup
+      #6{%
+        \@hangfrom{\hskip #3\relax{\color{utahheadingcolor}{\@svsec}}}%
+          \interlinepenalty \@M {\color{utahheadingcolor}{#8}}\@@par}%
+    \endgroup
+    \csname #1mark\endcsname{#7}%
+    \addcontentsline{toc}{#1}{%
+      \ifnum #2>\c@secnumdepth \else
+        \protect\numberline{\csname the#1\endcsname}%
+      \fi
+      #7}%
+  \else
+    \def\@svsechd{%
+      #6{\hskip #3\relax
+      {\color{utahheadingcolor}{\@svsec #8}}}%
+      \csname #1mark\endcsname{#7}%
+      \addcontentsline{toc}{#1}{%
+        \ifnum #2>\c@secnumdepth \else
+          \protect\numberline{\csname the#1\endcsname}%
+        \fi
+        #7}}%
+  \fi
+  \@xsect{#5}}
+
+\let \old@makecaption = \@makecaption
+\renewcommand {\@makecaption} [2]{\old@makecaption{{\color{utahheadingcolor}{#1}}}{#2}}
+
+%%% We want \verb and \begin{verbatim} ... \end{verbatim} environments to be
+%%% set in color to make them stand out.
+
+\definecoloralias {verbatimcolor} {utahblue}
+
+\renewcommand {\verbatim@font} {\normalfont \ttfamily \color{verbatimcolor}}
+

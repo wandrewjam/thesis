@@ -1,0 +1,96 @@
+%%% -*-TeX-*-
+%%% ====================================================================
+%%%  @LaTeX-style-file{
+%%%     author          = "Nelson H. F. Beebe",
+%%%     version         = "0.00",
+%%%     date            = "10 April 2017",
+%%%     time            = "17:17:28 MDT",
+%%%     filename        = "x-bst.sty",
+%%%     address         = "University of Utah
+%%%                        Department of Mathematics, 110 LCB
+%%%                        155 S 1400 E RM 233
+%%%                        Salt Lake City, UT 84112-0090
+%%%                        USA",
+%%%     telephone       = "+1 801 581 5254",
+%%%     FAX             = "+1 801 581 4148",
+%%%     URL             = "http://www.math.utah.edu/~beebe",
+%%%     checksum        = "23423 96 309 3394",
+%%%     email           = "beebe@math.utah.edu, beebe@acm.org,
+%%%                        beebe@computer.org (Internet)",
+%%%     codetable       = "ISO/ASCII",
+%%%     keywords        = "bibliography: BibTeX; extended bibliography
+%%%                        styles",
+%%%     license         = "public domain",
+%%%     supported       = "yes",
+%%%     docstring       = "This style file provides definitions of TeX
+%%%                        conditionals for controlling which of the
+%%%                        extended fields supported by the x-*.bst
+%%%                        files are typeset.  It is needed in a LaTeX
+%%%                        document to supply definitions of
+%%%                        \ifshowXXX commands that control whether
+%%%                        material is typeset or not.
+%%%
+%%%                        The checksum field above contains a CRC-16
+%%%                        checksum as the first value, followed by the
+%%%                        equivalent of the standard UNIX wc (word
+%%%                        count) utility output of lines, words, and
+%%%                        characters.  This is produced by Robert
+%%%                        Solovay's checksum utility.",
+%%%  }
+%%% ====================================================================
+
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{x-bst}[2017/04/10 v0.00]
+
+\immediate \write16 {====================================================================================================}
+\immediate \write16 {x-bst.sty version 0.00 <10 April 2017>}
+\immediate \write16 {LaTeX support for the x-abbrv.bst, x-alpha.bst,x-plain.bst, and x-unsrt.bst}
+\immediate \write16 {extended basic BibTeX styles}
+\immediate \write16 {====================================================================================================}
+
+\RequirePackage{url}
+
+\newif \ifshowBIBTYPE
+\newif \ifshowBOOKPAGES
+\newif \ifshowCODEN
+\newif \ifshowDOI
+\newif \ifshowDOIPERIOD
+\newif \ifshowISBN
+\newif \ifshowISSN
+\newif \ifshowISSNL
+\newif \ifshowLCCN
+\newif \ifshowPRICE
+\newif \ifshowURL
+
+\newcommand{\showOPTIONAL}
+{%
+    \showBOOKPAGEStrue
+    \showCODENtrue
+    \showDOIPERIODtrue
+    \showDOItrue
+    \showISBNtrue
+    \showISSNtrue
+    \showISSNLtrue
+    \showLCCNtrue
+    \showPRICEtrue
+    \showURLtrue
+}
+
+\newcommand{\hideOPTIONAL}
+{%
+    \showBOOKPAGESfalse
+    \showCODENfalse
+    \showDOIPERIODfalse
+    \showDOIfalse
+    \showISBNfalse
+    \showISSNfalse
+    \showISSNLfalse
+    \showLCCNfalse
+    \showPRICEfalse
+    \showURLfalse
+}
+
+%%% By default, all extended fields (except bibtype) are shown:
+
+\showBIBTYPEfalse
+\showOPTIONAL

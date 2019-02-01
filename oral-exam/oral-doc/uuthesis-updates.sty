@@ -1,0 +1,107 @@
+%%% -*-TeX-*-
+%%% ====================================================================
+%%% This file implements updates to the base version 2.00 files of 27
+%%% January 2018.  It exists so that we can maintain long-term
+%%% stability of the 2.00 files, and, if needed, add modifications via
+%%% this single file.  At version 2.00, it does nothing but announce
+%%% its version.
+%%%
+%%% At long intervals, thoroughly tested changes from this file may be
+%%% merged back into the 2.00 *.sty files, with an accompanying
+%%% increase of their version numbers.
+%%%
+%%% [31-Jan-2019] -- Version 2.03: add support for up to nine readers
+%%% [23-Jan-2019] -- Version 2.02: fix page number handling in \prefacesection
+%%% [23-Jan-2019] -- Version 2.01: parametrize number box sizes
+%%% [27-Jan-2018] -- Version 2.00 (no updates supplied)
+%%% ====================================================================
+
+\NeedsTeXFormat {LaTeX2e} [1994/12/01]
+\ProvidesPackage {uuthesis-updates} [2019/01/31 v2.03]
+
+\immediate \write16 {===============================================================================}%
+\immediate \write16 {}%
+\immediate \write16 {This is uuthesis-updates.sty version 2.03 <31 January 2019>}%
+\immediate \write16 {}%
+\immediate \write16 {===============================================================================}%
+
+%%% ====================================================================
+%%% Version 2019/01/23 v2.01
+
+%% Make names for hard-coded dimensions that may need author adjustment:
+
+\newlength {\fignumwidth}
+\newlength {\pagenumwidth}
+\newlength {\parnumwidth}
+\newlength {\secnumwidth}
+\newlength {\subparnumwidth}
+\newlength {\subsecnumwidth}
+\newlength {\subsubsecnumwidth}
+\newlength {\tabnumwidth}
+
+%% Set their default values from book.cls:634--641:
+
+\setlength {\fignumwidth}       {2.3em}
+\setlength {\pagenumwidth}      {1.55em}
+\setlength {\parnumwidth}       {5em}
+\setlength {\secnumwidth}       {2.3em}
+\setlength {\subparnumwidth}    {6em}
+\setlength {\subsecnumwidth}    {3.2em}
+\setlength {\subsubsecnumwidth} {4.1em}
+\setlength {\tabnumwidth}       {2.3em}
+
+%% Redefine macros to use named dimensions for the number boxes:
+
+\renewcommand* {\l@figure}        {\@dottedtocline {1} {1.5em} {\fignumwidth}}
+\renewcommand* {\l@table}         {\@dottedtocline {1} {1.5em} {\tabnumwidth}}
+\renewcommand* {\l@section}       {\@dottedtocline {1} {1.5em} {\secnumwidth}}
+\renewcommand* {\l@subsection}    {\@dottedtocline {2} {3.8em} {\subsecnumwidth}}
+\renewcommand* {\l@subsubsection} {\@dottedtocline {3} {7.0em} {\subsubsecnumwidth}}
+\renewcommand* {\l@paragraph}     {\@dottedtocline {4} {10em}  {\parnumwidth}}
+\renewcommand* {\l@subparagraph}  {\@dottedtocline {5} {12em}  {\subparnumwidth}}
+
+\renewcommand  {\@pnumwidth}      {\pagenumwidth}
+
+%%% ====================================================================
+%%% Version 2019/01/23 v2.02
+
+%%% There is a faulty assumption in uuthesis-base.sty that \prefacesection
+%%% will be invoked only once, and it sets the page counter to match UofUtah
+%%% Thesis Office requirements.  The fix is to reset the page counter only
+%%% when it is sufficiently small.
+
+\renewcommand {\prefacesection} [1]
+{%
+  \newpage
+  %% \typeout{============== DEBUG 1: #1: page counter = \the\c@page}%
+  \thispagestyle{empty}
+  \uunormalspace
+  \ifnum \c@page < 3
+      \setcounter {page} {2}                % UofU Thesis Office demands abstract on p. iii: start one lower
+  \fi
+  %% \typeout{============== DEBUG 2: #1: page counter = \the\c@page}%
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\uppercase{#1}}
+  %% \typeout{============== DEBUG 3: #1: page counter = \the\c@page}%
+}
+
+%%% ====================================================================
+%%% Version 2019/01/31 v2.03
+
+%%% We have so far encountered only one student with a chair and five readers,
+%%% but we allow up to nine readers, because doing so is simple.
+
+\newcommand {\fifthreader}              [1]{\gdef \@fifthreader                {#1}}
+\newcommand {\fifthdateapproved}        [1]{\gdef \@fifthdateapproved          {#1}}
+
+\newcommand {\sixthreader}              [1]{\gdef \@sixthreader                {#1}}
+\newcommand {\sixthdateapproved}        [1]{\gdef \@sixthdateapproved          {#1}}
+
+\newcommand {\seventhreader}            [1]{\gdef \@seventhreader              {#1}}
+\newcommand {\seventhdateapproved}      [1]{\gdef \@seventhdateapproved        {#1}}
+
+\newcommand {\eighthreader}             [1]{\gdef \@eighthreader               {#1}}
+\newcommand {\eighthdateapproved}       [1]{\gdef \@eighthdateapproved         {#1}}
+
+\newcommand {\ninthreader}              [1]{\gdef \@ninthreader                {#1}}
+\newcommand {\ninthdateapproved}        [1]{\gdef \@ninthdateapproved          {#1}}

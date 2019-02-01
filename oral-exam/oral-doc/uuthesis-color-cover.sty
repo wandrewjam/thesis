@@ -1,0 +1,17 @@
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{uuthesis-color-cover}[2018/10/25 v1.00]
+
+\immediate \write16 {===============================================================================}%
+\immediate \write16 {}%
+\immediate \write16 {This is uuthesis-color-cover.sty version 1.00 <25 October 2018>}%
+\immediate \write16 {}%
+\immediate \write16 {WARNING: Color in theses is still experimental, and subject to approval by}%
+\immediate \write16 {the University of Utah Thesis Office!  One of their concerns is that color}%
+\immediate \write16 {pages printed on black-and-white printers should not have text disappear}%
+\immediate \write16 {because it is too light to see against a white paper background.}%
+\immediate \write16 {===============================================================================}%
+
+\RequirePackage{uuthesis-color}
+
+\let \oldtitlepage = \titlepage
+\renewcommand {\titlepage} {{\color{utahheadingcolor}\oldtitlepage}}

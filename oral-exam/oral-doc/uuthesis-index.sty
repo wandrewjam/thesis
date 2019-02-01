@@ -1,0 +1,107 @@
+%%% -*-TeX-*-
+%%% ====================================================================
+%%% This file contains changes to uuthesis-2016-d (or later) to
+%%% provide support for an end-of-thesis subject index.  It must be
+%%% used INSTEAD of the standard LaTeX makeidx package, because it
+%%% needs to define additional macros and formatting compatible with
+%%% the University of Utah Thesis Office regulations.
+%%%
+%%% Modern machines are sufficiently fast that there is no observable
+%%% time savings from suppressing index generation, so this file
+%%% always issues the \makeindex command.
+%%%
+%%% Usage:
+%%%
+%%%     \documentclass {uuthesis2e}
+%%%     ... other \usepackage{...} commands ...
+%%%     \usepackage    {uuthesis-2016-d}
+%%%     \usepackage    {uuthesis-index}
+%%%     ... front matter definitions ...
+%%%     \begin {document}
+%%%     ...
+%%%     \bibliography  {siam}
+%%%     \printindex
+%%%     \end   {document}
+%%%
+%%% Two aspects of the formatting are user controllable via commands
+%%% issued just before the \printindex command:
+%%%
+%%%     \columnsep = 0pt                % change from nonzero default
+%%%     \renewcommand{TOPIC INDEX}      % change from SUBJECT INDEX default
+%%%
+%%% That location is also a reasonable place to insert index cross
+%%% references, like these examples:
+%%%
+%%%     \index{DCT|see{Discrete Cosine Transform}}%
+%%%     \index{DWT|see{Discrete Wavelet Transform}}%
+%%%     \index{DCT|seealso{Discrete Wavelet Transform}}%
+%%%     \index{DWT|seealso{Discrete Cosine Transform}}%
+%%%     \index{mu@$\mu$ (mu)|see{Borel measure}}%
+%%%     \index{m|seealso{mu (\$mu$)}}%
+%%%
+%%% [27-Jan-2018] --- Version 2.00 minor revisions for new 2018
+%%%                   book-style-based dissertation and thesis support
+%%% [23-Mar-2016]
+%%% ====================================================================
+
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{uuthesis-index}[2018/01/27 v2.00]
+
+\immediate \write16 {===============================================================================}%
+\immediate \write16 {}%
+\immediate \write16 {This is uuthesis-index.sty version 2.00 <27 January 2018>}%
+\immediate \write16 {}%
+\immediate \write16 {===============================================================================}%
+
+\usepackage{makeidx}
+
+\def \indexname {Subject Index}
+
+\renewenvironment{theindex}
+                 {%
+                     \if@twocolumn
+                         \@restonecolfalse
+                     \else
+                         \@restonecoltrue
+                     \fi
+                     \twocolumn[\@makeschapterhead{\indexname}]%
+		     \@mkboth{\MakeUppercase\indexname}%
+			     {\MakeUppercase\indexname}%
+                     \addcontentsline {toc} {chapter} {\indexname}%
+                     \thispagestyle {plain}%
+                     \parindent     = \z@
+                     \parskip       = \z@ \@plus .3\p@\relax
+                     \columnseprule = \z@
+                     \columnsep     = 35\p@
+                     \columnsep     = 50\p@
+                     \columnseprule = 0.5\p@
+                     \columnwidth   = \textwidth
+                     \advance \columnwidth by -\columnseprule
+                     \advance \columnwidth by -\columnsep
+                     \advance \columnwidth by -6\p@
+                     \divide \columnwidth by 2
+                     \let \item     = \@idxitem
+                     \raggedright
+                     \sloppy
+                 }
+                 {\if@restonecol \onecolumn \else \clearpage \fi}
+
+\makeindex
+
+\newcommand{\newindexgroup}[1]
+{%
+    \ifx \undefined \color
+        \def \color #1{}
+    \fi
+    % {\textbf{\large \centerline{\color{utahheadingcolor}{#1}}}}%
+    % {\textbf{\large \centerline{\color{utahheadingcolor}{\hrulefill\ #1\ \hrulefill }}}}%
+    \setbox0 = \hbox{#1}%
+    % {\textbf{\large \centerline{\color{utahheadingcolor}{\mbox{ }\hrulefill\ \raisebox{-0.5\ht0}{#1}\ \hrulefill \mbox{ }}}}}%
+    {\textbf{\large \centerline{\color{utahheadingcolor}{\kern 2em\hrulefill\ \raisebox{-0.5\ht0}{#1}\ \hrulefill \kern 2em}}}}%
+    \nopagebreak
+    \vskip 0.5\ht0
+    \nopagebreak
+    %% \markboth{\indexname\ \ldots{} #1}%
+    %%          {\indexname\ \ldots{} #1}%
+    %% \nopagebreak
+}
