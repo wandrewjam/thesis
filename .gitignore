@@ -22,6 +22,7 @@ shek-pres/*
 oral-exam/thesis-templates/
 figures/
 oral-exam/oral-doc/oral-document.bib
+*.stripped
 
 # Copied from github/gitignore/Python.gitignore
 ###############################################
@@ -284,6 +285,7 @@ acs-*.bib
 
 # makeidx
 *.idx
+*.idx.old
 *.ilg
 *.ind
 *.ist
