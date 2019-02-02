@@ -58,7 +58,7 @@
     11pt                                % One of: <empty>, or 11pt, or 12pt
 ]{book}  % everything after this extends the standard LaTeX book class
 
-\overfullrule = 0pt                     % do not show overfull boxes
+% \overfullrule = 0pt                     % do not show overfull boxes
 \overfullrule = 100pt                   % make overfull boxes really visible!
 
 \usepackage {uuthesis-base}             % MANDATORY package for a minimal thesis
@@ -94,7 +94,7 @@
 %%: OPTIONAL:  \usepackage {times}
 %%: OPTIONAL:  \usepackage {utopia}
 
-\usepackage {tgadventor}                % for document font family
+%% \usepackage {tgadventor}                % for document font family
 
 %%% ====================================================================
 %%% The remaining packages are required by this particular thesis,
@@ -123,9 +123,9 @@
 %%% Support for showing the sample thesis input and typesetting (NOT
 %%% needed by ordinary users)
 
-\usepackage {fancyvrb}                  % for displaying this book's LaTeX input
-\usepackage {color}                     % for colorizing the sample input
-\usepackage {colortbl}                  % for color shading in tables
+%% \usepackage {fancyvrb}                  % for displaying this book's LaTeX input
+%% \usepackage {color}                     % for colorizing the sample input
+%% \usepackage {colortbl}                  % for color shading in tables
 
 %%% ====================================================================
 %%% Support for brief and extended tables of contents (helpful for
@@ -207,18 +207,18 @@
 %%% ====================================================================
 %%% The student-specific front matter fields are defined here:
 
-\author                 {Jane Doe}
-\title                  {Integral Transforms in Quantum Physics}
+\author                 {Andrew Watson}
+\title                  {Platelet Priming}
 \thesistype             {dissertation}
 
-\dedication             {For my parents, Alice and Bob.}
+\dedication             {Thanks to some people}
 
 %%% Most students need just a short degree name, like this:
 \degree                 {Doctor of Philosophy}
 %%% However, multiline degrees are possible, and are done like this:
-\degree                 {Doctor of Philosophy \\
-                         in \\
-                         Mathematical Physics}
+%% \degree                 {Doctor of Philosophy \\
+%%                          in \\
+%%                          Mathematical Physics}
 
 %%% For a Master's thesis, use something like this:
 %%%
@@ -235,15 +235,15 @@
 %%% College- and Department-level definitions:
 \approvaldepartment     {Mathematics}
 \department             {Department of Mathematics}
-\graduatedean           {Alice B. Toklas}
-\departmentchair        {Petrus Marcus Aurelius Featherstone-Hough}
+\graduatedean           {David Kieda}
+\departmentchair        {Davar Khoshnevisan}
 
 %%% The graduate student's committee members:
-\committeechair         {Cornelius L{\'a}nczos}
-\firstreader            {Hans Bethe}
-\secondreader           {Niels Bohr}
-\thirdreader            {Max Born}
-\fourthreader           {Paul A. M. Dirac}
+\committeechair         {Aaron Fogelson}
+\firstreader            {James P. Keener}
+\secondreader           {Vladimir Hlady}
+\thirdreader            {Christel Hohenegger}
+\fourthreader           {Sean Lawley}
 \chairtitle             {Professor}
 
 %%% NB: It is rare, but possible, for there to be two chairs, For
@@ -260,11 +260,11 @@
 \copyrightyear          {2018}
 
 %%% Dates on which committee members approved the thesis
-\chairdateapproved      {20 January 2018}
-\firstdateapproved      {21 January 2018}
-\seconddateapproved     {22 January 2018}
-\thirddateapproved      {23 January 2018}
-\fourthdateapproved     {24 January 2018}
+\chairdateapproved      {2018}
+\firstdateapproved      {2018}
+\seconddateapproved     {2018}
+\thirddateapproved      {2018}
+\fourthdateapproved     {2018}
 
 %%% ====================================================================
 %%% Typesetting begins here:
@@ -275,8 +275,8 @@
 \titlepage                              % MANDATORY
 \copyrightpage                          % optional, but strongly recommended
 \dissertationapproval                   % MANDATORY
-\include {latex-input}                  % ONLY for this sample document
-\include {latex-processing}             % ONLY for this sample document
+%% \include {latex-input}                  % ONLY for this sample document
+%% \include {latex-processing}             % ONLY for this sample document
 \dedicationpage                         % optional
 
 %% Most theses have just one table of contents, like this:
@@ -308,7 +308,7 @@
 
 % \preface {acknowledge} {Acknowledgements}
 
-\optionalfront{Color in typesetting}{\input{color-notes}}
+% \optionalfront{Color in typesetting}{\input{color-notes}}
 
 %%% Demonstrations of thesis typesetting features for the sample thesis.
 %%% Once you have seen the examples, you can comment out this line.
@@ -375,35 +375,35 @@
 %%% indexes, as a matter of style (to match the reference list), and
 %%% for compactness.
 
-\singlespace
+%% \singlespace
 
-%%% Define several index cross references (there are many more such
-%%% in chap1.tex, but the examples here give a useful summary of how
-%%% they are made):
+%% %%% Define several index cross references (there are many more such
+%% %%% in chap1.tex, but the examples here give a useful summary of how
+%% %%% they are made):
 
-\index{DCT|see{discrete cosine transform}}
-\index{DWT|see{discrete wavelet transform}}
-\index{Borel measure ($\mu$)}
-\index{mu@$\mu$ (mu)|see{Borel measure}}
-\index{Escherichia coli@\bioname{Escherichia coli}|see{E. coli}}
-\index{transform|seealso{discrete cosine transform}}
-\index{transform|seealso{discrete wavelet transform}}
-\index{transform|seealso{Fast Fourier Transform}}
+%% \index{DCT|see{discrete cosine transform}}
+%% \index{DWT|see{discrete wavelet transform}}
+%% \index{Borel measure ($\mu$)}
+%% \index{mu@$\mu$ (mu)|see{Borel measure}}
+%% \index{Escherichia coli@\bioname{Escherichia coli}|see{E. coli}}
+%% \index{transform|seealso{discrete cosine transform}}
+%% \index{transform|seealso{discrete wavelet transform}}
+%% \index{transform|seealso{Fast Fourier Transform}}
 
-\renewcommand {\bioname} [1] {\emph{#1}}   % redefine to suppress color and indexing in index
-\renewcommand {\fsfname} [1] {\texttt{#1}} % redefine to suppress color and indexing in index
+%% \renewcommand {\bioname} [1] {\emph{#1}}   % redefine to suppress color and indexing in index
+%% \renewcommand {\fsfname} [1] {\texttt{#1}} % redefine to suppress color and indexing in index
 
-\renewcommand {\indexname} {Biological Nomenclature Index}
+%% \renewcommand {\indexname} {Biological Nomenclature Index}
 
-\input{\jobname-bioname.ind}
+%% \input{\jobname-bioname.ind}
 
-\renewcommand {\indexname} {Free Software Index}
+%% \renewcommand {\indexname} {Free Software Index}
 
-\input{\jobname-fsfname.ind}
+%% \input{\jobname-fsfname.ind}
 
-\renewcommand {\indexname} {Topic Index}
+%% \renewcommand {\indexname} {Topic Index}
 
-\overfullrule = 0pt                     % suppress overfull-box warnings
-\printindex
+%% \overfullrule = 0pt                     % suppress overfull-box warnings
+%% \printindex
 
 \end {document}
