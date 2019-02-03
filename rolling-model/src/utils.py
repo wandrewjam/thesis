@@ -15,7 +15,7 @@ def length(z, th, d=0):
     z, th : array_like
         Coordinate arrays specifying points on the wall and the platelet,
         respectively.
-    d : float
+    d : scalar
         The minimum separation distance between the platelet and wall.
 
     Returns
