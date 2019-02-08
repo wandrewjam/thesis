@@ -126,6 +126,7 @@ STYFILES	= amssymb.sty			\
 		  diagram.sty			\
 		  lamsarrow.sty			\
 		  mythesis.sty			\
+		  ../../model-defs.tex		\
 		  rgb.sty			\
 		  tgrind.sty			\
 		  uuthesis-approval.sty		\
