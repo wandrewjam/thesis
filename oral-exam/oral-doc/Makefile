@@ -138,7 +138,7 @@ TEXFILES        = abstract.tex			\
 		  acknowledge.tex		\
 		  intro.tex			\
 		  model.tex			\
-		  chap3.tex			\
+		  results.tex			\
 		  chap4.tex			\
 		  appa.tex			\
 		  appb.tex			\
