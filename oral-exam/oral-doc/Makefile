@@ -137,7 +137,7 @@ STYFILES	= amssymb.sty			\
 TEXFILES        = abstract.tex			\
 		  acknowledge.tex		\
 		  intro.tex			\
-		  chap2.tex			\
+		  model.tex			\
 		  chap3.tex			\
 		  chap4.tex			\
 		  appa.tex			\
