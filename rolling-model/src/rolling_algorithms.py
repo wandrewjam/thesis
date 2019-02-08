@@ -165,6 +165,7 @@ def _interpolate_velocities(v_f, om_f, T):
 
 
 def _frac(th_mesh, nu):
+
     assert nu > 0  # Checks that nu is valid
 
     def ramp(th):
@@ -409,14 +410,14 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
                                        v[-1], om[-1])
             )
 
-            break_indices = _advect_bonds_out(master_list, th_mesh, nu, dt, om,
-                                              L, correct_flux)
+            break_indices = _advect_bonds_out(master_list, th_mesh, nu, dt,
+                                              om[-1], L, correct_flux)
 
             master_list = _update_bond_list(master_list, th_mesh, j,
                                             break_indices, a, b, eta)
 
             bond_counts = np.append(arr=bond_counts,
-                                    values=master_list.shape[0])
+                                    values=master_list.shape[0]*nu/bond_max)
             force, torque = _get_forces(master_list, th_mesh, bond_max, nu, d)
             v = np.append(arr=v, values=v_f_interp(t_mesh[-1]) + force/eta_v)
             om = np.append(arr=om, values=om_f_interp(t_mesh[-1])
@@ -457,7 +458,7 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
                                 for bond_list in master_list])
     else:
         raise Exception('master_list has an invalid number of dimensions')
-    return master_list, bond_counts, v, om
+    return master_list, bond_counts, v, om, t_mesh
 
 
 def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
@@ -523,14 +524,14 @@ def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
         return coeffs, a, b
 
     min_step = t_uniform[1] - t_uniform[0]
-    master_list, bond_counts, v, om = (
+    master_list, bond_counts, v, om, t_mesh = (
         _run_stochastic_model(master_list, v_list, om_list, t_mesh, th_mesh, L,
                               T, nu, bond_max, d, v_f, om_f, xi_v, xi_om, eta,
                               delta, on, off, sat, correct_flux, min_step,
                               coeffs_and_bounds)
     )
 
-    return master_list, bond_counts, v, om
+    return master_list, bond_counts, v, om, t_mesh
 
 
 if __name__ == '__main__':
@@ -538,7 +539,7 @@ if __name__ == '__main__':
     time_steps = 2000
     m0 = np.zeros(shape=(2*M+1, N+1))
     model_outputs = []
-    bond_max = 10
+    bond_max = 100
     correct_flux = True
 
     for scheme in ['up', 'bw']:
@@ -552,7 +553,7 @@ if __name__ == '__main__':
 
     fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(6, 8))
 
-    for i in range(2):
+    for i in range(3):
         bond_counts, v, om, t_mesh = model_outputs[i]
         ax[0].plot(t_mesh, v)
         ax[1].plot(t_mesh, om)
