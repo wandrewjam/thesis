@@ -141,9 +141,9 @@ TEXFILES        = abstract.tex			\
 		  model.tex			\
 		  results.tex			\
 		  future.tex			\
-		  appa.tex			\
-		  appb.tex			\
-		  appc.tex			\
+		  nondim.tex			\
+		  scheme.tex			\
+		  parest.tex			\
 		  latex-input.tex		\
 		  latex-processing.tex		\
 		  notation.tex
