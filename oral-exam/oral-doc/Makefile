@@ -139,7 +139,7 @@ TEXFILES        = abstract.tex			\
 		  intro.tex			\
 		  model.tex			\
 		  results.tex			\
-		  chap4.tex			\
+		  future.tex			\
 		  appa.tex			\
 		  appb.tex			\
 		  appc.tex			\
