@@ -14,6 +14,7 @@ The four algorithms are named as follows:
 # make more assumptions about variables and parameters. E.g. v_f and
 # om_f are explicitly given as vectors to the method
 
+import multiprocessing as mp
 import numpy as np
 from scipy.integrate import simps
 from scipy.special import erf
@@ -22,6 +23,7 @@ from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 from default_values import *
 from utils import nd_force, nd_torque, length
+from timeit import default_timer as timer
 
 
 def _handle_velocities(v_f, om_f):
@@ -417,7 +419,7 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
                                             break_indices, a, b, eta)
 
             bond_counts = np.append(arr=bond_counts,
-                                    values=master_list.shape[0]*nu/bond_max)
+                                    values=master_list.shape[0])
             force, torque = _get_forces(master_list, th_mesh, bond_max, nu, d)
             v = np.append(arr=v, values=v_f_interp(t_mesh[-1]) + force/eta_v)
             om = np.append(arr=om, values=om_f_interp(t_mesh[-1])
@@ -458,7 +460,7 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
                                 for bond_list in master_list])
     else:
         raise Exception('master_list has an invalid number of dimensions')
-    return master_list, bond_counts, v, om, t_mesh
+    return master_list, bond_counts*nu/bond_max, v, om, t_mesh
 
 
 def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
@@ -510,7 +512,7 @@ def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
         _generate_coordinate_arrays(M, N, time_steps, L, T, d, 'sto')[1::2]
     )
 
-    master_list, v_list, om_list, t_mesh = (
+    master_list, v_list, om_list, t_list = (
         _initialize_unknown_lists(v_f, om_f, save_bond_history)
     )
 
@@ -524,14 +526,70 @@ def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
         return coeffs, a, b
 
     min_step = t_uniform[1] - t_uniform[0]
-    master_list, bond_counts, v, om, t_mesh = (
-        _run_stochastic_model(master_list, v_list, om_list, t_mesh, th_mesh, L,
+    master_list, bond_counts, v_list, om_list, t_list = (
+        _run_stochastic_model(master_list, v_list, om_list, t_list, th_mesh, L,
                               T, nu, bond_max, d, v_f, om_f, xi_v, xi_om, eta,
                               delta, on, off, sat, correct_flux, min_step,
                               coeffs_and_bounds)
     )
 
-    return master_list, bond_counts, v, om, t_mesh
+    return master_list, bond_counts, v_list, om_list, t_list
+
+
+def count_variable(M, N, T, time_steps, m0, bond_max, correct_flux, k=None,
+                       trials=None, **kwargs):
+        start = timer()
+        bond_counts, v_list, om_list, t_list = (
+            rolling_ssa(M, N, time_steps, m0, bond_max,
+                        correct_flux, **kwargs)[1:]
+        )
+        t_sample = np.linspace(0, T, num=time_steps+1)
+        indices = np.searchsorted(t_list, t_sample, side='left')
+        end = timer()
+
+        if k is not None and trials is not None:
+            print('Completed {:d} of {:d} variable runs. This run took {:g}'
+                  'seconds.'.format(kwargs['k']+1, kwargs['trials'],
+                                    end-start))
+        elif k is not None:
+            print('Completed {:d} variable runs so far. This run took {:g}'
+                  'seconds.'.format(kwargs['k']+1, end-start))
+        elif trials is not None:
+            print('Completed one of {:d} variable runs. This run took {:g}'
+                  'seconds.'.format(kwargs['trials'], end-start))
+        else:
+            print('Completed one variable run. This run took {:g} seconds.'
+                  .format(end-start))
+
+        return bond_counts[indices], v_list[indices], om_list[indices], t_list
+
+
+def stochastic_experiments(trials, M, N, time_steps, m0, bond_max, correct_flux,
+                           **kwargs):
+    """ Runs many stochastic experiments at once """
+
+    T = set_parameters(**kwargs)[12]
+
+    pool = mp.Pool(processes=4)
+    result = [
+        pool.apply_async(count_variable,
+                         args=(M, N, T, time_steps, m0, bond_max, correct_flux),
+                         kwds=kwargs.update(k=k, trials=trials))
+        for k in range(trials)
+    ]
+
+    result = [res.get() for res in result]
+
+    bond_counts = [res[0] for res in result]
+    v_list = [res[1] for res in result]
+    om_list = [res[2] for res in result]
+    t_list = [res[3] for res in result]
+
+    count_array = np.vstack(bond_counts)
+    v_array = np.vstack(v_list)
+    om_array = np.vstack(om_list)
+
+    return count_array, v_array, om_array, t_list
 
 
 if __name__ == '__main__':
@@ -540,16 +598,17 @@ if __name__ == '__main__':
     m0 = np.zeros(shape=(2*M+1, N+1))
     model_outputs = []
     bond_max = 100
+    trials = 8
     correct_flux = True
 
     for scheme in ['up', 'bw']:
         model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,
                                           save_bond_history=False)[1:])
 
-    model_outputs.append(
-        rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux,
-                    save_bond_history=False)[1:]
-                         )
+    model_outputs.append(np.mean(
+        stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
+                               correct_flux, save_bond_history=False)[1:],
+        axis=0))
 
     fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(6, 8))
 
