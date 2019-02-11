@@ -14,6 +14,9 @@ The four algorithms are named as follows:
 # make more assumptions about variables and parameters. E.g. v_f and
 # om_f are explicitly given as vectors to the method
 
+# Really the way to do this is to use a more object-oriented approach in order
+# to easily pass the necessary parameters between functions
+
 import multiprocessing as mp
 import numpy as np
 from scipy.integrate import simps
@@ -549,14 +552,14 @@ def count_variable(M, N, T, time_steps, m0, bond_max, correct_flux, k=None,
 
         if k is not None and trials is not None:
             print('Completed {:d} of {:d} variable runs. This run took {:g}'
-                  'seconds.'.format(kwargs['k']+1, kwargs['trials'],
+                  'seconds.'.format(k+1, trials,
                                     end-start))
         elif k is not None:
             print('Completed {:d} variable runs so far. This run took {:g}'
-                  'seconds.'.format(kwargs['k']+1, end-start))
+                  'seconds.'.format(k+1, end-start))
         elif trials is not None:
             print('Completed one of {:d} variable runs. This run took {:g}'
-                  'seconds.'.format(kwargs['trials'], end-start))
+                  'seconds.'.format(trials, end-start))
         else:
             print('Completed one variable run. This run took {:g} seconds.'
                   .format(end-start))
@@ -564,17 +567,19 @@ def count_variable(M, N, T, time_steps, m0, bond_max, correct_flux, k=None,
         return bond_counts[indices], v_list[indices], om_list[indices], t_list
 
 
-def stochastic_experiments(trials, M, N, time_steps, m0, bond_max, correct_flux,
-                           **kwargs):
+def stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
+                           correct_flux, **kwargs):
     """ Runs many stochastic experiments at once """
 
     T = set_parameters(**kwargs)[12]
+    t_sample = np.linspace(0, T, time_steps+1)
 
     pool = mp.Pool(processes=4)
     result = [
         pool.apply_async(count_variable,
-                         args=(M, N, T, time_steps, m0, bond_max, correct_flux),
-                         kwds=kwargs.update(k=k, trials=trials))
+                         args=(M, N, T, time_steps, m0, bond_max, correct_flux,
+                               k, trials),
+                         kwds=kwargs)
         for k in range(trials)
     ]
 
@@ -583,13 +588,20 @@ def stochastic_experiments(trials, M, N, time_steps, m0, bond_max, correct_flux,
     bond_counts = [res[0] for res in result]
     v_list = [res[1] for res in result]
     om_list = [res[2] for res in result]
-    t_list = [res[3] for res in result]
 
     count_array = np.vstack(bond_counts)
     v_array = np.vstack(v_list)
     om_array = np.vstack(om_list)
 
-    return count_array, v_array, om_array, t_list
+    return count_array, v_array, om_array, t_sample
+
+
+def _extract_means(stochastic_result):
+    """ Extracts the mean of a set of stochastic experiment results """
+
+    mean_results = tuple(np.mean(array, axis=0)
+                         for array in stochastic_result[:-1])
+    return mean_results + (stochastic_result[-1], )
 
 
 if __name__ == '__main__':
@@ -605,10 +617,12 @@ if __name__ == '__main__':
         model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,
                                           save_bond_history=False)[1:])
 
-    model_outputs.append(np.mean(
+    stochastic_results = (
         stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
-                               correct_flux, save_bond_history=False)[1:],
-        axis=0))
+                               correct_flux, save_bond_history=False)
+    )
+
+    model_outputs.append(_extract_means(stochastic_results))
 
     fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(6, 8))
 
