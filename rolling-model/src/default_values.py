@@ -9,16 +9,16 @@ from warnings import warn
 
 # Define a dictionary for biological/physical parameters.
 _biological_parameters = {
-    'gamma': 20,
-    'kappa': 1,
-    'eta': .1,
-    'd': .1,
-    'delta': 3,
+    'gamma': 40,
+    'kappa': .05,
+    'eta': 2.3e4,
+    'd': .01,
+    'delta': 1,
     'on': True,
     'off': True,
     'sat': True,
-    'xi_v': .01,
-    'xi_om': .01
+    'xi_v': 1e-6,
+    'xi_om': 1e-6
 }
 
 # Define a dictionary for numerical parameters.
@@ -65,7 +65,7 @@ def set_parameters(**kwargs):
             warn('Only one of v_f or om_f is specified. These values '
                  'will be set using gamma instead.')
         v_f = _parameters['gamma'] * (1 + d)
-        om_f = _parameters['gamma']
+        om_f = _parameters['gamma']/2.
         print('Set v_f and om_f using the shear rate')
 
     return (v_f, om_f, kappa, eta, d, delta, on, off, sat, xi_v, xi_om,

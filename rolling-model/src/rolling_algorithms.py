@@ -544,6 +544,7 @@ def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
 def count_variable(M, N, T, time_steps, m0, bond_max, correct_flux, k=None,
                        trials=None, **kwargs):
         start = timer()
+        np.random.seed()
         bond_counts, v_list, om_list, t_list = (
             rolling_ssa(M, N, time_steps, m0, bond_max,
                         correct_flux, **kwargs)[1:]
@@ -598,7 +599,7 @@ def stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
     return count_array, v_array, om_array, t_sample
 
 
-def _generate_file_string(alg, M, N, time_steps, init, **kwargs):
+def generate_file_string(alg, M, N, time_steps, init, **kwargs):
     """ Generate the file string for the given parameters """
 
     (v_f, om_f, kappa, eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
@@ -640,8 +641,8 @@ def _generate_file_string(alg, M, N, time_steps, init, **kwargs):
 def write_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
     """ Run deterministic simulation and write results to a file """
 
-    file_path = _generate_file_string('det', M, N, time_steps, init,
-                                      scheme=scheme, **kwargs)
+    file_path = generate_file_string('det', M, N, time_steps, init,
+                                     scheme=scheme, **kwargs)
 
     try:
         with open(file_path, 'r') as file:
@@ -660,11 +661,24 @@ def write_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
     return None
 
 
+def load_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
+    file_path = generate_file_string('det', M, N, time_steps, init,
+                                     scheme=scheme, **kwargs)
+
+    with open(file_path, 'r') as file:
+        load_data = np.load(file)
+        bond_counts, v, om, t_mesh = (load_data['bond_counts'], load_data['v'],
+                                      load_data['om'], load_data['t_mesh'])
+        print('Loaded file {:s}'.format(file_path))
+
+    return bond_counts, v, om, t_mesh
+
+
 def write_stochastic_data(trials, M, N, time_steps, init, bond_max,
                           correct_flux, **kwargs):
     """ Run stochastic simulations and write results to a file """
 
-    file_path = _generate_file_string(
+    file_path = generate_file_string(
         'sto', M, N, time_steps, init, trials=trials, bond_max=bond_max,
         correct_flux=correct_flux, **kwargs
     )
@@ -687,6 +701,24 @@ def write_stochastic_data(trials, M, N, time_steps, init, bond_max,
     return None
 
 
+def load_stochastic_data(trials, M, N, time_steps, init, bond_max,
+                         correct_flux, **kwargs):
+    file_path = generate_file_string(
+        'sto', M, N, time_steps, init, trials=trials, bond_max=bond_max,
+        correct_flux=correct_flux, **kwargs
+    )
+
+    with open(file_path, 'r') as file:
+        load_data = np.load(file)
+        count_array, v_array, om_array, t_sample = (
+            load_data['count_array'], load_data['v_array'],
+            load_data['om_array'], load_data['t_sample']
+        )
+        print('Loaded file {:s}'.format(file_path))
+
+    return count_array, v_array, om_array, t_sample
+
+
 def _extract_means(stochastic_result):
     """ Extracts the mean of a set of stochastic experiment results """
 
@@ -696,12 +728,12 @@ def _extract_means(stochastic_result):
 
 
 if __name__ == '__main__':
-    M, N = 32, 32
-    time_steps = 1000
+    M, N = 128, 128
+    time_steps = 5120
     m0 = np.zeros(shape=(2*M+1, N+1))
     init = 'free'
     model_outputs = []
-    bond_max = 2
+    bond_max = 100
     trials = 16
     correct_flux = False
 
