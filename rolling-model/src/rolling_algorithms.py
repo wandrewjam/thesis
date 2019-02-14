@@ -157,7 +157,7 @@ def _form(bond_mesh, form_rate, h, dt, sat):
 def _interpolate_velocities(v_f, om_f, T):
     """ Returns functions to interpolate fluid velocity data """
 
-    assert v_f.shape == om_f.shape
+    assert v_f.shape == om_f.shape, 'velocity shapes are not correct'
 
     t_uniform = np.linspace(0, T, num=v_f.shape[0])
 
@@ -171,7 +171,7 @@ def _interpolate_velocities(v_f, om_f, T):
 
 def _frac(th_mesh, nu):
 
-    assert nu > 0  # Checks that nu is valid
+    assert nu > 0, 'nu is invalid'  # Checks that nu is valid
 
     def ramp(th):
         return ((np.pi + nu)/2 - np.abs(th))/nu
@@ -184,7 +184,8 @@ def _frac(th_mesh, nu):
                             [0, ramp, 1])
 
     # Makes sure factor is in the correct range
-    assert np.min(fraction) >= 0 and np.max(fraction) <= 1
+    assert np.min(fraction) >= 0 and np.max(fraction) <= 1, \
+        'frac is not in the correct range'
 
     return fraction.reshape(th_mesh.shape, order='F')
 
@@ -246,7 +247,8 @@ def _advect_bonds_out(bond_list, th_mesh, nu, dt, om, L, correct_flux):
         last_bin = np.nonzero((th_mesh < -(np.pi - nu)/2)
                               * (th_mesh > -(np.pi + nu)/2))
         fraction = dt*om/(nu*_frac(th_mesh[last_bin] + dt*om, nu))
-        assert 0 < fraction < 1
+        fraction = np.maximum(0, fraction)
+        assert 0 <= fraction < 1, 'fraction is outside the correct range'
 
         lbin_rows = np.where(bond_list[:, 1].astype(int) == last_bin)[1]
         r_advect = np.random.binomial(1, fraction, size=lbin_rows.shape)
@@ -466,7 +468,7 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
     return master_list, bond_counts*nu/bond_max, v, om, t_mesh
 
 
-def pde_eulerian(M, N, time_steps, m0, scheme='up', **kwargs):
+def pde_eulerian(M, N, time_steps, m0, scheme='bw', **kwargs):
     """ Solves the full eulerian PDE model """
 
     # Define the problem parameters
@@ -569,7 +571,7 @@ def count_variable(M, N, T, time_steps, m0, bond_max, correct_flux, k=None,
 
 def stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
                            correct_flux, **kwargs):
-    """ Runs many stochastic experiments at once """
+    """ Run many stochastic experiments at once """
 
     T = set_parameters(**kwargs)[12]
     t_sample = np.linspace(0, T, time_steps+1)
@@ -596,6 +598,95 @@ def stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
     return count_array, v_array, om_array, t_sample
 
 
+def _generate_file_string(alg, M, N, time_steps, init, **kwargs):
+    """ Generate the file string for the given parameters """
+
+    (v_f, om_f, kappa, eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
+     save_bond_history) = set_parameters(**kwargs)
+
+    if alg == 'det':
+        file_path = '../data/deterministic/'
+        scheme = kwargs['scheme']
+
+        file_str = (
+            'alg{0:s}_M{1:d}_N{2:d}_tsteps{3:d}_init{4:s}_scheme{5:s}_vf{6:g}_'
+            'omf{7:g}_kappa{8:g}_eta{9:g}_d{10:g}_delta{11:g}_on{12:b}_'
+            'off{13:b}_sat{14:b}_xiv{15:g}_xiom{16:g}_L{17:g}_T{18:g}_'
+            'sbh{19:b}.npz'.format(alg, M, N, time_steps, init, scheme, v_f,
+                                   om_f, kappa, eta, d, delta, on, off, sat,
+                                   xi_v, xi_om, L, T, save_bond_history)
+        )
+    elif alg == 'sto':
+        file_path = '../data/stochastic/'
+        trials = kwargs['trials']
+        bond_max = kwargs['bond_max']
+        correct_flux = kwargs['correct_flux']
+
+        file_str = (
+            'alg{0:s}_M{1:d}_N{2:d}_tsteps{3:d}_init{4:s}_trials{5:d}_'
+            'bmax{20:d}_cflux{21:b}_vf{6:g}_omf{7:g}_kappa{8:g}_eta{9:g}_'
+            'd{10:g}_delta{11:g}_on{12:b}_off{13:b}_sat{14:b}_xiv{15:g}_'
+            'xiom{16:g}_L{17:g}_T{18:g}_sbh{19:b}.npz'
+                .format(alg, M, N, time_steps, init, trials, v_f, om_f, kappa,
+                        eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
+                        save_bond_history, bond_max, correct_flux)
+        )
+    else:
+        raise ValueError('alg parameter is invalid')
+
+    return file_path + file_str
+
+
+def write_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
+    """ Run deterministic simulation and write results to a file """
+
+    file_path = _generate_file_string('det', M, N, time_steps, init,
+                                      scheme=scheme, **kwargs)
+
+    try:
+        with open(file_path, 'r') as file:
+            print('The file {:s} already exists!'.format(file_path))
+    except IOError:
+        if init == 'free':
+            m0 = np.zeros(shape=(2*M+1, N+1))
+        else:
+            raise ValueError('init isn\'t a valid string')
+
+        bond_counts, v, om, t_mesh = pde_eulerian(M, N, time_steps, m0, scheme,
+                                                  **kwargs)[1:]
+        np.savez_compressed(file_path, bond_counts, v, om, t_mesh,
+                            bond_counts=bond_counts, v=v, om=om, t_mesh=t_mesh)
+        print('Wrote output to {:s}'.format(file_path))
+    return None
+
+
+def write_stochastic_data(trials, M, N, time_steps, init, bond_max,
+                          correct_flux, **kwargs):
+    """ Run stochastic simulations and write results to a file """
+
+    file_path = _generate_file_string(
+        'sto', M, N, time_steps, init, trials=trials, bond_max=bond_max,
+        correct_flux=correct_flux, **kwargs
+    )
+
+    try:
+        with open(file_path, 'r') as file:
+            print('The file {:s} already exists!'.format(file_path))
+    except IOError:
+        if init == 'free':
+            m0 = np.zeros(shape=(2*M+1, N+1))
+        else:
+            raise ValueError('init isn\'t a valid string')
+
+        count_array, v_array, om_array, t_sample = stochastic_experiments(
+            trials, M, N, time_steps, m0, bond_max, correct_flux, **kwargs)
+        np.savez_compressed(file_path, count_array, v_array, om_array,
+                            t_sample, count_array=count_array, v_array=v_array,
+                            om_array=om_array, t_sample=t_sample)
+        print('Wrote output to {:s}'.format(file_path))
+    return None
+
+
 def _extract_means(stochastic_result):
     """ Extracts the mean of a set of stochastic experiment results """
 
@@ -606,34 +697,39 @@ def _extract_means(stochastic_result):
 
 if __name__ == '__main__':
     M, N = 32, 32
-    time_steps = 2000
+    time_steps = 1000
     m0 = np.zeros(shape=(2*M+1, N+1))
+    init = 'free'
     model_outputs = []
-    bond_max = 100
-    trials = 8
-    correct_flux = True
+    bond_max = 2
+    trials = 16
+    correct_flux = False
 
-    for scheme in ['up', 'bw']:
-        model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,
-                                          save_bond_history=False)[1:])
+    write_deterministic_data(M, N, time_steps, init, scheme='bw')
+    write_stochastic_data(trials, M, N, time_steps, init, bond_max,
+                          correct_flux)
 
-    stochastic_results = (
-        stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
-                               correct_flux, save_bond_history=False)
-    )
-
-    model_outputs.append(_extract_means(stochastic_results))
-
-    fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(6, 8))
-
-    for i in range(3):
-        bond_counts, v, om, t_mesh = model_outputs[i]
-        ax[0].plot(t_mesh, v)
-        ax[1].plot(t_mesh, om)
-        ax[2].plot(t_mesh, bond_counts)
-    ax[2].set_xlabel('ND time ($s$)')
-    ax[0].set_ylabel('ND translation velocity ($v$)')
-    ax[1].set_ylabel('ND rotation rate ($\\omega$)')
-    ax[2].set_ylabel('ND bond quantity ($\\iint m$)')
-    plt.tight_layout()
-    plt.show()
+    # for scheme in ['up', 'bw']:
+    #     model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,
+    #                                       save_bond_history=False)[1:])
+    #
+    # stochastic_results = (
+    #     stochastic_experiments(trials, M, N, time_steps, init, bond_max,
+    #                            correct_flux, save_bond_history=False)
+    # )
+    #
+    # model_outputs.append(_extract_means(stochastic_results))
+    #
+    # fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(6, 8))
+    #
+    # for i in range(3):
+    #     bond_counts, v, om, t_mesh = model_outputs[i]
+    #     ax[0].plot(t_mesh, v)
+    #     ax[1].plot(t_mesh, om)
+    #     ax[2].plot(t_mesh, bond_counts)
+    # ax[2].set_xlabel('ND time ($s$)')
+    # ax[0].set_ylabel('ND translation velocity ($v$)')
+    # ax[1].set_ylabel('ND rotation rate ($\\omega$)')
+    # ax[2].set_ylabel('ND bond quantity ($\\iint m$)')
+    # plt.tight_layout()
+    # plt.show()
