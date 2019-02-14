@@ -17,9 +17,13 @@ reduce the risks of thrombosis and embolism
 % 2. Contextualize rolling within blood clotting
 % Process of clotting begins when agonists (vWF and collagen) are
 % exposed on the ECs
-In order for a platelet aggregate to form, two processes (wording?)
-need to occur: platelet adhesion to the vessel wall, and cohesion
-among platelets. In normal hemostasis, adhesion is facilitated by two
+
+\section{Platelet rolling within the clotting framework}
+\label{sec:plat-roll-with}
+
+In order for a platelet aggregate to form, two processes need to
+occur: platelet adhesion to the vessel wall, and cohesion among
+platelets. In normal hemostasis, adhesion is facilitated by two
 surface-immobilized proteins: collagen embedded in the sub-endothelial
 matrix, and von Willebrand factor (vWF) which can either be bound to
 collagen in the SE matrix or expressed by endothelial cells in
@@ -148,3 +152,46 @@ nonreactive control (Colin's thesis, Corum paper). Also, recent
 unpublished work has shown similar results when the upstream agonist
 printing is replaced by a stenotic region with higher wall shear rates
 (reference Shek's work).
+
+\section{Existing cell rolling models}
+\label{sec:exist-cell-roll}
+
+A large body of work has been published on the subject of cell rolling
+and adhesion, including mathematical models of cell rolling. However
+most of the modeling work has been done on leukocyte rolling on an
+agonist-coated surface, and relatively less work has been done on
+platelet rolling.
+
+Adhesive dynamics (AD) is perhaps the most well-known modeling
+framework for leukocytes, and the first AD model was published in 1992
+by Hammer \& Apte \cite{Hammer1992}. The Hammer and Apte paper
+provides a good example to describe the AD models in general. It is
+convenient to view the more recent models as modifications of this
+fundamental model. They model a leukocyte as a rigid sphere, with
+rigid microvilli protruding normally from the surface of the
+cell. Receptors are located only at the tips of these microvilli
+(multiple receptors can occupy a single microvillus), and can bind to
+ligand binding sites which are uniformly distributed along a flat
+wall. The positions and bound state of each receptor is tracked
+throughout the simulation. Binding and unbinding of receptors is
+modeled with a stochastic process with length-dependent rates given by
+the Dembo model \cite{Dembo1988}:
+\begin{align}
+  \label{eq:dembo-on}
+  k_\tn{on} \left(L_\tn{sep}\right)
+  &= k_\tn{on}^0 \exp \left( -\frac{\sigma_\tn{ts} (L_\tn{sep} -
+    \gamma)^2}{2\boltzmann \temp} \right) \\
+  \label{eq:dembo-off}
+  k_\tn{off} \left(L_\tn{sep}\right)
+  &= k_\tn{off}^0 \exp \left( \frac{(\sigma - \sigma_\tn{ts})
+    (L_\tn{sep} - \gamma)^2}{2 \boltzmann \temp} \right).
+\end{align}
+
+The movement of the leukocyte is determined by balancing hydrodynamic
+forces and various chemical forces. The hydrodynamic forces are found
+by assuming that the fluid surrounding the leukocyte is a Newtonian
+fluid with $\Reynolds = 0$ at the revelent length and time scales of
+the problem, and the fluid is moving in a shear flow. Under this set
+of assumptions, there is a linear relationship between the drag force
+$\forceVec$ on the cell and the velocity $\velVec$: $\forceVec =
+\resMatrix \velVec$. 
