@@ -5,23 +5,73 @@
 \section{Problem Description}
 \label{sec:problem-description}
 
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[scale=3]
+    \newcommand{\dist}{0.5}
+    \newcommand{\Length}{2.5}
+    \newcommand{\slope}{0.5}
+    \newcommand{\buff}{0.1}
+
+    % Define a coordinate for the center of the platelet, and draw a
+    % node there
+    \coordinate (pltcenter) at (0, 1 + \dist);
+    \node [circle, inner sep=1.5pt, fill=black] at (pltcenter) {};
+
+    % Draws the wall and the platelet
+    \draw (-\Length, 0) -- (\Length, 0);
+    \draw (pltcenter) circle [radius = 1];
+    \draw[<->] (0, 0) -- node[right] {$\separation$} (0, \dist);
+
+    % Draws the lines showing the applied velocities
+    \draw[->] (pltcenter) ++(1+\buff, 0) -- node[above] {$\velocity$}
+    (\Length-\buff, 1+\dist);
+
+    \draw[->] (0, 1+\dist) ++(135:1+\buff) arc [start angle=135, end
+    angle=45, radius=1+\buff] node[midway, above] {$\rotation$};
+
+    % Draws the arrows showing the shear flow
+    \foreach \y in {0.5, 1, 1.5, 2, 2.5}
+    \draw[->] (-\Length, \y) -- (-\Length + \slope*\y, \y);
+    \draw[gray, very thin] (-\Length, 0) -- node[midway, right, black]
+    {$V_\tn{fluid} = \shear h$} (-\Length + \slope*\Length, \Length);
+
+    % Draws a bond between the platelet and wall
+    \draw[decorate, decoration=zigzag] (pltcenter) ++(315:1)
+    node[circle, inner sep=1.5pt, fill=black] {} -- (1.25,0) node
+    [circle, inner sep=1.5pt, fill=black] {};
+
+    % Labels the x and theta coordinates
+    \draw[{Bar[]}->] (0, -\buff) -- node[fill=white] {$x$} (1.25,
+    -\buff);
+
+    \draw (pltcenter) -- +(0, -1);
+    \draw (pltcenter) -- node[above right] {$R$} +(315:1);
+    \draw[->] (pltcenter) ++(0, -3*\buff) arc [start angle=270, end
+    angle=315, radius=3*\buff] node[midway, below] {$\theta$};
+  \end{tikzpicture}
+  \caption{Model geometry}
+  \label{fig:model-geometry}
+\end{figure}
+
 \subsection{Geometry and Physics}
 \label{sec:geometry-physics}
 
-Assume we have a circular rigid platelet (of radius $\radius$) rolling
-and translating in shear flow with shear rate $\shear$ adjacent to a
-wall. The platelet translates parallel to the wall at speed
-$\velocity$, and rolls at angular velocity $\rotation$. Because the
-circle is always translating parallel to the wall, there is a fixed
-vertical distance $\separation$ between the wall and the closest point
-on the circle. Define the height $\height$ of the platelet to be the
-distance from the wall to the center of the platelet ($\height =
-\separation + \radius$). The fluid forces exerted on the platelet are
-a function of $\height$, $\radius$, $\shear$, and $\velocity$, as well
-as the fluid viscosity ($\viscosity$) which is constant across all
-experiments. We assume that the platelet is moving in a Stokes flow,
-meaning that the inertial terms are negligible and force balance must
-be satisfied on the platelet at all times.
+A sketch of the problem geometry is given in Figure
+\ref{fig:model-geometry}. Assume we have a circular rigid platelet (of
+radius $\radius$) rolling and translating in shear flow with shear
+rate $\shear$ adjacent to a wall. The platelet translates parallel to
+the wall at speed $\velocity$, and rolls at angular velocity
+$\rotation$. Because the circle is always translating parallel to the
+wall, there is a fixed vertical distance $\separation$ between the
+wall and the closest point on the circle. Define the height $\height$
+of the platelet to be the distance from the wall to the center of the
+platelet ($\height = \separation + \radius$). The fluid forces exerted
+on the platelet are a function of $\height$, $\radius$, $\shear$, and
+$\velocity$, as well as the fluid viscosity ($\viscosity$) which is
+constant across all experiments. We assume that the platelet is moving
+in a Stokes flow, meaning that the inertial terms are negligible and
+force balance must be satisfied on the platelet at all times.
 
 Due to the linearity of Stokes equations, there is a linear
 relationship between platelet velocity and fluid force. In a general
@@ -40,9 +90,10 @@ number of simplifying assumptions.
   wall, eliminating all vertical motion (and consequently we ignore
   all vertical forces imposed by bonds between the platelet and
   wall).
-\item The translational velocity is decoupled from torque, and vice
-  versa. (Is this equivalent to assuming the platelet is sitting in a
-  constant flow?)
+\item The hydrodynamic forces on the platelet are computed assuming
+  the platelet is infinitely far from the wall. In particular the
+  translational velocity of the platelet is assumed to be independent
+  of the torque, and vice versa.
 \end{enumerate}
 Therefore we end up with two decoupled linear equations relating the
 horizontal force ($\horzForce$) to the translational velocity
@@ -59,10 +110,14 @@ coordinate $x$, defined to be the horizontal distance from the center
 of the circle, and points on the platelet surface are given by the
 coordinate $\theta$, defined to be the angle formed by the receptor,
 the center of the circle, and the closest point on the circle to the
-wall (Figure something). With this definition of $x$ and $\theta$, the
-distance from a ligand at $x$ on wall and a receptor $\theta$ on the
-platelet surface is given by the equation
-% Equation. 
+wall (Figure \ref{fig:model-geometry}). With this definition of $x$
+and $\theta$, the distance from a ligand at $x$ on wall and a receptor
+$\theta$ on the platelet surface is given by the equation
+\begin{equation}
+  \label{eq:dim-length}
+  \length^2 (x, \theta) \equiv (\radius - \radius\cos\theta +
+  \separation)^2 + (\radius\sin\theta - x)^2.
+\end{equation}
 
 \subsection{Biology}
 \label{sec:biology}
@@ -75,12 +130,20 @@ excess. We assume that bonds act like Hookean springs with a rest
 length of 0, so the force exerted by a bond is proportional to its
 length and the proportionality constant is the stiffness of the
 bond. Formation and dissociation rates are distance and force
-dependent, respectively. We use the Bell model (source) to express the
-bond dissociation rate as a function of force, and the (something)
-model to express the bond formation rate as a function of the distance
-between a receptor and ligand. This gives us the following equations
-for formation rate and dissociation rate:
-% Equations.
+dependent, respectively. We use the Bell model \cite{Bell1978} to
+express the bond dissociation rate as a function of force, and the
+(something) model to express the bond formation rate as a function of
+the distance between a receptor and ligand. This gives us the
+following equations for formation rate and dissociation rate:
+\begin{align}
+  \label{eq:binding}
+  \onRate(\length) &= \onConst \exp
+                     \left(-\frac{\stiffness}{2\boltzmann\temp}
+                     \length^2(x, \theta) \right), \\
+  \label{eq:unbinding}
+  \offRate(\length) &= \offConst \exp \left( \frac{\stiffness
+                      \length(x, \theta)}{\refForce} \right).
+\end{align}
 
 In order to calculate $\horzForce$ and $\torque$ for an existing set
 of bonds between the platelet and wall, we simply have to add up the
@@ -91,10 +154,17 @@ vector $\mathbf{F}$ points in the same direction as the bond with
 magnitude proportional to the bond length. I'll leave out the
 derivation. The horizontal force generated by a single bond
 ($\horzForce$) is given simply by
-% Equation,
+\begin{equation}
+  \label{eq:horz-force}
+  \horzForce = \stiffness (x - \radius\sin\theta),
+\end{equation}
 while the torque generated by a single bond ($\torque$) is given by
 the slightly more complicated
-% Equation.
+\begin{equation}
+  \label{eq:torque}
+  \torque = -\stiffness \radius ((\radius - \radius\cos\theta +
+  \separation)\sin\theta + (\radius\sin\theta - x)\cos\theta).
+\end{equation}
 
 \section{Deterministic PDE model}
 \label{sec:determ-pde-model}
@@ -109,18 +179,37 @@ velocity $\rotation$. Bonds form at the rate given in equation
 $\receptorDensity$. Finally, bonds break at the force-dependent rate
 given in equation (something). Putting all of this together gives us
 the following PDE definition of $n$:
-% Equation.
+\begin{equation}
+  \label{eq:bond-density}
+  \frac{\partial n}{\partial t} = \rotation \frac{\partial n}{\partial
+    \theta} + \velocity \frac{\partial n}{\partial x} +
+  \onRate(\length) \left(\receptorDensity - \int_{-\infty}^{\infty}
+    n(x, \theta, t) dx \right) - \offRate(\length) n(x, \theta, t).
+\end{equation}
 
 This equation can't yet be solved for $n$, because there are still 2
 unknowns in it: $\velocity$ and $\rotation$. Recall from above that
 $\velocity$ and $\rotation$ are found by balancing the fluid and bond
 forces acting on the platelet (equations (something)). First, we have
-to calculate the total force $\horzForce$ and torque $\torque$
-generated by the distribution of bonds $n$:
-% Equations.
+to calculate the total force $\horzTotalForce$ and torque
+$\totalTorque$ generated by the distribution of bonds $n$:
+\begin{align}
+  \label{eq:horz-total-force}
+  \horzTotalForce &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2}
+                    \horzForce n(x, \theta, t) d\theta dx, \\
+  \label{eq:total-torque}
+  \totalTorque &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2}
+                 \torque n(x, \theta, t) d\theta dx.
+\end{align}
 
 Once we have $\horzForce$ and $\torque$, the platelet velocities
-$\velocity$ and $\rotation$ are given by the equations: % Equations.
+$\velocity$ and $\rotation$ are given by the equations:
+\begin{align}
+  \label{eq:force-balance}
+  0 &= \velFriction (\appliedVel - \velocity) + \horzTotalForce, \\
+  \label{eq:torque-balance}
+  0 &= \rotFriction (\appliedRot - \rotation) + \totalTorque.
+\end{align}
 
 Now we have 3 equations in 3 unknowns and this is a closed system that
 can be solved simultaneously for $n$, $\velocity$, and $\rotation$. We
@@ -128,14 +217,15 @@ still need to define the domains of all three variables, and give
 boundary conditions for $n$ before we can solve this system. Assume
 that bonds can only attach to the lower half-circle of the platelet
 surface, while bonds can form at any point along the wall. Thus we are
-solving $n$ in the domain $something$. We need to enforce boundary
-conditions at the upstream (with respect to variables $x$ and
-$\theta$) ends of the $x$ and $\theta$ domains. Because we assume
-there are no bonds attached to the upper half of the platelet, and
-because the equilibrium concentration of bonds $something rightarrow
-0$ as $L \rightarrow \infty$, we must set homogeneous Dirichlet
-boundary conditions on both $x$ and $\theta$. Finally we just set the
-initial condition to be $something$.
+solving $n$ in the domain $(-\infty, \infty) \times [-\pi/2,
+\pi/2]$. We need to enforce boundary conditions at the upstream (with
+respect to variables $x$ and $\theta$) ends of the $x$ and $\theta$
+domains. Because we assume there are no bonds attached to the upper
+half of the platelet, and because the equilibrium concentration of
+bonds $n \rightarrow 0$ as $L \rightarrow \infty$, we must set
+homogeneous Dirichlet boundary conditions on both $x$ and
+$\theta$. Finally we just set the initial condition to be $n(x,
+\theta, 0) \equiv n_0(x, \theta)$.
 
 In order to eliminate some parameters, we nondimensionalize this model
 by introducing nondimensional coordinates $x = \radius z$ and $s =
@@ -144,7 +234,22 @@ nondimensional functions $\radius n = \receptorDensity m$, $\velocity
 = \radius \offConst \ndVelocity$, and $\rotation = \offConst
 \ndRotation$. The details of the nondimensionalization are included in
 Appendix (something), but the final nondimensional set of equations is
-% Equations.
+\begin{align}
+  \label{eq:nd-bond-density}
+  \frac{\partial m}{\partial s}
+  &= \ndRotation \frac{\partial m}{\partial \theta} + \ndVelocity
+    \frac{\partial m}{\partial z} + \ndOnConst \exp
+    \left(-\frac{\onForceScale}{2} \ndLength^2(z, \theta) \right)
+    \left(1 - \int_{-\infty}^{\infty} m(z, \theta, s) dz \right) -
+    \exp \left(\offForceScale\ndLength(z, \theta)\right) m(z, \theta,
+    s), \\
+  \label{eq:nd-force-balance}
+  0 &= \ndVelFriction \left(\ndAppliedVel - \ndVelocity\right) + 
+      \ndHorzTotalForce, \\
+  \label{eq:nd-torque-balance}
+  0 &= \ndRotFriction \left(\ndAppliedRot - \ndRotation\right) +
+      \ndTotalTorque.
+\end{align}
 
 The nondimensional bond length $\ell$ is given by $something$, and the
 nondimensional force $\ndHorzForce$ and torque $\ndTorque$ are given

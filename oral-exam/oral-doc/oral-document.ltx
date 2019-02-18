@@ -48,7 +48,7 @@
 %%% mentioned in this file!
 %%%
 %%% In the rest of this top-level thesis file, comments that contain
- %%% the word OPTIONAL hide commands that you might wish to use; just
+%%% the word OPTIONAL hide commands that you might wish to use; just
 %%% remove the "%%: OPTIONAL: " comment prefix to enable them.
 %%%
 %%% [25-Jan-2018]
@@ -115,8 +115,8 @@
 \usepackage {graphpap}                  % for figures in UofUtah sample theses
 %%: OPTIONAL:  \usepackage {longtable}  % for multipage tables
 %%: OPTIONAL:  \usepackage {multirow}   % for multirow-spanning table cells
-%%: OPTIONAL:  \usepackage {tikz}       % for tikz graphics files
-%%: OPTIONAL:  \usetikzlibrary {decorations.markings}
+\usepackage {tikz}       % for tikz graphics files
+\usetikzlibrary {decorations.pathmorphing,arrows.meta}
 \usepackage {varioref}                  % for improved document cross-references
 
 %%% ====================================================================
@@ -137,8 +137,8 @@
 %%% This tells BibTeX to read x-plain.bst from the first directory where
 %%% it is found in the BSTINPUTS search path:
 
-\usepackage {x-bst}                     % for macros produced by x-plain.bst
-\bibliographystyle {x-plain}
+% \usepackage {x-bst}                     % for macros produced by x-plain.bst
+\bibliographystyle {plain}
 
 %%% ====================================================================
 %%% Support for a subject index:
@@ -268,7 +268,7 @@
 
 %%% ====================================================================
 %%% Typesetting begins here:
-
+\includeonly{intro,model}
 \begin{document}
 
 %% Comment out items by inserting a percent % character

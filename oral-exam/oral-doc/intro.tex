@@ -180,12 +180,16 @@ the Dembo model \cite{Dembo1988}:
   \label{eq:dembo-on}
   k_\tn{on} \left(L_\tn{sep}\right)
   &= k_\tn{on}^0 \exp \left( -\frac{\sigma_\tn{ts} (L_\tn{sep} -
-    \gamma)^2}{2\boltzmann \temp} \right) \\
+    \lambda)^2}{2\boltzmann \temp} \right) \\
   \label{eq:dembo-off}
   k_\tn{off} \left(L_\tn{sep}\right)
   &= k_\tn{off}^0 \exp \left( \frac{(\sigma - \sigma_\tn{ts})
-    (L_\tn{sep} - \gamma)^2}{2 \boltzmann \temp} \right).
+    (L_\tn{sep} - \lambda)^2}{2 \boltzmann \temp} \right).
 \end{align}
+where $\lambda$ is the equilibrium separation distance,
+$\boltzmann\temp$ is the thermal energy, $\sigma$ is the spring
+constant, and $\sigma_\tn{ts}$ is the transition state spring
+constant.
 
 The movement of the leukocyte is determined by balancing hydrodynamic
 forces and various chemical forces. The hydrodynamic forces are found
@@ -194,4 +198,7 @@ fluid with $\Reynolds = 0$ at the revelent length and time scales of
 the problem, and the fluid is moving in a shear flow. Under this set
 of assumptions, there is a linear relationship between the drag force
 $\forceVec$ on the cell and the velocity $\velVec$: $\forceVec =
-\resMatrix \velVec$. 
+\resMatrix \velVec$. The chemical forces on the cell are split up into
+5 different forces: bond forces between the cell and the surface, van
+der Waals forces, gravitational body force, electrostatic force, and
+steric stabilization force.
