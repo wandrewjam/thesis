@@ -7,6 +7,7 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{subcaption}
+\usepackage{pgfplots}
 
 \newcommand{\tn}{\textnormal}
 
@@ -26,8 +27,12 @@
 
 
 \begin{center}
-{\Large Meeting Notes (February 14th, 2019)}
+{\Large Meeting Notes for February 21st, 2019}
 \end{center}
+
+This document contains notes on estimating $\onConst$ from our meeting
+on February 14th, and expands on ways to estimate and verify
+$\onConst$ and $\onForceScale$.
 
 \section{Estimating $\onConst$}
 \label{sec:estimating-onconst}
@@ -58,15 +63,15 @@ the surface to bind.
 
 In our model we have a distance-dependent bond formation rate that
 gives the rate of bond formation between a single receptor and a
-single point on the vessel wall $k_\tn{on}^0 \exp \left(-\eta/2
-  \ell(z, \theta)^2 \right)$. Figure \ref{fig:binding} sketches the
-two different approaches to modeling binding. In order to use the
+single point on the vessel wall $\onConst \exp \left(-\eta/2 \ell(z,
+  \theta)^2 \right)$. Figure \ref{fig:binding} sketches the two
+different approaches to modeling binding. In order to use the
 Fitzgibbon estimate, we have to find the total rate of bond formation
 on our model between the platelet surface and the vessel wall and
 equate that to $k_\tn{on}^F A$. Therefore we need to enforce
 \begin{equation}
   \label{eq:fm-rate}
-  k_\tn{on}^F A = k_\tn{on}^0 \sum_j \left( \int_{-L}^{L} \exp
+  k_\tn{on}^F A = \onConst \sum_j \left( \int_{-L}^{L} \exp
     \left(-\frac{\eta}{2} \ell(z, \theta_j)^2\right) dz \right)
   n_j^\tn{avail}.
 \end{equation}
@@ -77,12 +82,12 @@ number of receptors a bin (the receptors are distributed uniformly and
 so $n^\tn{max}$ is the same for every bin). Furthermore platelet
 receptors do not saturate in the Fitzgibbon model, which supports the
 choice to use $n^\tn{max}$ instead of $n_j^\tn{avail}$. Therefore with
-a given value for $\eta$, we can find $k_\tn{on}^0$ by rearranging
+a given value for $\eta$, we can find $\onConst$ by rearranging
 equation \eqref{eq:fm-rate}:
 
 \begin{equation}
   \label{eq:kon-calc}
-  k_\tn{on}^0 = k_\tn{on}^F A \bigg/ \left( n^\tn{max} \sum_j \int_{-L}^{L}
+  \onConst = k_\tn{on}^F A \bigg/ \left( n^\tn{max} \sum_j \int_{-L}^{L}
     \exp \left(-\frac{\eta}{2} \ell(z, \theta_j)^2 \right) dz \right).
 \end{equation}
 
@@ -95,7 +100,7 @@ bin width) and rewrite equation \eqref{eq:kon-calc}:
 
 \begin{equation}
   \label{eq:kon-calc-reimann}
-  k_\tn{on}^0 = k_\tn{on}^F A \bigg/ \left(\frac{n^\tn{max}}{\Delta
+  \onConst = k_\tn{on}^F A \bigg/ \left(\frac{n^\tn{max}}{\Delta
       \theta} \sum_j \Delta \theta \int_{-L}^{L}
     \exp\left(-\frac{\eta}{2} \ell(z, \theta_j)^2 \right) dz \right).
 \end{equation}
@@ -109,15 +114,99 @@ Note that
 With these observations, equation \eqref{eq:kon-calc-reimann} becomes
 \begin{equation}
   \label{eq:kon-calc-int}
-  k_\tn{on}^0 \approx k_\tn{on}^F A \bigg/ \left(N_T
-    \int_{-\pi/2}{\pi/2} \int_{-L}^{L} \exp \left(-\frac{\eta}{2}
+  \onConst \approx k_\tn{on}^F A \bigg/ \left(N_T
+    \int_{-\pi/2}^{\pi/2} \int_{-L}^{L} \exp \left(-\frac{\eta}{2}
       \ell(z, \theta)^2 \right) dz d\theta \right).
 \end{equation}
 
 This approximation is now independent of the mesh size on the surface
 of the platelet. For $\eta = 2.34 \times 10^4$ (estimated in the
-parameters write-up), $N_T = 5,000$, $d = 0.1$, and $k_\tn{on}^F A = 0.4$ from
-\cite{Fitzgibbon2014}, 
+parameters write-up), $N_T = 5,000$, $d = 0.01$, and $k_\tn{on}^F A =
+0.4 \tn{s}^{-1}$ from \cite{Fitzgibbon2014}, we get $\onConst \approx .4/3.76
+\approx 0.106 \tn{s}^{-1}$. It is worth noting that I also computed
+$\onConst$ using equation \eqref{eq:kon-calc} with $N=128$
+$\theta$-bins, and the result was accurate to within 3 decimal places
+of the $\onConst = 0.106 \tn{s}^{-1}$ estimate from equation
+\eqref{eq:kon-calc-int}.
+
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{semilogxaxis}[
+      xlabel={$d$},
+      minor y tick num=5,
+      grid=major,
+    ]
+      \addplot[blue] table[col sep=comma] {integral.dat};
+    \end{semilogxaxis}
+  \end{tikzpicture}
+  \caption{Values of the integral in equation \eqref{eq:kon-calc-int}
+    for a range of $d$ values.}
+  \label{fig:int-vals}
+\end{figure}
+
+\section{Comparing binding behavior in our model with other rolling models}
+\label{sec:comparing-binding}
+
+In order to confirm that our model and parameter choices are
+generating realistic rolling behavior, I think it will be useful to
+catalog some binding characteristics from previous rolling models and
+compare our results with those already published.
+
+Here is a list of quantities I think will be useful to track in our
+binding models and are often reported in published rolling papers:
+\begin{enumerate}
+\item Total number of bonds between the cell and surface
+\item Average length of bonds
+\item Average force per bond
+\item Average bond lifetimes
+\item Average distance from cell to surface
+\item Values of $k_\tn{on}(L)$ for a range of $L$ values.
+\end{enumerate}
+
+\subsection{Number of bonds}
+\label{sec:number-bonds}
+
+\subsection{Length, force, and bond lifetime}
+\label{sec:length-force-lifetime}
+
+\subsection{Distance between surfaces}
+\label{sec:sep-distance}
+
+\subsection{On rate as a function of $L$}
+\label{sec:on-rate-fn}
+
+
+In the current version of our rolling model, we are using $k_\tn{on} =
+\onConst \exp \left(-\frac{\stiffness}{2\boltzmann\temp}
+  \length^2\right)$. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.6\textwidth]{hammer-fig3}
+  \caption{Figure 3 from Hammer \& Apte, 1992 \cite{Hammer1992}. Instantaneous
+    translational velocities and the number of bonds are
+    plotted as a function of time for a sample run. The number of
+    bonds are shown with a dotted line.}
+  \label{fig:hammer-apte}
+\end{figure}
+
+%% What about other rolling models? (Numbers of bonds)
+%% There are a few bonds present in the PAD multiscale model from Wang
+%% et. al.
+%% Take a look at Dan Hammer's review (2014)
+%% What about shear rates? Distances from the wall?
+
+%% I want to compare our estimate of the bond formation function to
+%% those used in other rolling models.
+
+%% How many bonds are there in the Fitzgibbon paper?
+%% How many receptors are available to bind in the Fitzgibbon model?
+
+%% I want to look at average bond lengths
+%% Also, I should plot numbers of bonds, instead of whatever weird
+%% nondimensional quantity I'm using.
 
 \bibliographystyle{plain}
 \bibliography{../../library}
