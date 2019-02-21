@@ -10,7 +10,7 @@ from warnings import warn
 # Define a dictionary for biological/physical parameters.
 _biological_parameters = {
     'gamma': 40,
-    'kappa': .05,
+    'kappa': 1,
     'eta': 2.3e4,
     'd': .01,
     'delta': 1,
@@ -24,7 +24,7 @@ _biological_parameters = {
 # Define a dictionary for numerical parameters.
 _numerical_parameters = {
     'L': 2.5,
-    'T': 1,
+    'T': 3,
     'bond_max': 10,
     'save_bond_history': False
 }
