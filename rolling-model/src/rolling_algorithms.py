@@ -729,7 +729,7 @@ def _extract_means(stochastic_result):
 
 if __name__ == '__main__':
     M, N = 128, 128
-    time_steps = 5120
+    time_steps = 10240*3
     m0 = np.zeros(shape=(2*M+1, N+1))
     init = 'free'
     model_outputs = []
