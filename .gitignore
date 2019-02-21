@@ -10,6 +10,7 @@
 *.idea
 *.png
 *.tiff
+*.jpg
 ss*.txt
 
 # Folders
