@@ -8,6 +8,7 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{pgfplots}
+\usepackage{textgreek}
 
 \newcommand{\tn}{\textnormal}
 
@@ -119,17 +120,6 @@ With these observations, equation \eqref{eq:kon-calc-reimann} becomes
       \ell(z, \theta)^2 \right) dz d\theta \right).
 \end{equation}
 
-This approximation is now independent of the mesh size on the surface
-of the platelet. For $\eta = 2.34 \times 10^4$ (estimated in the
-parameters write-up), $N_T = 5,000$, $d = 0.01$, and $k_\tn{on}^F A =
-0.4 \tn{s}^{-1}$ from \cite{Fitzgibbon2014}, we get $\onConst \approx .4/3.76
-\approx 0.106 \tn{s}^{-1}$. It is worth noting that I also computed
-$\onConst$ using equation \eqref{eq:kon-calc} with $N=128$
-$\theta$-bins, and the result was accurate to within 3 decimal places
-of the $\onConst = 0.106 \tn{s}^{-1}$ estimate from equation
-\eqref{eq:kon-calc-int}.
-
-
 \begin{figure}
   \centering
   \begin{tikzpicture}
@@ -145,6 +135,37 @@ of the $\onConst = 0.106 \tn{s}^{-1}$ estimate from equation
     for a range of $d$ values.}
   \label{fig:int-vals}
 \end{figure}
+
+This approximation is now independent of the mesh size on the surface
+of the platelet. For $\eta = 2.34 \times 10^4$ (estimated in the
+parameters write-up), $N_T = 5,000$, $d = 0.01$, and $k_\tn{on}^F A =
+0.4 \tn{s}^{-1}$ from \cite{Fitzgibbon2014}, we get $\onConst \approx .4/3.76
+\approx 0.106 \tn{s}^{-1}$. It is worth noting that I also computed
+$\onConst$ using equation \eqref{eq:kon-calc} with $N=128$
+$\theta$-bins, and the result was accurate to within 3 decimal places
+of the $\onConst = 0.106 \tn{s}^{-1}$ estimate from equation
+\eqref{eq:kon-calc-int}. This estimate for $\onConst$ is similar to
+what we estimated last week, which ultimately resulted in only a tiny
+fraction of the platelets forming bonds with the surface at all.
+
+I think this observation is consistent with our understanding of the
+Fitzgibbon model \cite{Fitzgibbon2014}. They report a \emph{total}
+bond formation rate of 0.4 s$^{-1}$ between a platelet and the
+surface, and a bond breaking rate of 5 s$^{-1}$. This means that it
+takes 2.5 s on average for one bond to form, and that bond lasts an
+average of 0.2 s before breaking. With these parameters, I don't see
+how they can get platelets translocating along the surface for several
+seconds. I would think they should see most platelets releasing within
+a fraction of a second.
+
+One possibility is that 0.4 bonds/s is not a good estimate of the
+formation rate of bonds on a platelet which already has a bond with
+the surface. It may be possible that the fluid flattens the platelet
+against the wall within the lifespan of the existing bond, exposing a
+much greater area of the platelet to binding than the average over
+platelets which are moving freely in the F-L layer. If this is the
+case, then 0.4 s$^{-1}$ is too low of an estimate for the bond
+formation rate on a platelet which is already bound to the wall.
 
 \section{Comparing binding behavior in our model with other rolling models}
 \label{sec:comparing-binding}
@@ -165,22 +186,11 @@ binding models and are often reported in published rolling papers:
 \item Values of $k_\tn{on}(L)$ for a range of $L$ values.
 \end{enumerate}
 
+It is probably also important to note which specific bonds they are
+modeling, the shear rates used, and the size of the cell used.
+
 \subsection{Number of bonds}
 \label{sec:number-bonds}
-
-\subsection{Length, force, and bond lifetime}
-\label{sec:length-force-lifetime}
-
-\subsection{Distance between surfaces}
-\label{sec:sep-distance}
-
-\subsection{On rate as a function of $L$}
-\label{sec:on-rate-fn}
-
-
-In the current version of our rolling model, we are using $k_\tn{on} =
-\onConst \exp \left(-\frac{\stiffness}{2\boltzmann\temp}
-  \length^2\right)$. 
 
 \begin{figure}
   \centering
@@ -191,6 +201,91 @@ In the current version of our rolling model, we are using $k_\tn{on} =
     bonds are shown with a dotted line.}
   \label{fig:hammer-apte}
 \end{figure}
+
+In Hammer \& Apte, 1992 (\cite{Hammer1992}), they see about 10--50
+bonds throughout the course of a simulation (Figure
+\ref{fig:hammer-apte}). In their simulations they use shear rates in
+the range 50--400 s$^{-1}$, and their cell radius is 4.5
+{\textmugreek}m.
+
+In Wang et. al. \cite{Wang2013} they model a platelet translocating
+along vWF at a shear rate of 1250 s$^{-1}$. In their simulations a
+single platelet had between 0 and 10 bonds at a time, and this handful
+of bonds was sufficient to bring the platelet to a halt (see Figure
+\ref{fig:wang}).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\textwidth]{wang-fig2}
+  \caption{Figure 2 from Wang, Mody, \& King, 2013.}
+  \label{fig:wang}
+\end{figure}
+
+In our model with toy parameter values we've been using, $\sim$11.7\% of
+available receptors are bound at steady state. For 1,000s or 10,000s
+of receptors, this predicts a higher bond count than other models by
+an order of magnitude or two. For example, Figure \ref{fig:toy-number}
+shows hundreds of bonds have formed between the platelet and wall, but
+only slow the platelet down by $\sim 20\%$.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\textwidth]{{M512_N512_tsteps16000_initfree_trials1000_bmax10_cflux1_vf22_omf20_kappa1_eta0.1_d0.1_delta3_on1_off1_sat1_xiv0.01_xiom0.01_L2.5_T1_sbh0}.png}
+  \caption{Translational and angular velocities, and number of bonds
+    for $\kappa = 1$, $\eta = 0.1$, $N_T = 1630$ receptors/radian}
+  \label{fig:toy-number}
+\end{figure}
+
+In order to see the effects of different $\onConst$ values on the
+number of bonds and rolling dynamics, I ran simulations for 3
+different values of $\ndOnConst \equiv \onConst/\offConst$:
+$\ndOnConst = 0.1, 1, 10$. The other parameter values are estimated
+from the literature as outlined in the parameter estimation document:
+$\onForceScale = 2.3 \times 10^4$, $\ndSeparation = 0.01$,
+$\offForceScale = 1$, and $\shear = 200 \tn{ s}^{-1} \implies
+\shear/\offConst = 40$. Results for these three cases are shown in
+Figures \ref{fig:small-kap}--~\ref{fig:large-kap}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\textwidth]{{M128_N128_tsteps30720_initfree_trials16_bmax100_cflux0_vf40.4_omf20_kappa0.1_eta23000_d0.01_delta1_on1_off1_sat1_xiv1e-06_xiom1e-06_L2.5_T3_sbh0}.png}
+  \caption{Results of simulations with $\kappa = 0.1$}
+  \label{fig:small-kap}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\textwidth]{{M128_N128_tsteps30720_initfree_trials16_bmax100_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta1_on1_off1_sat1_xiv1e-06_xiom1e-06_L2.5_T3_sbh0}.png}
+  \caption{Results of simulations with $\kappa = 1$}
+  \label{fig:medium-kap}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\textwidth]{{M128_N128_tsteps30720_initfree_trials16_bmax100_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta1_on1_off1_sat1_xiv1e-06_xiom1e-06_L2.5_T3_sbh0}.png}
+  \caption{Results of simulations with $\kappa = 10$}
+  \label{fig:large-kap}
+\end{figure}
+% \subsection{Length, force, and bond lifetime}
+% \label{sec:length-force-lifetime}
+
+% \subsection{Distance between surfaces}
+% \label{sec:sep-distance}
+
+% \subsection{On rate as a function of $L$}
+% \label{sec:on-rate-fn}
+
+% In Hammer \& Apte \cite{Hammer1992}, they use the Dembo models of
+% binding and unbinding with parameter values $\sigma_\tn{ts} \approx
+% 1 \frac{\tn{pN}}{\tn{nm}}$, $\sigma \approx 1.5
+% \frac{\tn{pN}}{\tn{nm}}$, $\lambda = 20 \tn{nm}$:
+% \begin{equation}
+%   \label{eq:bell-on}
+%   k_\tn{on}^\tn{Bell}(L) = 
+% \end{equation}
+% . In the current
+% version of our rolling model, we are using $k_\tn{on} = \onConst \exp
+% \left(-\frac{\stiffness}{2\boltzmann\temp} \length^2\right)$. 
 
 %% What about other rolling models? (Numbers of bonds)
 %% There are a few bonds present in the PAD multiscale model from Wang
@@ -212,7 +307,3 @@ In the current version of our rolling model, we are using $k_\tn{on} =
 \bibliography{../../library}
 
 \end{document}
-
-
-
-
