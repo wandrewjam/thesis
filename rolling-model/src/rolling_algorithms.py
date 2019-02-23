@@ -148,8 +148,14 @@ def _bw(bond_mesh, vel, dx, dt, axis):
                   + bond_mesh[:-1, 2:])
 
 
-def _form(bond_mesh, form_rate, h, dt, sat):
-    sat_term = (1 - sat*np.tile(np.trapz(bond_mesh[:, :-1], dx=h, axis=0),
+def _form(bond_mesh, form_rate, h, dt, sat, scheme):
+    if scheme == 'up':
+        integrator = np.trapz
+    elif scheme == 'bw':
+        integrator = simps
+    else:
+        raise Exception('Parameter \'scheme\' is invalid')
+    sat_term = (1 - sat*np.tile(integrator(bond_mesh[:, :-1], dx=h, axis=0),
                                 reps=(bond_mesh.shape[0]-1, 1)))
     return dt*form_rate*sat_term
 
@@ -276,9 +282,17 @@ def _count_bonds(bond_mesh, z_mesh, th_mesh, scheme):
     if scheme == 'up':
         return np.trapz(np.trapz(bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
     elif scheme == 'bw':
-        return np.trapz(np.trapz(bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
+        return simps(simps(bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
     else:
         raise Exception('parameter \'scheme\' is invalid')
+
+
+def _get_avg_length(bond_mesh, z_mesh, th_mesh, scheme):
+    """ Calculate the average length of a bond distribution """
+
+
+
+    return None
 
 
 def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
@@ -288,7 +302,7 @@ def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
         new_bonds[:-1, :-1] += _up(bond_mesh, v, h, dt, axis=0)
         new_bonds[:-1, :-1] += _up(bond_mesh, om, nu, dt, axis=1)
         new_bonds[:-1, :-1] += _form(bond_mesh, form_rate[:-1, :-1], h, dt,
-                                     sat)
+                                     sat, scheme)
         new_bonds[:-1, :-1] /= (1 + dt*break_rate[:-1, :-1])
     elif scheme == 'bw':
         new_bonds[:-2, :-1] += _bw(bond_mesh, v, h, dt, axis=0)
@@ -298,7 +312,7 @@ def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
         new_bonds[:-1, -2] += np.squeeze(_up(bond_mesh[:, -2:], om, nu, dt,
                                              axis=1))
         new_bonds[:-1, :-1] += _form(bond_mesh, form_rate[:-1, :-1], h, dt,
-                                     sat)
+                                     sat, scheme)
         new_bonds[:-1, :-1] /= (1 + dt*break_rate[:-1, :-1])
     return new_bonds
 
@@ -354,6 +368,9 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
     h = z_mesh[1] - z_mesh[0]
     nu = th_mesh[1] - th_mesh[0]
     dt = t_mesh[1] - t_mesh[0]
+
+    # avg_lengths = np.zeros(shape=t_mesh.shape)
+    # avg_lengths[0] = _get_avg_length(bond_mesh, z_mesh, th_mesh, scheme)
 
     if bond_mesh.ndim == 2:  # Equivalent to 'not save_bond_history'
         bond_counts = np.zeros(shape=t_mesh.shape)
@@ -728,13 +745,13 @@ def _extract_means(stochastic_result):
 
 
 if __name__ == '__main__':
-    M, N = 128, 128
-    time_steps = 10240*3
+    M, N = 64, 64
+    time_steps = 5180*3
     m0 = np.zeros(shape=(2*M+1, N+1))
     init = 'free'
     model_outputs = []
     bond_max = 100
-    trials = 16
+    trials = 4
     correct_flux = False
 
     write_deterministic_data(M, N, time_steps, init, scheme='bw')

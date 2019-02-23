@@ -4,11 +4,11 @@ from rolling_algorithms import load_deterministic_data, load_stochastic_data
 
 
 if __name__ == '__main__':
-    M, N = 128, 128
-    time_steps = 10240*3
+    M, N = 64, 64
+    time_steps = 5180*3
     init = 'free'
     bond_max = 100
-    trials = 16
+    trials = 4
     correct_flux = False
 
     bond_counts, v, om, t_mesh = load_deterministic_data(M, N, time_steps,
@@ -23,17 +23,6 @@ if __name__ == '__main__':
                                         (count_array, v_array, om_array))
     count_std, v_std, om_std = tuple(np.std(a, axis=0) for a in
                                      (count_array, v_array, om_array))
-
-    # count_array = count_array[::16, ::10]
-    # v_array = v_array[::16, ::10]
-    # om_array = om_array[::16, ::10]
-    # t_sample = t_sample[::10]
-    # v_mean = v_mean[::10]
-    # om_mean = om_mean[::10]
-    # count_mean = count_mean[::10]
-    # v_std = v_std[::10]
-    # om_std = om_std[::10]
-    # count_std = count_std[::10]
 
     fig, ax = plt.subplots(nrows=3, ncols=2, sharex='all', sharey='row',
                            figsize=(12, 8))
@@ -52,11 +41,11 @@ if __name__ == '__main__':
     ax[2, 0].set_ylabel('Bond number')
     ax[2, 0].set_xlabel('Nondimensional time')
 
-    ax[0, 1].plot(t_sample, np.transpose(v_array)[:, 5], 'b', linewidth=.5)
+    ax[0, 1].plot(t_sample, np.transpose(v_array)[:, 1], 'b', linewidth=.5)
     ax[0, 1].plot(t_mesh, v, 'r')
-    ax[1, 1].plot(t_sample, np.transpose(om_array)[:, 5], 'b', linewidth=.5)
+    ax[1, 1].plot(t_sample, np.transpose(om_array)[:, 1], 'b', linewidth=.5)
     ax[1, 1].plot(t_mesh, om, 'r')
-    ax[2, 1].plot(t_sample, np.transpose(count_array)[:, 5], 'b', linewidth=.5)
+    ax[2, 1].plot(t_sample, np.transpose(count_array)[:, 1], 'b', linewidth=.5)
     ax[2, 1].plot(t_mesh, bond_counts, 'r')
     ax[2, 1].set_xlabel('Nondimensional time')
     plt.tight_layout()
