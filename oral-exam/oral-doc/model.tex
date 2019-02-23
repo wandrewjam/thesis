@@ -42,13 +42,13 @@
     [circle, inner sep=1.5pt, fill=black] {};
 
     % Labels the x and theta coordinates
-    \draw[{Bar[]}->] (0, -\buff) -- node[fill=white] {$x$} (1.25,
-    -\buff);
+    \draw[{Bar[]}->] (0, -\buff) -- node[fill=white] {$\wallDist$}
+    (1.25, -\buff);
 
     \draw (pltcenter) -- +(0, -1);
     \draw (pltcenter) -- node[above right] {$R$} +(315:1);
     \draw[->] (pltcenter) ++(0, -3*\buff) arc [start angle=270, end
-    angle=315, radius=3*\buff] node[midway, below] {$\theta$};
+    angle=315, radius=3*\buff] node[midway, below] {$\recAngle$};
   \end{tikzpicture}
   \caption{Model geometry}
   \label{fig:model-geometry}
@@ -75,12 +75,12 @@ force balance must be satisfied on the platelet at all times.
 
 Due to the linearity of Stokes equations, there is a linear
 relationship between platelet velocity and fluid force. In a general
-3D Stokes flow, this relationship is given by a 6x6 matrix equation
-$\mathbf{F} = \underline{\underline{R}} \mathbf{U}$ where $\mathbf{U}$
-is a 6x1 vector containing the 3 translational velocities and 3
-rotational velocities, and $\mathbf{F}$ is a 6x1 vector containing the
-3 forces and 3 torques. However in the current model we've made a
-number of simplifying assumptions. 
+3D Stokes flow, this relationship is given by a $6 \times 6$ matrix
+equation $\mathbf{F} = \underline{\underline{R}} \mathbf{U}$ where
+$\mathbf{U}$ is a $6 \times 1$ vector containing the 3 translational
+velocities and 3 rotational velocities, and $\mathbf{F}$ is a
+$6 \times 1$ vector containing the 3 forces and 3 torques. However in
+the current model we've made a number of simplifying assumptions.
 \begin{enumerate}
 \item The flow is a 2D Stokes flow, eliminating all forces and
   translational velocities along the dimension going into and out of
@@ -88,8 +88,7 @@ number of simplifying assumptions.
   other dimensions.
 \item The platelet remains at a constant separation distance from the
   wall, eliminating all vertical motion (and consequently we ignore
-  all vertical forces imposed by bonds between the platelet and
-  wall).
+  all vertical forces imposed by bonds between the platelet and wall).
 \item The hydrodynamic forces on the platelet are computed assuming
   the platelet is infinitely far from the wall. In particular the
   translational velocity of the platelet is assumed to be independent
@@ -106,17 +105,18 @@ velocity ($\rotation$):
 We identify bonds by their two attachment points on the wall and on
 the platelet surface, so each bond has two coordinates associated with
 it for each of its endpoints. Points on the wall are given by the
-coordinate $x$, defined to be the horizontal distance from the center
-of the circle, and points on the platelet surface are given by the
-coordinate $\theta$, defined to be the angle formed by the receptor,
-the center of the circle, and the closest point on the circle to the
-wall (Figure \ref{fig:model-geometry}). With this definition of $x$
-and $\theta$, the distance from a ligand at $x$ on wall and a receptor
-$\theta$ on the platelet surface is given by the equation
+coordinate $\wallDist$, defined to be the horizontal distance from the
+center of the circle, and points on the platelet surface are given by
+the coordinate $\recAngle$, defined to be the angle formed by the
+receptor, the center of the circle, and the closest point on the
+circle to the wall (Figure \ref{fig:model-geometry}). With this
+definition of $\wallDist$ and $\recAngle$, the distance from a ligand at
+$\wallDist$ on wall and a receptor $\recAngle$ on the platelet surface is
+given by the equation
 \begin{equation}
   \label{eq:dim-length}
-  \length^2 (x, \theta) \equiv (\radius - \radius\cos\theta +
-  \separation)^2 + (\radius\sin\theta - x)^2.
+  \length^2 (\wallDist, \recAngle) \equiv (\radius - \radius\cos\recAngle +
+  \separation)^2 + (\radius\sin\recAngle - \wallDist)^2.
 \end{equation}
 
 \subsection{Biology}
@@ -132,17 +132,17 @@ length and the proportionality constant is the stiffness of the
 bond. Formation and dissociation rates are distance and force
 dependent, respectively. We use the Bell model \cite{Bell1978} to
 express the bond dissociation rate as a function of force, and the
-(something) model to express the bond formation rate as a function of
-the distance between a receptor and ligand. This gives us the
-following equations for formation rate and dissociation rate:
+Dembo model \cite{Dembo1988} to express the bond formation rate as a
+function of the distance between a receptor and ligand. This gives us
+the following equations for formation rate and dissociation rate:
 \begin{align}
   \label{eq:binding}
   \onRate(\length) &= \onConst \exp
                      \left(-\frac{\stiffness}{2\boltzmann\temp}
-                     \length^2(x, \theta) \right), \\
+                     \length^2(\wallDist, \recAngle) \right), \\
   \label{eq:unbinding}
   \offRate(\length) &= \offConst \exp \left( \frac{\stiffness
-                      \length(x, \theta)}{\refForce} \right).
+                      \length(\wallDist, \recAngle)}{\refForce} \right).
 \end{align}
 
 In order to calculate $\horzForce$ and $\torque$ for an existing set
@@ -156,50 +156,56 @@ derivation. The horizontal force generated by a single bond
 ($\horzForce$) is given simply by
 \begin{equation}
   \label{eq:horz-force}
-  \horzForce = \stiffness (x - \radius\sin\theta),
+  \horzForce = \stiffness (\wallDist - \radius\sin\recAngle),
 \end{equation}
 while the torque generated by a single bond ($\torque$) is given by
 the slightly more complicated
 \begin{equation}
   \label{eq:torque}
-  \torque = -\stiffness \radius ((\radius - \radius\cos\theta +
-  \separation)\sin\theta + (\radius\sin\theta - x)\cos\theta).
+  \torque = -\stiffness \radius ((\radius - \radius\cos\recAngle +
+  \separation)\sin\recAngle + (\radius\sin\recAngle - \wallDist)\cos\recAngle).
 \end{equation}
 
 \section{Deterministic PDE model}
 \label{sec:determ-pde-model}
 
 If we assume that there is a continuous distribution of bonds between
-the platelet and the wall, we can define the function $n(x, \theta,
-t)$ which gives the density of bonds at time $t$ between points $x$
-and $\theta$ on the wall and platelet, respectively. Bonds advect in
-$x$ with velocity $\velocity$ and they advect in $\theta$ with
-velocity $\rotation$. Bonds form at the rate given in equation
-(something) and saturate in $\theta$ with a maximum density
+the platelet and the wall, we can define the function
+$\bondDensity(\wallDist, \recAngle, \dTime)$ which gives the density of
+bonds at time $\dTime$ between points $\wallDist$ and $\recAngle$ on the
+wall and platelet, respectively. Bonds advect in $\wallDist$ with
+velocity $\velocity$ and they advect in $\recAngle$ with velocity
+$\rotation$. Bonds form at the rate given in equation
+(\ref{eq:binding}) and saturate in $\recAngle$ with a maximum density
 $\receptorDensity$. Finally, bonds break at the force-dependent rate
-given in equation (something). Putting all of this together gives us
-the following PDE definition of $n$:
+given in equation (\ref{eq:unbinding}). Putting all of this together
+gives us the following PDE definition of $\bondDensity$:
 \begin{equation}
   \label{eq:bond-density}
-  \frac{\partial n}{\partial t} = \rotation \frac{\partial n}{\partial
-    \theta} + \velocity \frac{\partial n}{\partial x} +
-  \onRate(\length) \left(\receptorDensity - \int_{-\infty}^{\infty}
-    n(x, \theta, t) dx \right) - \offRate(\length) n(x, \theta, t).
+  \frac{\partial \bondDensity}{\partial \dTime} = \rotation
+  \frac{\partial \bondDensity}{\partial \recAngle} + \velocity
+  \frac{\partial \bondDensity}{\partial \wallDist} + \onRate(\length)
+  \left(\receptorDensity - \int_{-\infty}^{\infty}
+    \bondDensity(\wallDist, \recAngle, \dTime) d\wallDist \right) -
+  \offRate(\length) \bondDensity(\wallDist, \recAngle, \dTime).
 \end{equation}
 
-This equation can't yet be solved for $n$, because there are still 2
-unknowns in it: $\velocity$ and $\rotation$. Recall from above that
-$\velocity$ and $\rotation$ are found by balancing the fluid and bond
-forces acting on the platelet (equations (something)). First, we have
-to calculate the total force $\horzTotalForce$ and torque
-$\totalTorque$ generated by the distribution of bonds $n$:
+This equation can't yet be solved for $\bondDensity$, because there
+are still 2 unknowns in it: $\velocity$ and $\rotation$. Recall from
+above that $\velocity$ and $\rotation$ are found by balancing the
+fluid and bond forces acting on the platelet (equations
+(\ref{eq:force-balance}) and (\ref{eq:torque-balance})). First, we
+have to calculate the total force $\horzTotalForce$ and torque
+$\totalTorque$ generated by the distribution of bonds $\bondDensity$:
 \begin{align}
   \label{eq:horz-total-force}
   \horzTotalForce &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2}
-                    \horzForce n(x, \theta, t) d\theta dx, \\
+                    \horzForce \bondDensity(\wallDist, \recAngle, \dTime)
+                    d\recAngle d\wallDist, \\ 
   \label{eq:total-torque}
   \totalTorque &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2}
-                 \torque n(x, \theta, t) d\theta dx.
+                 \torque \bondDensity(\wallDist, \recAngle, \dTime)
+                 d\recAngle d\wallDist.
 \end{align}
 
 Once we have $\horzForce$ and $\torque$, the platelet velocities
@@ -212,37 +218,43 @@ $\velocity$ and $\rotation$ are given by the equations:
 \end{align}
 
 Now we have 3 equations in 3 unknowns and this is a closed system that
-can be solved simultaneously for $n$, $\velocity$, and $\rotation$. We
-still need to define the domains of all three variables, and give
-boundary conditions for $n$ before we can solve this system. Assume
-that bonds can only attach to the lower half-circle of the platelet
-surface, while bonds can form at any point along the wall. Thus we are
-solving $n$ in the domain $(-\infty, \infty) \times [-\pi/2,
-\pi/2]$. We need to enforce boundary conditions at the upstream (with
-respect to variables $x$ and $\theta$) ends of the $x$ and $\theta$
+can be solved simultaneously for $\bondDensity$, $\velocity$, and
+$\rotation$. We still need to define the domains of all three
+variables, and give boundary conditions for $\bondDensity$ before we
+can solve this system. Assume that bonds can only attach to the lower
+half-circle of the platelet surface, while bonds can form at any point
+along the wall. Thus we are solving $\bondDensity$ in the domain
+$(-\infty, \infty) \times [-\pi/2, \pi/2]$. We need to enforce
+boundary conditions at the upstream (with respect to variables
+$\wallDist$ and $\recAngle$) ends of the $\wallDist$ and $\recAngle$
 domains. Because we assume there are no bonds attached to the upper
 half of the platelet, and because the equilibrium concentration of
-bonds $n \rightarrow 0$ as $L \rightarrow \infty$, we must set
-homogeneous Dirichlet boundary conditions on both $x$ and
-$\theta$. Finally we just set the initial condition to be $n(x,
-\theta, 0) \equiv n_0(x, \theta)$.
+bonds $\bondDensity \rightarrow 0$ as $L \rightarrow \infty$, we must
+set homogeneous Dirichlet boundary conditions on both $\wallDist$ and
+$\recAngle$. Finally we just set the initial condition to be
+$\bondDensity(\wallDist, \recAngle, 0) \equiv \bondDensity_0(\wallDist,
+\recAngle)$.
 
 In order to eliminate some parameters, we nondimensionalize this model
-by introducing nondimensional coordinates $x = \radius z$ and $s =
-\offConst t$ (note that $\theta$ is already dimensionless) and
-nondimensional functions $\radius n = \receptorDensity m$, $\velocity
-= \radius \offConst \ndVelocity$, and $\rotation = \offConst
-\ndRotation$. The details of the nondimensionalization are included in
-Appendix (something), but the final nondimensional set of equations is
+by introducing nondimensional coordinates
+$\wallDist = \radius \ndWallDist$ and $\ndTime = \offConst \dTime$
+(note that $\recAngle$ is already dimensionless) and nondimensional
+functions $\radius \bondDensity = \receptorDensity \ndBondDensity$,
+$\velocity = \radius \offConst \ndVelocity$, and
+$\rotation = \offConst \ndRotation$. The details of the
+nondimensionalization are included in Appendix \ref{app:nondim}, but
+the final nondimensional set of equations is
 \begin{align}
   \label{eq:nd-bond-density}
-  \frac{\partial m}{\partial s}
-  &= \ndRotation \frac{\partial m}{\partial \theta} + \ndVelocity
-    \frac{\partial m}{\partial z} + \ndOnConst \exp
-    \left(-\frac{\onForceScale}{2} \ndLength^2(z, \theta) \right)
-    \left(1 - \int_{-\infty}^{\infty} m(z, \theta, s) dz \right) -
-    \exp \left(\offForceScale\ndLength(z, \theta)\right) m(z, \theta,
-    s), \\
+  \frac{\partial \ndBondDensity}{\partial \ndTime}
+  &= \ndRotation \frac{\partial \ndBondDensity}{\partial \recAngle} +
+    \ndVelocity \frac{\partial \ndBondDensity}{\partial z} +
+    \ndOnConst \exp \left(-\frac{\onForceScale}{2}
+    \ndLength^2(\ndWallDist, \recAngle) \right) \left(1 -
+    \int_{-\infty}^{\infty} \ndBondDensity(\ndWallDist, \recAngle,
+    \ndTime) d\ndWallDist \right) - \exp
+    \left(\offForceScale\ndLength(\ndWallDist, \recAngle)\right)
+    \ndBondDensity(\ndWallDist, \recAngle, \ndTime), \\
   \label{eq:nd-force-balance}
   0 &= \ndVelFriction \left(\ndAppliedVel - \ndVelocity\right) + 
       \ndHorzTotalForce, \\
@@ -251,11 +263,29 @@ Appendix (something), but the final nondimensional set of equations is
       \ndTotalTorque.
 \end{align}
 
-The nondimensional bond length $\ell$ is given by $something$, and the
-nondimensional force $\ndHorzForce$ and torque $\ndTorque$ are given
-by $something$. A complete list of the nondimensional coordinates,
-functions, and parameters with their definitions are given in Table
-(something).
+The nondimensional bond length $\ndLength$ is given by
+\begin{equation}
+  \label{eq:nd-length}
+  \ndLength^2(\ndWallDist, \recAngle) = (1 - \cos\recAngle +
+  \ndSeparation)^2 + (\sin\recAngle - \ndWallDist)^2,
+\end{equation}
+and the nondimensional force $\ndHorzForce$ and torque $\ndTorque$ are
+given by
+\begin{align}
+  \label{eq:nd-force}
+  \ndHorzForce &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2}
+                 (\ndWallDist - \sin\recAngle)
+                 \ndBondDensity(\ndWallDist, \recAngle, \ndTime)
+                 d\recAngle d\ndWallDist \\
+  \label{eq:nd-torque}
+  \ndTorque &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2} \left[
+              \left(1 - \cos\recAngle + \ndSeparation\right) \sin\recAngle +
+              \left(\sin\recAngle - \ndWallDist\right) \cos\recAngle \right]
+              \ndBondDensity(\ndWallDist, \recAngle, \ndTime) d\recAngle
+              d\ndWallDist
+\end{align}
+A complete list of the nondimensional coordinates, functions, and
+parameters with their definitions are given in Table (something).
 
 \section{Stochastic model}
 \label{sec:stochastic-model}
