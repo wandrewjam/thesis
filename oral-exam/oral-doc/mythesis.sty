@@ -44,7 +44,17 @@
 
 \def \verbatim@font {\normalfont \ttfamily \color{verbatimcolor}}
 
-%%% Input the definitions of model parameters
+%%% Package to write normal greek letters in text
 \usepackage{textgreek}
+
+%%% Define a shortcut for textnormal 
 \newcommand{\tn}{\textnormal}
+
+%%% Macros for typesetting derivatives and integrals
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Int}[4]{\int_{#3}^{#4} #1 \, \dd #2}
+
+%%% Input the definitions of model parameters
 \input{/Users/andrewwork/thesis/model-defs}
