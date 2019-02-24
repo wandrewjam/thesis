@@ -269,20 +269,21 @@ The nondimensional bond length $\ndLength$ is given by
   \ndLength^2(\ndWallDist, \recAngle) = (1 - \cos\recAngle +
   \ndSeparation)^2 + (\sin\recAngle - \ndWallDist)^2,
 \end{equation}
-and the nondimensional force $\ndHorzForce$ and torque $\ndTorque$ are
-given by
+and the nondimensional force $\ndHorzTotalForce$ and torque
+$\ndTotalTorque$ are given by
 \begin{align}
   \label{eq:nd-force}
-  \ndHorzForce &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2}
-                 (\ndWallDist - \sin\recAngle)
-                 \ndBondDensity(\ndWallDist, \recAngle, \ndTime)
-                 d\recAngle d\ndWallDist \\
+  \ndHorzTotalForce &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2}
+                      (\ndWallDist - \sin\recAngle)
+                      \ndBondDensity(\ndWallDist, \recAngle, \ndTime)
+                      d\recAngle d\ndWallDist \\
   \label{eq:nd-torque}
-  \ndTorque &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2} \left[
-              \left(1 - \cos\recAngle + \ndSeparation\right) \sin\recAngle +
-              \left(\sin\recAngle - \ndWallDist\right) \cos\recAngle \right]
-              \ndBondDensity(\ndWallDist, \recAngle, \ndTime) d\recAngle
-              d\ndWallDist
+  \ndTotalTorque &= \int_{-\infty}^{\infty} \int_{-\pi/2}^{\pi/2}
+                   \left[ \left(1 - \cos\recAngle +
+                   \ndSeparation\right) \sin\recAngle +
+                   \left(\sin\recAngle - \ndWallDist\right)
+                   \cos\recAngle \right] \ndBondDensity(\ndWallDist,
+                   \recAngle, \ndTime) d\recAngle d\ndWallDist
 \end{align}
 A complete list of the nondimensional coordinates, functions, and
 parameters with their definitions are given in Table (something).
