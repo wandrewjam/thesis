@@ -79,7 +79,7 @@ def _cfl_check(v_f, om_f, dt, h, nu, scheme):
 
 
 def _generate_coordinate_arrays(M, N, time_steps, L, T, d, alg):
-    """ Generates numerical meshes needed by deterministic algorithms"""
+    """ Generates numerical meshes needed by simulation algorithms"""
 
     z_mesh = np.linspace(-L, L, 2*M+1)
     if alg == 'det':
@@ -113,7 +113,7 @@ def _initialize_unknowns(v_f, om_f, m0, time_steps, save_bond_history):
     return bond_mesh, v, om
 
 
-def _initialize_unknown_lists(v_f, om_f, save_bond_history):
+def _initialize_unknown_lists(v_f, om_f, m0, save_bond_history):
     """ Initializes arrays for v, om, and bond_list """
 
     v, om = np.array([v_f[0]]), np.array([om_f[0]])
@@ -121,9 +121,9 @@ def _initialize_unknown_lists(v_f, om_f, save_bond_history):
 
     if save_bond_history:
         master_list = np.zeros(shape=0)
-        master_list = np.append(arr=master_list, values=np.zeros(shape=(0, 2)))
+        master_list = np.append(arr=master_list, values=m0)
     else:
-        master_list = np.zeros(shape=(0, 2))
+        master_list = m0
 
     return master_list, v, om, t_mesh
 
@@ -485,7 +485,7 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
     return master_list, bond_counts*nu/bond_max, v, om, t_mesh
 
 
-def pde_eulerian(M, N, time_steps, m0, scheme='bw', **kwargs):
+def pde_eulerian(M, N, time_steps, init, scheme='bw', **kwargs):
     """ Solves the full eulerian PDE model """
 
     # Define the problem parameters
@@ -502,6 +502,15 @@ def pde_eulerian(M, N, time_steps, m0, scheme='bw', **kwargs):
     # Check for the CFL condition
     _cfl_check(v_f, om_f, dt, h, nu, scheme)
 
+    if init == 'free':
+        m0 = np.zeros(shape=(2*M+1, N+1))
+    elif init == 'tbound':
+        eps = 0.1
+        m0 = 1/(bond_max*N*eps**2)*np.exp(-(z_mesh[:, None]**2
+                                            + th_mesh[None, :]**2)/eps**2)
+    else:
+        raise ValueError('init isn\'t a valid string')
+
     bond_mesh, v, om = _initialize_unknowns(v_f, om_f, m0, time_steps,
                                             save_bond_history)
 
@@ -517,7 +526,7 @@ def pde_eulerian(M, N, time_steps, m0, scheme='bw', **kwargs):
     return bond_mesh, bond_counts, v, om, t_mesh
 
 
-def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
+def rolling_ssa(M, N, time_steps, init, bond_max, correct_flux, **kwargs):
     """ Runs a single stochastic rolling simulation """
 
     # Define the problem parameters
@@ -534,8 +543,15 @@ def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
         _generate_coordinate_arrays(M, N, time_steps, L, T, d, 'sto')[1::2]
     )
 
+    if init == 'free':
+        m0 = np.zeros(shape=(0, 2))
+    elif init == 'tbound':
+        m0 = np.array([[0, np.searchsorted(th_mesh, 0).astype('float64')]])
+    else:
+        raise ValueError('init isn\'t a valid string')
+
     master_list, v_list, om_list, t_list = (
-        _initialize_unknown_lists(v_f, om_f, save_bond_history)
+        _initialize_unknown_lists(v_f, om_f, m0, save_bond_history)
     )
 
     def coeffs_and_bounds(bins):
@@ -558,15 +574,14 @@ def rolling_ssa(M, N, time_steps, m0, bond_max, correct_flux, **kwargs):
     return master_list, bond_counts, v_list, om_list, t_list
 
 
-def count_variable(M, N, T, time_steps, m0, bond_max, correct_flux, k=None,
-                       trials=None, **kwargs):
+def count_variable(M, N, t_sample, time_steps, init, bond_max, correct_flux,
+                   k=None, trials=None, **kwargs):
         start = timer()
         np.random.seed()
         bond_counts, v_list, om_list, t_list = (
-            rolling_ssa(M, N, time_steps, m0, bond_max,
+            rolling_ssa(M, N, time_steps, init, bond_max,
                         correct_flux, **kwargs)[1:]
         )
-        t_sample = np.linspace(0, T, num=time_steps+1)
         indices = np.searchsorted(t_list, t_sample, side='left')
         end = timer()
 
@@ -587,7 +602,7 @@ def count_variable(M, N, T, time_steps, m0, bond_max, correct_flux, k=None,
         return bond_counts[indices], v_list[indices], om_list[indices], t_list
 
 
-def stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
+def stochastic_experiments(trials, M, N, time_steps, init, bond_max,
                            correct_flux, **kwargs):
     """ Run many stochastic experiments at once """
 
@@ -597,8 +612,8 @@ def stochastic_experiments(trials, M, N, time_steps, m0, bond_max,
     pool = mp.Pool(processes=4)
     result = [
         pool.apply_async(count_variable,
-                         args=(M, N, T, time_steps, m0, bond_max, correct_flux,
-                               k, trials),
+                         args=(M, N, t_sample, time_steps, init, bond_max,
+                               correct_flux, k, trials),
                          kwds=kwargs)
         for k in range(trials)
     ]
@@ -665,13 +680,8 @@ def write_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
         with open(file_path, 'r') as file:
             print('The file {:s} already exists!'.format(file_path))
     except IOError:
-        if init == 'free':
-            m0 = np.zeros(shape=(2*M+1, N+1))
-        else:
-            raise ValueError('init isn\'t a valid string')
-
-        bond_counts, v, om, t_mesh = pde_eulerian(M, N, time_steps, m0, scheme,
-                                                  **kwargs)[1:]
+        bond_counts, v, om, t_mesh = pde_eulerian(M, N, time_steps, init,
+                                                  scheme, **kwargs)[1:]
         np.savez_compressed(file_path, bond_counts, v, om, t_mesh,
                             bond_counts=bond_counts, v=v, om=om, t_mesh=t_mesh)
         print('Wrote output to {:s}'.format(file_path))
@@ -704,13 +714,8 @@ def write_stochastic_data(trials, M, N, time_steps, init, bond_max,
         with open(file_path, 'r') as file:
             print('The file {:s} already exists!'.format(file_path))
     except IOError:
-        if init == 'free':
-            m0 = np.zeros(shape=(2*M+1, N+1))
-        else:
-            raise ValueError('init isn\'t a valid string')
-
         count_array, v_array, om_array, t_sample = stochastic_experiments(
-            trials, M, N, time_steps, m0, bond_max, correct_flux, **kwargs)
+            trials, M, N, time_steps, init, bond_max, correct_flux, **kwargs)
         np.savez_compressed(file_path, count_array, v_array, om_array,
                             t_sample, count_array=count_array, v_array=v_array,
                             om_array=om_array, t_sample=t_sample)
@@ -746,17 +751,19 @@ def _extract_means(stochastic_result):
 
 if __name__ == '__main__':
     M, N = 64, 64
-    time_steps = 5180*3
-    m0 = np.zeros(shape=(2*M+1, N+1))
-    init = 'free'
+    T = 5
+    time_steps = 5120*T
+    # m0 = np.zeros(shape=(2*M+1, N+1))
+    # init = 'free'
+    init = 'tbound'  # One bond between the platelet and surface
     model_outputs = []
     bond_max = 100
-    trials = 4
+    trials = 16
     correct_flux = False
 
-    write_deterministic_data(M, N, time_steps, init, scheme='bw')
+    write_deterministic_data(M, N, time_steps, init, scheme='bw', T=T)
     write_stochastic_data(trials, M, N, time_steps, init, bond_max,
-                          correct_flux)
+                          correct_flux, T=T)
 
     # for scheme in ['up', 'bw']:
     #     model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,

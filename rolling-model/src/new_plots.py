@@ -5,16 +5,19 @@ from rolling_algorithms import load_deterministic_data, load_stochastic_data
 
 if __name__ == '__main__':
     M, N = 64, 64
-    time_steps = 5180*3
-    init = 'free'
+    T = 5
+    time_steps = 5120*5
+    # init = 'free'
+    init = 'tbound'  # One bond between the platelet and surface
     bond_max = 100
-    trials = 4
+    trials = 16
     correct_flux = False
 
     bond_counts, v, om, t_mesh = load_deterministic_data(M, N, time_steps,
-                                                         init, scheme='bw')
+                                                         init, scheme='bw',
+                                                         T=T)
     count_array, v_array, om_array, t_sample = load_stochastic_data(
-        trials, M, N, time_steps, init, bond_max, correct_flux)
+        trials, M, N, time_steps, init, bond_max, correct_flux, T=T)
 
     bond_counts *= bond_max*N/np.pi
     count_array *= bond_max*N/np.pi
@@ -29,15 +32,15 @@ if __name__ == '__main__':
 
     ax[0, 0].plot(t_mesh, v, 'r', t_sample, v_mean, 'b')
     ax[0, 0].plot(t_sample, v_mean + v_std, 'b--', t_sample, v_mean - v_std,
-               'b--', linewidth=.5)
+                  'b--', linewidth=.5)
     ax[0, 0].set_ylabel('Translation velocity ($v$)')
     ax[1, 0].plot(t_mesh, om, 'r', t_sample, om_mean, 'b')
     ax[1, 0].plot(t_sample, om_mean + om_std, 'b--', t_sample, om_mean - om_std,
-               'b--', linewidth=.5)
+                  'b--', linewidth=.5)
     ax[1, 0].set_ylabel('Rotation rate ($\\omega$)')
     ax[2, 0].plot(t_mesh, bond_counts, 'r', t_sample, count_mean, 'b')
     ax[2, 0].plot(t_sample, count_mean + count_std, 'b--', t_sample,
-               count_mean - count_std, 'b--', linewidth=.5)
+                  count_mean - count_std, 'b--', linewidth=.5)
     ax[2, 0].set_ylabel('Bond number')
     ax[2, 0].set_xlabel('Nondimensional time')
 
