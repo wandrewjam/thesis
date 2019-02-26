@@ -146,31 +146,41 @@ simultaneously solving equations \eqref{eq:nd-density},
 % The nondimensional system is given by the following equations:
 % \begin{align}
 %   \label{eq:nd-master1}
-%   \Pder{\ndBondDensity}{\ndTime} &= \ndRotation \Pder{\ndBondDensity}{\recAngle} + \ndVelocity \Pder{\ndBondDensity}{\ndWallDist} + \ndOnConst
-%   \exp\left(-\onForceScale \frac{l^2}{2}\right) \left(1 - \Int{\ndBondDensity(\ndWallDist,\recAngle,\ndTime)}
-%   {\ndWallDist}{-\infty}{\infty}\right) - \exp(\offForceScale l) \ndBondDensity(\ndWallDist,\recAngle,\ndTime) \\
+%   \Pder{\ndBondDensity}{\ndTime} &= \ndRotation
+%   \Pder{\ndBondDensity}{\recAngle} + \ndVelocity
+%   \Pder{\ndBondDensity}{\ndWallDist} + \ndOnConst
+%   \exp\left(-\onForceScale \frac{l^2}{2}\right) \left(1 -
+%   \Int{\ndBondDensity(\ndWallDist,\recAngle,\ndTime)}
+%   {\ndWallDist}{-\infty}{\infty}\right) - \exp(\offForceScale l)
+%   \ndBondDensity(\ndWallDist,\recAngle,\ndTime) \\
 %   \label{eq:nd-torq}
 %   0 &= \ndRotFriction(\ndAppliedRot - \ndRotation) + \tau_s' \\
 %   \label{eq:nd-vel}
-%   0 &= \ndVelFriction (\ndAppliedVel - \ndVelocity) + \ndHorzTotalForce.
+%   0 &= \ndVelFriction (\ndAppliedVel - \ndVelocity) +
+%   \ndHorzTotalForce.
 % \end{align}
 
-% The nondimensional torque and force---$\tau_s'$ and $\ndHorzTotalForce$
-% respectively---are defined in the following way in terms of
-% nondimensional parameters:
+% The nondimensional torque and force---$\tau_s'$ and
+% $\ndHorzTotalForce$ respectively---are defined in the following way
+% in terms of nondimensional parameters:
 % \begin{align}
 %   \label{eq:total-nd-torq}
-%   \ndTotalTorque &\equiv \Int{ \Int{((1 - \cos\recAngle + \ndSeparation) \sin\recAngle +
-%           (\sin\recAngle - \ndWallDist) \cos\recAngle) \ndBondDensity(\ndWallDist,\recAngle,\dTime)}{ \recAngle
-%           }{-\frac{\pi}{2}}{\frac{\pi}{2}} }{ \ndWallDist }{ -\infty }{ \infty }
-%   &= \totalTorque/(\stiffness \receptorDensity \radius^2) \\ 
-%   \label{eq:total-nd-force}
-%   \ndHorzTotalForce &\equiv \Int{ \Int{(\ndWallDist - \sin\recAngle) \ndBondDensity(\ndWallDist,\recAngle,\dTime)}{ \recAngle }{
-%          -\frac{\pi}{2} }{\frac{\pi}{2}} }{ \ndWallDist }{ -\infty }{ \infty }
-%   &= \horzTotalForce/(\stiffness \receptorDensity \radius).
+%   \ndTotalTorque &\equiv \Int{ \Int{((1 - \cos\recAngle +
+%   \ndSeparation) \sin\recAngle + 
+%           (\sin\recAngle - \ndWallDist) \cos\recAngle)
+%           \ndBondDensity(\ndWallDist,\recAngle,\dTime)}{ \recAngle 
+%           }{-\frac{\pi}{2}}{\frac{\pi}{2}} }{ \ndWallDist }{ -\infty
+%           }{ \infty } 
+%   &= \totalTorque/(\stiffness \receptorDensity \radius^2) \\  
+%   \label{eq:total-nd-force} 
+%   \ndHorzTotalForce &\equiv \Int{ \Int{(\ndWallDist - \sin\recAngle)
+%   \ndBondDensity(\ndWallDist,\recAngle,\dTime)}{ \recAngle }{ 
+%          -\frac{\pi}{2} }{\frac{\pi}{2}} }{ \ndWallDist }{ -\infty
+%          }{ \infty } 
+%   &= \horzTotalForce/(\stiffness \receptorDensity \radius). 
 % \end{align}
 
-% The definitions of the nondimensional variables and parameters are
+% The definitions of the nondimensional variables and parameters are 
 % given in Table \ref{tab:nd-vars}. 
 
 \begin{table}
@@ -226,8 +236,3 @@ simultaneously solving equations \eqref{eq:nd-density},
   \caption{Nondimensional variables and parameters}
   \label{tab:nd-vars}
 \end{table}
-
-The nondimensional length $l$ between points $\ndWallDist$ and
-$\recAngle$ is given by $l^2 = (1 - \cos(\recAngle) + \ndSeparation)^2
-+ (\sin(\recAngle) - \ndWallDist)^2$, and is equivalent to
-$\length/\radius$.
