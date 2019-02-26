@@ -12,6 +12,7 @@
 *.tiff
 *.jpg
 ss*.txt
+*.ai
 
 # Folders
 literature_repository/*
