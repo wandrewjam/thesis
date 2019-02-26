@@ -46,15 +46,30 @@
 
 %%% Package to write normal greek letters in text
 \usepackage{textgreek}
+\usepackage{tabu}
 
 %%% Define a shortcut for textnormal 
 \newcommand{\tn}{\textnormal}
+\newcommand{\inv}{^{-1}}
 
 %%% Macros for typesetting derivatives and integrals
 \newcommand{\dd}{d}
 \newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
 \newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\Int}[4]{\int_{#3}^{#4} #1 \, \dd #2}
+
+\newcommand{\DimReceptorSaturation}{\Int
+  {\bondDensity\left(\wallDist,\recAngle,\dTime\right)} {\wallDist}
+  {-\infty} {\infty}}
+\newcommand{\NDReceptorSaturation}{\Int
+  {\ndBondDensity\left(\ndWallDist,\recAngle,\ndTime\right)}{\ndWallDist}
+  {-\infty} {\infty}}
+\newcommand{\DimQuantity}[1]{\Int {\Int
+    {#1 \bondDensity\left(\wallDist,\recAngle,\dTime\right)}
+    {\wallDist} {-\infty} {\infty}} {\recAngle} {-\pi/2} {\pi/2}}
+\newcommand{\NDQuantity}[1]{\Int {\Int
+    {#1 \ndBondDensity\left(\ndWallDist,\recAngle,\ndTime\right)}
+    {\ndWallDist} {-\infty} {\infty}} {\recAngle} {-\pi/2} {\pi/2}}
 
 %%% Input the definitions of model parameters
 \input{/Users/andrewwork/thesis/model-defs}
