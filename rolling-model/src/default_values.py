@@ -17,8 +17,8 @@ _biological_parameters = {
     'on': True,
     'off': True,
     'sat': True,
-    'xi_v': 1e-6,
-    'xi_om': 1e-6
+    'xi_v': 7.36e-6,
+    'xi_om': 9.82e-6
 }
 
 # Define a dictionary for numerical parameters.

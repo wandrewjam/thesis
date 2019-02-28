@@ -750,20 +750,22 @@ def _extract_means(stochastic_result):
 
 
 if __name__ == '__main__':
-    M, N = 64, 64
+    M, N = 128, 128
     T = 5
     time_steps = 5120*T
+    kappa = 10.
     # m0 = np.zeros(shape=(2*M+1, N+1))
-    # init = 'free'
-    init = 'tbound'  # One bond between the platelet and surface
+    init = 'free'
+    # init = 'tbound'  # One bond between the platelet and surface
     model_outputs = []
-    bond_max = 100
+    bond_max = 10
     trials = 16
     correct_flux = False
 
-    write_deterministic_data(M, N, time_steps, init, scheme='bw', T=T)
+    write_deterministic_data(M, N, time_steps, init, scheme='bw', T=T,
+                             kappa=kappa)
     write_stochastic_data(trials, M, N, time_steps, init, bond_max,
-                          correct_flux, T=T)
+                          correct_flux, T=T, kappa=kappa)
 
     # for scheme in ['up', 'bw']:
     #     model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,

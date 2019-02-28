@@ -4,20 +4,22 @@ from rolling_algorithms import load_deterministic_data, load_stochastic_data
 
 
 if __name__ == '__main__':
-    M, N = 64, 64
+    M, N = 128, 128
     T = 5
-    time_steps = 5120*5
-    # init = 'free'
-    init = 'tbound'  # One bond between the platelet and surface
-    bond_max = 100
+    time_steps = 5120*T
+    kappa = 10.
+    init = 'free'
+    # init = 'tbound'  # One bond between the platelet and surface
+    bond_max = 10
     trials = 16
     correct_flux = False
 
     bond_counts, v, om, t_mesh = load_deterministic_data(M, N, time_steps,
                                                          init, scheme='bw',
-                                                         T=T)
+                                                         T=T, kappa=kappa)
     count_array, v_array, om_array, t_sample = load_stochastic_data(
-        trials, M, N, time_steps, init, bond_max, correct_flux, T=T)
+        trials, M, N, time_steps, init, bond_max, correct_flux, T=T,
+        kappa=kappa)
 
     bond_counts *= bond_max*N/np.pi
     count_array *= bond_max*N/np.pi
