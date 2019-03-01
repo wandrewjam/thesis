@@ -215,58 +215,58 @@ important in understanding platelet interactions with implanted
 biomaterials. In particular they have shown that platelet interactions
 with immobilized agonists may not cause the platelets to adhere at the
 site of interaction, but can nonetheless prime them for downstream
-adhesion and full activation. One possible example of this in a
-vascular graft is shown in Figure \# something. At either end of the
-implanted device, native tissue must be joined with the artificial
-device. At these points along the vessel wall the tissue is inflamed
-and anastomotic, which could expose platelet agonists on the surface
-of the wall. Additionally the increased shear rate in the stenotic
-regions could act as a platelet agonist (shear-induced platelet
-activation). Therefore while platelets may not bind to a single
-inflamed region of the vessel, the upstream region may prime platelets
-for adhesion, and then more readily bind to the downstream inflamed
-region. It is also possible that the inflamed tissue or the
-biomaterial may not cause platelets to bind locally, but nonetheless
-partially activate platelets and cause them to adhere downstream
-somewhere in the circulation.
+adhesion and full activation.
+
+One possible example of this in a vascular graft is shown in Figure \#
+something. At either end of the implanted device, native tissue must
+be joined with the artificial device. At these points along the vessel
+wall the tissue is inflamed and anastomotic, which could expose
+platelet agonists on the surface of the wall. Additionally the
+increased shear rate in the stenotic regions could act as a platelet
+agonist through a phenomenon known as shear-induced platelet
+activation \cite{Fogelson2015,Kroll96,Shankaran2003}. Therefore while
+platelets may not bind to a single inflamed region of the vessel, the
+upstream region may prime platelets for adhesion, and then more
+readily bind to the downstream inflamed region. It is also possible
+that the inflamed tissue or the biomaterial may not cause platelets to
+bind locally, but nonetheless partially activate platelets and cause
+them to adhere downstream somewhere in the circulation.
 		
 % Describe experimental setup, ongoing experiments, etc
 In order to investigate nonlocal effects of priming, Dr. Hlady's group
 has designed a microfluidic assay with two regions printed with
-platelet agonists (see Figure whatever). The upstream agonist region
-will be called the priming region, and the downstream region with
-agonist will be called the capture region. In previous research,
+platelet agonists (see Figure whatever) \cite{Corum2012}. The upstream
+agonist region is called the priming region, and the downstream region
+with agonist is called the capture region. In previous research,
 Dr. Hlady's group has found that all 3 immobilized platelet agonists
 tested (vWF, collagen, and fibrinogen) in the upstream region
 increased adhesion of platelets in the capture region relative to a
-nonreactive control (Colin's thesis, Corum paper). Also, recent
-unpublished work has shown similar results when the upstream agonist
-printing is replaced by a stenotic region with higher wall shear rates
-(reference Shek's work).
+nonreactive control \cite{Eichinger2016}. Recent unpublished work has
+shown similar results when the upstream agonist printing is replaced
+by a stenotic region with higher wall shear rates (unpublished data).
 
 \section{Existing cell rolling models}
 \label{sec:exist-cell-roll}
 
 A large body of work has been published on the subject of cell rolling
-and adhesion, including mathematical models of cell rolling. However
-most of the modeling work has been done on leukocyte rolling on an
-agonist-coated surface, and relatively less work has been done on
-platelet rolling.
+and adhesion, including mathematical models of cell rolling
+\cite{Pospieszalska2009,Sundd2011}. However most of the modeling work
+has been done on leukocyte rolling on an agonist-coated surface, and
+relatively less work has been done on platelet rolling.
 
-Adhesive dynamics (AD) is perhaps the most well-known modeling
-framework for leukocytes, and the first AD model was published in 1992
-by Hammer \& Apte \cite{Hammer1992}. The Hammer and Apte paper
-provides a good example to describe the AD models in general. It is
-convenient to view the more recent models as modifications of this
-fundamental model. They model a leukocyte as a rigid sphere, with
-rigid microvilli protruding normally from the surface of the
-cell. Receptors are located only at the tips of these microvilli
-(multiple receptors can occupy a single microvillus), and can bind to
-ligand binding sites which are uniformly distributed along a flat
-wall. The positions and bound state of each receptor is tracked
-throughout the simulation. Binding and unbinding of receptors is
-modeled with a stochastic process with length-dependent rates given by
-the Dembo model \cite{Dembo1988}:
+Adhesive dynamics (AD) is a common modeling framework for leukocytes,
+and the first AD model was published in 1992 by Hammer \& Apte
+\cite{Hammer1992}. The Hammer and Apte paper provides a good example
+to describe the AD models in general. It is convenient to view the
+more recent models as modifications of this fundamental model. They
+model a leukocyte as a rigid sphere, with rigid microvilli protruding
+normally from the surface of the cell. Receptors are located only at
+the tips of these microvilli (multiple receptors can occupy a single
+microvillus), and can bind to ligand binding sites which are uniformly
+distributed along a flat wall. The positions and bound state of each
+receptor is tracked throughout the simulation. Binding and unbinding
+of receptors is modeled with a stochastic process with
+length-dependent rates given by the Dembo model \cite{Dembo1988}:
 \begin{align}
   \label{eq:dembo-on}
   k_\tn{on} \left(L_\tn{sep}\right)
@@ -293,3 +293,21 @@ $\forceVec$ on the cell and the velocity $\velVec$: $\forceVec =
 5 different forces: bond forces between the cell and the surface, van
 der Waals forces, gravitational body force, electrostatic force, and
 steric stabilization force.
+
+Many extensions and adaptations of the AD model have been made since
+its publication. In \cite{Bhatia2003}, they model leukocyte rolling
+with two classes of receptors: fast binding and unbinding selectins,
+and slow binding and unbinding integrins. \cite{King2001} uses the AD
+framework to model the dynamics and interactions of multiple cells
+rolling on a surface at once. 
+
+A platelet adhesive dynamics (PAD) model is developed in
+\cite{Mody2008a} and \cite{Mody2008b}, which is used to model the
+aggregation of non-spherical platelets in a shear flow through binding
+with vWF. The PAD model was later adapted to model the dynamics of
+platelet rolling on a vWF-coated wall, with collisions between rolling
+platelets and free-flowing platelets \cite{Wang2013}. Adhesive
+dynamics models are detailed and expensive, because they explicitly
+model individual receptors on the cell surface, and many of them
+require solving Stokes' equations at every time step.
+
