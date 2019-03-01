@@ -1,10 +1,5 @@
 \documentclass{article}
-% \let\bb\enumerate
-% \let\ee\endenumerate
-% \let\bd\description
-% \let\ed\enddescription
-% \let\ii\item
-\let\ds\displaystyle
+
 \newcommand{\ep}{\rule{.06in}{.1in}}
 \textheight 9.5in
 \usepackage{amssymb}
@@ -12,6 +7,11 @@
 \usepackage{amsthm}
 \usepackage{textgreek}
 \usepackage{tabu}
+\usepackage{multirow}
+\input{/Users/andrewwork/Documents/grad-school/thesis/model-defs}
+\newcommand{\inv}{^{-1}}
+\newcommand{\tn}{\textnormal}
+
 \pagestyle{empty} 
 \bibliographystyle{plain}
 
@@ -23,24 +23,9 @@
 \textwidth 7in
 
 %\font\cj=msbm10 at 12pt
-\def\R{\mathbb{R}}
-\def\N{\mathbb{N}}
-\def\C{\mathbb{C}}
-\def\Z{\mathbb{Z}}
-\def\Q{\mathbb{Q}}
-\def\H{\mathbb{H}}
-\def\B{\mathcal{B}} 
-\def\and{\wedge}
-\newcommand{\inv}{^{-1}}
 
-\input{/Users/andrewwork/thesis/model_defs.tex}
-
-%\def\ior{\vee} %this line can cause problems (in tables, nested
-                %lists, others?), comment out if necessary
-%\topmargin -.5in 
 \begin{document}
 \pagestyle{empty}
-
 
 \begin{center}
 {\Large Parameter Estimates}
@@ -54,34 +39,39 @@ PDE model, listed in Table \ref{tab:dim_pars}.
   \begin{tabu}{c|X|X|X}
     Symbol & Description & Estimate & Source \\ \hline
     $\radius$ & Platelet radius & 1 {\textmugreek}m & None \\
-    $\separation$ & Wall separation distance & 0.1 {\textmugreek}m
-                                    & None \\
-    $\stiffness$ & Bond stiffness & 12 pN/nm or 100 pN/{\textmugreek}m
-    & \cite{Litvinov2011} or \cite{Fitzgibbon2014}
-    (for the \ITA{IIb}\ITB{3}--fbg bond) \\
+    $\separation$ & Wall separation distance & 0.01 {\textmugreek}m &
+    None \\ 
+    \multirow{3}{*}{$\stiffness$} & \multirow{3}{*}{Bond stiffness} &
+    12 pN/nm & \cite{Litvinov2011} (\ITA{IIb}\ITB{3}--fbg) \\
+    & & 100 pN/{\textmugreek}m & \cite{Fitzgibbon2014} (GP1b-vWF) \\
+    & & 10 pN/nm & \cite{Mody2008b} (GP1b-vWF) \\
     $\boltzmann$ & Boltzmann constant & $1.38 \times 10^{-23}$ J/K
                                     & None \\
     $\temp$ & Blood temperature & 310 K & None \\
-    $\onConst$ & Maximum bond on rate & 10--1000 s$\inv$
-                                    & \cite{Bhatia2003} \\
-    $\offConst$ & Unstressed bond off rate & 0.2 s$\inv$
-                                    & \cite{Litvinov2011} \\
-    $\refForce$ & Characteristic breaking force & 107 pN
-                                    & Estimated below \\
+    $\onConst$ & Maximum bond on rate & 
+                                    &  \\
+    $\offConst$ & Unstressed bond off rate & 5 s$\inv$
+                                    & \cite{Fitzgibbon2014} (GP1b--vWF)\\
+    \multirow{2}{*}{$\refForce$} & \multirow{2}{*}{Characteristic
+      breaking force} & 6.03 pN & Estimated below from
+    \cite{Mody2008b} (GP1b--vWF) \\
+    & & 107 pN & Estimated below from \cite{Bhatia2003}
+    (E-selectin--sLe\textsuperscript{x}) (\cite{Doggett2002} gives similar)\\
     $\receptorDensity$ & Angular receptor density
-                         & 10,00--13,000 OR $4,775w$--$6,366w$
-                           receptors/radian & Estimated below \\
+                         & $\sim 1000$ receptors/radian  & Estimated
+                         below \\
     $\appliedRot$ & Fluid-imposed rotation rate & $\gamma/2$ s$\inv$ &
     \cite{Goldman1967b} \\
     $\appliedVel$ & Fluid-imposed translation velocity
                          & $(R + d)\gamma$ {\textmugreek}m/s &
                          \cite{Goldman1967b} \\
     $\velFriction$ & Translational drag coefficient
-                         & $6 \times 10^{-5}$ g/s & Estimated below \\
+                         &  $6 \times 10^{-5}$ g/s & Estimated below
+                         (GP1b--vWF) \\
     $\rotFriction$ & Rotational drag coefficient
                          & $8 \times 10^{-5}$
-                           {\textmugreek}m\textsuperscript{2}g/s
-                                    & Estimated below \\
+                         {\textmugreek}m\textsuperscript{2}g/s &
+                         Estimated below \\
   \end{tabu}
   \caption{Dimensional parameters in the PDE model}
   \label{tab:dim_pars}
@@ -95,16 +85,16 @@ PDE model, listed in Table \ref{tab:dim_pars}.
 
 $\refForce$ is equivalent to $\boltzmann\temp/\compliance$ in
 \cite{Pospieszalska2009} and \cite{Sundd2011}, where $\compliance$ is
-the reactive compliance and is estimated at 0.4 angstroms in
-\cite{Bhatia2003}. Then converting units as needed:
+the reactive compliance and is estimated at 0.71 nm in
+\cite{Mody2008b}. Then converting units as needed:
 \begin{align*}
-  &\compliance = 0.4 \text{ angstroms} = 4 \times 10^{-5}
+  &\compliance = 0.71 \text{ nm} = 7.1 \times 10^{-4}
     \text{{\textmugreek}m} \text{, and} \\
   &\boltzmann = 1.38 \times 10^{-23} \text{N}\cdot\text{m}/\text{K} =
     1.38 \times 10^{-5} \text{pN}\cdot\text{{\textmugreek}m}/\text{K}.
 \end{align*}
 Finally, $\refForce = \frac{\boltzmann\cdot\temp}{\compliance} =
-\frac{310 \cdot 1.38 \times 10^{-5}}{4 \times 10^{-5}} \text{pN} = 107
+\frac{310 \cdot 1.38 \times 10^{-5}}{7.1 \times 10^{-4}} \text{pN} = 6.03
 \text{pN}$.
 
 \subsection{Angular receptor density}
@@ -196,32 +186,34 @@ in Table \ref{tab:nd-params}.
   \centering
   \begin{tabular}{c|c|l|l}
     Parameter & Definition & Value & Description \\ \hline
-    $\ndSeparation$ & $\separation = \radius\ndSeparation$ & 0.1
+    $\ndSeparation$ & $\separation = \radius\ndSeparation$ & 0.01
                                    & cell-surface separation \\
     $\ndAppliedRot$ & $\appliedRot = \ndAppliedRot\offConst$
-                           & $0.2\gamma$ & Fluid-imposed rotation rate
+                           & $(0.1 \text{ s})\shear$ & Fluid-imposed
+                                                       rotation rate
     \\
     $\ndAppliedVel$ & $\appliedVel = \ndAppliedVel\radius\offConst$
-                           & $0.2\gamma$ & Fluid-imposed translation
-                                           velocity \\
+                           & $(0.2 \text{ s}) (1 + \ndSeparation)
+                             \shear$
+                                   & Fluid-imposed translation
+                                     velocity \\
     $\ndOnConst$ & $\ndOnConst = \frac{\radius\onConst}{\offConst}$
-                           & $10$--$10^4$ & Maximum relative on rate \\
+                           &  & Maximum relative on rate \\
     $\onForceScale$ & $\onForceScale =
                     \frac{\stiffness\radius^2}{\boltzmann\temp}$
-                           & $2 \times 10^7$ & Length dependence of on
-                                               rate \\
+                           & $2.34 \times 10^4$ & Length dependence of
+                                                  on rate \\
     $\offForceScale$ & $\offForceScale = \stiffness\radius/\refForce$
-                           & 1000 & Length dependence of off rate \\
+                           & 16.6 & Length dependence of off rate \\
     $\ndVelFriction$ & $\ndVelFriction =
                      \frac{\offConst}{\stiffness\receptorDensity}
-                     \velFriction$ & $4 \times 10^{-12}$--$4 \times
-                                     10^{-10}$
+                       \velFriction$ & $7.36 \times 10^{-6}$
                                    & Translational drag coefficient \\
     $\ndRotFriction$ & $\ndRotFriction =
                      \frac{\offConst}{\stiffness\receptorDensity
                                       \radius^2}\rotFriction$
-                           & $5 \times 10^{-12}$--$5 \times 10^{-10}$
-                                   & Rotational drag coefficient
+                           & $9.82 \times 10^{-6}$ & Rotational drag
+                                                     coefficient
   \end{tabular}
   \caption{Nondimensional parameters}
   \label{tab:nd-params}
