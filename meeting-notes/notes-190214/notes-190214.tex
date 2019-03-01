@@ -266,27 +266,67 @@ Figures \ref{fig:small-kap}--~\ref{fig:large-kap}.
   \caption{Results of simulations with $\kappa = 10$}
   \label{fig:large-kap}
 \end{figure}
-% \subsection{Length, force, and bond lifetime}
-% \label{sec:length-force-lifetime}
 
-% \subsection{Distance between surfaces}
-% \label{sec:sep-distance}
+\subsection{Length, force, and bond lifetime}
+\label{sec:length-force-lifetime}
 
-% \subsection{On rate as a function of $L$}
-% \label{sec:on-rate-fn}
+\subsection{Distance between surfaces}
+\label{sec:sep-distance}
 
-% In Hammer \& Apte \cite{Hammer1992}, they use the Dembo models of
-% binding and unbinding with parameter values $\sigma_\tn{ts} \approx
-% 1 \frac{\tn{pN}}{\tn{nm}}$, $\sigma \approx 1.5
-% \frac{\tn{pN}}{\tn{nm}}$, $\lambda = 20 \tn{nm}$:
-% \begin{equation}
-%   \label{eq:bell-on}
-%   k_\tn{on}^\tn{Bell}(L) = 
-% \end{equation}
-% . In the current
-% version of our rolling model, we are using $k_\tn{on} = \onConst \exp
-% \left(-\frac{\stiffness}{2\boltzmann\temp} \length^2\right)$. 
+\subsection{On rate as a function of $L$}
+\label{sec:on-rate-fn}
 
+In Hammer \& Apte \cite{Hammer1992}, they use the Dembo models of
+binding and unbinding with parameter values $\sigma_\tn{ts} \approx
+1 \frac{\tn{pN}}{\tn{nm}}$, $\sigma \approx 1.5
+\frac{\tn{pN}}{\tn{nm}}$, $\lambda = 20 \tn{nm}$:
+\begin{equation}
+  \label{eq:bell-on}
+  k_\tn{on}^\tn{Bell}(L) = 
+\end{equation}
+In the current
+version of our rolling model, we are using $k_\tn{on} = \onConst \exp
+\left(-\frac{\stiffness}{2\boltzmann\temp} \length^2\right)$. 
+
+\section{A catalog of model parameters in other cell rolling models}
+\label{sec:catal-model-param}
+
+\subsection{Hammer \& Apte, 1992 \cite{Hammer1992}}
+\label{sec:hammer-apte}
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{ll} \hline
+    Parameter & Value \\ \hline
+    $\sigma$ & 1--2 dyn/cm \\
+    $\sigma_\tn{s}$ & 0--2 dyn/cm \\
+    $k_f^0$ & $10^{-10}$ cm$^2$/s $\implies$ 1--10$^4$ 1/s \\
+    $\lambda$ & 20 nm \\
+    $k_r^0$ & $10^{-5}--1$ 1/s \\
+    $\gamma$ & 100 1/s \\ \hline
+  \end{tabular}
+  \caption{Binding parameters for selectin--LECAM-1 binding}
+  \label{tab:hammer-apte-pars}
+\end{table}
+
+They use the Dembo model of binding and unbinding to get
+length-dependent on-rates.
+
+I wasn't able to find information on bond lifetimes or height of the
+cell.
+
+\subsection{Bhatia et. al., 2003 \cite{Bhatia2003}}
+\label{sec:bhatia}
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lll}
+    &&
+  \end{tabular}
+  \caption{Binding parameters for selectin--sLe\textsuperscript{x} and
+    integrin--ICAM-1}
+  \label{tab:bhatia-pars}
+\end{table}
 %% What about other rolling models? (Numbers of bonds)
 %% There are a few bonds present in the PAD multiscale model from Wang
 %% et. al.
