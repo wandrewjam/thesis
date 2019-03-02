@@ -287,12 +287,23 @@ def _count_bonds(bond_mesh, z_mesh, th_mesh, scheme):
         raise Exception('parameter \'scheme\' is invalid')
 
 
-def _get_avg_length(bond_mesh, z_mesh, th_mesh, scheme):
+def _get_avg_length(bond_mesh, z_mesh, th_mesh, d, scheme):
     """ Calculate the average length of a bond distribution """
 
-
-
-    return None
+    if scheme == 'up':
+        return (
+                np.trapz(np.trapz(length(z_mesh[:, None], th_mesh[None, :], d)
+                                 * bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
+                / _count_bonds(bond_mesh, z_mesh, th_mesh, scheme)
+        )
+    elif scheme == 'bw':
+        return (
+                simps(simps(length(z_mesh[:, None], th_mesh[None, :], d)
+                            * bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
+                / _count_bonds(bond_mesh, z_mesh, th_mesh, scheme)
+        )
+    else:
+        raise Exception('parameter \'scheme\' is invalid')
 
 
 def _eulerian_step(bond_mesh, v, om, h, nu, dt, form_rate, break_rate, sat,
@@ -375,6 +386,7 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
     if bond_mesh.ndim == 2:  # Equivalent to 'not save_bond_history'
         bond_counts = np.zeros(shape=t_mesh.shape)
         bond_counts[0] = _count_bonds(bond_mesh, z_mesh, th_mesh, scheme)
+        avg_lengths = np.zeros(shape=t_mesh.shape)
         for i in range(t_mesh.shape[0]-1):
             bond_mesh = _eulerian_step(bond_mesh, v[i], om[i], h, nu, dt,
                                        form_rate, break_rate, sat, scheme)
@@ -387,6 +399,8 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
 
             v[i+1] = v_f[i] + current_force/eta_v
             om[i+1] = om_f[i] + current_torque/eta_om
+            avg_lengths[i+1] = _get_avg_length(bond_mesh, z_mesh, th_mesh, d,
+                                             scheme)
     elif bond_mesh.ndim == 3:
         for i in range(t_mesh.shape[0]-1):
             bond_mesh[:, :, i+1] = _eulerian_step(bond_mesh[:, :, i], v[i],
@@ -403,7 +417,7 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
         bond_counts = _count_bonds(bond_mesh, z_mesh, th_mesh, scheme)
     else:
         raise Exception('bond_mesh has an invalid number of dimensions')
-    return bond_mesh, bond_counts, v, om
+    return bond_mesh, bond_counts, v, om, avg_lengths
 
 
 def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
@@ -417,6 +431,7 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
     if master_list.ndim == 2:  # Equivalent to 'not save_bond_history
         bond_counts = np.zeros(shape=0)
         bond_counts = np.append(arr=bond_counts, values=master_list.shape[0])
+        avg_lengths = np.zeros(shape=0)
         while t_mesh[-1] < T:
             bond_lengths = length(master_list[:, 0],
                                   th_mesh[master_list[:, 1].astype(int)], d=d)
@@ -446,6 +461,12 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             v = np.append(arr=v, values=v_f_interp(t_mesh[-1]) + force/eta_v)
             om = np.append(arr=om, values=om_f_interp(t_mesh[-1])
                                           + torque/eta_om)
+            try:
+                avg_lengths = np.append(arr=avg_lengths,
+                                        values=np.mean(bond_lengths))
+            except RuntimeWarning:
+                pass
+
     elif master_list.ndim == 1:
         while t_mesh[-1] < T:
             bond_list = np.copy(master_list[-1])
@@ -480,9 +501,10 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
 
         bond_counts = np.array([bond_list.shape[0]
                                 for bond_list in master_list])
+        avg_lengths = None
     else:
         raise Exception('master_list has an invalid number of dimensions')
-    return master_list, bond_counts*nu/bond_max, v, om, t_mesh
+    return master_list, bond_counts*nu/bond_max, v, om, t_mesh, avg_lengths
 
 
 def pde_eulerian(M, N, time_steps, init, scheme='bw', **kwargs):
@@ -518,12 +540,12 @@ def pde_eulerian(M, N, time_steps, init, scheme='bw', **kwargs):
     form_rate = on*kappa*np.exp(-eta/2*l_mesh**2)
     break_rate = off*np.exp(delta*l_mesh)
 
-    bond_mesh, bond_counts, v, om = _run_eulerian_model(
+    bond_mesh, bond_counts, v, om, avg_lengths = _run_eulerian_model(
         bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt, v_f, om_f, xi_v,
         xi_om, form_rate, break_rate, sat, d, scheme
     )
 
-    return bond_mesh, bond_counts, v, om, t_mesh
+    return bond_mesh, bond_counts, v, om, avg_lengths, t_mesh
 
 
 def rolling_ssa(M, N, time_steps, init, bond_max, correct_flux, **kwargs):
@@ -564,23 +586,23 @@ def rolling_ssa(M, N, time_steps, init, bond_max, correct_flux, **kwargs):
         return coeffs, a, b
 
     min_step = t_uniform[1] - t_uniform[0]
-    master_list, bond_counts, v_list, om_list, t_list = (
+    master_list, bond_counts, v_list, om_list, t_list, avg_lengths = (
         _run_stochastic_model(master_list, v_list, om_list, t_list, th_mesh, L,
                               T, nu, bond_max, d, v_f, om_f, xi_v, xi_om, eta,
                               delta, on, off, sat, correct_flux, min_step,
                               coeffs_and_bounds)
     )
 
-    return master_list, bond_counts, v_list, om_list, t_list
+    return master_list, bond_counts, v_list, om_list, t_list, avg_lengths
 
 
 def count_variable(M, N, t_sample, time_steps, init, bond_max, correct_flux,
                    k=None, trials=None, **kwargs):
         start = timer()
         np.random.seed()
-        bond_counts, v_list, om_list, t_list = (
+        master_list, bond_counts, v_list, om_list, t_list, avg_lengths = (
             rolling_ssa(M, N, time_steps, init, bond_max,
-                        correct_flux, **kwargs)[1:]
+                        correct_flux, **kwargs)
         )
         indices = np.searchsorted(t_list, t_sample, side='left')
         end = timer()
@@ -599,7 +621,8 @@ def count_variable(M, N, t_sample, time_steps, init, bond_max, correct_flux,
             print('Completed one variable run. This run took {:g} seconds.'
                   .format(end-start))
 
-        return bond_counts[indices], v_list[indices], om_list[indices], t_list
+        return (bond_counts[indices], v_list[indices], om_list[indices],
+                avg_lengths[indices[1:]-1], master_list, t_list)
 
 
 def stochastic_experiments(trials, M, N, time_steps, init, bond_max,
@@ -623,12 +646,15 @@ def stochastic_experiments(trials, M, N, time_steps, init, bond_max,
     bond_counts = [res[0] for res in result]
     v_list = [res[1] for res in result]
     om_list = [res[2] for res in result]
+    length_list = [res[3] for res in result]
+    master_list = [res[4] for res in result]
 
     count_array = np.vstack(bond_counts)
     v_array = np.vstack(v_list)
     om_array = np.vstack(om_list)
+    avg_lengths = np.vstack(length_list)
 
-    return count_array, v_array, om_array, t_sample
+    return count_array, v_array, om_array, avg_lengths, master_list, t_sample
 
 
 def generate_file_string(alg, M, N, time_steps, init, **kwargs):
@@ -667,7 +693,7 @@ def generate_file_string(alg, M, N, time_steps, init, **kwargs):
     else:
         raise ValueError('alg parameter is invalid')
 
-    return file_path + file_str
+    return file_path + 'expanded' + file_str
 
 
 def write_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
@@ -680,10 +706,13 @@ def write_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
         with open(file_path, 'r') as file:
             print('The file {:s} already exists!'.format(file_path))
     except IOError:
-        bond_counts, v, om, t_mesh = pde_eulerian(M, N, time_steps, init,
-                                                  scheme, **kwargs)[1:]
-        np.savez_compressed(file_path, bond_counts, v, om, t_mesh,
-                            bond_counts=bond_counts, v=v, om=om, t_mesh=t_mesh)
+        bond_mesh, bond_counts, v, om, avg_lengths, t_mesh = (
+            pde_eulerian(M, N, time_steps, init, scheme, **kwargs)
+        )
+        np.savez_compressed(file_path, bond_counts, v, om, avg_lengths,
+                            bond_mesh, t_mesh, bond_counts=bond_counts, v=v,
+                            om=om, avg_lengths=avg_lengths,
+                            bond_mesh=bond_mesh, t_mesh=t_mesh)
         print('Wrote output to {:s}'.format(file_path))
     return None
 
@@ -694,11 +723,14 @@ def load_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
 
     with open(file_path, 'r') as file:
         load_data = np.load(file)
-        bond_counts, v, om, t_mesh = (load_data['bond_counts'], load_data['v'],
-                                      load_data['om'], load_data['t_mesh'])
+        bond_counts, v, om, avg_lengths, bond_mesh, t_mesh = (
+            load_data['bond_counts'], load_data['v'], load_data['om'],
+            load_data['avg_lengths'], load_data['bond_mesh'],
+            load_data['t_mesh']
+        )
         print('Loaded file {:s}'.format(file_path))
 
-    return bond_counts, v, om, t_mesh
+    return bond_counts, v, om, avg_lengths, bond_mesh, t_mesh
 
 
 def write_stochastic_data(trials, M, N, time_steps, init, bond_max,
@@ -714,11 +746,15 @@ def write_stochastic_data(trials, M, N, time_steps, init, bond_max,
         with open(file_path, 'r') as file:
             print('The file {:s} already exists!'.format(file_path))
     except IOError:
-        count_array, v_array, om_array, t_sample = stochastic_experiments(
-            trials, M, N, time_steps, init, bond_max, correct_flux, **kwargs)
+        count_array, v_array, om_array, avg_lengths, master_list, t_sample = (
+            stochastic_experiments(trials, M, N, time_steps, init, bond_max,
+                                   correct_flux, **kwargs)
+        )
         np.savez_compressed(file_path, count_array, v_array, om_array,
-                            t_sample, count_array=count_array, v_array=v_array,
-                            om_array=om_array, t_sample=t_sample)
+                            avg_lengths, master_list, t_sample,
+                            count_array=count_array, v_array=v_array,
+                            om_array=om_array, avg_lengths=avg_lengths,
+                            master_list=master_list, t_sample=t_sample)
         print('Wrote output to {:s}'.format(file_path))
     return None
 
@@ -732,13 +768,14 @@ def load_stochastic_data(trials, M, N, time_steps, init, bond_max,
 
     with open(file_path, 'r') as file:
         load_data = np.load(file)
-        count_array, v_array, om_array, t_sample = (
+        count_array, v_array, om_array, avg_lengths, master_list, t_sample = (
             load_data['count_array'], load_data['v_array'],
-            load_data['om_array'], load_data['t_sample']
+            load_data['om_array'], load_data['avg_lengths'],
+            load_data['master_list'], load_data['t_sample']
         )
         print('Loaded file {:s}'.format(file_path))
 
-    return count_array, v_array, om_array, t_sample
+    return count_array, v_array, om_array, avg_lengths, master_list, t_sample
 
 
 def _extract_means(stochastic_result):
@@ -766,6 +803,9 @@ if __name__ == '__main__':
                              kappa=kappa)
     write_stochastic_data(trials, M, N, time_steps, init, bond_max,
                           correct_flux, T=T, kappa=kappa)
+
+    # count_variable(M, N, np.linspace(0, T, time_steps+1), time_steps, init,
+    #                bond_max, correct_flux, T=T, kappa=kappa)
 
     # for scheme in ['up', 'bw']:
     #     model_outputs.append(pde_eulerian(M, N, time_steps, m0, scheme=scheme,
