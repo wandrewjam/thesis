@@ -12,7 +12,10 @@ trigger immune responses in the bloodstream. However, current designs
 are not sufficiently blood-compatible and patients with a
 blood-contacting device must be placed on systemic anticoagulants to
 reduce the risks of thrombosis and embolism
-\cite{Ratner1993,Ratner2007,Oprea13}. It is important to first know
+\cite{Ratner1993,Ratner2007,Oprea13}. %There's probably another
+                                %transition sentence that needs to go
+                                %here.
+It is important to first know
 how the blood clotting system is ``supposed'' to work before
 understanding the problems that arise when an artificial device is
 implanted into the bloodstream.
@@ -50,7 +53,13 @@ agonist, and so mediates further activation of platelets throughout
 the blood. Thrombin is also the chemical which initiates the process
 of fibrin gelation, by cleaving fibrinogen to form fibrin
 monomers. Finally these fibrin monomers can polymerize to form a
-fibrin gel, which stabilizes the blood clot \cite{Fogelson2015}. 
+fibrin gel, which stabilizes the blood clot \cite{Fogelson2015}. These
+two processes do not occur in sequence, but in parallel with abundant
+cross-talk between them. Coagulation can upregulate activation through
+the production of thrombin, activation upregulates coagulation by
+exposing PS on platelet surfaces, and platelet adhesion can
+downregulate coagulation by blocking tissue factor and slowing the
+pathways required to form thrombin \cite{Kuharsky2001}. 
 
 
 \subsection{Platelet adhesion to an injury and aggregate formation}
@@ -93,7 +102,7 @@ release of intracellular calcium and activating
 phosphatidylinositide-3-kinase (PI3K) which are two crucial events in
 platelet activation \cite{Bye2016,Du2007,Senis2014}. These activation
 pathways ultimately terminate in a suite of responses that are
-collectively called "platelet activation," including granule
+collectively called ``platelet activation,'' including granule
 secretion, TxA2 synthesis, cytoskeletal rearrangements, and activation
 of integrins \ITA{IIb}\ITB{3} and \ITA{2}\ITB{1}. These integrins are
 receptors for fibrinogen/vWF and collagen, respectively. They are
@@ -106,7 +115,7 @@ high-affinity conformation after platelet activation
 In general, integrins form a large group of transmembrane receptors
 that are primarily involved in the adhesion of cells to extracellular
 matrix (ECM) \cite{Giancotti1999}. They have a large extracellular
-domain called the ectodomain with a hinge. In the low affinity
+domain---called the ectodomain---with a hinge. In the low affinity
 conformation, the ectodomain is bent at the hinge and the ligand
 binding domain is at least partially blocked. When switching from
 low-affinity to high-affinity conformations the integrin ectodomain
@@ -125,9 +134,9 @@ mediators of platelet activation TxA2 and ADP \cite{Bye2016}. These
 are soluble platelet agonists which enter the blood and activate
 platelets in the bulk flow, forming a positive feedback loop where
 activated platelets release chemical signals that trigger more
-platelets to activate. (Can I say something about a wave of activating
+platelets to activate. \emph{(Can I say something about a wave of activating
 chemical seen in previous coagulation models by Aaron and his
-students?) Platelets that are activated in the blood must
+students?)} Platelets that are activated in the blood must
 then be recruited to the growing clot by either adhering to collagen
 or vWF exposed on the wall, or by cohering to an existing platelet
 aggregate. 
@@ -161,10 +170,8 @@ platelets are strongly activated, they expose phosphatidylserine (PS)
 on the blood-facing side of their plasma membrane, to which
 coagulation factors can bind and catalyze activation of other
 membrane-bound proteins. These surface-mediated reactions are an
-important part ((this is a bit weasley and vague)) of the coagulation
+important part \emph{((this is a bit weasley and vague))} of the coagulation
 pathway \cite{Fogelson1998,Kuharsky2001}.
-
-A paragraph on fibrin gel formation...
 	
 % Once platelets are activated, they can bind firmly to the wall,
 % release soluble platelet agonists which causes a platelet aggregate to
@@ -237,13 +244,33 @@ In order to investigate nonlocal effects of priming, Dr. Hlady's group
 has designed a microfluidic assay with two regions printed with
 platelet agonists (see Figure whatever) \cite{Corum2012}. The upstream
 agonist region is called the priming region, and the downstream region
-with agonist is called the capture region. In previous research,
-Dr. Hlady's group has found that all 3 immobilized platelet agonists
-tested (vWF, collagen, and fibrinogen) in the upstream region
-increased adhesion of platelets in the capture region relative to a
-nonreactive control \cite{Eichinger2016}. Recent unpublished work has
-shown similar results when the upstream agonist printing is replaced
-by a stenotic region with higher wall shear rates (unpublished data).
+with agonist is called the capture region. In the priming region,
+platelets that are close to the agonist-printed surface of the flow
+chamber may have transient contacts with the agonist, initiating
+activation pathways within the platelet. Some platelets may firmly
+adhere in this priming region, but many will not and instead reenter
+the flow and get washed downstream to the capture region. Once they
+reach the capture region, the platelets which contacted the agonist in
+the priming region will have more active integrin on their surfaces
+\cite{Corum2012}, more phosphatidylserine exposed (unpublished data),
+and probably heightened levels of intracellular activating chemicals
+like Ca$^{++}$. That is, they will be ``primed'' to adhere with the
+capture region, and therefore adhere with a greater frequency than
+unprimed platelets.
+
+In previous research, Dr. Hlady's group has found that all 3
+immobilized platelet agonists tested (vWF, collagen, and fibrinogen)
+in the upstream region increased adhesion of platelets in the capture
+region relative to a nonreactive control
+\cite{Corum2012,Eichinger2016}. Recent unpublished work has shown
+similar results when the upstream agonist printing is replaced by a
+stenotic region with higher wall shear rates (unpublished data). In
+addition, flow cytometry has revealed that platelets in blood which
+has been perfused over surface-immobilized agonists express higher
+levels of P-selectin (a marker for degranulation), high-affinity
+\ITA{IIb}\ITB{3}, exposed PS, and lysosomal glycoprotein (another
+marker of degranulation) (\cite{Corum2012,Eichinger2016} and
+unpublished data).
 
 \section{Existing cell rolling models}
 \label{sec:exist-cell-roll}
@@ -253,6 +280,9 @@ and adhesion, including mathematical models of cell rolling
 \cite{Pospieszalska2009,Sundd2011}. However most of the modeling work
 has been done on leukocyte rolling on an agonist-coated surface, and
 relatively less work has been done on platelet rolling.
+
+\subsection{Adhesive dynamics (AD) models}
+\label{sec:adhesive-dynamics}
 
 Adhesive dynamics (AD) is a common modeling framework for leukocytes,
 and the first AD model was published in 1992 by Hammer \& Apte
@@ -294,20 +324,38 @@ $\forceVec$ on the cell and the velocity $\velVec$: $\forceVec =
 der Waals forces, gravitational body force, electrostatic force, and
 steric stabilization force.
 
+\subsubsection{Extensions of AD}
+\label{sec:extensions-ad}
+
 Many extensions and adaptations of the AD model have been made since
-its publication. In \cite{Bhatia2003}, they model leukocyte rolling
-with two classes of receptors: fast binding and unbinding selectins,
-and slow binding and unbinding integrins. \cite{King2001} uses the AD
-framework to model the dynamics and interactions of multiple cells
-rolling on a surface at once. 
+its publication. \cite{King2001} uses the AD framework to model the
+dynamics and interactions of multiple cells rolling on a surface at
+once. In \cite{Bhatia2003}, Bhatia, King, and Hammer model leukocyte
+rolling with two classes of receptors: fast binding and unbinding
+selectins (P-selectin--sLe\textsuperscript{x}), and slow binding and
+unbinding integrins (\ITB{2}-integrin--ICAM-1). They plot the effect
+of modulating the selectin and integrin ligand surface densities by
+creating state diagrams which characterize the cell rolling behavior
+in different regions of this 2D parameter space. They showed the
+effect of neutrophil activation on these state diagrams by increasing
+the $k_\tn{on, integrin}^0$ value.
 
 A platelet adhesive dynamics (PAD) model is developed in
 \cite{Mody2008a} and \cite{Mody2008b}, which is used to model the
 aggregation of non-spherical platelets in a shear flow through binding
 with vWF. The PAD model was later adapted to model the dynamics of
 platelet rolling on a vWF-coated wall, with collisions between rolling
-platelets and free-flowing platelets \cite{Wang2013}. Adhesive
-dynamics models are detailed and expensive, because they explicitly
-model individual receptors on the cell surface, and many of them
-require solving Stokes' equations at every time step.
+platelets and free-flowing platelets \cite{Wang2013}.
 
+Adhesive dynamics models are detailed and expensive, because they
+explicitly model individual receptors on the cell surface, and many of
+them require solving Stokes' equations at every time step.
+
+\subsection{Semi-analytic rolling models}
+\label{sec:semi-analytic}
+
+In contrast to the expensive AD models, semi-analytic models save on
+computational cost by tracking bond and receptor densities in the
+cell-substrate contact region instead of tracking every bond
+individually \cite{Pospieszalska2009}. An early example of this comes
+from T\"{o}zeren and Ley \cite{Tozeren1992}. 

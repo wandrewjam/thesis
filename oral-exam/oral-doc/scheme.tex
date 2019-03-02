@@ -44,109 +44,20 @@ In summary, for each timestep $k$, I do the following:
         \frac{\ndLength_{ij}}{2}\right) \left(1 - h \sum_{q = 0}^{N-1}
         \ndBondDensity_{qj}^k\right)\right) 
   \end{multline}
-\item Calculate $\ndHorzTotalForce_{k+1}$ and $\ndTotalTorque_{k+1}$ from the new bond
+\item Calculate $\ndHorzTotalForce^{k+1}$ and $\ndTotalTorque^{k+1}$ from the new bond
   distribution $\ndBondDensity^{k+1}$.
 \item Find the new angular and linear velocities:
   \begin{align}
     \label{eq:ang-timestep}
-    \ndRotation^{k+1} &= \ndAppliedRot + \ndTotalTorque_{k+1}/\ndRotFriction \\
+    \ndRotation^{k+1} &= \ndAppliedRot + \ndTotalTorque^{k+1}/\ndRotFriction \\
     \label{eq:vel-timestep}
-    \ndVelocity^{k+1} &= \ndAppliedVel + \ndHorzTotalForce_{k+1}/\ndVelFriction.
+    \ndVelocity^{k+1} &= \ndAppliedVel + \ndHorzTotalForce^{k+1}/\ndVelFriction.
   \end{align}
 \item Repeat
 \end{enumerate}
 
 \section{Stochastic Model}
 \label{sec:stochastic-model}
-
-For the stochastic model, assume that there are $\receptorDensity$ receptors per
-radian, and the receptors are uniformly distributed along the surface
-of the platelet. Assume there is an excess of ligand on the wall
-surface, so that bonds can form anywhere along the wall and there is
-no saturation of bonds in the $\wallDist$ dimension.
-
-A bond can form between a receptor located at $\recAngle$ and a point $\wallDist$
-on the wall at ``rate'' $\onRate(\wallDist, \recAngle)$. More precisely, the time
-$\tau$ that it takes a bond to form between $\wallDist$ and $\recAngle$ is
-exponentially distributed with mean $\onRate^{-1}$. Similarly, the time
-it takes a bond between $\recAngle$ and $\wallDist$ to break is exponentially
-distributed with mean $1/\offRate(\wallDist, \recAngle)$. Finally, a single bond
-between $\wallDist$ and $\recAngle$ generates horizontal force and torque which
-are given by $f_h$ and $\tau_s$ as defined in section
-\ref{sec:reaction-rate-equation}. As in the continuous model, assume
-that only bonds on the lower half-circle of the platelet can interact
-with the wall surface.
-
-One way to simulate this model would be to track each of the $2\pi
-\receptorDensity$ receptors on the surface of the platelet, whether they are bound
-or unbound. But this seems expensive to do, so I did something else. I
-partitioned the interval $[-\pi/2, \pi/2)$ into $N$ subintervals of
-equal length $I_j = \left[-\frac{\pi}{2} + \frac{\pi}{N}j,
-  -\frac{\pi}{2} + \frac{\pi}{N} (j+1)\right)$. Then there can be at
-most $b_\tn{max} \equiv \receptorDensity \pi/N$ bonds in any subinterval. I still
-keep track of the exact $\wallDist$ and $\recAngle$ positions the bond forms
-between, the subintervals are only used to limit the bond
-concentration at $\receptorDensity$ per radian. 
-
-To simulate random bond breaking, a random number is generated for
-each existing bond to test if it breaks within the time step $\Delta
-\dTime$. The probability that a bond between $\wallDist$ and $\recAngle$ in the time
-interval $[\dTime, \dTime + \Delta \dTime)$ is $\mathbb{P} = 1 - \exp(-\Delta \dTime
-\offRate(\wallDist, \recAngle))$.
-
-Next look at bond formation. The probability of a bond forming between
-points $\recAngle$ and $\wallDist$ can be split into two distinct probabilities:
-the probability that a bond forms from a receptor at position $\recAngle$
-to anywhere on the wall (denote this event as $A$, and the associated
-probability as $\mathbb{P}(A)$), and the probability that a bond forms
-to the point $\wallDist$ on the wall from any receptor (denote this event as
-$B$, and the probability $\mathbb{P}(B)$). The probability of the
-combined event $A \cap B$ is $\mathbb{P}(A \cap B) = dt
-\onRate(\wallDist, \recAngle)$. 
-
-% To simulate bond formation, first assume that at most 1 bond can
-% form in a single time step in each subinterval $I_j$. One can think of
-% bond formation 
-
-% Then for each
-% subinterval, calculate the probality of a bond forming within that
-% subinterval in the time interval $\Delta \dTime$. If a bond forms then an
-% $\wallDist$ is chosen at random.
-
-First, the probability that a bond forms within subinterval $I_j$ is
-given by the rate of bond formation multiplied by the number of
-available receptors in $I_j$. The rate that bonds form from $\recAngle$
-to \emph{any} point on the wall, integrate $\onRate$ with respect to
-$\wallDist$. In the case $\onRate(\wallDist, \recAngle) = k_\tn{on} \exp\left(-\frac{\stiffness
-    \length^2}{2\boltzmann \temp}\right)$, we have
-\begin{equation}
-  \label{eq:total_fm_rate}
-  \int_{-\infty}^{\infty} \onRate(\wallDist, \recAngle)\, dx = k_\tn{on} \exp
-  \left( -\frac{\stiffness}{2\boltzmann \temp} (\radius - \radius \cos\recAngle + \separation)^2 \right)
-  \sqrt{\frac{2 \pi \boltzmann \temp}{\stiffness}}.
-\end{equation}
-Therefore the probability that a bond forms somewhere in the interval
-$I_j$ to any point on the wall in a time interval of length $dt$ is
-given by 
-\begin{equation}
-  \label{eq:1}
-  \mathbb{P} = dt (b_\tn{max} - \bondDensity_j) \left[ k_\on \exp \left( -
-      \frac{\stiffness}{2 \boltzmann \temp} \left( \radius - \radius\cos\recAngle + \separation \right)^2 \right)
-    \sqrt{\frac{2\pi \boltzmann \temp}{\stiffness}} \right].
-\end{equation}
-
-Next, we need to find the probability that a bond forms between a
-point $\wallDist$ on the wall and $\recAngle$, given that a bond forms from
-$\recAngle$. From the definition 
-
-\begin{equation}
-  \label{eq:2}
-  \exp \left(-\frac{\stiffness}{2 \boltzmann \temp}
-    \left(\wallDist - \radius \sin{\recAngle} \right) \right)
-\end{equation}
-
-\subsection{Algorithm}
-\label{sec:algorithm}
 
 \begin{enumerate}
 \item Discretize the interval $[-\pi/2, \pi/2)$ into $N$ equal bins.
