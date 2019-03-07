@@ -9,12 +9,12 @@ def extract_stats(stat, *args):
 
 def quart1(arr, axis):
     """ Find the 1st quartile """
-    return np.quantile(a=arr, q=.25, axis=axis)
+    return np.percentile(a=arr, q=25, axis=axis)
 
 
 def quart3(arr, axis):
     """ Find the 3rd quartile """
-    return np.quantile(a=arr, q=.75, axis=axis)
+    return np.percentile(a=arr, q=75, axis=axis)
 
 
 def process_data(det_file, sto_file):
@@ -43,8 +43,8 @@ def process_data(det_file, sto_file):
     len_mean = np.nanmean(len_array, axis=0)
     len_std = np.nanstd(len_array, axis=0)
     len_med = np.nanmedian(len_array, axis=0)
-    len_1q = np.nanquantile(len_array, q=.25, axis=0)
-    len_3q = np.nanquantile(len_array, q=.75, axis=0)
+    len_1q = np.nanpercentile(len_array, q=25, axis=0)
+    len_3q = np.nanpercentile(len_array, q=75, axis=0)
 
     if count_array.shape[0] < 20:
         runs = np.arange(count_array.shape[0])
