@@ -29,6 +29,17 @@ if __name__ == '__main__':
         sto_data['len_sampled']
     )
 
+    (count_med, count_1q, count_3q, v_med, v_1q, v_3q, om_med, om_1q, om_3q,
+     force_med, force_1q, force_3q, torque_med, torque_1q, torque_3q, len_med,
+     len_1q, len_3q) = (
+        sto_data['count_med'], sto_data['count_1q'], sto_data['count_3q'],
+        sto_data['v_med'], sto_data['v_1q'], sto_data['v_3q'],
+        sto_data['om_med'], sto_data['om_1q'], sto_data['om_3q'],
+        sto_data['force_med'], sto_data['force_1q'], sto_data['force_3q'],
+        sto_data['torque_med'], sto_data['torque_1q'], sto_data['torque_3q'],
+        sto_data['len_med'], sto_data['len_1q'], sto_data['len_3q']
+    )
+
     fig, ax = plt.subplots(nrows=3, ncols=2, sharex='all', sharey='none',
                            figsize=(12, 8))
 
@@ -62,27 +73,60 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
 
-    fig1, ax1 = plt.subplots(nrows=3, ncols=3, sharex='all', sharey='row',
+    fig1, ax1 = plt.subplots(nrows=3, ncols=2, sharex='all', sharey='none',
+                           figsize=(12, 8))
+
+    ax1[0, 0].plot(t_mesh, v, 'r', t_sample, v_med, 'b')
+    ax1[0, 0].plot(t_sample, v_1q, 'b--', t_sample, v_3q, 'b--', linewidth=.5)
+    ax1[0, 0].set_ylabel('Translation velocity ($v$)')
+    ax1[1, 0].plot(t_mesh, om, 'r', t_sample, om_med, 'b')
+    ax1[1, 0].plot(t_sample, om_1q, 'b--', t_sample, om_3q, 'b--',
+                   linewidth=.5)
+    ax1[1, 0].set_ylabel('Rotation rate ($\\omega$)')
+    ax1[2, 0].plot(t_mesh, bond_counts, 'r', t_sample, count_med, 'b')
+    ax1[2, 0].plot(t_sample, count_1q, 'b--', t_sample, count_3q, 'b--',
+                   linewidth=.5)
+    ax1[2, 0].set_ylabel('Bond number')
+    ax1[2, 0].set_xlabel('Nondimensional time')
+
+    ax1[0, 1].plot(t_mesh, force, 'r', t_sample, force_med, 'b')
+    ax1[0, 1].plot(t_sample, force_1q, 'b--', t_sample, force_3q, 'b--',
+                   linewidth=.5)
+    ax1[0, 1].set_ylabel('Net horizontal force')
+
+    ax1[1, 1].plot(t_mesh, torque, 'r', t_sample, torque_med, 'b')
+    ax1[1, 1].plot(t_sample, torque_1q, 'b--', t_sample, torque_3q, 'b--',
+                   linewidth=.5)
+    ax1[1, 1].set_ylabel('Net torque')
+    ax1[2, 1].plot(t_mesh, avg_lengths, 'r', t_sample[1:], len_med, 'b')
+    ax1[2, 1].plot(t_sample[1:], len_1q, 'b--', t_sample[1:], len_3q, 'b--',
+                   linewidth=.5)
+    ax1[2, 1].set_xlabel('Nondimensional time')
+    ax1[2, 1].set_ylabel('Bond length')
+    plt.tight_layout()
+    plt.show()
+
+    fig2, ax2 = plt.subplots(nrows=3, ncols=3, sharex='all', sharey='row',
                              figsize=(12, 8))
 
     lw = 1
     runs = count_sampled.shape[0]
 
-    ax1[0, 0].plot(t_sample, np.transpose(v_sampled[:runs/3]), linewidth=lw)
-    ax1[0, 0].set_ylabel('Translation velocity ($v$)')
-    ax1[1, 0].plot(t_sample, np.transpose(om_sampled[:runs/3]), linewidth=lw)
-    ax1[1, 0].set_ylabel('Rotation velocity ($\\omega$)')
-    ax1[2, 0].plot(t_sample, np.transpose(count_sampled[:runs/3]), linewidth=lw)
-    ax1[2, 0].set_xlabel('Nondimensional time')
-    ax1[2, 0].set_ylabel('Bond number')
+    ax2[0, 0].plot(t_sample, np.transpose(v_sampled[:runs / 3]), linewidth=lw)
+    ax2[0, 0].set_ylabel('Translation velocity ($v$)')
+    ax2[1, 0].plot(t_sample, np.transpose(om_sampled[:runs / 3]), linewidth=lw)
+    ax2[1, 0].set_ylabel('Rotation velocity ($\\omega$)')
+    ax2[2, 0].plot(t_sample, np.transpose(count_sampled[:runs / 3]), linewidth=lw)
+    ax2[2, 0].set_xlabel('Nondimensional time')
+    ax2[2, 0].set_ylabel('Bond number')
 
-    ax1[0, 1].plot(t_sample, np.transpose(v_sampled[runs/3:2*runs/3]), linewidth=lw)
-    ax1[1, 1].plot(t_sample, np.transpose(om_sampled[runs/3:2*runs/3]), linewidth=lw)
-    ax1[2, 1].plot(t_sample, np.transpose(count_sampled[runs/3:2*runs/3]), linewidth=lw)
-    ax1[0, 2].plot(t_sample, np.transpose(v_sampled[2*runs/3:]), linewidth=lw)
-    ax1[1, 2].plot(t_sample, np.transpose(om_sampled[2*runs/3:]), linewidth=lw)
-    ax1[2, 2].plot(t_sample, np.transpose(count_sampled[2*runs/3:]), linewidth=lw)
-    ax1[2, 1].set_xlabel('Nondimensional time')
-    ax1[2, 2].set_xlabel('Nondimensional time')
+    ax2[0, 1].plot(t_sample, np.transpose(v_sampled[runs / 3:2 * runs / 3]), linewidth=lw)
+    ax2[1, 1].plot(t_sample, np.transpose(om_sampled[runs / 3:2 * runs / 3]), linewidth=lw)
+    ax2[2, 1].plot(t_sample, np.transpose(count_sampled[runs / 3:2 * runs / 3]), linewidth=lw)
+    ax2[0, 2].plot(t_sample, np.transpose(v_sampled[2 * runs / 3:]), linewidth=lw)
+    ax2[1, 2].plot(t_sample, np.transpose(om_sampled[2 * runs / 3:]), linewidth=lw)
+    ax2[2, 2].plot(t_sample, np.transpose(count_sampled[2 * runs / 3:]), linewidth=lw)
+    ax2[2, 1].set_xlabel('Nondimensional time')
+    ax2[2, 2].set_xlabel('Nondimensional time')
     plt.tight_layout()
     plt.show()
