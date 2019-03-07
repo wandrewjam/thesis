@@ -421,7 +421,7 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
 
 def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
                           bond_max, d, v_f, om_f, eta_v, eta_om, eta, delta,
-                          on, off, sat, correct_flux, max_step_length,
+                          on, off, sat, correct_flux, max_step,
                           coeffs_and_bounds):
     """ Runs the variable time-step stochastic algorithm """
 
@@ -443,9 +443,10 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             all_rates = _find_rates(binned_bonds, bond_lengths, on, off,
                                     bond_max, sat, expected_coeffs, delta)
 
-            assert max_step_length > 0
-            max_step = max_step_length / np.maximum(np.amax(v_f), np.abs(v[-1]))
-            assert max_step > 0
+            # assert max_step_length > 0
+            # max_step = max_step_length / np.maximum(np.amax(v_f),
+            #                                         np.abs(v[-1]))
+            # assert max_step > 0
             dt, j = _get_next_reaction(all_rates, max_step)
             master_list, th_mesh, t_mesh = (
                 _update_bond_positions(master_list, th_mesh, t_mesh, dt,
@@ -597,12 +598,13 @@ def rolling_ssa(M, N, time_steps, init, bond_max, correct_flux, **kwargs):
         b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
-    max_step_length = T/time_steps*10
+    # max_step_length = T/time_steps*10
+    max_step = t_uniform[1] - t_uniform[0]
     (master_list, bond_counts, v_list, om_list, force_list, torque_list,
      t_list, avg_lengths) = (_run_stochastic_model(
         master_list, v_list, om_list, t_list, th_mesh, L, T, nu, bond_max, d,
         v_f, om_f, xi_v, xi_om, eta, delta, on, off, sat, correct_flux,
-        max_step_length, coeffs_and_bounds
+        max_step, coeffs_and_bounds
         )
     )
 
@@ -881,8 +883,8 @@ def main():
 if __name__ == '__main__':
     M, N = 64, 64
     T = float(5)
-    time_steps = int(5120*T)
-    kappa = float(10)
+    time_steps = int(10240*T)
+    kappa = float(100)
     # m0 = np.zeros(shape=(2*M+1, N+1))
     init = 'free'
     # init = 'tbound'  # One bond between the platelet and surface
