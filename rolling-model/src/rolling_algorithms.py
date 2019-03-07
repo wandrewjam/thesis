@@ -23,7 +23,6 @@ from scipy.integrate import simps
 from scipy.special import erf
 from scipy.stats import truncnorm
 from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
 from default_values import *
 from utils import nd_force, nd_torque, length
 from timeit import default_timer as timer
@@ -206,7 +205,7 @@ def _find_rates(binned_bonds, bond_lengths, on, off, bond_max, sat, expected_coe
     return all_rates
 
 
-def _get_next_reaction(all_rates, min_step):
+def _get_next_reaction(all_rates, max_step):
     """ Finds the next reaction to occur in the stochastic simulation """
 
     sum_rates = np.cumsum(all_rates)
@@ -218,8 +217,8 @@ def _get_next_reaction(all_rates, min_step):
     except ZeroDivisionError:
         dt = np.inf
 
-    if dt > min_step:
-        return min_step, None
+    if dt > max_step:
+        return max_step, None
     else:
         j = np.searchsorted(a=sum_rates, v=r[1]*total_rate)
         return dt, j
@@ -293,7 +292,7 @@ def _get_avg_length(bond_mesh, z_mesh, th_mesh, d, scheme):
     if scheme == 'up':
         return (
                 np.trapz(np.trapz(length(z_mesh[:, None], th_mesh[None, :], d)
-                                 * bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
+                                  * bond_mesh, z_mesh, axis=0), th_mesh, axis=0)
                 / _count_bonds(bond_mesh, z_mesh, th_mesh, scheme)
         )
     elif scheme == 'bw':
@@ -400,7 +399,7 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
             v[i+1] = v_f[i] + current_force/eta_v
             om[i+1] = om_f[i] + current_torque/eta_om
             avg_lengths[i+1] = _get_avg_length(bond_mesh, z_mesh, th_mesh, d,
-                                             scheme)
+                                               scheme)
     elif bond_mesh.ndim == 3:
         for i in range(t_mesh.shape[0]-1):
             bond_mesh[:, :, i+1] = _eulerian_step(bond_mesh[:, :, i], v[i],
@@ -422,12 +421,13 @@ def _run_eulerian_model(bond_mesh, v, om, z_mesh, th_mesh, t_mesh, h, nu, dt,
 
 def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
                           bond_max, d, v_f, om_f, eta_v, eta_om, eta, delta,
-                          on, off, sat, correct_flux, min_step,
+                          on, off, sat, correct_flux, max_step_length,
                           coeffs_and_bounds):
     """ Runs the variable time-step stochastic algorithm """
 
     v_f_interp, om_f_interp = _interpolate_velocities(v_f, om_f, T)
 
+    force_arr, torque_arr = _get_forces(master_list, th_mesh, bond_max, nu, d)
     if master_list.ndim == 2:  # Equivalent to 'not save_bond_history
         bond_counts = np.zeros(shape=0)
         bond_counts = np.append(arr=bond_counts, values=master_list.shape[0])
@@ -443,7 +443,10 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             all_rates = _find_rates(binned_bonds, bond_lengths, on, off,
                                     bond_max, sat, expected_coeffs, delta)
 
-            dt, j = _get_next_reaction(all_rates, min_step)
+            assert max_step_length > 0
+            max_step = max_step_length / np.maximum(np.amax(v_f), np.abs(v[-1]))
+            assert max_step > 0
+            dt, j = _get_next_reaction(all_rates, max_step)
             master_list, th_mesh, t_mesh = (
                 _update_bond_positions(master_list, th_mesh, t_mesh, dt,
                                        v[-1], om[-1])
@@ -458,6 +461,9 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             bond_counts = np.append(arr=bond_counts,
                                     values=master_list.shape[0])
             force, torque = _get_forces(master_list, th_mesh, bond_max, nu, d)
+            force_arr = np.append(force_arr, force)
+            torque_arr = np.append(torque_arr, torque)
+
             v = np.append(arr=v, values=v_f_interp(t_mesh[-1]) + force/eta_v)
             om = np.append(arr=om, values=om_f_interp(t_mesh[-1])
                                           + torque/eta_om)
@@ -482,7 +488,9 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             all_rates = _find_rates(binned_bonds, bond_lengths, on, off,
                                     bond_max, sat, expected_coeffs)
 
-            dt, j = _get_next_reaction(all_rates, min_step)
+            assert v[-1] > 0
+            max_step = max_step_length / np.abs(v[-1])
+            dt, j = _get_next_reaction(all_rates, max_step)
             bond_list, th_mesh, t_mesh = (
                 _update_bond_positions(bond_list, th_mesh, t_mesh, dt)
             )
@@ -504,10 +512,11 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
         avg_lengths = None
     else:
         raise Exception('master_list has an invalid number of dimensions')
-    return master_list, bond_counts*nu/bond_max, v, om, t_mesh, avg_lengths
+    return (master_list, bond_counts, v, om, force_arr, torque_arr, t_mesh,
+            avg_lengths)
 
 
-def pde_eulerian(M, N, time_steps, init, scheme='bw', **kwargs):
+def pde_eulerian(M, N, time_steps, init, bond_max, scheme='bw', **kwargs):
     """ Solves the full eulerian PDE model """
 
     # Define the problem parameters
@@ -545,7 +554,10 @@ def pde_eulerian(M, N, time_steps, init, scheme='bw', **kwargs):
         xi_om, form_rate, break_rate, sat, d, scheme
     )
 
-    return bond_mesh, bond_counts, v, om, avg_lengths, t_mesh
+    force, torque = xi_v*(v - v_f), xi_om*(om - om_f)
+
+    return (bond_mesh, bond_counts*bond_max*N/np.pi, v, om, avg_lengths, force,
+            torque, t_mesh)
 
 
 def rolling_ssa(M, N, time_steps, init, bond_max, correct_flux, **kwargs):
@@ -585,25 +597,27 @@ def rolling_ssa(M, N, time_steps, init, bond_max, correct_flux, **kwargs):
         b = (L - np.sin(bins))/np.sqrt(1/eta)
         return coeffs, a, b
 
-    min_step = t_uniform[1] - t_uniform[0]
-    master_list, bond_counts, v_list, om_list, t_list, avg_lengths = (
-        _run_stochastic_model(master_list, v_list, om_list, t_list, th_mesh, L,
-                              T, nu, bond_max, d, v_f, om_f, xi_v, xi_om, eta,
-                              delta, on, off, sat, correct_flux, min_step,
-                              coeffs_and_bounds)
+    max_step_length = T/time_steps*10
+    (master_list, bond_counts, v_list, om_list, force_list, torque_list,
+     t_list, avg_lengths) = (_run_stochastic_model(
+        master_list, v_list, om_list, t_list, th_mesh, L, T, nu, bond_max, d,
+        v_f, om_f, xi_v, xi_om, eta, delta, on, off, sat, correct_flux,
+        max_step_length, coeffs_and_bounds
+        )
     )
 
-    return master_list, bond_counts, v_list, om_list, t_list, avg_lengths
+    return (master_list, bond_counts, v_list, om_list, force_list, torque_list,
+            t_list, avg_lengths)
 
 
 def count_variable(M, N, t_sample, time_steps, init, bond_max, correct_flux,
                    k=None, trials=None, **kwargs):
         start = timer()
         np.random.seed()
-        master_list, bond_counts, v_list, om_list, t_list, avg_lengths = (
-            rolling_ssa(M, N, time_steps, init, bond_max,
-                        correct_flux, **kwargs)
-        )
+        (master_list, bond_counts, v_list, om_list, force_list, torque_list,
+         t_list, avg_lengths) = rolling_ssa(M, N, time_steps, init, bond_max,
+                                            correct_flux, **kwargs)
+
         indices = np.searchsorted(t_list, t_sample, side='left')
         end = timer()
 
@@ -622,39 +636,55 @@ def count_variable(M, N, t_sample, time_steps, init, bond_max, correct_flux,
                   .format(end-start))
 
         return (bond_counts[indices], v_list[indices], om_list[indices],
+                force_list[indices], torque_list[indices],
                 avg_lengths[indices[1:]-1], master_list, t_list)
 
 
-def stochastic_experiments(trials, M, N, time_steps, init, bond_max,
+def stochastic_experiments(trials, proc, M, N, time_steps, init, bond_max,
                            correct_flux, **kwargs):
     """ Run many stochastic experiments at once """
+
+    assert type(proc) is int, 'proc must be a positive integer'
 
     T = set_parameters(**kwargs)[12]
     t_sample = np.linspace(0, T, time_steps+1)
 
-    pool = mp.Pool(processes=4)
-    result = [
-        pool.apply_async(count_variable,
-                         args=(M, N, t_sample, time_steps, init, bond_max,
-                               correct_flux, k, trials),
-                         kwds=kwargs)
-        for k in range(trials)
-    ]
+    if proc == 1:
+        result = [count_variable(M, N, t_sample, time_steps, init, bond_max,
+                                 correct_flux, k, trials)
+                  for k in range(trials)]
+    elif proc > 1:
+        pool = mp.Pool(processes=proc)
+        result = [
+            pool.apply_async(count_variable,
+                             args=(M, N, t_sample, time_steps, init, bond_max,
+                                   correct_flux, k, trials),
+                             kwds=kwargs)
+            for k in range(trials)
+        ]
 
-    result = [res.get() for res in result]
+        result = [res.get() for res in result]
+    else:
+        raise ValueError('proc must be a positive integer')
 
     bond_counts = [res[0] for res in result]
     v_list = [res[1] for res in result]
     om_list = [res[2] for res in result]
-    length_list = [res[3] for res in result]
-    master_list = [res[4] for res in result]
+    force_list = [res[3] for res in result]
+    torque_list = [res[4] for res in result]
+    length_list = [res[5] for res in result]
+    master_list = [res[6] for res in result]
+    t_list = [res[7] for res in result]
 
     count_array = np.vstack(bond_counts)
     v_array = np.vstack(v_list)
     om_array = np.vstack(om_list)
+    force_array = np.vstack(force_list)
+    torque_array = np.vstack(torque_list)
     avg_lengths = np.vstack(length_list)
 
-    return count_array, v_array, om_array, avg_lengths, master_list, t_sample
+    return (count_array, v_array, om_array, force_array, torque_array,
+            avg_lengths, master_list, t_sample, t_list)
 
 
 def generate_file_string(alg, M, N, time_steps, init, **kwargs):
@@ -696,44 +726,43 @@ def generate_file_string(alg, M, N, time_steps, init, **kwargs):
     return file_path + 'expanded' + file_str
 
 
-def write_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
+def write_deterministic_data(M, N, time_steps, init, bond_max, scheme,
+                             **kwargs):
     """ Run deterministic simulation and write results to a file """
 
     file_path = generate_file_string('det', M, N, time_steps, init,
-                                     scheme=scheme, **kwargs)
+                                     bond_max=bond_max, scheme=scheme,
+                                     **kwargs)
 
     try:
         with open(file_path, 'r') as file:
             print('The file {:s} already exists!'.format(file_path))
     except IOError:
-        bond_mesh, bond_counts, v, om, avg_lengths, t_mesh = (
-            pde_eulerian(M, N, time_steps, init, scheme, **kwargs)
+        bond_mesh, bond_counts, v, om, avg_lengths, force, torque, t_mesh = (
+            pde_eulerian(M, N, time_steps, init, bond_max, scheme, **kwargs)
         )
         np.savez_compressed(file_path, bond_counts, v, om, avg_lengths,
-                            bond_mesh, t_mesh, bond_counts=bond_counts, v=v,
-                            om=om, avg_lengths=avg_lengths,
-                            bond_mesh=bond_mesh, t_mesh=t_mesh)
+                            bond_mesh, force, torque, t_mesh,
+                            bond_counts=bond_counts, v=v, om=om,
+                            avg_lengths=avg_lengths, bond_mesh=bond_mesh,
+                            force=force, torque=torque, t_mesh=t_mesh)
         print('Wrote output to {:s}'.format(file_path))
     return None
 
 
-def load_deterministic_data(M, N, time_steps, init, scheme, **kwargs):
-    file_path = generate_file_string('det', M, N, time_steps, init,
-                                     scheme=scheme, **kwargs)
+def load_deterministic_data(f):
+    load_data = np.load(f)
+    bond_counts, v, om, avg_lengths, bond_mesh, force, torque, t_mesh = (
+        load_data['bond_counts'], load_data['v'], load_data['om'],
+        load_data['avg_lengths'], load_data['bond_mesh'], load_data['force'],
+        load_data['torque'], load_data['t_mesh']
+    )
+    print('Loaded file {:s}'.format(f))
 
-    with open(file_path, 'r') as file:
-        load_data = np.load(file)
-        bond_counts, v, om, avg_lengths, bond_mesh, t_mesh = (
-            load_data['bond_counts'], load_data['v'], load_data['om'],
-            load_data['avg_lengths'], load_data['bond_mesh'],
-            load_data['t_mesh']
-        )
-        print('Loaded file {:s}'.format(file_path))
-
-    return bond_counts, v, om, avg_lengths, bond_mesh, t_mesh
+    return bond_counts, v, om, avg_lengths, bond_mesh, force, torque, t_mesh
 
 
-def write_stochastic_data(trials, M, N, time_steps, init, bond_max,
+def write_stochastic_data(trials, proc, M, N, time_steps, init, bond_max,
                           correct_flux, **kwargs):
     """ Run stochastic simulations and write results to a file """
 
@@ -746,36 +775,34 @@ def write_stochastic_data(trials, M, N, time_steps, init, bond_max,
         with open(file_path, 'r') as file:
             print('The file {:s} already exists!'.format(file_path))
     except IOError:
-        count_array, v_array, om_array, avg_lengths, master_list, t_sample = (
-            stochastic_experiments(trials, M, N, time_steps, init, bond_max,
-                                   correct_flux, **kwargs)
+        (count_array, v_array, om_array, force_array, torque_array,
+         avg_lengths, master_list, t_sample) = (
+            stochastic_experiments(trials, proc, M, N, time_steps, init,
+                                   bond_max, correct_flux, **kwargs)[:-1]
         )
-        np.savez_compressed(file_path, count_array, v_array, om_array,
-                            avg_lengths, master_list, t_sample,
-                            count_array=count_array, v_array=v_array,
-                            om_array=om_array, avg_lengths=avg_lengths,
-                            master_list=master_list, t_sample=t_sample)
+        np.savez_compressed(
+            file_path, count_array, v_array, om_array, force_array,
+            torque_array, avg_lengths, master_list, t_sample,
+            count_array=count_array, v_array=v_array, om_array=om_array,
+            force_array=force_array, torque_array=torque_array,
+            avg_lengths=avg_lengths, master_list=master_list,
+            t_sample=t_sample)
         print('Wrote output to {:s}'.format(file_path))
-    return None
 
 
-def load_stochastic_data(trials, M, N, time_steps, init, bond_max,
-                         correct_flux, **kwargs):
-    file_path = generate_file_string(
-        'sto', M, N, time_steps, init, trials=trials, bond_max=bond_max,
-        correct_flux=correct_flux, **kwargs
+def load_stochastic_data(f):
+    load_data = np.load(f)
+    (count_array, v_array, om_array, force_array, torque_array, avg_lengths,
+     master_list, t_sample) = (
+        load_data['count_array'], load_data['v_array'], load_data['om_array'],
+        load_data['force_array'], load_data['torque_array'],
+        load_data['avg_lengths'], load_data['master_list'],
+        load_data['t_sample']
     )
+    print('Loaded file {:s}'.format(f))
 
-    with open(file_path, 'r') as file:
-        load_data = np.load(file)
-        count_array, v_array, om_array, avg_lengths, master_list, t_sample = (
-            load_data['count_array'], load_data['v_array'],
-            load_data['om_array'], load_data['avg_lengths'],
-            load_data['master_list'], load_data['t_sample']
-        )
-        print('Loaded file {:s}'.format(file_path))
-
-    return count_array, v_array, om_array, avg_lengths, master_list, t_sample
+    return (count_array, v_array, om_array, force_array, torque_array,
+            avg_lengths, master_list, t_sample)
 
 
 def _extract_means(stochastic_result):
@@ -786,22 +813,88 @@ def _extract_means(stochastic_result):
     return mean_results + (stochastic_result[-1], )
 
 
+def read_parameter_file(file_name):
+    """ Reads a file containing the parameters to run """
+    with open(file_name, 'r') as f:
+        while True:
+            command = f.readline().split()
+            if len(command) < 1:
+                continue
+
+            if command[0] == 'v_f':
+                gamma = float(command[1])
+            elif command[0] == 'kappa':
+                kappa = float(command[1])
+            elif command[0] == 'eta':
+                eta = float(command[1])
+            elif command[0] == 'd':
+                d = float(command[1])
+            elif command[0] == 'delta':
+                delta = float(command[1])
+            elif command[0] == 'on':
+                on = bool(command[1])
+            elif command[0] == 'off':
+                off = bool(command[1])
+            elif command[0] == 'sat':
+                sat = bool(command[1])
+            elif command[0] == 'xi_v':
+                xi_v = float(command[1])
+            elif command[0] == 'xi_om':
+                xi_om = float(command[1])
+            elif command[0] == 'L':
+                L = float(command[1])
+            elif command[0] == 'T':
+                T = float(command[1])
+            elif command[0] == 'bond_max':
+                bond_max = int(command[1])
+            elif command[0] == 'save_bond_history':
+                save_bond_history = bool(command[1])
+            elif command[0] == 'M':
+                M = int(command[1])
+            elif command[0] == 'N':
+                N = int(command[1])
+            elif command[0] == 'time_steps':
+                time_steps = int(command[1])
+            elif command[0] == 'init':
+                init = command[1]
+            elif command[0] == 'trials':
+                trials = int(command[1])
+            elif command[0] == 'proc':
+                proc = int(command[1])
+            elif command[0] == 'correct_flux':
+                correct_flux = bool(command[1])
+            elif command[0] == 'alg':
+                alg = command[1]
+            elif command[0] == 'file_name':
+                file_name = command[1]
+            elif command[0] == 'done':
+                break
+    return (gamma, kappa, eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
+            bond_max, save_bond_history, M, N, time_steps, init, trials, proc,
+            correct_flux, alg, file_name)
+
+
+def main():
+    """ Run the main function """
+
+
 if __name__ == '__main__':
-    M, N = 128, 128
-    T = 5
-    time_steps = 5120*T
-    kappa = 10.
+    M, N = 64, 64
+    T = float(5)
+    time_steps = int(5120*T)
+    kappa = float(10)
     # m0 = np.zeros(shape=(2*M+1, N+1))
     init = 'free'
     # init = 'tbound'  # One bond between the platelet and surface
     model_outputs = []
     bond_max = 10
     trials = 16
+    proc = 4
     correct_flux = False
 
-    write_deterministic_data(M, N, time_steps, init, scheme='bw', T=T,
-                             kappa=kappa)
-    write_stochastic_data(trials, M, N, time_steps, init, bond_max,
+    write_deterministic_data(M, N, time_steps, init, bond_max=bond_max,
+                             scheme='bw', T=T, kappa=kappa)
+    write_stochastic_data(trials, proc, M, N, time_steps, init, bond_max,
                           correct_flux, T=T, kappa=kappa)
 
     # count_variable(M, N, np.linspace(0, T, time_steps+1), time_steps, init,
