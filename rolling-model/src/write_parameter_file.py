@@ -1,3 +1,6 @@
+from default_values import set_parameters
+
+
 def write_parameter_file(file_name, alg, correct_flux, M, N, time_steps, init,
                          trials, proc, **kwargs):
     """ Writes a file containing the parameters to run """
