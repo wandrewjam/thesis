@@ -2,8 +2,24 @@
 
 \chapter{Mathematical Rolling Model}
 
+Because transient interactions with agonist-coated blood vessel
+surfaces and the resulting cell rolling is critical in the early
+activation of a platelet, we want a model that describes both the
+physics of fluid and bond forces and the chemistry of bond formation
+and breaking during this process. Rolling velocity is often measured
+and interpreted as a proxy for cell contact with a surface during
+rolling because it is relatively easy to observe, whereas directly
+experimentally measuring the number of bonds between a platelet and
+surface is not feasible. 
+
 \section{Problem Description}
 \label{sec:problem-description}
+
+Below I describe the set of assumptions that we use to model a
+platelet translocating along an agonist-coated surface. Important,
+experimentally variable, biological and physical parameters such as
+receptor and ligand density, receptor on/off rates, shear rate, and
+fluid viscosity appear in the model.
 
 \begin{figure}
   \centering
@@ -22,6 +38,9 @@
     \draw (-\Length, 0) -- (\Length, 0);
     \draw (pltcenter) circle [radius = 1];
     \draw[<->] (0, .05) -- node[right] {$\separation$} (0, \dist-.05);
+    \draw[<->] (-.15, .05) -- node[left] {$\height$} (-.15,
+    .95+\dist);
+    \draw[dashed] (0, 1+\dist) -- (-.3, 1+\dist);
 
     % Draws the lines showing the applied velocities
     \draw[->] (pltcenter) ++(1+\buff, 0) -- node[above] {$\velocity$}
@@ -34,7 +53,7 @@
     \foreach \y in {0.5, 1, 1.5, 2, 2.5}
     \draw[->] (-\Length, \y) -- (-\Length + \slope*\y, \y);
     \draw[gray, very thin] (-\Length, 0) -- node[midway, right, black]
-    {$V_\tn{fluid} = \shear h$} (-\Length + \slope*\Length, \Length);
+    {$V_\tn{fluid} = \shear y$} (-\Length + \slope*\Length, \Length);
 
     % Draws a bond between the platelet and wall
     \draw[decorate, decoration=zigzag] (pltcenter) ++(315:1)
@@ -85,19 +104,42 @@ the current model we've made a number of simplifying assumptions.
 \item The flow is a 2D Stokes flow, eliminating all forces and
   translational velocities along the dimension going into and out of
   the page. This also eliminates rotations and torques about the two
-  other dimensions.
+  other dimensions. Similarly the platelet geometry is a circle in
+  2D. We arrive at this assumption by assuming the platelet is a
+  sphere in 3D, but due to the length-dependence of bond formation and
+  breaking there is only a narrow reactive strip of width $\width$
+  along the bottom of the platelet in which bonds exist. We then
+  approximate this narrow reaction region with a finite cylinder of
+  height $\width$ and radius $\radius$. 
 \item The platelet remains at a constant separation distance from the
   wall, eliminating all vertical motion (and consequently we ignore
-  all vertical forces imposed by bonds between the platelet and wall).
+  all vertical forces imposed by bonds between the platelet and
+  wall). In published adhesive dynamics models, the nonspecific
+  repulsive forces between the platelet and vessel wall are only
+  significant at very short ranges, therefore it is plausible to say
+  that at the length scales relevant to the problem, the height of the
+  platelet from the surface does not change, and bond forces pulling
+  the platelet towards the wall are balanced by the nonspecific
+  repulsive forces.
 \item The hydrodynamic forces on the platelet are computed assuming
   the platelet is infinitely far from the wall. In particular the
   translational velocity of the platelet is assumed to be independent
-  of the torque, and vice versa.
+  of the torque, and vice versa. This assumption is hard to justify
+  physically, and there is a good case for removing this assumption
+  from the model in the future, however it does simplify the
+  relationship between bond forces and torques and the platelet
+  translation and angular velocities. 
 \end{enumerate}
-Therefore we end up with two decoupled linear equations relating the
-horizontal force ($\horzForce$) to the translational velocity
-($\velocity$) and relating the torque ($\torque$) to the rotational
-velocity ($\rotation$):
+With these assumptions in place, we end up with two decoupled linear
+equations relating the horizontal force ($\horzTotalForce$) to the
+translational velocity ($\velocity$) and relating the torque
+($\totalTorque$) to the rotational velocity ($\rotation$):
+\begin{align}
+  \label{eq:force-bal}
+  0 &= \velFriction(\appliedVel - \velocity) + \horzTotalForce \\
+  \label{eq:torque-bal}
+  0 &= \rotFriction(\appliedRot - \rotation) + \totalTorque
+\end{align}
 % Equations.
 % NOTE: I will need to expand on this more when I add equations to
 % the paper. I also forgot to discuss the applied fluid velocities.
@@ -240,12 +282,14 @@ $\rotation = \offConst \ndRotation$. The details of the
 nondimensionalization are included in Appendix \ref{app:nondim}, but
 the final nondimensional set of equations is
 \begin{align}
-  \label{eq:nd-bond-density}
+  \nonumber
   \Pder{\ndBondDensity}{\ndTime}
   &= \ndRotation \Pder{\ndBondDensity} {\recAngle} + \ndVelocity
     \Pder{\ndBondDensity}{\ndWallDist} + \ndOnConst \exp
     \left(-\frac{\onForceScale}{2} \ndLength^2(\ndWallDist, \recAngle)
-    \right) \left(1 - \NDReceptorSaturation\right) - \exp
+    \right) \left(1 - \NDReceptorSaturation\right) \\
+  \label{eq:nd-bond-density}
+  &\qquad - \exp
     \left(\offForceScale\ndLength(\ndWallDist, \recAngle)\right)
     \ndBondDensity(\ndWallDist, \recAngle, \ndTime), \\
   \label{eq:nd-force-balance}
@@ -280,20 +324,41 @@ parameters with their definitions are given in Table
 \section{Stochastic model}
 \label{sec:stochastic-model}
 
-For the stochastic model, assume that there are $\receptorDensity$ receptors per
-radian, and the receptors are uniformly distributed along the surface
-of the platelet. Assume there is an excess of ligand on the wall
-surface, so that bonds can form anywhere along the wall and there is
-no saturation of bonds in the $\wallDist$ dimension.
+An assumption that is implicit in the deterministic model is that cell
+rolling is mediated by a large number of bonds between the platelet
+and the surface, and therefore by the law of large numbers randomness
+of bond formation and breaking is inconsequential. This assumption is
+not supported by previous rolling models, nor is it supported by
+experimental observation. In \cite{Wang2013}, which models platelet
+rolling along vWF, at no point during their numerical experiment does
+the number of bonds between the platelet and surface exceed 9. Even in
+models of leukocyte rolling, where the drag force on the cell is
+several times greater than drag on a platelet, the number of bonds
+between the cell and the surface is approximately 20 at any given
+point in time.
+
+Therefore, there is good evidence that rolling is mediated by a small
+number of bonds that can halt a platelet, and the implicit assumption
+in the deterministic model that there are many bonds is not valid. In
+order to fully and accurately describe platelet rolling, we must model
+bond formation and breaking as a stochastic process, and consequently
+the rolling velocity of the platelet is a stochastic process.
+
+For the stochastic model---like the deterministic model---assume that
+there are $\receptorDensity$ receptors per radian, and the receptors
+are uniformly distributed along the surface of the platelet. Assume
+there is an excess of ligand on the wall surface, so that bonds can
+form anywhere along the wall and there is no saturation of bonds in
+the $\wallDist$ dimension.
 
 A bond can form between a receptor located at $\recAngle$ and a point
 $\wallDist$ on the wall at ``rate'' $\onRate(\wallDist,
-\recAngle)$. More precisely, the time $\tau$ that it takes a bond to
-form between $\wallDist$ and $\recAngle$ is exponentially distributed
-with mean $\onRate\inv(\wallDist, \recAngle)$. Similarly, the time it
-takes a bond between $\recAngle$ and $\wallDist$ to break is
-exponentially distributed with mean
-$\offRate\inv(\wallDist, \recAngle)$. Finally, a single bond between
+\recAngle)$. More precisely, the time $t_\tn{form}$ that it takes a
+bond to form between $\wallDist$ and $\recAngle$ is exponentially
+distributed with mean $1/\onRate(\wallDist, \recAngle)$. Similarly,
+the time it takes a bond between $\recAngle$ and $\wallDist$ to break
+is exponentially distributed with mean
+$1/\offRate(\wallDist, \recAngle)$. Finally, a single bond between
 $\wallDist$ and $\recAngle$ generates horizontal force and torque
 which are given by $f_h$ and $\tau_s$ as defined in equations
 (\ref{eq:horz-force}) and (\ref{eq:torque}). As in the continuous
@@ -302,18 +367,21 @@ can interact with the wall surface.
 
 One way to simulate this model would be to track each of the
 $2\pi \receptorDensity$ receptors on the surface of the platelet,
-whether they are bound or unbound. But this seems expensive to do, so
-I do something else. At the beginning of a simulation, I partition the
-interval $[-\pi/2, \pi/2)$ into $N$ subintervals of equal length
-$I_j(0) = \left[-\frac{\pi}{2} + \frac{\pi}{N}j, -\frac{\pi}{2} +
-  \frac{\pi}{N} (j+1)\right)$. Within each subinterval $I_j$, there
-are $b_\tn{max} \equiv \receptorDensity \pi/N$ total receptors, which
-are all assumed to be located at the midpoint $\binMidpoint$ of the
-interval: $\binMidpoint(0) \equiv -\frac{\pi}{2} + \frac{\pi}{N}
-\left( j + \frac{1}{2} \right)$. As the simulation evolves, the
-intervals $I_j$ (and their midpoints $\binMidpoint$) track with the
-surface of the platelet as it rotates; that is, they form a Lagrangian
-partition of the platelet surface (see Figure \ref{fig:plt-bins}).
+whether they are bound or unbound. But this is expensive to do, so I
+do something else. At the beginning of a simulation, I partition the
+entire platelet surface $\theta \in [-\pi, \pi)$ into $2N$
+subintervals of equal length
+$I_j(0) = \left[-\frac{\pi} + \frac{\pi}{N}j, -\frac{\pi} +
+  \frac{\pi}{N} (j+1)\right)$. Each subinterval has width
+$\nu \equiv \pi/N$. Within each subinterval $I_j$, there are
+$b_\tn{max} \equiv \receptorDensity \pi/N$ total receptors, which are
+all assumed to be located at the midpoint $\binMidpoint{j}$ of the
+interval:
+$\binMidpoint{j}(0) \equiv -\frac{\pi}{2} + \frac{\pi}{N} \left( j +
+  \frac{1}{2} \right)$. As the simulation evolves, the intervals $I_j$
+(and their midpoints $\binMidpoint{j}$) track with the surface of the
+platelet as it rotates; that is, they form a Lagrangian partition of
+the platelet surface (see Figure \ref{fig:plt-bins}).
 
 \begin{figure}
   \centering
@@ -328,7 +396,7 @@ partition of the platelet surface (see Figure \ref{fig:plt-bins}).
     \foreach \th in {236.25,258.75,303.75}
     \filldraw (\th:1) circle [radius=.015];
     
-    \filldraw[midpoints] (281.25:1) node [above left] {$\binMidpoint$}
+    \filldraw[midpoints] (281.25:1) node [above left] {$\binMidpoint{j}$}
     circle [radius=.015];
 
     \draw [<->, intervals] (271:1.04) arc [start angle=271, end
@@ -344,14 +412,14 @@ partition of the platelet surface (see Figure \ref{fig:plt-bins}).
 To simulate random bond breaking, a random number is generated for
 each existing bond to test if it breaks within the time step
 $\Delta \dTime$. The probability that a bond between $\wallDist$ and
-$\binMidpoint$ in the time interval $[\dTime, \dTime + \Delta \dTime)$
+$\binMidpoint{j}$ in the time interval $[\dTime, \dTime + \Delta \dTime)$
 is $\mathbb{P} = 1 - \exp(-\Delta \dTime \offRate(\wallDist,
-\binMidpoint))$.
+\binMidpoint{j}))$.
 
 Next look at bond formation. The probability of a bond forming between
-points $\binMidpoint$ and $\wallDist$ can be split into two distinct
+points $\binMidpoint{j}$ and $\wallDist$ can be split into two distinct
 probabilities: the probability that a bond forms from a receptor at
-position $\binMidpoint$ to anywhere on the wall (denote this event as
+position $\binMidpoint{j}$ to anywhere on the wall (denote this event as
 $A$, and the associated probability as $\mathbb{P}(A)$), and the
 probability that a bond forms to the point $\wallDist$ on the wall
 from any receptor (denote this event as $B$, and the probability
@@ -359,7 +427,7 @@ $\mathbb{P}(B)$). The probability of the combined event $A \cap B$ is
 \begin{equation}
   \label{eq:joint-prob}
   \mathbb{P}(A \cap B) = \Delta t (b_\tn{max} - n_j)
-  \onRate(\wallDist, \binMidpoint).
+  \onRate(\wallDist, \binMidpoint{j}).
 \end{equation}
 
 
@@ -375,15 +443,15 @@ $\mathbb{P}(B)$). The probability of the combined event $A \cap B$ is
 First, the probability that a bond forms within subinterval $I_j$ is
 given by the rate of bond formation multiplied by the number of
 available receptors in $I_j$. The rate that bonds form from
-$\binMidpoint$ to \emph{any} point on the wall, integrate $\onRate$
+$\binMidpoint{j}$ to \emph{any} point on the wall, integrate $\onRate$
 with respect to $\wallDist$. In the case $\onRate(\wallDist,
-\binMidpoint) = k_\tn{on} \exp\left(-\frac{\stiffness
+\binMidpoint{j}) = k_\tn{on} \exp\left(-\frac{\stiffness
     \length^2}{2\boltzmann \temp}\right)$, we have
 \begin{equation}
   \label{eq:total_fm_rate}
-  \int_{-\infty}^{\infty} \onRate(\wallDist, \binMidpoint)\, dx = k_\tn{on} \exp
+  \int_{-\infty}^{\infty} \onRate(\wallDist, \binMidpoint{j})\, dx = k_\tn{on} \exp
   \left( -\frac{\stiffness}{2\boltzmann \temp} (\radius - \radius
-    \cos\binMidpoint + \separation)^2 \right) \sqrt{\frac{2 \pi
+    \cos\binMidpoint{j} + \separation)^2 \right) \sqrt{\frac{2 \pi
       \boltzmann \temp}{\stiffness}}.
 \end{equation}
 Therefore the probability that a bond forms somewhere in the interval
@@ -393,13 +461,13 @@ is given by
   \label{eq:form-prob}
   \mathbb{P}(A) = \Delta t (b_\tn{max} - \bondDensity_j) \left[ \onConst
     \exp \left( - \frac{\stiffness}{2 \boltzmann \temp} \left( \radius
-        - \radius\cos\binMidpoint + \separation \right)^2 \right)
+        - \radius\cos\binMidpoint{j} + \separation \right)^2 \right)
     \sqrt{\frac{2\pi \boltzmann \temp}{\stiffness}} \right].
 \end{equation}
 
 Next, we need to find the probability that a bond forms between a
-point $\wallDist$ on the wall and $\binMidpoint$, given that a bond forms from
-$\binMidpoint$. From the definition of conditional probability,
+point $\wallDist$ on the wall and $\binMidpoint{j}$, given that a bond forms from
+$\binMidpoint{j}$. From the definition of conditional probability,
 \begin{align}
   \mathbb{P} \left( B \mid A \right) 
   &= \frac{\mathbb{P}(A \cap B)}
@@ -407,12 +475,56 @@ $\binMidpoint$. From the definition of conditional probability,
   \label{eq:wall-distr}
   &= \sqrt{\frac{\stiffness}{2\pi \boltzmann\temp}} \exp
     \left(-\frac{\stiffness}{2 \boltzmann \temp} \left(\wallDist -
-    \radius \sin{\binMidpoint} \right) \right).
+    \radius \sin{\binMidpoint{j}} \right) \right).
 \end{align}
 That is if a bond is forming from a receptor at the point
-$\binMidpoint$ on platelet, the probability distribution of its wall
+$\binMidpoint{j}$ on platelet, the probability distribution of its wall
 attachment point $\wallDist$ is a normal distribution with mean
-$\sin\binMidpoint$ and variance $\boltzmann\temp/\stiffness$:
-$\wallDist \sim \mathcal{N} \left(\mu=\sin\binMidpoint,
+$\sin\binMidpoint{j}$ and variance $\boltzmann\temp/\stiffness$:
+$\wallDist \sim \mathcal{N} \left(\mu=\sin\binMidpoint{j},
   \sigma^2 = \boltzmann\temp/\stiffness \right)$.
 
+Just like the deterministic algorithm, the stochastic algorithm tracks
+3 time-varying unknowns: bonds between the platelet and wall,
+translational velocity, and angular velocity. However now the bonds
+between the platelet and surface are tracked discretely, and the bond
+quantity between points $x$ and $\theta$ is now a stochastic
+process. Both velocities are also stochastic processes as well,
+because of their dependence on the bonds between the platelet and
+wall.
+
+A full description of the stochastic algorithm is given in Appendix
+\ref{cha:numerical-schemes}, but I will summarize the key features
+below.
+\begin{enumerate}
+\item Platelet-wall bonds are tracked in an array which stores the two
+  endpoints of each bond. Each row represents a single bond; the first
+  column stores the $x$ coordinate of the bond (the wall attachment
+  point), and the second column stores $j$ (the $\theta$-bin from which
+  the bond formed.
+  \begin{equation}
+    \label{eq:bond-list}
+    \verb|bond_list| =
+    \begin{bmatrix}
+      x_0(t) & j_0 \\
+      x_1(t) & j_1 \\
+      \vdots & \vdots \\
+      x_{\texttt{nbonds}-1}(t) & j_{\texttt{nbonds} - 1}
+    \end{bmatrix}    
+  \end{equation}
+  where $j_i = 0, \hdots, 2N-1$ and $\Der{x_i}{t} = -V(t)$ for $i = 0,
+  \hdots, \texttt{nbonds} - 1$.
+
+  As time evolves, \verb|bond_list| is updated in two ways: (1) the
+  $x$-coordinate changes as the platelet moves, and (2) rows are added
+  to or removed from \verb|bond_list| as bonds form or break.
+
+\item For each time step, we carry out the following steps:
+  \begin{enumerate}
+  \item Update $x_i(t)$ and $\binMidpoint{j}(t)$.
+  \item Compute the rate of bond formation $\onRate(\binMidpoint{j})
+    b_j^\tn{avail}$ for $j = 0, \hdots, 2N-1$ and the rate of bond
+    breaking $\offRate(x_i, \binMidpoint{j_i})$ for $i = 0, \hdots,
+    \texttt{nbonds} - 1$.
+  \end{enumerate}
+\end{enumerate}

@@ -7,9 +7,12 @@ There are 13 dimensional parameters in the dimensional version of the
 PDE model, listed in Table \ref{tab:dim_pars}.
 
 \begin{table}[h]
+  \renewcommand{\arraystretch}{1.5}
   \centering
-  \begin{tabu}{c|X|X|X}
-    Symbol & Description & Estimate & Source \\ \hline
+  \begin{tabu}{cXXX}
+    \toprule
+    Symbol & Description & Estimate & Source \\
+    \midrule
     $\radius$ & Platelet radius & 1 {\textmugreek}m & None \\
     $\separation$ & Wall separation distance & 0.1 {\textmugreek}m
                                     & None \\
@@ -35,10 +38,9 @@ PDE model, listed in Table \ref{tab:dim_pars}.
                          \cite{Goldman1967b} \\
     $\velFriction$ & Translational drag coefficient
                          & $6 \times 10^{-5}$ g/s & Estimated below \\
-    $\rotFriction$ & Rotational drag coefficient
-                         & $8 \times 10^{-5}$
-                           {\textmugreek}m\textsuperscript{2}g/s
-                                    & Estimated below \\
+    $\rotFriction$ & Rotational drag coefficient & $8 \times 10^{-5}$
+    {\textmugreek}m\textsuperscript{2}g/s & Estimated below \\
+    \bottomrule
   \end{tabu}
   \caption{Dimensional parameters in the PDE model}
   \label{tab:dim_pars}
@@ -150,11 +152,14 @@ There are 8 parameters in the nondimensional PDE rolling model, listed
 in Table \ref{tab:nd-params}.
 
 \begin{table}
+  \renewcommand{\arraystretch}{1.5}
   \centering
-  \begin{tabular}{c|c|l|l}
-    Parameter & Definition & Value & Description \\ \hline
+  \begin{tabular}{ccll}
+    \toprule
+    Parameter & Definition & Value & Description \\
+    \midrule
     $\ndSeparation$ & $\separation = \radius\ndSeparation$ & 0.1
-                                   & cell-surface separation \\
+                                   & Cell-surface separation \\
     $\ndAppliedRot$ & $\appliedRot = \ndAppliedRot\offConst$
                            & $0.2\gamma$ & Fluid-imposed rotation rate
     \\
@@ -178,7 +183,8 @@ in Table \ref{tab:nd-params}.
                      \frac{\offConst}{\stiffness\receptorDensity
                                       \radius^2}\rotFriction$
                            & $5 \times 10^{-12}$--$5 \times 10^{-10}$
-                                   & Rotational drag coefficient
+                                   & Rotational drag coefficient \\
+    \bottomrule                                 
   \end{tabular}
   \caption{Nondimensional parameters}
   \label{tab:nd-params}

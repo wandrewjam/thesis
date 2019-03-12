@@ -184,10 +184,12 @@ simultaneously solving equations \eqref{eq:nd-density},
 % given in Table \ref{tab:nd-vars}. 
 
 \begin{table}
+  \renewcommand{\arraystretch}{1.5}
   \centering
-  \begin{tabular}{c|c|l}
+  \begin{tabular}{ccl}
+    \toprule
     ND Parameter & Parameter Definition & Description \\
-    \hline
+    \midrule
     $\ndWallDist$ & $\wallDist = \radius\ndWallDist$ & ND distance
                                                        coordinate \\
     $\ndTime$ & $\offConst \dTime = \ndTime$ & ND time \\ 
@@ -232,6 +234,7 @@ simultaneously solving equations \eqref{eq:nd-density},
                 \tau_s'$ & ND torque \\
     $\ndHorzTotalForce$ & $\horzForce = \stiffness \receptorDensity
                           \radius \ndHorzTotalForce$ & ND force \\
+    \bottomrule
   \end{tabular}
   \caption{Nondimensional variables and parameters}
   \label{tab:nd-vars}
