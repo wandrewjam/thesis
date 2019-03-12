@@ -36,6 +36,6 @@ def write_parameter_file(file_name, alg, correct_flux, M, N, time_steps, init,
 
 
 if __name__ == '__main__':
-    import sys
-    file_name = sys.argv[1]
-    write_parameter_file(file_name)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--alg', )
