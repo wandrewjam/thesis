@@ -4,8 +4,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from timeit import default_timer as timer
 
 
-def steady_state_sweep(L=2.5, M=100, N=100, d_prime=.1, eta=.1, delta=3, kap=1, eta_v=.01, eta_om=.01,
-                       om_max=200, om_number=21, v_max=200, v_number=21, saturation=True, plot=True):
+def steady_state_sweep(L=2.5, M=100, N=100, d_prime=.1, eta=.1, delta=3, kap=1,
+                       eta_v=.01, eta_om=.01, om_max=200, om_number=21,
+                       v_max=200, v_number=21, saturation=True, plot=True):
     start = timer()
     z_mesh, th_mesh = np.meshgrid(np.linspace(-L, L, 2*M+1),
                                   np.linspace(-np.pi/2, np.pi/2, N+1),
@@ -16,7 +17,8 @@ def steady_state_sweep(L=2.5, M=100, N=100, d_prime=.1, eta=.1, delta=3, kap=1, 
     nu = th_mesh[0, 1] - th_mesh[0, 0]
     lam = nu/h
 
-    A, B, C, D, R = construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime, saturation)
+    A, B, C, D, R = construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap,
+                                     d_prime, saturation)
 
     if d_prime > 0:
         omegas = np.linspace(0, om_max, om_number)
@@ -78,14 +80,16 @@ def steady_state_sweep(L=2.5, M=100, N=100, d_prime=.1, eta=.1, delta=3, kap=1, 
         torques = np.zeros(shape=om_number)
 
         for i in range(om_number):
-            torques[i] = find_torque_roll(A, B, C, D, R, omegas[i], omegas[i],
-                                          lam, nu, h, kap, M, z_mesh, th_mesh)[0]
+            torques[i] = find_torque_roll(
+                A, B, C, D, R, omegas[i], omegas[i], lam, nu, h, kap, M,
+                z_mesh, th_mesh)[0]
             print('Completed {:d} of {:d} loops'.format(i+1, om_number))
 
         om_f = omegas - torques/eta_om
         end = timer()
 
-        print('This sweep took {:g} seconds total, and {:g} seconds for each solve'.format(end-start, (end-start)/om_number))
+        print('This sweep took {:g} seconds total, and {:g} seconds for each '
+              'solve'.format(end-start, (end-start)/om_number))
         if plot:
             fig, ax = plt.subplots(nrows=1, ncols=2)
 
