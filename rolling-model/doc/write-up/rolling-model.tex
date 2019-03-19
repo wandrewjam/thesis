@@ -25,7 +25,10 @@
 \newcommand{\Int}[4]{\int_{#3}^{#4} #1 \, \dd #2}
 \newcommand{\tn}{\textnormal}
 \newcommand{\on}{\textnormal{on}}
+\DeclareMathOperator{\erf}{erf}
 \renewcommand{\arraystretch}{1.5}
+
+\input{/Users/andrewwork/thesis/model-defs}
 
 \graphicspath{{/Users/andrewwork/thesis/rolling-model/plots/}}
 %\topmargin -.5in 
@@ -774,14 +777,32 @@ algorithm has the same behavior. Should I be concerned about this? The
 stochastic simulation algorithms should ideally converge to the
 deterministic model in some limit. 
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\textwidth]{{comp_N100_bmax10_eta0.01}.png}
-  \caption{Comparison of deterministic results with stochastic results
-    for $\kappa = 1, \eta = 0.1, \delta=3, \eta_\omega = \eta_v =
-    0.01, \gamma=20$. For the stochastic simulations, $b_\tn{max} =
-    10, N = 100$. Solid lines show averages and dashed lines show
-    average $\pm$ standard deviation over 100 runs.}
-  \label{fig:comp_N100_bmax10_eta0.01}
-\end{figure}
+\section{Useful Identities}
+\label{sec:useful-identities}
+
+This section aggregates some useful identities, so that I don't have
+to rederive them, or spend time sifting through notes or code to find
+them.
+
+\begin{equation}
+  \label{eq:total-fm-rate}
+  \Int{\exp\left[-\frac{\onForceScale}{2} \length^2(\ndWallDist,
+      \recAngle) \right]} {\ndWallDist} {-\domLength} {\domLength} =
+  \sqrt{\frac{\pi}{2\onForceScale}} \exp\left[-\frac{\onForceScale}{2}
+    \left(1 - \cos\recAngle + \ndSeparation\right)^2 \right] \left(
+    \erf\left[\sqrt{\frac{\onForceScale}{2}} (\domLength +
+        \sin\recAngle)\right] +
+      \erf\left[\sqrt{\frac{\onForceScale}{2}} (\domLength -
+        \sin\recAngle)\right] \right)
+\end{equation}
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=\textwidth]{{comp_N100_bmax10_eta0.01}.png}
+%   \caption{Comparison of deterministic results with stochastic results
+%     for $\kappa = 1, \eta = 0.1, \delta=3, \eta_\omega = \eta_v =
+%     0.01, \gamma=20$. For the stochastic simulations, $b_\tn{max} =
+%     10, N = 100$. Solid lines show averages and dashed lines show
+%     average $\pm$ standard deviation over 100 runs.}
+%   \label{fig:comp_N100_bmax10_eta0.01}
+% \end{figure}
 \end{document}
