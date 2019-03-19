@@ -1,0 +1,29 @@
+\begin{tikzpicture}[
+  node text/.style={
+    align=center,
+    draw, very thick,
+    fill=white,
+    rounded corners,
+    inner xsep=10pt,
+    minimum height=13mm,
+  },
+  connect/.style={shorten <=5pt, shorten >=5pt, thick},
+  background/.style={rounded corners, inner ysep=10pt, draw, dashed,
+    thick},
+  ]
+  
+  \node[node text] (roll) {Rolling and \\ Activation};
+  \node[node text] (aggr) [right=of roll] {Aggregation}
+  edge [<-, connect] (roll);
+  \node[node text] (thrb) [right=of aggr] {Thrombin \\ Formation}
+  edge [<-, connect] (aggr);
+  \node[node text] (fibr) [right=of thrb] {Fibrin \\ Gelation}
+  edge [<-, connect] (thrb);
+
+  \begin{scope}[on background layer]
+    \node [fill=blue!50, fit=(roll) (aggr), background,
+    label=above:Activation and Aggregation] {};
+    \node [fill=red!50, fit=(thrb) (fibr), background,
+    label=above:Coagulation] {};
+  \end{scope}
+\end{tikzpicture}

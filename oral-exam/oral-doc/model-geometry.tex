@@ -1,0 +1,46 @@
+\begin{tikzpicture}[scale=3]
+  \newcommand{\dist}{0.5}
+  \newcommand{\Length}{2.5}
+  \newcommand{\slope}{0.5}
+  \newcommand{\buff}{0.1}
+
+  % Define a coordinate for the center of the platelet, and draw a
+  % node there
+  \coordinate (pltcenter) at (0, 1 + \dist);
+  \node [circle, inner sep=1.5pt, fill=black] at (pltcenter) {};
+
+  % Draws the wall and the platelet
+  \draw (-\Length, 0) -- (\Length, 0);
+  \draw (pltcenter) circle [radius = 1];
+  \draw[<->] (0, .05) -- node[right] {$\separation$} (0, \dist-.05);
+  \draw[<->] (-.15, .05) -- node[left] {$\height$} (-.15,
+  .95+\dist);
+  \draw[dashed] (0, 1+\dist) -- (-.3, 1+\dist);
+
+  % Draws the lines showing the applied velocities
+  \draw[->] (pltcenter) ++(1+\buff, 0) -- node[above] {$\velocity$}
+  (\Length-\buff, 1+\dist);
+
+  \draw[->] (0, 1+\dist) ++(135:1+\buff) arc [start angle=135, end
+  angle=45, radius=1+\buff] node[midway, above] {$\rotation$};
+
+  % Draws the arrows showing the shear flow
+  \foreach \y in {0.5, 1, 1.5, 2, 2.5}
+  \draw[->] (-\Length, \y) -- (-\Length + \slope*\y, \y);
+  \draw[gray, very thin] (-\Length, 0) -- node[midway, right, black]
+  {$V_\tn{fluid} = \shear y$} (-\Length + \slope*\Length, \Length);
+
+  % Draws a bond between the platelet and wall
+  \draw[decorate, decoration=zigzag] (pltcenter) ++(315:1)
+  node[circle, inner sep=1.5pt, fill=black] {} -- (1.25,0) node
+  [circle, inner sep=1.5pt, fill=black] {};
+
+  % Labels the x and theta coordinates
+  \draw[{Bar[]}->] (0, -\buff) -- node[fill=white] {$\wallDist$}
+  (1.25, -\buff);
+
+  \draw (pltcenter) -- +(0, -1);
+  \draw (pltcenter) -- node[above right] {$R$} +(315:1);
+  \draw[->] (pltcenter) ++(0, -3*\buff) arc [start angle=270, end
+  angle=315, radius=3*\buff] node[midway, below] {$\recAngle$};
+\end{tikzpicture}
