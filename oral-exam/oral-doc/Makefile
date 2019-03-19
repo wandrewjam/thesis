@@ -146,7 +146,9 @@ TEXFILES        = abstract.tex			\
 		  parest.tex			\
 		  latex-input.tex		\
 		  latex-processing.tex		\
-		  notation.tex
+		  notation.tex   		\
+		  clot-path.tex			\
+		  model-geometry.tex		
 
 THESIS		= oral-document
 
