@@ -1,0 +1,153 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{pgfplots}
+\usepackage{textgreek}
+
+\newcommand{\tn}{\textnormal}
+
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+%\topmargin -.5in
+
+\usepackage{textgreek}
+\input{/Users/andrewwork/Documents/grad-school/thesis/model-defs}
+\graphicspath{{/Users/andrewwork/thesis/rolling-model/plots/}}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{center}
+{\Large Meeting Notes for February 28th, 2019}
+\end{center}
+
+These notes contain results from experiments with an initially-bound
+platelet, as well as an exploration of anomalous behavior in the
+simulations with a large on rate constant.
+
+\begin{table}
+  \centering
+  \begin{tabular}{lll} \hline
+    Name & Value & Source \\ \hline
+    $\onConst$ & 5--250 s$^{-1}$ & \\
+    $\offConst$ & 5 s$^{-1}$ & \cite{Mody2008b,Fitzgibbon2014} \\
+    $\compliance$ & 0.04 nm & \cite{Bhatia2003,Doggett2002} \\
+    $\stiffness$ & 100 {\textmugreek}m/nm & \cite{Fitzgibbon2014} \\
+    $\receptorDensity$ & 1280/$\pi$ receptors/radian & \cite{Wang2013}
+    \\
+    \hline
+  \end{tabular}
+  \caption{Dimensional binding parameters}
+  \label{tab:dim-parameters}
+\end{table}
+
+The biological binding parameters (Table \ref{tab:dim-parameters})
+are estimates of the kinetics of GP1b-vWF bond formation.
+
+I realized my plots from last week were not generated with the correct
+estimate of the nondimensional friction coefficients, and so while I
+changed the number of receptors in the stochastic model from previous
+simulations I did not properly account for this in the friction
+coefficients. In particular, the vertical axes on the bond count plots
+were incorrect.
+
+I repeated the unbound experiments and those plots are shown below
+(Figures \ref{fig:kappa-1-unbound}---~\ref{fig:kappa-50-bound}),
+and then also ran the same simulations where the platelet was
+initialized with a single bond to the surface (with endpoints $z = 0$
+and $\theta = 0$). The deterministic simulations were initialized with
+a regularized $\delta$ function:
+\begin{equation*}
+  m(z, \theta, 0) = \frac{1}{\pi N_T \epsilon^2} \exp\left(
+    -\frac{(z^2 + \theta^2)} {\epsilon^2}\right)
+\end{equation*}
+with $\epsilon = 0.1$.
+
+In both cases where $\kappa = 50$ (Figures \ref{fig:kappa-50-unbound}
+\& \ref{fig:kappa-50-bound}), there are enormous nonphysical
+oscillations in the velocities. Figure \ref{fig:oscillations} shows
+the bond positions at 4 consecutive time points. I suspect these
+oscillations are due to the fact that the friction coefficients are
+very small: $\mathcal{O}(10^{-6})$. Therefore, even though the total
+bond forces on the platelet are ``only'' $\mathcal{O}(10^{-3})$, the
+force and torque balance equations yield velocities
+$\mathcal{O}(10^3)$. I suspect a finer time discretization will
+eliminate this error, but I haven't tested it.
+
+There is also strange behavior in the deterministic solution for the
+initially bound case with $\kappa = 1$ (Figure
+\ref{fig:kappa-1-bound}), but I don't know what this could be due to.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_initfree_trials1000_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
+  \caption{$\kappa = 1$, initially unbound}
+  \label{fig:kappa-1-unbound}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_initfree_trials1000_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
+  \caption{$\kappa = 10$, initially unbound}
+  \label{fig:kappa-10-unbound}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_initfree_trials1000_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
+  \caption{$\kappa = 50$, initially unbound}
+  \label{fig:kappa-50-unbound}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_inittbound_trials1000_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
+  \caption{$\kappa = 1$, initially bound}
+  \label{fig:kappa-1-bound}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_inittbound_trials1000_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
+  \caption{$\kappa = 10$, initially bound}
+  \label{fig:kappa-10-bound}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_inittbound_trials1000_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
+  \caption{$\kappa = 50$, initially bound}
+  \label{fig:kappa-50-bound}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{{oscillations_kappa10_M128_bmax40}.png}
+  \caption{A sequence of bond positions during the nonphysical
+    oscillations. Each point in the $(z, \theta)$ space represents a
+    single bond. The different colors represent 4 consecutive time
+    steps in the order: blue, orange, green, red. The black line is $z
+    = \sin\theta$; that is, a bond that is oriented pointing straight
+    down from the platelet will lie along that line. It is clear from
+    the picture that the oscillations are growing in time. (Since the
+    axes aren't labeled, the horizontal axis is $z$, and the vertical
+    axis is $\sin\theta$.)}
+  \label{fig:oscillations}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
