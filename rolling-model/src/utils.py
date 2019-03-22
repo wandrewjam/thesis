@@ -34,18 +34,40 @@ def length(z, th, d=0):
 
 
 def construct_system(M, N, eta, z_vec, th_vec, delta, nu, kap, d_prime=0,
-                     saturation=True):
-    # Construct A matrix (upwind in theta)
-    diagonals = [-np.ones((2*M+1)*(N+1)), np.ones((2*M+1)*N)]
-    offsets = [0, 2*M+1]
-    A = diags(diagonals, offsets)
+                     saturation=True, scheme='up'):
+    if scheme == 'up':
+        # Construct A matrix (upwind in theta)
+        diagonals = [-np.ones((2*M+1)*(N+1)), np.ones((2*M+1)*N)]
+        offsets = [0, 2*M+1]
+        A = diags(diagonals, offsets)
 
-    # Construct B matrix (upwind in z)
-    subdiag = np.ones((2*M+1)*(N+1) - 1)
-    subdiag[(2*M)::(2*M+1)] = 0
-    diagonals = [-np.ones((2*M+1)*(N+1)), subdiag]
-    offsets = [0, 1]
-    B = diags(diagonals, offsets)
+        # Construct B matrix (upwind in z)
+        subdiag = np.ones((2*M+1)*(N+1) - 1)
+        subdiag[(2*M)::(2*M+1)] = 0
+        diagonals = [-np.ones((2*M+1)*(N+1)), subdiag]
+        offsets = [0, 1]
+        B = diags(diagonals, offsets)
+    elif scheme == 'bw':
+        # Construct A matrix (2nd order upwind in theta)
+        main_diag = np.hstack([-3*np.ones((2*M+1)*N)/2, -np.ones(2*M+1)])
+        diagonals = [main_diag, 2*np.ones((2*M+1)*N),
+                     -np.ones((2*M+1)*(N-1))/2]
+        offsets = [0, 2*M+1, 2*(2*M+1)]
+        A = diags(diagonals, offsets)
+        print(A.shape)
+
+        # Construct B matrix (2nd order upwind in z)
+        main_diag = np.hstack([-3*np.ones(2*M)/2, -1])
+        main_diag = np.tile(main_diag, reps=N+1)
+        supdiag = 2*np.ones((2*M+1)*(N+1) - 1)
+        supdiag[(2*M)::(2*M+1)] = 0
+        supsupdiag = -np.ones((2*M+1)*(N+1))/2
+        supsupdiag[(2*M)::(2*M+1)] = 0
+        supsupdiag[(2*M-1)::(2*M+1)] = 0
+        diagonals = [main_diag, supdiag, supsupdiag]
+        offsets = [0, 1, 2]
+        B = diags(diagonals, offsets)
+        print(B.shape)
 
     # Construct C matrix (bond formation term)
     if saturation:
