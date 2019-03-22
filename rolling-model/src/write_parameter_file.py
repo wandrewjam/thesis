@@ -4,14 +4,14 @@ from default_values import set_parameters
 def write_parameter_file(file_name, alg, correct_flux, M, N, time_steps, init,
                          trials, proc, **kwargs):
     """ Writes a file containing the parameters to run """
-    gamma = kwargs.pop('gamma')
-    (kappa, eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
-     save_bond_history) = set_parameters(**kwargs)[2:]
+    (v_f, om_f, kappa, eta, d, delta, on, off, sat, xi_v, xi_om, L, T,
+     save_bond_history) = set_parameters(**kwargs)
 
     format_str = '{0:s} {1:}\n'
 
     with open(file_name+'.txt', 'w') as f:
-        f.write(format_str.format('gamma', gamma))
+        f.write(format_str.format('v_f', v_f))
+        f.write(format_str.format('om_f', om_f))
         f.write(format_str.format('kappa', kappa))
         f.write(format_str.format('eta', eta))
         f.write(format_str.format('d', d))
@@ -35,7 +35,44 @@ def write_parameter_file(file_name, alg, correct_flux, M, N, time_steps, init,
         f.write(format_str.format('file_name', file_name))
 
 
-if __name__ == '__main__':
+def setup_parser():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--alg', )
+    parser.add_argument('-a', '--alg', choices=['bw', 'up'], default='up')
+    parser.add_argument('-x', '--correct_flux', type=bool, default=False)
+    parser.add_argument('-M', type=int, default=64)
+    parser.add_argument('-N', type=int, default=64)
+    parser.add_argument('-t', '--time_steps', type=int, default=10240 * 5)
+    parser.add_argument('-i', '--init', default='free')
+    parser.add_argument('-r', '--trials', type=int, default=100)
+    parser.add_argument('-p', '--proc', type=int, default=4)
+    parser.add_argument('-g', '--gamma', type=float)
+    parser.add_argument('-k', '--kappa', type=float)
+    parser.add_argument('-e', '--eta', type=float)
+    parser.add_argument('-d', '--separation', type=float)
+    parser.add_argument('-n', '--on', type=bool)
+    parser.add_argument('-f', '--off', type=bool)
+    parser.add_argument('-s', '--sat', type=bool)
+    parser.add_argument('--xi_v', type=float)
+    parser.add_argument('--xi_om', type=float)
+    parser.add_argument('-L', type=float)
+    parser.add_argument('-T', type=float)
+    parser.add_argument('--bond_max', type=int)
+    parser.add_argument('--save_bond_history', type=bool)
+    parser.add_argument('file_name')
+
+    return parser
+
+
+if __name__ == '__main__':
+    parser = setup_parser()
+
+    args = parser.parse_args()
+    args = vars(args)
+    stripped_args = dict()
+    for (key, val) in args.iteritems():
+        if val is not None:
+            stripped_args[key] = val
+
+    write_parameter_file(**stripped_args)
+    print('Wrote parameters to {}.txt'.format(stripped_args['file_name']))
