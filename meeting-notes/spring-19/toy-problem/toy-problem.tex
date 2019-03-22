@@ -10,6 +10,8 @@
 \usepackage{pgfplots}
 \usepackage{textgreek}
 
+\pgfplotstableset{col sep=comma}
+\pgfkeys{/pgf/number format/.cd,fixed,precision=3}
 \newcommand{\tn}{\textnormal}
 
 \pagestyle{empty} 
@@ -24,128 +26,345 @@
 
 \usepackage{textgreek}
 \input{/Users/andrewwork/Documents/grad-school/thesis/model-defs}
-\graphicspath{{/Users/andrewwork/thesis/rolling-model/plots/}}
+% \graphicspath{{/Users/andrewwork/thesis/rolling-model/plots/}}
 
 \begin{document}
 \pagestyle{empty}
 
 \begin{center}
-{\Large Meeting Notes for February 28th, 2019}
+{\Large Notes on a toy rolling problem}
 \end{center}
 
-These notes contain results from experiments with an initially-bound
-platelet, as well as an exploration of anomalous behavior in the
-simulations with a large on rate constant.
+\section{The rolling-only problem}
+\label{sec:rolling-only-problem}
 
-\begin{table}
+To simplify the platelet rolling model, assume that $d = 0$ and
+$V = R \Omega$. That is, no slip is allowed between the platelet
+surface and the wall. Then the bond density ($n$) evolution equation
+simplifies to
+\begin{equation}
+  \label{eq:full-pde}
+  \frac{\partial n}{\partial t} = R\Omega \frac{\partial n}{\partial
+    x} + \Omega \frac{\partial n}{\partial \theta} + \alpha(x, \theta)
+  \left(N_T - \int_{-\infty}^\infty n(x, \theta) dx \right) - \beta(x,
+  \theta) n.
+\end{equation}
+
+We are looking to find steady state rolling velocities and bond
+distributions as a function of the applied rolling velocity $V_f$, so
+set $\frac{\partial n}{\partial t} = 0$:
+\begin{equation}
+  \label{eq:dim-ss}
+  0 = R\Omega \frac{\partial n}{\partial x} + \Omega \frac{\partial
+    n}{\partial \theta} + \alpha(x, \theta) \left(N_T -
+    \int_{-\infty}^\infty n(x, \theta) dx \right) - \beta(x, \theta)n,
+\end{equation}
+or in nondimensional terms, 
+\begin{equation}
+  \label{eq:ndim-ss}
+  0 = \omega \frac{\partial m}{\partial z} + \omega \frac{\partial
+    m}{\partial \theta} + \alpha'(z, \theta) \left(1 -
+    \int_{-\infty}^\infty m(z, \theta) dz \right) - \beta'(z,
+  \theta)m.
+\end{equation}
+
+We can write evolution equations for the coordinates $z$ and $\theta$
+using the rolling velocities:
+\begin{equation}
+  \label{eq:dz-dth}
+  \frac{dz}{dt} = \frac{d\theta}{dt} = -\omega
+\end{equation}
+
+Therefore, $z(t) = -\omega t + z_0$ and $\theta(t) = -\omega t +
+\theta_0$, then eliminating $t$ we get $\theta(z) = z + \theta_0 -
+z_0$. Let's say we can define a density function $\hat{m}$ that only
+varies as a function of $z$: $\hat{m}(z) = m(z, \theta(z))$. Then note
+what happens when we take a derivative of $\hat{m}$:
+\begin{equation}
+  \frac{d\hat{m}}{dz} = \frac{\partial m}{\partial z} + \frac{\partial
+    m}{\partial \theta} \frac{d \theta}{dz} = \frac{\partial m}{\partial
+    z} + \frac{\partial m}{\partial\theta}.
+\end{equation}
+
+Multiplying through by $-\omega$, we get the following:
+\begin{align}
+  -\omega\frac{d\hat{m}}{dz} = -\omega \frac{\partial m}{\partial z} -
+  \omega\frac{\partial m}{\partial\theta}
+  &= \alpha'(z, \theta(z)) \left(1 - \int_{-\infty}^{\infty} m(z,
+    \theta(z)) dz \right) - \beta'(z, \theta(z)) m \nonumber \\
+  &= \alpha'(z, \theta(z)) \left(1 - \int_{-\infty}^{\infty}
+    \hat{m}(z) dz \right) - \beta'(z, \theta(z))
+    \hat{m}. \label{eq:ide}
+\end{align}
+
+If you believe the work above, we have simplified an
+integro-differential equation in two variables to an IDE in one
+variable.
+
+\subsection{Solving the IDE for $\hat{m}$}
+\label{sec:solving-ide}
+
+From equation \eqref{eq:ide} above, we have
+\begin{equation}
+  -\omega\frac{d\hat{m}}{dz} = \hat{\alpha}'(z) \left(1 -
+    \int_{-\infty}^{\infty} \hat{m}(z) dz \right) - \hat{\beta}'(z)
+  \hat{m}.
+\end{equation}
+
+This can be solved with the following procedure:
+
+\begin{enumerate}
+\item Pick a value $I \in [0, 1)$
+\item Solve the ODE $-\omega\frac{dm'}{dz} = \hat{\alpha}'(z) \left(1
+    - I \right) - \hat{\beta}'(z) m'$ 
+\item Define $I' = \int_{-\infty}^{\infty} m'(x) dx$ 
+\item Then $\hat{m}(x) = m'(x)/(1 - I + I')$
+\end{enumerate}
+
+To see that $\hat{m}(z)$ solves the IDE, substitute $m'(z)/(1 - I +
+I')$ into the IDE above:
+\begin{equation}
+  -\omega \frac{d\hat{m}}{dz} = -\frac{\omega}{1 - I +
+    I'}\frac{dm'(z)}{dz} = \frac{\hat{\alpha}'}{1 - I + I'}(1 - I) -
+  \hat{\beta}'\frac{m'}{1 - I + I'}. \label{eq:verify}
+\end{equation}
+
+Clearly the 2nd term on the RHS is just $\hat{\beta}'(z) \hat{m}$. The
+1st term on the RHS simplifies to $\hat{\alpha}' \left(1 - \frac{I'}{1
+    - I + I'}\right)$. Note that from the definition of $I'$,
+$\frac{I'}{1 - I + I'} = \int_{-\infty}^{\infty} \hat{m}(z)
+dz$. Therefore $\hat{m}(z)$ solves the IDE.
+
+Dr. Keener's code solves the following ODE system (taking $I = 0$):
+\begin{equation}
+  \frac{d\mathbf{y}}{dz} = \mathbf{F}(z, \mathbf{y}(z)) \text{ where }
+  \mathbf{y} = \begin{pmatrix} m' \\ M \\ T \end{pmatrix} \text{ and }
+  \mathbf{F} = \begin{pmatrix} \hat{\alpha}'(z) - \hat{\beta}'(z) m'
+    \\ m' \\ \tau \end{pmatrix}.
+\end{equation}
+
+$M$ and $T$ accumulate the bond number and torque, respectively, and
+$\tau = -[(1 - \cos(z))\sin(z) + (\sin(z) - z)\cos(z)]m'(z)$. The
+total bond number $\int m'(z) dz$ and total torque $\int \tau m'(z)
+dz$ are just the endpoints of $M$ and $T$. Note: Dr. Keener's code
+doesn't rescale $T$, and so it instead reports the total torque
+generated by the steady state bond distribution of the modified
+problem in step 2.
+
+Figures \ref{fig:unscaled} \& \ref{fig:scaled} show results from
+solving equation \eqref{eq:ide} with $\omega = 10$.
+
+\begin{figure}
   \centering
-  \begin{tabular}{lll} \hline
-    Name & Value & Source \\ \hline
-    $\onConst$ & 5--250 s$^{-1}$ & \\
-    $\offConst$ & 5 s$^{-1}$ & \cite{Mody2008b,Fitzgibbon2014} \\
-    $\compliance$ & 0.04 nm & \cite{Bhatia2003,Doggett2002} \\
-    $\stiffness$ & 100 {\textmugreek}m/nm & \cite{Fitzgibbon2014} \\
-    $\receptorDensity$ & 1280/$\pi$ receptors/radian & \cite{Wang2013}
-    \\
-    \hline
-  \end{tabular}
-  \caption{Dimensional binding parameters}
-  \label{tab:dim-parameters}
-\end{table}
-
-The biological binding parameters (Table \ref{tab:dim-parameters})
-are estimates of the kinetics of GP1b-vWF bond formation.
-
-I realized my plots from last week were not generated with the correct
-estimate of the nondimensional friction coefficients, and so while I
-changed the number of receptors in the stochastic model from previous
-simulations I did not properly account for this in the friction
-coefficients. In particular, the vertical axes on the bond count plots
-were incorrect.
-
-I repeated the unbound experiments and those plots are shown below
-(Figures \ref{fig:kappa-1-unbound}---~\ref{fig:kappa-50-bound}),
-and then also ran the same simulations where the platelet was
-initialized with a single bond to the surface (with endpoints $z = 0$
-and $\theta = 0$). The deterministic simulations were initialized with
-a regularized $\delta$ function:
-\begin{equation*}
-  m(z, \theta, 0) = \frac{1}{\pi N_T \epsilon^2} \exp\left(
-    -\frac{(z^2 + \theta^2)} {\epsilon^2}\right)
-\end{equation*}
-with $\epsilon = 0.1$.
-
-In both cases where $\kappa = 50$ (Figures \ref{fig:kappa-50-unbound}
-\& \ref{fig:kappa-50-bound}), there are enormous nonphysical
-oscillations in the velocities. Figure \ref{fig:oscillations} shows
-the bond positions at 4 consecutive time points. I suspect these
-oscillations are due to the fact that the friction coefficients are
-very small: $\mathcal{O}(10^{-6})$. Therefore, even though the total
-bond forces on the platelet are ``only'' $\mathcal{O}(10^{-3})$, the
-force and torque balance equations yield velocities
-$\mathcal{O}(10^3)$. I suspect a finer time discretization will
-eliminate this error, but I haven't tested it.
-
-There is also strange behavior in the deterministic solution for the
-initially bound case with $\kappa = 1$ (Figure
-\ref{fig:kappa-1-bound}), but I don't know what this could be due to.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_initfree_trials1000_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
-  \caption{$\kappa = 1$, initially unbound}
-  \label{fig:kappa-1-unbound}
+  \begin{subfigure}{0.48\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$z$},
+        legend entries={$m'(z)$, $\int^z m'(s) ds$,
+          $\int^z \tau_s(s) ds$},
+        legend pos=north
+        west,
+        grid=major,
+        ]
+        \addplot[no markers, smooth, blue, very thick] table[x=t,
+        y=m_prime] {unscaled.dat};
+        \addplot[no markers, smooth, red, very thick] table[x=t, y=M]
+        {unscaled.dat};
+        \addplot[no markers, smooth, black, very thick] table[x=t,
+        y=torque] {unscaled.dat};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Plots of $m'(z)$, $M$, and $T$}
+    \label{fig:unscaled}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$z$},
+        ylabel={Value of $\hat{m}(z)$},
+        grid=major,
+        yticklabel={$\pgfmathprintnumber{\tick}$},
+        ]
+        \addplot[no markers, smooth, blue, very thick] table
+        {scaled.dat};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Plot of $\hat{m}(z)$}
+    \label{fig:scaled}
+  \end{subfigure}
+  \caption{Results from solving the reduced problem \eqref{eq:ide} for
+  $\omega = 10$}
+  \label{fig:reduced-prob}
 \end{figure}
 
-\begin{figure}[h]
+\subsection{Generating a bifurcation diagram}
+\label{sec:bifurc-diagr}
+
+We can use the above approach to generate a bifurcation diagram in the
+parameter $\omega_f$. We choose a bunch of $\omega$ values, solve for
+the steady state bond distribution, calculate the torque generated at
+steady state, and finally solve for $\omega_f$ using $\omega_f =
+\omega + \tau/\xi_\omega$. 
+
+A plot of torque versus rolling velocity
+$\omega$ is given in Figure \ref{fig:om-vs-tau} and a plot of steady
+states in $(\omega_f, \omega)$ space are shown in Figure
+\ref{fig:omf-vs-om}. The results in these plots match the results of
+Dr. Keener's Matlab code (after applying the correct scaling).
+
+\begin{figure}
   \centering
-  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_initfree_trials1000_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
-  \caption{$\kappa = 10$, initially unbound}
-  \label{fig:kappa-10-unbound}
+  \begin{subfigure}{0.48\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$\omega$},
+        ylabel={$\tau$},
+        grid=major,
+        scaled ticks=false,
+        ]
+        \addplot[no markers, smooth, blue, very thick] table
+        {om_vs_tau.dat};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Torque versus rolling velocity $\omega$}
+    \label{fig:om-vs-tau}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$\omega_f$},
+        ylabel={$\omega$},
+        grid=major
+        ]
+        \addplot[no markers, smooth, blue, very thick] table
+        {omf_vs_om.dat};
+        \addplot[no markers, black, very thick, dashed, domain=0:110]
+        {x}; 
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Applied rolling velocity $\omega_f$ versus rolling
+      velocity $\omega$}
+    \label{fig:omf-vs-om}
+  \end{subfigure}
+  \caption{Results for many different rolling velocities $\omega$}
+  \label{fig:bifurcation}
 \end{figure}
 
-\begin{figure}[h]
+\subsection{Comparison with 2D steady state solution}
+\label{sec:comparison-with-2d}
+
+In order to solve the full 2D problem (equation \eqref{eq:ndim-ss}),
+restrict the numerical domain in $z$ to be $[-L, L]$. Then define $z_i
+= -L + ih$ for $i = 0, \hdots, 2M$ and $h = L/M$, and $\theta_j =
+-\pi/2 + j\nu$ for $j = 0, \hdots, N$ and $\nu = \pi/N$. Let $m_{ij}
+\approx m(z_i, \theta_j)$, and define $\alpha_{ij}$ and $\beta_{ij}$
+similarly. Also, define $D_z$ and $D_\theta$ be forward differences in
+$z$ and $\theta$ respectively.
+
+From boundary conditions, $m_{i,N+1} = m_{2M+1, j} = 0 \quad \forall
+i,j$. Then we can define a numerical scheme:
+\begin{equation}
+  0 = \omega(D_z m_{ij} + D_\theta m_{ij}) + \alpha_{ij} \left(1 - h
+    \sum_i a_i m_{ij} \right) - \beta_{ij} m_{ij} \text{ for } i=0,
+  \hdots, 2M \text{ and } j=0, \hdots, N.
+\end{equation}
+This gives us a $(2M+1)(N+1) \times (2M+1)(N+1)$ linear system that we
+can solve to find the $m_{ij}$s. From the steady state distribution,
+it is straightforward to calculate the torque generated by the
+distribution $\tau = h \nu \sum_j a_j \sum_i a_i \tau_{ij} m_{ij}$.
+
+I repeated the bifurcation analysis using 100 $\omega$ values between
+$0$ and $100$ with the 2D problem, and compared the results with the
+reduced problem in Figure \ref{fig:bifurcation2d}. I used a first
+order forward difference for $D_z$ and $D_\theta$, and I used a
+trapezoid rule to approximate the integral (that is, $a_0 = a_{2M} =
+1/2$ and $a_i = 1$ otherwise). In the 2D problem, the torque is less
+sharply peaked as a function of $\omega$ than in the reduced problem,
+and the peak has moved to the right. That is, the maximum torque is
+achieved for a higher value of $\omega$ in the 2D problem.
+
+\begin{figure}
   \centering
-  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_initfree_trials1000_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
-  \caption{$\kappa = 50$, initially unbound}
-  \label{fig:kappa-50-unbound}
+  \begin{subfigure}{0.48\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$\omega$},
+        ylabel={$\tau$},
+        grid=major,
+        scaled ticks=false,
+        legend entries={Reduced problem, 2D problem},
+        legend pos=north east,
+        ]
+        \addplot[no markers, smooth, blue, very thick] table
+        {om_vs_tau.dat};
+        \addplot[no markers, smooth, red, very thick] table
+        {om_vs_tau2d.dat};
+      \end{axis}      
+    \end{tikzpicture}
+    \caption{Torque versus rolling velocity $\omega$}
+    \label{fig:om-vs-tau2d}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$\omega_f$},
+        ylabel={$\omega$},
+        grid=major,
+        legend entries={Reduced problem, 2D problem},
+        legend pos=north west,
+        ]
+        \addplot[no markers, smooth, blue, very thick] table
+        {omf_vs_om.dat};
+        \addplot[no markers, smooth, red, very thick] table
+        {omf_vs_om2d.dat}; 
+        \addplot[no markers, black, very thick, dashed, domain=0:110]
+        {x}; 
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Applied rolling velocity $\omega_f$ versus rolling
+      velocity $\omega$ for the 2D steady state problem}
+    \label{fig:omf-vs-om2d}
+  \end{subfigure}
+
+  \caption{Results from the 2D steady state problem with varying
+    $\omega$}
+  \label{fig:bifurcation2d}
 \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_inittbound_trials1000_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
-  \caption{$\kappa = 1$, initially bound}
-  \label{fig:kappa-1-bound}
-\end{figure}
+\subsection{Thoughts about the reduced problem}
+\label{sec:thoughts}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_inittbound_trials1000_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
-  \caption{$\kappa = 10$, initially bound}
-  \label{fig:kappa-10-bound}
-\end{figure}
+If the reduced problem was equivalent to the 2D problem, we would
+expect the curves in Figure \ref{fig:bifurcation2d} to be exactly the
+same. There are a couple of reasons why I think the reduced problem is
+not equivalent to the 2D problem:
+\begin{enumerate}
+\item In the 2D problem, $m$ is defined on the 2D domain $[-L, L]
+  \times [-\pi/2, \pi/2]$. In order to reduce the problem to 1
+  dimension, we took $z = \theta$, but this only represents a single
+  path through the domain. In particular, the integral in equation
+  \eqref{eq:ndim-ss} is integrating along a different curve in $(z,
+  \theta)$ than the integral in equation \eqref{eq:ide}. The first
+  integral is integrating along lines of constant $\theta$, whereas
+  the second integral is integrating along the line $z = \theta$.
+\item The 2D problem allows for bonds at a fixed $\theta$ to be bound
+  to multiple different $z$s along the wall, and vice versa. The
+  reduced problem does not allow this.
+\item The quantities $m$ and $\hat{m}$ seem to have fundamentally
+  different interpretations. Both of them are nondimensional, but
+  $\hat{m}$ is a nondimensional density---you integrate it once to get
+  a bond number---and $m$ is a nondimensional 2nd order (?)
+  density---you integrate it twice to get a bond number.
+\end{enumerate}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{{M128_N128_tsteps25600_inittbound_trials1000_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta1_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0}.png}
-  \caption{$\kappa = 50$, initially bound}
-  \label{fig:kappa-50-bound}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.5\textwidth]{{oscillations_kappa10_M128_bmax40}.png}
-  \caption{A sequence of bond positions during the nonphysical
-    oscillations. Each point in the $(z, \theta)$ space represents a
-    single bond. The different colors represent 4 consecutive time
-    steps in the order: blue, orange, green, red. The black line is $z
-    = \sin\theta$; that is, a bond that is oriented pointing straight
-    down from the platelet will lie along that line. It is clear from
-    the picture that the oscillations are growing in time. (Since the
-    axes aren't labeled, the horizontal axis is $z$, and the vertical
-    axis is $\sin\theta$.)}
-  \label{fig:oscillations}
-\end{figure}
+I think we should use a different approach to reduce the 2D problem to
+1 dimension. One possibility that I haven't yet explored is to
+approximate the bond formation term $\alpha$ as a
+$\delta$-function. This way, every bond is uniquely determined by its
+attachment point on the platelet.
 
 \bibliographystyle{plain}
 \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
