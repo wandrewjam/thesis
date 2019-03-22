@@ -9,11 +9,11 @@ from warnings import warn
 
 # Define a dictionary for biological/physical parameters.
 _biological_parameters = {
-    'gamma': 40,
-    'kappa': 1,
+    'gamma': 40.,
+    'kappa': 1.,
     'eta': 2.3e4,
     'd': .01,
-    'delta': 1,
+    'delta': 1.,
     'on': True,
     'off': True,
     'sat': True,
