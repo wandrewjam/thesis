@@ -109,17 +109,12 @@ TRUE		= true
 ### then a change to that file would not cause typesetting to be done
 ### on the next "make" command!
 
-EPSFILES	= fig1.eps			\
-		  fig2.eps 			\
-		  fig3.eps
+EPSFILES	= 
 
-FIGFILES	= fig1.tex			\
-		  fig2.tex 			\
-		  fig3.tex
+FIGFILES	= clot-path.tex			\
+		  model-geometry.tex
 
-PDFFILES	= fig1.pdf			\
-		  fig2.pdf 			\
-		  fig3.pdf
+PDFFILES	= 
 
 STYFILES	= amssymb.sty			\
 		  amssymbols.sty		\
@@ -146,9 +141,7 @@ TEXFILES        = abstract.tex			\
 		  parest.tex			\
 		  latex-input.tex		\
 		  latex-processing.tex		\
-		  notation.tex   		\
-		  clot-path.tex			\
-		  model-geometry.tex		
+		  notation.tex
 
 THESIS		= oral-document
 

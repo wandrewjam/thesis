@@ -1,12 +1,82 @@
 %%% -*-LaTeX-*-
 
 \chapter{Future Work}
+\label{cha:future-work}
 
-\section{Allow for motion normal to the wall}
-\label{sec:allow-motion-normal}
+There are many areas where this model can be expanded, where
+assumptions can be relaxed or more biological realism
+incorporated. Perhaps the most obvious next step is to use the
+stochastic method to fit parameters to experimental velocity
+distributions obtained by Dr. Hlady's group. Some extensions I would like
+to make to the model include modeling multiple receptors,
+incorporating (some) intracellular signaling dynamics, and 3D modeling
+of a nonspherical platelet. 
+
+\section{Fit stochastic parameters to experimental data}
+\label{sec:fit-stoch-param}
+
+One advantage of the stochastic algorithm is that it is able to
+model the full velocity distribution of a population of platelets all
+interacting with an agonist-coated surface. Experimental observations
+show that platelets go through a wide range of rolling velocities in
+the course of an experiment, indicating that stochasticity is
+important, and it also highlights a deficiency of the deterministic
+model in that it can only reproduce the mean rolling velocity of
+platelets.
+
+Dr. Hlady's group has characterized platelet rolling on an
+agonist-coated surface in several different ways that provide
+different checks on the stochastic algorithm. The different statistics
+that are calculated from platelet rolling may not be independent
+of one another, but nonetheless the stochastic algorithm should be
+able to capture the same behaviors. The rolling data collected are:
+\begin{itemize}
+\item platelet trajectories (i.e. displacement of individual platelets
+  with respect to time),
+\item platelet pause/dwell times (i.e. the length of time a platelet
+  spends stationary or almost stationary on the surface before
+  resuming rolling),
+\item platelet instantaneous and time-averaged velocities, and
+\item platelet step sizes (i.e. the distance a platelet travels in
+  between pause events).
+\end{itemize}
+
+All of these features have analogs in the stochastic model which can
+be tracked and recorded to compare with experimental data. In the
+deterministic model, there are no pauses and therefore it produces
+nothing that can be compared to experimental measurements of pause
+times or step sizes, in addition to the deficiency mentioned before
+that it cannot produce a distribution of platelet velocities.
+
+What parameters can be fit to this experimental data? Many of the
+parameters in this model have been estimated before in other research
+on platelet rolling, both in modeling work \cite{Fitzgibbon2014,
+  Mody2008b, Wang2013} and in experimental papers \cite{Litvinov2011,
+  Litvinov2012}. However the confidence in these parameter estimates
+varies depending on the parameter. For example, the bond formation
+rate is difficult to estimate precisely and can only be estimated to
+within several orders of magnitude (SOURCE). In addition, some of
+these parameters with platelet priming. For example, it is known that
+more adhesion receptors are recruited to the surface during platelet
+activation (SOURCE). It is also known that integrins \ITA{IIb}\ITB{3}
+and \ITA{2}\ITB{1} are activated as a result of platelet activation
+\cite{Kee2015}, which may change any or all of $\onConst$, $\offConst$,
+$\refForce$, $\stiffness$, or $\compliance$. By modifying these
+parameters, we can crudely model platelet activation in the model
+presented above.
 
 \section{Multiple receptors}
 \label{sec:multiple-receptors}
+
+One fairly obvious extension of the model is to model 2 different
+receptors with different parameters. For platelet agonists vWF and
+collagen, there are two receptors which can bind with each of these
+receptors: GP1b and \ITA{IIb}\ITB{3} for vWF, and GPIV and
+\ITA{2}\ITB{1} for collagen. GP1b and GPIV are fast receptors with
+relatively large binding and unbinding rates, and these receptors are
+constitutively present and active on the surfaces of inactive
+platelets and do not change their activity based on the platelets
+activation state. 
 
 \section{Intracellular signaling}
 \label{sec:intr-sign}
