@@ -24,7 +24,6 @@
 %\font\cj=msbm10 at 12pt
 %\topmargin -.5in
 
-\usepackage{textgreek}
 \input{/Users/andrewwork/Documents/grad-school/thesis/model-defs}
 % \graphicspath{{/Users/andrewwork/thesis/rolling-model/plots/}}
 
@@ -360,11 +359,89 @@ not equivalent to the 2D problem:
   density---you integrate it twice to get a bond number.
 \end{enumerate}
 
-I think we should use a different approach to reduce the 2D problem to
-1 dimension. One possibility that I haven't yet explored is to
-approximate the bond formation term $\alpha$ as a
-$\delta$-function. This way, every bond is uniquely determined by its
-attachment point on the platelet.
+\section{Simplifications of the full problem}
+\label{sec:simpl-full-probl}
+
+Because the above reduction is not correct, and because it isn't clear
+that there is a way to reduce the full model exactly, we need to
+explore some simplifications of the problem that allow us to
+search through parameter space rapidly. There are two simplifications
+I have thought of so far:
+\begin{enumerate}
+\item Removing the saturation term (i.e. the integral term) in
+  equation~\eqref{eq:ndim-ss}, and 
+\item Approximating $\alpha(z, \theta)$ with a $\delta$-fn.
+\end{enumerate}
+
+\subsection{Model without saturation}
+\label{sec:model-no-satur}
+
+If we assume there are an excess of receptors relative to the steady
+state number of bonds, then equation \eqref{eq:ndim-ss} is
+approximately equivalent to
+\begin{equation}
+  \label{eq:reduced-model-sat}
+  0 = \omega \left(\frac{\partial m}{\partial z} + \frac{\partial
+      m}{\partial \theta} \right) + \alpha'(z, \theta) - \beta'(z, \theta)m.
+\end{equation}
+
+This simplification is a reasonable thing to try, because we are
+looking for regions of parameter space where there are relatively few
+bonds anyway, and so saturation may not be particularly relevant in
+that parameter regime. (Caveat: we are looking for regions where $\pi
+>> \int \int m dz d\theta$, which is not necessarily the same as $1 >>
+\int m dz$ for all $\theta$).
+
+This problem can be solved with the method of characteristics. Define
+the following characteristics as functions of parameter $t$: $z(t, z_0) =
+z_0 - \pi t$ and $\theta(t) = \pi/2 - \pi t$ where $0 \le t \le
+1$. Then
+\begin{equation}
+  \label{eq:char}
+  \frac{d m}{ds} (z(s, z_0), \theta(s)) = -\pi \left( \frac{\partial 
+      m}{\partial z} + \frac{\partial m}{\partial \theta} \right) =
+  -\frac{\pi}{\omega} \left[ \alpha'(z(s, z_0), \theta(s)) -
+    \beta'(z(s, z_0), \theta(s)) m(z(s, z_0), \theta(s)) \right].
+\end{equation}
+
+Also note that with our change of variables, integrals over the domain
+change:
+\begin{equation}
+  \label{eq:integral-cov}
+  \iint f(z, \theta) dz d\theta = \pi \iint f(z(s, z_0), \theta(s)) ds dz_0.
+\end{equation}
+
+Then we can solve for $m$ as a function of $s$ and $z_0$ by
+integrating equation \eqref{eq:char} and then find the total bond
+number and total torque on the platelet at a given rolling velocity
+$\omega$ by using equation \eqref{eq:integral-cov}.
+
+The Radau method implemented in SciPy's \verb|solve_ivp| method was
+too slow, so I just implemented a simple trapezoidal rule in Python to
+solve this:
+\begin{equation}
+  \label{eq:trapezoidal-rule}
+  m_{i+1} = m_i + \frac{h\pi}{2\omega} \left[ \alpha_i - \beta_i m_i +
+    \alpha_{i+1} - \beta_{i+1} m_{i+1} \right],
+\end{equation}
+where the indices $i$ refer to a discretization in $s$. I chose the
+trapezoidal rule because it is an A-stable method and second
+order. The off-rate can change \emph{enormously} along a single
+characteristic (e.g. take $z_0 = 0$, then at $s = 0$, $\beta = 1$ and
+at $s = 1$, $\beta = \exp(\delta \pi) \approx 10^4$), and so the
+obvious solution is to use an A-stable method so that you don't have
+to choose punishingly short step sizes to ensure stability. (It may be
+worth trying SciPy's higher-order BDF implementation, as it may be
+stable along the entire negative real axis).
+
+In order to integrate $m$ to find $M$ and $T$, I just use the
+trapezoidal rule for integration. 
+
+% I think we should use a different approach to reduce the 2D problem to
+% 1 dimension. One possibility that I haven't yet explored is to
+% approximate the bond formation term $\alpha$ as a
+% $\delta$-function. This way, every bond is uniquely determined by its
+% attachment point on the platelet.
 
 \bibliographystyle{plain}
 \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
