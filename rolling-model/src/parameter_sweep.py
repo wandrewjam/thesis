@@ -75,7 +75,7 @@ def parameter_sweep(kap_vec, eta_vec, del_vec, proc=4):
 
 
 if __name__ == '__main__':
-    N = 2**5 + 1
+    N = 2**4 + 1
     kap_vec = np.logspace(-1, 3, num=N)
     eta_vec = np.logspace(2, 5, num=N)
     del_vec = np.linspace(.5, 2, num=N)
@@ -85,6 +85,12 @@ if __name__ == '__main__':
     start = timer()
     omegas, M, T = parameter_sweep(kap_mid, eta_mid, del_mid)
     end = timer()
+
+    print('Total time required: {} seconds'.format(end-start))
+    np.savez_compressed('../data/toy-model/parameter_sweep_coarse.npz', M, T,
+                        kap_vec, eta_vec, del_vec, omegas, M=M, T=T,
+                        kap_vec=kap_vec, eta_vec=eta_vec, del_vec=del_vec,
+                        omegas=omegas)
 
     plt.pcolormesh(omegas, np.log10(kap_msh), M[:, 0, 0, :], norm=LogNorm())
     plt.xlabel('$\\omega$')
