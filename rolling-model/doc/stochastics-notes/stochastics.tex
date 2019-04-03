@@ -32,7 +32,7 @@
 
 \input{/Users/andrewwork/thesis/model-defs}
 
-\graphicspath{{/Users/andrewwork/thesis/rolling-model/plots/}}
+\graphicspath{{/Users/andrewwork/thesis/rolling-model/plots/190403/}}
 %\topmargin -.5in 
 \begin{document}
 \pagestyle{empty}
@@ -84,9 +84,9 @@ sophisticated way.
 \label{sec:notes-modified-nrm}
 
 The fundamental premise of the Gillespie algorithm and related methods
-is that each chemical reaction $k$ proceeds with a propensity function
-$a_j(\mathbf{x})$ that depends on the state of the system $\mathbf{x}$
-and defined so that
+\cite{Gillespie2007} is that each chemical reaction $k$ proceeds with
+a propensity function $a_j(\mathbf{x})$ that depends on the state of
+the system $\mathbf{x}$ and defined so that
 \begin{equation}
   \label{eq:prop-def}
   a_k(\mathbf{x}) \dd t \equiv \tn{the probability that reaction $k$
@@ -184,7 +184,11 @@ for the next reaction method for autonomous reaction rates:
 \item Go to 5.
 \end{enumerate}
 
-In the code below, I simulate a simple enzymatic reaction
+\subsubsection{A simple enzymatic reaction}
+\label{sec:simple-enzym-react}
+
+In the plots below, I show results of simulations of a simple
+enzymatic reaction
 $\mathrm{A} + \mathrm{B} \rightleftharpoons \mathrm{C} \rightarrow
 \mathrm{B} + \mathrm{P}$ with rates $k^+ = 1$, $k^- = 5$, and
 $k^\text{cat} = 5$ using the Gillespie and next reaction methods and
@@ -202,6 +206,16 @@ a_2 &= k^- c \\
 a_3 &= k^\text{cat} c.
 \end{align}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{nrm-example-const}
+  \caption{Number of species A in the enzymatic system above, with
+    initial numbers $A(0) = 50$, $B(0) = 20$, and $C(0) = 0$. For the
+    Gillespie and Next reaction curves, results are averaged over 10
+    trials.}
+  \label{fig:nrm-example-const}
+\end{figure}
+
 \subsection{Time-dependent reaction rates}
 \label{sec:time-depend-react}
 
@@ -216,19 +230,34 @@ In the algorithm described above, only steps 5 and 8 change. In step 5
 to find the absolute firing times of each reaction $\Delta t_k$, we
 must now solve
 \begin{equation}
+  \label{eq:step-5}
   \int_t^{t + \Delta t_k} a_k(X(t), s) ds = P_k - T_k.
 \end{equation}
 
 In step 8 to advance each internal clock, we now have to set
 \begin{equation}
-T_k = T_k + \int_t^{t + \Delta} a_k(X(t), s) ds.
+  \label{eq:step-8}
+  T_k = T_k + \int_t^{t + \Delta} a_k(X(t), s) ds.
 \end{equation}
 
-The code below simulates the same chemical system as above, but with
-exponentially decreasing reaction rates. That is,
-$k^+(t) = k^+_0 \exp(-Rt)$ and similarly for the other reaction
-rates. As $R \rightarrow 0$, this system approaches the system above
-with constant reaction rates.
+Figure \ref{fig:nrm-example-var} shows results from simulations of the
+same chemical system as above, but with exponentially decreasing
+reaction rates. That is, $k^+(t) = k^+_0 \exp(-Rt)$ and similarly for
+the other reaction rates. As $R \rightarrow 0$, this system approaches
+the system above with constant reaction rates. Taking an average over
+more trials does give better agreement between the deterministic and
+stochastic models, I used a relatively small number of trials in order
+to show the randomness in the system.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{nrm-example-var}
+  \caption{Number of species A in the enzymatic system with
+    exponentially decaying reaction rates. Again, the Next reaction
+    curve is the result of averaging over 10 independent trials. The
+    initial conditions are the same as in Figure 1, and $R = 5$.}
+  \label{fig:nrm-example-var}
+\end{figure}
 
 \section{The modified next reaction method applied to platelet
   rolling}
@@ -242,14 +271,115 @@ formation and breaking.
 
 Let's look at the force-balance equations for the platelet. We have
 \begin{align}
+  \label{eq:vel-force-bal}
   0 &= \ndVelFriction \left(\ndAppliedVel - \ndVelocity \right) +
-  \ndHorzTotalForce \\
-  0 &= \ndRotFriction \left(\ndAppliedRot - \ndRotation \right) + \ndTotalTorque
+      \ndHorzTotalForce \\
+  \label{eq:rot-force-bal}
+  0 &= \ndRotFriction \left(\ndAppliedRot - \ndRotation \right) +
+      \ndTotalTorque
 \end{align}
-where $\ndHorzTotalForce = \sum_{i=0}^\texttt{n\_bonds}
+where $\ndHorzTotalForce = \sum_{i=1}^\mathtt{n\_bonds}
 (\sin\recAngle_i - \ndWallDist_i )$ and $\ndTotalTorque =
--\sum_{i=0}^\texttt{n\_bonds} [(1 - \cos\recAngle_i +
-\ndSeparation)\sin\recAngle_i + (\sin\recAngle_i - \ndWallDist_i)\cos\recAngle_i]$.
+-\sum_{i=1}^\mathtt{n\_bonds} [(1 - \cos\recAngle_i +
+\ndSeparation)\sin\recAngle_i + (\sin\recAngle_i -
+\ndWallDist_i)\cos\recAngle_i]$.
+
+The motion of the platelet is defined so that
+$\Der{\ndWallDist_i}{\dTime} = -\ndVelocity$ and
+$\Der{\recAngle_i}{\dTime} = -\ndRotation$ for all $i = 1, \hdots
+\mathtt{n\_bonds}$. These differential equations have the solution
+$\ndWallDist_i(\dTime) = -\ndVelocity \dTime + \ndWallDist_i^0$ and
+$\recAngle_i(\dTime) = -\ndRotation \dTime + \recAngle_i^0$. The
+time-dependent piece of these equations is independent of $i$, and so
+we can write $\ndWallDist_i(\dTime)$ and $\recAngle_i(\dTime)$ in
+terms of an initial value (that varies only over $i$) plus a reference
+point that varies only over $\dTime$:
+\begin{align}
+  \ndWallDist_i(t) &= \ndWallDist_\tn{ref}(\dTime) + \ndWallDist_i^0
+                     \quad \tn{where} \quad
+                     \ndWallDist_\tn{ref}(\dTime) \equiv
+                     -\ndVelocity\dTime \\
+  \recAngle_i(t) &= \recAngle_\tn{ref}(\dTime) + \recAngle_i^0 \quad
+                   \tn{where} \quad \recAngle_\tn{ref}(\dTime) \equiv
+                   -\ndRotation \dTime.
+\end{align}
+
+From the definitions of $\ndWallDist_\tn{ref}$ and
+$\recAngle_\tn{ref}$, we can rewrite equations
+\eqref{eq:vel-force-bal} and \eqref{eq:rot-force-bal} as a set of
+ODEs:
+\begin{align}
+  \label{eq:wall-evol}
+  \Der{\ndWallDist_\tn{ref}}{\dTime}
+  &= -\ndAppliedVel + F_h'\left(\ndWallDist_\tn{ref},
+    \recAngle_\tn{ref} \right)/\ndVelFriction \\
+  \label{eq:plt-evol}
+  \Der{\recAngle_\tn{ref}}{\dTime}
+  &= -\ndAppliedRot + \tau'\left(\ndWallDist_\tn{ref},
+    \recAngle_\tn{ref} \right)/\ndRotFriction.
+\end{align}
+
+Assuming that no bonds form or break in the time interval
+$[t_1, t_2]$, integrating equations \eqref{eq:wall-evol} and
+\eqref{eq:plt-evol} gives the position of the platelet at the times in
+that interval. Knowing the position and orientation of the platelet at
+all times $\dTime$ in some interval also means that the bond formation
+and breaking rates are also known for all times in that
+interval. Therefore equations \eqref{eq:wall-evol} and
+\eqref{eq:plt-evol} give us a way to evaluate the integral in
+equations \eqref{eq:step-5} and \eqref{eq:step-8}.
+
+One consideration we have to make is that we don't know \emph{a
+  priori} how long to integrate the above system to guarantee that a
+reaction fires in the time interval of integration. My solution to
+this is to augment the system with equations of the form
+$\Der{F_k}{\dTime} = a_k(\ndWallDist_\tn{ref}, \recAngle_\tn{ref})$
+where the $a_k$s are bond formation/breaking rates. That is, to
+integrate the reaction rates along with equations of motion, and
+then integrate the augmented system until one of the reactions fires.
+
+The full stochastic simulation algorithm for our platelet rolling
+model is the following:
+\begin{enumerate}
+\item Initialize platelet velocities $\ndVelocity$ and $\ndRotation$,
+  and \verb|bond_list|. Set $\dTime = 0$ and $T_k = 0$ for each of the
+  $2N$ bins on the platelet surface, and any bonds that exist in the
+  initial condition.
+\item Generate $2N + \mathtt{n\_bonds}$ independent, uniform random
+  numbers $r_k$.
+\item Set $P_k = \log(1/r_k)$ for each $k$ (i.e. set the internal
+  firing times for each reaction).
+\item Define $\dTime_0$ to be the current time $\dTime$,
+  $\ndWallDist_i^0$ to be the current $\ndWallDist$ coordinates of the
+  existing bonds, and $\recAngle_i^0$ to be the current $\recAngle$
+  coordinates of the existing bonds.
+\item Set up the ODE system
+  \begin{align}
+    \Der{\ndWallDist_\tn{ref}}{\dTime}
+    &= -\ndAppliedVel + F_h'\left(\ndWallDist_\tn{ref},
+      \recAngle_\tn{ref} \right)/\ndVelFriction \\
+    \Der{\recAngle_\tn{ref}}{\dTime}
+    &= -\ndAppliedRot + \tau'\left(\ndWallDist_\tn{ref},
+      \recAngle_\tn{ref} \right)/\ndRotFriction \\
+    \Der{F_k}{\dTime} &= a_k\left(\ndWallDist_\tn{ref},
+    \recAngle_\tn{ref} \right).
+  \end{align}
+  with initial conditions $\ndWallDist_\tn{ref}(\dTime_0) =
+  \recAngle_\tn{ref}(\dTime_0) = 0$ and $F_k(\dTime_0) = T_k - P_k$. 
+\item Integrate the ODE system until:
+  \begin{enumerate}
+  \item The end of the stochastic simulation $T_\tn{end}$ is reached,
+  \item One of the $F_k$s reaches 0 (i.e. a reaction fires), or
+  \item One of the bond endpoints exits the numerical domain.
+  \end{enumerate}
+\item If one of the bond endpoints exited the numerical domain, break
+  the appropriate bond, update the bond positions and bin positions on
+  the platelet, and return to step 4.
+\item If the $k$th reaction fired, either add or remove a bond as
+  needed, update the bond positions and bin positions, and return to
+  step 4.
+\item If $T_\tn{end}$ was reached, end the simulation. 
+\end{enumerate}
 
 \bibliography{/Users/andrewwork/thesis/library.bib}
 
