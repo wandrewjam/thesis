@@ -1,0 +1,256 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\pagestyle{empty}
+
+\bibliographystyle{plain}
+
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Int}[4]{\int_{#3}^{#4} #1 \, \dd #2}
+\newcommand{\tn}{\textnormal}
+\newcommand{\on}{\textnormal{on}}
+\DeclareMathOperator{\erf}{erf}
+\renewcommand{\arraystretch}{1.5}
+
+\input{/Users/andrewwork/thesis/model-defs}
+
+\graphicspath{{/Users/andrewwork/thesis/rolling-model/plots/}}
+%\topmargin -.5in 
+\begin{document}
+\pagestyle{empty}
+
+
+\begin{center}
+{\Large Notes on ``A modified next reaction method...''
+  \cite{Anderson2007} and its application to platelet rolling}
+\end{center}
+
+The old approach I've been using to simulate platelet rolling is a
+naive modification of the Gillespie algorithm where at each time step
+in the simulation, I calculate two random numbers: one representing
+the first time a reaction occurs, and the second representing which
+particular reaction occurs. The modification I made is to enforce a
+maximum time step, and if no reaction occurs before that maximum time
+step I update the position of the platelet and the positions of the
+bonds, but I do not create or destroy any bonds (i.e. no reactions
+occur). Then I repeat the process, generating a new pair of random
+numbers and comparing them to the maximum time step.
+
+There are a couple of weaknesses in this approach. First, because I
+generate two random numbers for every single time step, and in my
+simulations the maximum time step I enforce is much smaller than
+the average time for a bond to form or break, I end up wasting most of
+the random numbers I generate. In a typical simulation, I use
+$\sim10^4$ time steps but only $\sim10$---$100$ reactions occur in
+a simulation. That is, I generate about 20,000 random numbers, but
+only use 20---200 of them and discard the rest. The second problem is
+that this method is a very crude way to integrate the motion of the
+platelet. Let me explain this a little more thoroughly.
+
+The motion of a rolling platelet is piecewise deterministic: that is,
+in between bond formation/breaking events, the motion of the platelet
+is deterministic. With the method described above, I am really
+integrating the motion of the platelet using a forward Euler method
+with a constant step size. The biggest issue with this is that the
+nondimensional friction coefficient for the platelet motion is very
+small, and so the ODEs governing platelet motion are stiff, requiring
+a very small step size in order for the Forward Euler method to be
+stable. The notes that follow develop a method that more clearly
+separates the simulation of the deterministic motion of the platelet
+from the stochastic simulation of chemical reaction events so that
+each of these separate processes can be dealt with in a more
+sophisticated way.
+
+\section{Notes on ``A modified next reaction method for simulating
+  chemical systems with time dependent propensities and delays''}
+\label{sec:notes-modified-nrm}
+
+The fundamental premise of the Gillespie algorithm and related methods
+is that each chemical reaction $k$ proceeds with a propensity function
+$a_j(\mathbf{x})$ that depends on the state of the system $\mathbf{x}$
+and defined so that
+\begin{equation}
+  \label{eq:prop-def}
+  a_k(\mathbf{x}) \dd t \equiv \tn{the probability that reaction $k$
+    takes place in a small time interval $[t, t+\dd t)$}.
+\end{equation}
+
+Based on this assumption, the time $\Delta t_k$ that it takes for
+reaction $k$ to fire is exponentially distributed with rate parameter
+$a_k(\mathbf{x})$. As mentioned above, for each time step in the
+Gillespie algorithm, two random numbers are generated. The first is
+used to find the minimum firing time over all the reactions (the
+minimum firing time is exponentially distributed with rate parameter
+$a_0(\mathbf{x}) = \sum_{k=1}^M a_k(\mathbf{x})$), and the second is
+used to find which reaction occurred (reaction $k$ occurred with
+probability $a_k(\mathbf{x}) / a_0 (\mathbf{x})$).
+
+\subsection{Next reaction method}
+\label{sec:next-reaction-method}
+
+In the Gillespie algorithm, two random numbers must be generated at
+each time step, and the number of random numbers that must be
+generated is independent of the number of possible reactions. For
+chemical systems where the number of time steps is large relative to
+the number of possible reactions, the next reaction method improves on
+the Gillespie algorithm in that fewer random numbers are required to
+advance the simulation. However the feature that is most relevant for
+these notes is that the next reaction method is more easily
+generalized to the case where reaction rates are explicitly dependent
+on time.
+
+For the next reaction method, we represent the reaction times of each
+individual reaction as the firing times of Poisson processes. Let
+$R_k(t)$ be the number of times the $k$th reaction has occurred before
+time $t$. $R_k(t)$ can be represented as a Poisson process with a
+nondimensional firing rate related to the reaction rate. Specifically,
+if we define $k$ independent Poisson processes with unit firing rate:
+$Y_k(\tau)$, then
+\begin{equation}
+  \label{eq:R-def}
+  R_k(t) = Y_k\left(\int_0^t a_k(X(s)) ds \right).
+\end{equation}
+
+Anderson defines the \emph{internal time} of reaction $k$ as $T_k(t)$:
+\begin{equation}
+  \label{eq:T-def}
+  T_k(t) \equiv \int_0^t a_k(X(s)) ds.
+\end{equation}
+The internal time is a nondimensional quantity that scales time in the
+$k$th Poisson process based on the reaction rate $a_k(X(t))$.
+
+The idea of the next reaction method is to calculate the firing times
+of each Poisson process independently, and then to find the minimum
+firing time. The system is updated based on which reaction fired, and
+the internal times of each reaction are updated appropriately. All of
+the firing times of the other reactions are saved, and a new firing
+time is generated only for the reaction which fired.
+
+More explicitly, define $P_k$ to be the first firing time of $Y_k$ (in
+the time scale of $Y_k$) after $T_k(t)$:
+\begin{equation}
+  \label{eq:P-def}
+  P_k(t) = \min\{s > T_k(t) \mid Y_k(s) > Y_k(T_k(t)) \}.
+\end{equation}
+
+Then from the definition of $T_k(t)$ the absolute time required for
+reaction $k$ to fire $\Delta t_k$ is given by
+\begin{equation}
+  \label{eq:dtk-def}
+  \int_t^{t + \Delta t_k} a_k(X(s)) ds = P_k - T_k.
+\end{equation}
+
+
+Assuming $X(s)$ is constant in $[t, t + \Delta t_k)$, then so is $a_k$
+(as long as $a_k$ doesn't explicitly depend on time) and
+$\Delta t_k = (P_k - T_k)/a_k$. This gives us the following algorithm
+for the next reaction method for autonomous reaction rates:
+\begin{enumerate}
+\item Initialize chemical species, set $t=0$, and $T_k = 0$ for
+  each $k$
+\item Calculate $a_k$ for each reaction.
+\item Generate $M$ independent, uniform random numbers $r_k$.
+\item For each $k$, set $P_k = \log(1/r_k)$ (find the internal firing
+  times of each reaction).
+\item For each $k$, set $\Delta t_k = (P_k - T_k)/a_k$ (convert the
+  internal firing times to absolute firing times).
+\item Set $\Delta = \min_k \{\Delta t_k\}$ and
+  $\mu = \operatorname{argmin}_k \{\Delta t_k\}$.
+\item Set $t = t + \Delta$ and update the number of molecular species
+  associated with reaction $\mu$.
+\item For each $k$, set $T_k = T_k + a_k \Delta$ (advance the internal
+  times).
+\item For reaction $\mu$, choose a new random number $r$ and set
+  $P_\mu = P_\mu + \log(1/r)$.
+\item Recalculate the reaction rates $a_k$.
+\item Go to 5.
+\end{enumerate}
+
+In the code below, I simulate a simple enzymatic reaction
+$\mathrm{A} + \mathrm{B} \rightleftharpoons \mathrm{C} \rightarrow
+\mathrm{B} + \mathrm{P}$ with rates $k^+ = 1$, $k^- = 5$, and
+$k^\text{cat} = 5$ using the Gillespie and next reaction methods and
+compare the results with the solution of the ODE reaction rate
+equation. This chemical system gives the following set of ODEs:
+\begin{align}
+\frac{da}{dt} &= -k^+ ab + k^- c \\
+\frac{db}{dt} &= -k^+ ab + (k^- + k^\text{cat}) c \\
+\frac{dc}{dt} &= k^+ ab - (k^- + k^\text{cat}) c
+\end{align}
+and the following set of propensity functions $a_k(X(t))$:
+\begin{align}
+a_1 &= k^+ ab \\
+a_2 &= k^- c \\
+a_3 &= k^\text{cat} c.
+\end{align}
+
+\subsection{Time-dependent reaction rates}
+\label{sec:time-depend-react}
+
+If we now assume that the reaction rates can change explicitly as a
+function of time (that is $a_k = a_k(X(t), t)$), we can apply the next
+reaction method described above to this new case in a fairly
+straightforward way. $P_k$ and $T_k$ are defined in the same way as
+above, the only difference is that now $T_k$ is not necessarily a
+piecewise linear function of the absolute time $t$.
+
+In the algorithm described above, only steps 5 and 8 change. In step 5
+to find the absolute firing times of each reaction $\Delta t_k$, we
+must now solve
+\begin{equation}
+  \int_t^{t + \Delta t_k} a_k(X(t), s) ds = P_k - T_k.
+\end{equation}
+
+In step 8 to advance each internal clock, we now have to set
+\begin{equation}
+T_k = T_k + \int_t^{t + \Delta} a_k(X(t), s) ds.
+\end{equation}
+
+The code below simulates the same chemical system as above, but with
+exponentially decreasing reaction rates. That is,
+$k^+(t) = k^+_0 \exp(-Rt)$ and similarly for the other reaction
+rates. As $R \rightarrow 0$, this system approaches the system above
+with constant reaction rates.
+
+\section{The modified next reaction method applied to platelet
+  rolling}
+\label{sec:plt-rolling}
+
+In the case of platelet rolling, it is clear that the reaction rates
+(i.e. bond formation and breaking rates) depend on time through the
+position of the platelet, and the method for simulating time-dependent
+reactions can nearly be directly applied to simulate random bond
+formation and breaking.
+
+Let's look at the force-balance equations for the platelet. We have
+\begin{align}
+  0 &= \ndVelFriction \left(\ndAppliedVel - \ndVelocity \right) +
+  \ndHorzTotalForce \\
+  0 &= \ndRotFriction \left(\ndAppliedRot - \ndRotation \right) + \ndTotalTorque
+\end{align}
+where $\ndHorzTotalForce = \sum_{i=0}^\texttt{n\_bonds}
+(\sin\recAngle_i - \ndWallDist_i )$ and $\ndTotalTorque =
+-\sum_{i=0}^\texttt{n\_bonds} [(1 - \cos\recAngle_i +
+\ndSeparation)\sin\recAngle_i + (\sin\recAngle_i - \ndWallDist_i)\cos\recAngle_i]$.
+
+\bibliography{/Users/andrewwork/thesis/library.bib}
+
+\end{document}
