@@ -91,9 +91,3 @@ if __name__ == '__main__':
                         kap_vec, eta_vec, del_vec, omegas, M=M, T=T,
                         kap_vec=kap_vec, eta_vec=eta_vec, del_vec=del_vec,
                         omegas=omegas)
-
-    plt.pcolormesh(omegas, np.log10(kap_msh), M[:, 0, 0, :], norm=LogNorm())
-    plt.xlabel('$\\omega$')
-    plt.ylabel('$\\kappa$')
-    plt.colorbar()
-    plt.show()
