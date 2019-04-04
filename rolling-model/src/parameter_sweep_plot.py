@@ -5,9 +5,8 @@ from itertools import combinations
 
 
 if __name__ == '__main__':
-    filepath = '../data/toy-model/'
     filename = sys.argv[1]
-    data = np.load(filepath + filename)
+    data = np.load(filename)
 
     M = data['M']
     T = data['T']
@@ -24,10 +23,8 @@ if __name__ == '__main__':
     weights = [arr[1:] - arr[:-1] for arr in pars]
 
     slices = list()
-    for (ax1, ax2) in combinations(range(3), 2):
-        slices.append(np.average(np.average(filtered, axis=ax2,
-                                            weights=weights[ax2]),
-                                 axis=ax1, weights=weights[ax1]))
+    for axs in combinations(range(3), 2):
+        slices.append(np.average(filtered, axis=axs))
 
     for (j, arr) in zip(reversed(range(3)), slices):
         plt.pcolormesh(omegas, pars[j], arr[:, :-1])
@@ -35,4 +32,5 @@ if __name__ == '__main__':
         plt.ylabel(par_names[j])
         plt.yscale('log')
         plt.colorbar()
+        plt.tight_layout()
         plt.show()
