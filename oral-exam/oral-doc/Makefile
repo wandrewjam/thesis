@@ -112,7 +112,9 @@ TRUE		= true
 EPSFILES	= 
 
 FIGFILES	= clot-path.tex			\
-		  model-geometry.tex
+		  model-geometry.tex		\
+		  blood-vessel.tex		\
+		  flow-chamber.tex
 
 PDFFILES	= 
 
