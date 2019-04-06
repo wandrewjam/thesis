@@ -1,7 +1,5 @@
 import multiprocessing as mp
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
 from scipy.integrate import trapz
 from timeit import default_timer as timer
 
