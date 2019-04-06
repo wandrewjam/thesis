@@ -430,12 +430,177 @@ order. The off-rate can change \emph{enormously} along a single
 characteristic (e.g. take $z_0 = 0$, then at $s = 0$, $\beta = 1$ and
 at $s = 1$, $\beta = \exp(\delta \pi) \approx 10^4$), and so the
 obvious solution is to use an A-stable method so that you don't have
-to choose punishingly short step sizes to ensure stability. (It may be
-worth trying SciPy's higher-order BDF implementation, as it may be
-stable along the entire negative real axis).
+to choose punishingly short step sizes to ensure stability. In order
+to integrate $m$ to find $M$ and $T$, I just use the trapezoidal rule
+for integration.
 
-In order to integrate $m$ to find $M$ and $T$, I just use the
-trapezoidal rule for integration. 
+\subsubsection{Redefining $\kappa$}
+\label{sec:redefining-kappa}
+
+In the work above, and in previous work, the on rate function was
+defined to be $\alpha(L) = \kappa \exp(-\eta L^2/2)$. Clearly this is
+a Gaussian function with $\kappa$ controlling the height and $\eta$
+controlling the spread. While we may expect the biological
+interpretation of these parameters to be that $\eta$ is a
+nondimensional bond stiffness and $\kappa$ is a nondimensional rate
+constant, this isn't quite correct. Imagine the overall bond formation
+rate between a surface patch on the platelet $d\theta$ and a patch on
+the wall $dz$. This overall formation rate depends not only on
+$\kappa$, but on $\eta$ as well.
+
+I think it makes more sense for the overall bond formation rate to
+depend only on $\kappa$ (i.e. have $\kappa$ control the integral of
+$\alpha$, not the maximum bond formation rate). I'm not entirely sure
+this is obviously the better choice for the model as a whole, but it
+seems better to me at least for the parameter exploration
+phase. Therefore, in the work below, I redefine $\kappa$ so that
+$\kappa_\tn{old} = \kappa_\tn{new} \sqrt{\eta/(2 \pi)}$, and then
+\begin{equation}
+  \alpha(L) = \kappa_\tn{new} \sqrt{\frac{\eta}{2\pi}}
+  \exp\left(-\frac{\eta}{2}L^2\right).  
+\end{equation}
+
+\subsection{Results from the model without saturation}
+\label{sec:results-from-model}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.48\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$\omega$},
+        ylabel={$\tau$},
+        xmin=0, ymin=0,
+        grid=major,
+        scaled ticks=false,
+        ]
+        \addplot[no markers, smooth, blue, very thick] table[x
+        index=0, y index=2] {chars_om_M_T.dat};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Torque versus rolling velocity}
+    \label{fig:om-vs-T-M}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{.49\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$\omega_f$},
+        ylabel={$\omega$},
+        xmin=0, ymin=0,
+        grid=major,
+        scaled ticks=false, 
+        ]
+        \addplot[no markers, smooth, blue, very thick] table[x
+        index=0, y index=1] {chars_omf_om_M.dat};
+        \addplot[no markers, black, very thick, dashed, domain=0:120]
+        {x};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Applied rolling velocity $\omega_f$ versus rolling
+      velocity $\omega$.}
+    \label{fig:omf-om-M}
+  \end{subfigure}
+  \caption{Results for a range of rolling velocities $\omega$ in the
+    simplified model without saturation.}
+  \label{fig:char-results}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.48\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$\omega$},
+        ylabel={$M$},
+        ymin=0, xmin=0,
+        grid=major,
+        scaled ticks=false,
+        ]
+        \addplot[no markers, smooth, blue, very thick] table[x
+        index=0, y index=1] {chars_om_M_T.dat};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Total bond number versus rolling velocity}
+    \label{fig:om-vs-T-M}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{.49\linewidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        xlabel={$\omega_f$},
+        ylabel={$\omega$},
+        xmin=0, ymin=0,
+        grid=major,
+        scaled ticks=false, 
+        ]
+        \addplot[no markers, smooth, blue, very thick] table[x
+        index=0, y index=2] {chars_omf_om_M.dat};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Applied rolling velocity $\omega_f$ versus total bond
+      number $M$.}
+    \label{fig:omf-om-M}
+  \end{subfigure}
+  \caption{Results for a range of rolling velocities $\omega$ in the
+    simplified model without saturation.}
+  \label{fig:char-results1}
+\end{figure}
+
+\subsection{Parameter sweeps}
+\label{sec:parameter-sweeps}
+
+We are interested in how parameters in the bond formation and breaking
+rate functions affect the total bond number $M$. There are three
+parameters that control these rate functions, $\kappa$ and $\eta$
+control bond formation, and $\delta$ controls bond breaking. Based on
+values in the literature, I previously estimated these parameters at
+$\eta \approx 2 \times 10^4$ and $\delta \approx 17$, with $\kappa$
+unknown. Previously I had experimented with $\kappa \approx $ 0.1--10
+which seemed to give reasonable rolling behavior.
+
+For a coarse parameter sweep, I used a log-scaled sweep in the
+following parameter ranges $\kappa \in [10^{-3}, 10^{2}]$, $\eta \in
+[10^2, 10^6]$, and $\delta \in [10^{-1}, 10^1]$. The scaling factor $N_T$
+for nondimensional bond density is approximately $10^3$, so we are
+looking for areas of parameter space where the nondimensional bond
+number is approximately $10^{-3}$--$10^{-1}$. After calculating the total
+bond number $M$ for each parameter and a range of $\omega$ values, I
+tested whether each $M$ value was within the desired range. Then I
+calculated slices of the parameters by averaging over 2 of the
+parameters, and I plotted the averages as a function of $\omega$ and
+each of the parameters.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+    \includegraphics[width=\textwidth]{kappa_slice}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\linewidth}
+    \includegraphics[width=\textwidth]{eta_slice}
+  \end{subfigure}
+  \begin{subfigure}{0.48\linewidth}
+    \includegraphics[width=\textwidth]{delta_slice}
+  \end{subfigure}
+  \caption{Slices of the parameter sweeps}
+  \label{fig:coarse_slices}
+\end{figure}
+
+The parameter that seems to matter the most is $\kappa$. So for a
+refined sweep, I fixed $\delta = 10$, $\eta = 10^4$, and did a
+linearly spaced sweep through $\kappa \in [0, 50]$.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{refined_sweep}
+  \caption{Refined sweep in $\kappa$}
+  \label{fig:refined-sweep}
+\end{figure}
+
+
+% (It may be worth trying SciPy's higher-order BDF implementation, as it
+% may be stable along the entire negative real axis).
 
 % I think we should use a different approach to reduce the 2D problem to
 % 1 dimension. One possibility that I haven't yet explored is to
