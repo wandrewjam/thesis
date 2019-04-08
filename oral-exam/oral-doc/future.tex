@@ -9,7 +9,7 @@ incorporated. Perhaps the most obvious next step is to use the
 stochastic method to fit parameters to experimental velocity
 distributions obtained by Dr. Hlady's group. Some extensions I would like
 to make to the model include modeling multiple receptors,
-incorporating (some) intracellular signaling dynamics, and 3D modeling
+incorporating some intracellular signaling dynamics, and 3D modeling
 of a nonspherical platelet. 
 
 \section{Fit stochastic parameters to experimental data}
@@ -75,7 +75,7 @@ receptors: GP1b and \ITA{IIb}\ITB{3} for vWF, and GPIV and
 \ITA{2}\ITB{1} for collagen. GP1b and GPIV are fast receptors with
 relatively large binding and unbinding rates, and these receptors are
 constitutively present and active on the surfaces of inactive
-platelets and do not change their activity based on the platelets
+platelets and do not change their activity based on the platelet's
 activation state.
 
 On the other hand, the integrin receptors \ITA{IIb}\ITB{3} and
@@ -101,4 +101,36 @@ to transition from rolling to firm adhesion.
 \section{Intracellular signaling}
 \label{sec:intr-sign}
 
+Ultimately, a model that attempts to describe both platelet rolling
+\emph{and} activation must include some intracellular signaling. As
+described in section \ref{sec:overview-clotting}, platelet activation
+is a complex process involving dozens of chemical intermediates which
+mediate a diverse suite of responses.
+
+There has been a large amount of modeling work describing different
+pathways within the platelet activation network, although most of them
+include \Ca dynamics as a central point of signal integration. A
+research group at Moscow State University have published a set of
+models describing intracellular platelet activation as a response to
+thrombin stimulation \cite{Shakhidzhanov2015, Sveshnikova2015,
+  Balabin2016, Sveshnikova2016}. Other models attempt to describe
+intracellular \Ca dynamics within a resting platelet \cite{Purvis2008,
+  Dolan2014}. Instead of modeling the activation responses downstream
+of the intracellular \Ca response, all of these models prescribe
+cytosolic \Ca concentration as an output and fit parameters to
+experimental data of platelet cytosol \Ca concentrations. One model
+that includes pathways downstream of elevated cytosolic \Ca
+(specifically \ITA{IIb}\ITB{3} activation and dense granule release)
+is the model of Lenoci et. al. \cite{Lenoci2011}. They were able to
+accurately predict a number of platelet responses (cytosol \Ca level,
+$\tn{PIP}_2$ concentration, ATP concentration, and activation of
+\ITA{IIb}\ITA{3}) after stimulation of PAR1, a platelet receptor for
+thrombin.
+
+All of these models are developed with activation by a soluble agonist
+in mind. In particular, the activation signal recieved is assumed to
+be both temporally and spacially constant. However in the case of
+platelet rolling, the platelet transiently contacts the surface and
+the activation signal is transmitted through GP1b and GPVI receptors
+which are randomly bound to the surface. 
 
