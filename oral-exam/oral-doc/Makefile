@@ -18,6 +18,7 @@
 ###				build
 ###	mostlyclean		same as clean
 ###	pdf			make PDF file(s)
+###	proof			check for writing errors and weaknesses
 ###	ps			make PostScript file(s)
 ###	spell			make spelling check
 ###	sample-thesis-1		same as sample-thesis-1.dvi
@@ -238,6 +239,16 @@ pdf-pass:
 	-$(MAKE) bbl-ind-toc
 
 pdf:	$(THESIS).stripped $(THESIS).pdf
+
+proof:
+	echo "weasel words: "
+	sh bin/weasel *.tex
+	echo
+	echo "passive voice: "
+	sh bin/passive *.tex
+	echo
+	echo "duplicates: "
+	perl bin/dups *.tex
 
 ps:	$(THESIS).ps
 
