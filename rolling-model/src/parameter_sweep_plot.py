@@ -27,10 +27,26 @@ if __name__ == '__main__':
         slices.append(np.average(filtered, axis=axs))
 
     for (j, arr) in zip(reversed(range(3)), slices):
-        plt.pcolormesh(omegas, pars[j], arr[:, :-1])
+        plt.pcolormesh(omegas, pars[j], arr[:, :-1], vmin=0, vmax=1)
         plt.xlabel('$\\omega$')
         plt.ylabel(par_names[j])
         plt.yscale('log')
         plt.colorbar()
         plt.tight_layout()
         plt.show()
+
+    fig, axs = plt.subplots(ncols=2, nrows=2, sharey='all', sharex='all')
+
+    axs[0, 0].contour(omegas, kap_vec[1::2], M[:, 0, 0, :])
+    axs[1, 0].contour(omegas, kap_vec[1::2], M[:, -1, 0, :])
+    axs[0, 1].contour(omegas, kap_vec[1::2], M[:, 0, -1, :])
+    axs[1, 1].contour(omegas, kap_vec[1::2], M[:, -1, -1, :])
+    axs[0, 0].set_yscale('log')
+    plt.show()
+
+    print(np.nonzero(filtered))
+    print(np.unique(np.nonzero(filtered)[0], return_counts=True))
+    print(np.unique(np.nonzero(filtered)[1], return_counts=True))
+    print(np.unique(np.nonzero(filtered)[2], return_counts=True))
+    print(filtered.size)
+    print(np.unique(filtered))

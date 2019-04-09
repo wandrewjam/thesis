@@ -71,10 +71,10 @@ def parameter_sweep(kap_vec, eta, delta, proc=4):
 
 
 if __name__ == '__main__':
-    N = 2**6 + 1
-    delta = 10
+    N = 2**4 + 1
+    delta = 16
     eta = 1e4
-    kap_vec = np.linspace(0, 50, num=N)
+    kap_vec = np.linspace(0, 10, num=N)
     kap_msh, kap_mid = kap_vec[::2], kap_vec[1::2]
     start = timer()
     omegas, M, T = parameter_sweep(kap_mid, eta, delta, proc=4)

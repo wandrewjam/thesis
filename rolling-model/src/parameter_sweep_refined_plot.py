@@ -12,7 +12,7 @@ if __name__ == '__main__':
     kap_vec = data['kap_vec']
     omegas = data['omegas']
 
-    low, high = 1e-3, 1e-2
+    low, high = 1e-4, 1e-2
     filtered = (M > low) * (M < high)
 
     plt.pcolormesh(omegas, kap_vec[::2], filtered[:, :-1])
