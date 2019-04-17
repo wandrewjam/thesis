@@ -37,7 +37,7 @@ def solve_along_chars(z_0, omega, kappa, eta, delta):
 
     for i in range(0, m_arr.shape[0]-1):
         m_arr[i+1] = ((m_arr[i] - np.pi*h/(2*omega)*(off_arr[i]*m_arr[i] - on_arr[i] - on_arr[i+1]))
-                      /(1+ np.pi*h*off_arr[i+1]/(2*omega)))
+                      / (1 + np.pi*h*off_arr[i+1]/(2*omega)))
     M = np.pi*trapz(trapz(m_arr, z_0, axis=1), dx=h, axis=0)
     T = np.pi*trapz(trapz(tau_arr*m_arr, z_0, axis=1), dx=h, axis=0)
     end = timer()
