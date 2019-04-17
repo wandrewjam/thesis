@@ -77,16 +77,16 @@ if __name__ == '__main__':
     N = 2**6 + 1
     kap_vec = np.logspace(-3, 2, num=N)
     eta_vec = np.logspace(2, 6, num=N)
-    del_vec = np.logspace(-1, 1, num=N)
+    del_vec = np.logspace(-1, 2, num=N)
     kap_msh, kap_mid = kap_vec[::2], kap_vec[1::2]
     eta_msh, eta_mid = eta_vec[::2], eta_vec[1::2]
     del_msh, del_mid = del_vec[::2], del_vec[1::2]
     start = timer()
-    omegas, M, T = parameter_sweep(kap_mid, eta_mid, del_mid, proc=64)
+    omegas, M, T = parameter_sweep(kap_mid, eta_mid, del_mid, proc=32)
     end = timer()
 
     print('Total time required: {} seconds'.format(end-start))
-    np.savez_compressed('../data/toy-model/parameter_sweep_coarse1.npz', M, T,
+    np.savez_compressed('../data/toy-model/parameter_sweep_coarse2.npz', M, T,
                         kap_vec, eta_vec, del_vec, omegas, M=M, T=T,
                         kap_vec=kap_vec, eta_vec=eta_vec, del_vec=del_vec,
                         omegas=omegas)

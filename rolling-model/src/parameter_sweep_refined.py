@@ -47,7 +47,7 @@ def solve_along_chars(z_0, omega, kappa, eta, delta):
 
 def parameter_sweep(kap_vec, eta, delta, proc=4):
     z_0 = np.linspace(-5, 5, num=1001)
-    omegas = np.linspace(0, 200, num=101)[1:]
+    omegas = np.linspace(0, 200, num=501)[1:]
 
     # Use multiprocessing to run this in parallel, there are probably
     # some numpy functions to manipulate these arrays so I can run
@@ -71,13 +71,13 @@ def parameter_sweep(kap_vec, eta, delta, proc=4):
 
 
 if __name__ == '__main__':
-    N = 2**4 + 1
+    N = 2**10 + 1
     delta = 16
     eta = 1e4
     kap_vec = np.linspace(0, 10, num=N)
     kap_msh, kap_mid = kap_vec[::2], kap_vec[1::2]
     start = timer()
-    omegas, M, T = parameter_sweep(kap_mid, eta, delta, proc=4)
+    omegas, M, T = parameter_sweep(kap_mid, eta, delta, proc=64)
     end = timer()
 
     print('Total time required: {} seconds'.format(end-start))
