@@ -9,11 +9,12 @@ if __name__ == '__main__':
     z0 = np.linspace(-5, 5, num=501)
     omegas = np.linspace(0, 200, num=501)[1:]
     kappas = np.array([5e-1, 1., 2.])
+
     eta = 1e4
     delta = 16
     xi = 1e-5
 
-    pool = mp.Pool(processes=3)
+    pool = mp.Pool(processes=4)
     results = [pool.apply_async(solve_along_chars, args=(z0, omegas, kappa,
                                                          eta, delta))
                for kappa in kappas]
