@@ -23,7 +23,7 @@ def off(length, kappa, eta, delta):
 
 def solve_along_chars(z_0, omega, kappa, eta, delta):
     start = timer()
-    s_vec = np.linspace(0, 1, num=1001)
+    s_vec = np.linspace(0, 1, num=5001)
     h = s_vec[1] - s_vec[0]
     s_vec = s_vec[:, None, None]
     z_0 = z_0[None, :, None]
