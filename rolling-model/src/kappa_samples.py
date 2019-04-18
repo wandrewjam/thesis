@@ -3,10 +3,11 @@ import multiprocessing as mp
 import numpy as np
 from parameter_sweep import solve_along_chars
 
+### I was working on correcting the axes of the right columns, and labeling the curves
 
 if __name__ == '__main__':
-    z0 = np.linspace(-5, 5, num=1001)
-    omegas = np.linspace(0, 100, num=201)[1:]
+    z0 = np.linspace(-5, 5, num=501)
+    omegas = np.linspace(0, 200, num=201)[1:]
     kappas = np.array([1e-1, 5e-1, 1., 2.])
     eta = 1e4
     delta = 16
@@ -24,10 +25,13 @@ if __name__ == '__main__':
 
     fig, ax = plt.subplots(nrows=kappas.shape[0], ncols=2, sharex='col',
                            figsize=(8, 9))
+    omfs = [omegas + result[1]/xi for result in results]
+    m = [np.amax(omf) for omf in omfs]
+    m = np.amax(m)
+
     for (j, result) in enumerate(results):
         ax[j, 0].plot(omegas, result[1])
         ax[j, 0].set_ylabel('Torque $\\tau$')
-        m = np.amax(omegas + result[1]/xi)
         ax[j, 1].plot(omegas + result[1]/xi, omegas)
         ax[j, 1].plot([0, m], [0, m], 'k--')
         ax[j, 1].set_ylabel('Rotation rate $\\omega$')

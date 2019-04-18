@@ -1,5 +1,6 @@
 import multiprocessing as mp
 import numpy as np
+from itertools import product
 from scipy.integrate import trapz
 from timeit import default_timer as timer
 
@@ -57,8 +58,8 @@ def parameter_sweep(kap_vec, eta_vec, del_vec, proc=4):
 
     result = [
         pool.apply_async(solve_along_chars,
-                         args=(z_0, omegas, kappa, eta, delta))
-        for kappa in kap_vec for eta in eta_vec for delta in del_vec]
+                         args=(z_0, omegas, pars[0], pars[1], pars[2]))
+        for (k, pars) in enumerate(product(kap_vec, eta_vec, del_vec))]
     result = [res.get() for res in result]
 
     M = [res[0] for res in result]
