@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.linalg import lstsq, norm
+from scipy.linalg import lstsq
 import matplotlib.pyplot as plt
 
 
@@ -62,37 +62,43 @@ def find_forces(u, v, x, y):
     return f_vec[::2], f_vec[1::2]
 
 
-mu = 1
-# eps = .03
-N = 160
-# xk = np.random.rand(N)
-# yk = np.random.rand(N)
-u = -np.ones(shape=N)
-v = np.zeros(shape=N)
+if __name__ == '__main__':
+    import sys
+    
+    N = 200
+    u = -np.ones(shape=N)
+    v = np.zeros(shape=N)
+    mu = 1
 
-xk = 0.25*np.cos(2*np.pi/N*np.arange(N))
-yk = 0.25*np.sin(2*np.pi/N*np.arange(N))
-eps = 2*np.pi*.25/N*.25
+    if sys.argv[1] == '--random':
+        eps = .03
+        xk = np.random.uniform(low=-1, high=1, size=N)
+        yk = np.random.uniform(low=-1, high=1, size=N)
+    elif sys.argv[1] == '--cylinder':
+        xk = 0.25*np.cos(2*np.pi/N*np.arange(N))
+        yk = 0.25*np.sin(2*np.pi/N*np.arange(N))
+        eps = 2*np.pi*.25/N*.25
 
-fx, fy = find_forces(u, v, xk, yk)
+    fx, fy = find_forces(u, v, xk, yk)
 
-x, y = np.meshgrid(np.linspace(-.5, .5), np.linspace(-.5, .5))
-p = np.zeros(shape=x.shape)
-u = np.zeros(shape=x.shape)
-v = np.zeros(shape=x.shape)
+    x, y = np.meshgrid(np.linspace(-.5, .5), np.linspace(-.5, .5))
+    p = np.zeros(shape=x.shape)
+    u = np.zeros(shape=x.shape)
+    v = np.zeros(shape=x.shape)
 
-for i in range(x.shape[0]):
-    for j in range(x.shape[1]):
-        p[i, j] = pressure(x[i, j], y[i, j])
-        temp_u = velocity(x[i, j], y[i, j])
-        u[i, j], v[i, j] = temp_u
+    for i in range(x.shape[0]):
+        for j in range(x.shape[1]):
+            p[i, j] = pressure(x[i, j], y[i, j])
+            temp_u = velocity(x[i, j], y[i, j])
+            u[i, j], v[i, j] = temp_u
 
-plt.quiver(x, y, u+1, v, np.sqrt((u+1)**2 + v**2))
-plt.colorbar()
-# plt.contour(x, y, u+1)
-plt.plot(xk, yk, 'ko')
-# plt.show()
-#
-# plt.contour(x, y, v)
-# plt.plot(xk, yk, 'ko')
-plt.show()
+    plt.quiver(x, y, u+1, v, np.sqrt((u+1)**2 + v**2))
+    plt.axis([-.5, .5, -.5, .5])
+    plt.colorbar()
+    # plt.contour(x, y, u+1)
+    plt.plot(xk, yk, 'ko')
+    # plt.show()
+    #
+    # plt.contour(x, y, v)
+    # plt.plot(xk, yk, 'ko')
+    plt.show()
