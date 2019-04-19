@@ -7,7 +7,7 @@ from parameter_sweep import solve_along_chars
 
 if __name__ == '__main__':
     z0 = np.linspace(-5, 5, num=501)
-    omegas = np.linspace(0, 200, num=201)[1:]
+    omegas = np.linspace(0, 200, num=501)[1:]
     kappas = np.array([1e-1, 5e-1, 1., 2.])
     eta = 1e4
     delta = 16
@@ -37,5 +37,20 @@ if __name__ == '__main__':
         ax[j, 1].set_ylabel('Rotation rate $\\omega$')
     ax[-1, 0].set_xlabel('Rotation rate $\\omega$')
     ax[-1, 1].set_xlabel('Applied rotation $\\omega_f$')
+    plt.tight_layout()
+    plt.show()
+
+    fig, ax = plt.subplots(nrows=kappas.shape[0], sharex='col',
+                           figsize=(4, 9))
+    xis = [5e-6, 1e-5, 2e-5, 5e-5]
+    omfs = [omegas + results[2][1]/xi for xi in xis]
+    m = [np.amax(omf) for omf in omfs]
+    m = np.amax(m)
+
+    for (j, omf) in enumerate(omfs):
+        ax[j].plot(omf, omegas)
+        ax[j].plot([0, m], [0, m], 'k--')
+        ax[j].set_ylabel('Rotation rate $\\omega$')
+    ax[-1].set_xlabel('Applied rotation $\\omega_f$')
     plt.tight_layout()
     plt.show()
