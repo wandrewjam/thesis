@@ -13,7 +13,7 @@ _biological_parameters = {
     'kappa': 1.,
     'eta': 2.3e4,
     'd': .01,
-    'delta': 1.,
+    'delta': 16.,
     'on': True,
     'off': True,
     'sat': True,
