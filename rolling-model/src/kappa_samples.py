@@ -6,8 +6,8 @@ from parameter_sweep import solve_along_chars
 ### I was working on correcting the axes of the right columns, and labeling the curves
 
 if __name__ == '__main__':
-    z0 = np.linspace(-5, 5, num=501)
-    omegas = np.linspace(0, 200, num=501)[1:]
+    z0 = np.linspace(-5, 5, num=1001)
+    omegas = np.linspace(0, 200, num=2001)[1:]
     kappas = np.array([5e-1, 1., 2.])
 
     eta = 1e4
