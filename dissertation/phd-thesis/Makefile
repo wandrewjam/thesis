@@ -112,11 +112,18 @@ TRUE		= true
 
 EPSFILES	= 
 
-FIGFILES	= clot-path.tex			\
-		  model-geometry.tex		\
-		  blood-vessel.tex		\
-		  flow-chamber.tex		
-		  
+FIGFILES	= hammer92scr.jpg		\
+		  internal-clocks.png		\
+		  kappa-sweeps.png		\
+		  kappa_omega_sweep.png		\
+		  large-kappa-trials.png	\
+		  med-kappa-trials.png		\
+		  parameter_sweep_heatmaps.png	\
+		  platelet.png			\
+		  small-kappa-trials.png	\
+		  transient-binding.png		\
+		  variable-receptors.png	\
+
 PDFFILES	= 
 
 STYFILES	= amssymb.sty			\
@@ -131,10 +138,11 @@ STYFILES	= amssymb.sty			\
 		  uuthesis-base.sty		\
 		  uuthesis-color.sty		\
 		  uuthesis-index.sty		\
-		  uuthesis-updates.sty
+		  uuthesis-updates.sty		\
 
 TEXFILES        = abstract.tex			\
 		  acknowledge.tex		\
+		  notation.tex			\
 		  intro.tex			\
 		  model.tex			\
 		  results.tex			\
@@ -142,9 +150,16 @@ TEXFILES        = abstract.tex			\
 		  nondim.tex			\
 		  scheme.tex			\
 		  parest.tex			\
-		  notation.tex
+		  nreact.tex			\
 
-THESIS		= oral-document
+TKZFILES	= blood-vessel.tex		\
+		  clot-path.tex			\
+		  ellipse.tex			\
+		  flow-chamber.tex		\
+		  model-geometry.tex		\
+		  plt-bins.tex			\
+
+THESIS		= phd-thesis
 
 TOPFILE		= $(THESIS).ltx
 
@@ -256,7 +271,7 @@ ps:	$(THESIS).ps
 spell:	$(TEXFILES) $(TOPFILE)
 	-if [ ! -f $(THESIS).sok ] ; then touch $(THESIS).sok ; fi
 	@echo '==================== spelling exceptions ===================='
-	for f in $(TEXFILES) $(TOPFILE) ;						\
+	for f in $(TEXFILES) $(TOPFILE) ;				\
 	do								\
 		echo ===== $$f ===== ;					\
 		g=`basename $$f .tex` ;					\
@@ -280,7 +295,7 @@ $(THESIS).aux:
 ### NB: Because of extensive cross-referencing in the thesis, and in
 ### the bibliography entries, we need FOUR complete passes to reach
 ### consistency!
-$(THESIS).dvi:	Makefile $(THESIS).bbl $(EPSFILES) $(FIGFILES) $(STYFILES) $(TEXFILES) $(TOPFILE)
+$(THESIS).dvi:	Makefile $(THESIS).bbl $(EPSFILES) $(FIGFILES) $(STYFILES) $(TEXFILES) $(TKZFILES) $(TOPFILE)
 	-$(MAKE) dvi-pass
 	-$(MAKE) dvi-pass
 	-$(MAKE) dvi-pass
@@ -306,7 +321,7 @@ $(THESIS).ind:	FRC $(THESIS).idx $(THESIS).ist
 ### NB: Because of extensive cross-referencing in the thesis, and in
 ### the bibliography entries, we need FOUR complete passes to reach
 ### consistency!
-$(THESIS).pdf:	Makefile $(THESIS).bbl $(THESIS).stripped $(FIGFILES) $(PDFFILES) $(STYFILES) $(TEXFILES)  $(TOPFILE)
+$(THESIS).pdf:	Makefile $(THESIS).bbl $(THESIS).stripped $(FIGFILES) $(PDFFILES) $(STYFILES) $(TEXFILES) $(TKZFILES) $(TOPFILE)
 	-$(MAKE) pdf-pass
 	-$(MAKE) pdf-pass
 	-$(MAKE) pdf-pass
