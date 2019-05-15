@@ -1,28 +1,30 @@
 %%% -*-LaTeX-*-
 
-\chapter{Introduction}
-\label{cha:introduction}
+\chapter{Background}
+\label{cha:background}
 
-% A few sentences on the priming project
-
-Interactions between the blood and artificial materials is an
-important engineering problem. Artificial devices are commonly used to
-treat cardiovascular diseases, and they must be designed to not
-trigger immune responses in the bloodstream. However, current designs
-are not sufficiently blood-compatible and patients with a
-blood-contacting device must be placed on systemic anticoagulants to
+An important concern in engineering blood-contacting devices is the
+interaction between blood and artificial materials. Artificial devices
+are commonly used to treat cardiovascular diseases, and they should
+not trigger immune responses in the bloodstream. But materials
+currently in use are not sufficiently blood-compatible and patients
+with a blood-contacting device must take systemic anti\-coagulants to
 reduce the risks of thrombosis and embolism
-\cite{Ratner1993,Ratner2007,Oprea13}. %There's probably another
-                                %transition sentence that needs to go
-                                %here.
-It is important to first know
-how the blood clotting system is ``supposed'' to work before
-understanding the problems that arise when an artificial device is
-implanted into the bloodstream.
-	
-% 2. Contextualize rolling within blood clotting
-% Process of clotting begins when agonists (vWF and collagen) are
-% exposed on the ECs
+\cite{Ratner1993,Ratner2007,Oprea13}. The goal of the work presented
+below is to model the mechanism by which platelets interact with a
+reactive surface, and how these interactions activate platelets to
+facilitate blood clotting.
+
+This background chapter first summarizes the mechanisms of platelet
+activation and their importance in blood clotting in section
+\ref{sec:overview-clotting}. Then section \ref{sec:priming-project}
+covers the relevance of platelet activation to the bio-materials
+engineering problem of hemocompatibility. This section also presents
+research from a biomedical engineering group at Utah led by Vladimir
+Hlady that shows that platelets can be primed by interactions with a
+reactive surface. Finally section \ref{sec:exist-cell-roll} reviews
+existing models of leukocytes and platelets rolling along reactive
+surfaces.
 
 \section{Overview of the clotting pathway}
 \label{sec:overview-clotting}
@@ -30,109 +32,103 @@ implanted into the bloodstream.
 \begin{figure}
   \centering
   \input{clot-path}
-  \caption[The clotting pathway]{Sketch of the major processes in the
-    clotting pathway}
+  \caption{Summary of the major processes in the clotting pathway.}
   \label{fig:clot-path}
 \end{figure}
 
 There are two major processes in the blood clotting pathway: platelet
-activation/adhesion and coagulation. In platelet adhesion and
-activation, chemical platelet agonists are exposed on the vessel wall
-and released into the fluid, signaling platelets to begin clot
-formation and adhere to the vessel wall. As activated platelets begin
-to aggregate, extracellular chemical reactions begin to occur both in
-the blood and on platelet surfaces ultimately resulting in the
-production of thrombin, and the formation of a fibrin
-gel. Collectively these two processes are called coagulation
-\cite{Fogelson2015}. 
+activation and coagulation. The dynamics of blood clotting are complex
+and do not proceed in a linear fashion, and so the major processes of
+activation and coagulation occur in parallel and feed back on each
+other in complex ways. Nonetheless, it is convenient to describe in a
+linear progression as sketched in Figure
+\ref{fig:clot-path}. Platelets in the bloodstream activate in response
+to binding to immobilized agonists on the vessel wall or soluble
+agonists dissolved in the blood plasma, and upon activation platelets
+begin clot formation and adhesion to the vessel wall.
 
-The process of platelet activation is mediated through
-intracellular chemical pathways. When a platelet binds with agonists,
-activation pathways are triggered which result in a suite of
-activation responses: degranulation (i.e. release of ADP and other
-soluble agonists), thromboxane A2 (TxA2) synthesis, activation and
-recruitment of \ITA{IIb}\ITB{3} receptors, exposure of
-phosphatidylserine (PS), and---after adhesion to a vessel
-wall---platelet spreading \cite{Bye2016}.
+As activated platelets begin to aggregate, extracellular chemical
+reactions begin to occur both in the blood and on platelet surfaces,
+ultimately resulting in the production of thrombin and the formation
+of a fibrin gel. Coagulation refers specifically to the two processes
+of thrombin generation and fibrin gelation \cite{Fogelson2015}. While
+coagulation is important in facilitating the growth of clots and
+stabilizing existing clots, it is not relevant in our model or in
+Dr. Hlady's experiments. The platelet priming experiments use
+anticoagulated blood, that is thrombin is inactivated and functionally
+removed from the system.
 
-Coagulation broadly refers to the extracellular chemical reaction
-network that produces thrombin. Thrombin is a soluble platelet
-agonist, and so mediates further activation of platelets throughout
-the blood. Thrombin is also the chemical which initiates the process
-of fibrin gelation, by cleaving fibrinogen to form fibrin
-monomers. Finally these fibrin monomers can polymerize to form a
-fibrin gel, which stabilizes the blood clot \cite{Fogelson2015}. These
-two processes do not occur in sequence, but in parallel with abundant
-cross-talk between them. Coagulation can upregulate activation through
-the production of thrombin, activation upregulates coagulation by
-exposing PS on platelet surfaces, and platelet adhesion can
-downregulate coagulation by blocking tissue factor and slowing the
-pathways required to form thrombin \cite{Kuharsky2001}. 
-
+Platelet activation is initiated by intracellular chemical
+pathways. When platelet receptors bind with agonists, the receptors
+trigger activation pathways which result in a suite of activation
+responses: degranulation (i.e. release of ADP and other soluble
+agonists), thromboxane A2 (TxA2) synthesis, activation and recruitment
+of \ITA{IIb}\ITB{3} receptors, exposure of phosphatidylserine (PS),
+and---after adhesion to a vessel wall---platelet spreading
+\cite{Bye2016}.
 
 \subsection{Platelet adhesion to an injury and aggregate formation}
 \label{sec:platelet-adhesion}
 
-In order for a platelet aggregate to form, two processes need to
-occur: platelet adhesion to the vessel wall, and cohesion among
-platelets. In normal hemostasis, adhesion is facilitated by two
-surface-immobilized proteins: collagen embedded in the sub-endothelial
-matrix, and von Willebrand factor (vWF) which can either be bound to
-collagen in the SE matrix or expressed by endothelial cells when
-activated \cite{Fogelson2015}. Platelets in the blood can roll along
-these proteins using fast-forming and fast-breaking bonds, and through
-these contacts activation pathways within the platelet are
-triggered. As a platelet is activated, receptors on the platelet
-surface are activated which can mediate stable, long lasting bonds
-with vWF and collagen \cite{Bye2016,Li2010,Fogelson2015,Qiu2015}. 
-%% (see refs in Fogelson and Neeves, 2015, pp. 384 \& 390).
+In order for a platelet aggregate to form on the vessel wall,
+platelets must adhere to the vessel wall and cohere to other
+platelets. In normal hemostasis, platelets adhere to the vessel wall
+by binding to the surface-immobilized proteins, collagen---which is
+embedded in the sub-endothelial matrix---or von Willebrand Factor
+(vWF)---which can either bind to exposed collagen, or is expressed by
+endothelial cells when they activate \cite{Fogelson2015}. Platelets in
+the blood roll along these proteins using fast-forming and
+fast-breaking bonds, and these contacts trigger activation pathways
+within the platelet. As a result of platelet activation, intracellular
+signaling pathways activate integrin receptors on the platelet
+surface, which mediate stable and long lasting bonds with vWF and
+collagen \cite{Bye2016,Li2010,Fogelson2015,Qiu2015}. Figure
+\ref{fig:transient-binding} shows a platelet transiently binding to
+vWF which itself is adhered to endothelial cells lining the blood
+vessel wall. This is just one example of a transient contact between
+a platelet and an agonist-coated wall; platelets can also bind to
+collagen and fibrinogen immobilized on a surface through different
+receptors. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{transient-binding}
+  \caption[An example of transient platelet binding to vWF through
+  GP1b.]{An example of transient platelet binding to vWF through
+    GP1b. When GP1b is bound to vWF, it initiates intracellular
+    signaling pathways resulting in platelet activation, and in
+    particular activation of \ITA{IIb}\ITB{3} which can mediate stable
+    adhesion.}
+  \label{fig:transient-binding}
+\end{figure}
+
+Platelets constitutively express separate fast receptors for vWF and
+collagen. The receptor GP1b binds to vWF molecules, and GPVI binds to
+collagen. These receptors have fast binding and unbinding kinetics,
+and are therefore able to form bonds with their surface-immobilized
+ligands while the platelet moves past the reactive surface. When these
+bonds form and stretch beyond their rest length, they exert a
+force in opposition to the flow and slow the platelet down. Therefore
+the motion of a platelet along a wall with immobilized agonists is a
+function of the biochemical interactions of receptors and ligands as
+well as the fluid forces exerted on the platelet.
 		
-% Platelets bind to these agonists with fast receptors first (GP1b and
-% GPVI), and then later with slow receptors (\alpha{IIb} \beta{3} and
-% \alpha{2} \beta{1}).
-Platelets constitutively express GP1b and GPVI receptors for vWF and
-collagen respectively. These receptors have fast binding and unbinding
-kinetics, and are therefore able to form bonds with their
-surface-immobilized ligands while the platelet is moving past the
-surface in the blood. When these bonds form and are stretched beyond
-their rest length, they exert a force in opposition to the flow and
-slow the platelet down. Therefore the motion of a platelet along a
-wall with immobilized agonists is a function of the biochemical
-interactions of receptors and ligands as well as the fluid forces
-exerted on the platelet.
-		
-% The fast receptors trigger intracellular signaling cascades that
-% result in platelet activation and activation of the slow receptors.
 These receptors are more than simple physical links between the
-platelet and surface. When they are bound with a ligand, they initiate
-intracellular signaling cascades that are responsible for triggering
-release of intracellular calcium and activating
-phosphatidylinositide-3-kinase (PI3K) which are two crucial events in
-platelet activation \cite{Bye2016,Du2007,Senis2014}. These activation
-pathways ultimately terminate in a suite of responses that are
-collectively called ``platelet activation,'' including granule
+platelet and surface. When they bind with a ligand, they initiate
+intracellular signaling cascades that trigger the release of
+intracellular calcium and activate phosphatidylinositide-3-kinase
+(PI3K) which are two crucial signaling molecules in the platelet
+activation pathway \cite{Bye2016,Du2007,Senis2014}. These activation
+signals ultimately terminate in a suite of responses that are
+collectively called platelet activation. The responses include granule
 secretion, TxA2 synthesis, cytoskeletal rearrangements, and activation
-of integrins \ITA{IIb}\ITB{3} and \ITA{2}\ITB{1}. These integrins are
-receptors for fibrinogen/vWF and collagen, respectively. They are
-constitutively expressed on the surface of the platelet, but on
-unactivated platelets they exist mostly in their low-affinity
-conformation and undergo a conformational change to their
+of the receptors \ITA{IIb}\ITB{3} and \ITA{2}\ITB{1}. These receptors
+mediate firm adhesion of the platelet to vWF and collagen,
+respectively. They are constitutively expressed on the surface of the
+platelet, but on inactive platelets they exist mostly in their
+low-affinity conformation and undergo a conformational change to their
 high-affinity conformation after platelet activation
 \cite{Qiu2015,Shattil1998,Shattil2010}.
-		
-In general, integrins form a large group of transmembrane receptors
-that are primarily involved in the adhesion of cells to extracellular
-matrix (ECM) \cite{Giancotti1999}. They have a large extracellular
-domain---called the ectodomain---with a hinge. In the low affinity
-conformation, the ectodomain is bent at the hinge and the ligand
-binding domain is at least partially blocked. When switching from
-low-affinity to high-affinity conformations the integrin ectodomain
-extends at the hinge to reveal the ligand binding site
-\cite{Campbell2011,Qiu2015,Shattil1998}. Once integrins are bound and
-in their high-affinity conformation, they can activate signal
-transduction pathways to initiate the formation of clusters of
-integrins that mediate firm adhesion of a cell to ECM along with other
-responses \cite{Hynes2002,Li2010,Shattil1998,Shattil2010}.
 
 \subsection{Secondary activation and platelet cohesion}
 \label{sec:second-wave-activ}
@@ -142,141 +138,97 @@ mediators of platelet activation TxA2 and ADP \cite{Bye2016}. These
 are soluble platelet agonists which enter the blood and activate
 platelets in the bulk flow, forming a positive feedback loop where
 activated platelets release chemical signals that trigger more
-platelets to activate. \emph{(Can I say something about a wave of activating
-chemical seen in previous coagulation models by Aaron and his
-students?)} Platelets that are activated in the blood must
-then be recruited to the growing clot by either adhering to collagen
-or vWF exposed on the wall, or by cohering to an existing platelet
-aggregate. 
+platelets to activate. Activated platelets can then be recruited to
+the growing clot by either binding to an agonist adhered to the wall,
+or by cohering to an existing platelet aggregate.
 
 Cohesion among platelets is mediated by vWF and fibrinogen---the
 precursor to fibrin monomers \cite{Fogelson2015}. As mentioned before,
-vWF is bound by the GP1b and \ITA{IIb}\ITB{3} receptors on the
-platelet surface, and fibrinogen is bound by \ITA{IIb}\ITB{3}. Both of
-these molecules circulate within the blood plasma, and activated
-platelets can bind to them. Once a platelet is adhered to the wall, it
-can capture both vWF and fibrinogen, which then act as a cross-bridge
-to which other platelets within the blood can cohere.
-
-\subsection{Coagulation: thrombin generation and fibrin gelation}
-\label{sec:coagulation}
-
-There are two closely related subprocesses in coagulation: thrombin
-generation through the tissue factor (TF) pathway, and fibrin gel
-formation. Thrombin is produced on the external face of platelet
-plasma membranes, and is both a potent activator of platelets
-\cite{Heemskerk2002,Heemskerk2013} and catalyzes fibrinogen conversion
-to fibrin monomers (try to find sources for this, search Mendeley).
-
-%% Is this section necessary?
-
-The TF pathway is initiated when TF embedded in the SEM is exposed to
-the bloodstream. Tissue factor can complex with an active enzyme
-present in the blood plasma to initiate a cascade of enzyme activation
-in the plasma, and on the surface of activated platelets. When
-platelets are strongly activated, they expose phosphatidylserine (PS)
-on the blood-facing side of their plasma membrane, to which
-coagulation factors can bind and catalyze activation of other
-membrane-bound proteins. These surface-mediated reactions are an
-important part \emph{((this is a bit weasley and vague))} of the coagulation
-pathway \cite{Fogelson1998,Kuharsky2001}.
-	
-% Once platelets are activated, they can bind firmly to the wall,
-% release soluble platelet agonists which causes a platelet aggregate to
-% form, and release thrombin which results in the formation of a fibrin
-% gel which ultimately stabilizes a clot.
-
-% 3. Description of cell rolling, a single cell interacting with the surface
-% Should mention margination in here somewhere.
-% Cell rolling is the important first part of the process of platelet
-% activation. There are three main insoluble platelet agonists: vWF,
-% collagen, and fibrinogen. Two important constitutively active platelet
-% receptors are GP1b (binds to vWF) and GPVI (binds to collagen). These
-% receptors have fast association and dissociation and mediate platelet
-% rolling along a vessel wall.
-% There are also constitutively expressed integrins \alpha{IIb}
-% \beta{3} and \alpha{2} \beta{1}, however they are in their
-% low-affinity conformation.
-
-% 1. Description of the priming project
-
-% Why is hemocompatibility important?
-
-% \section{Platelet rolling}
-% \label{sec:platelet-rolling}
+vWF binds with the GP1b and active \ITA{IIb}\ITB{3} receptors on the
+platelet surface, and fibrinogen binds with active
+\ITA{IIb}\ITB{3}. Both of these molecules circulate within the blood
+plasma, and activated platelets can capture them from the blood,
+immobilizing them on the platelet surface. When bound to the surface
+of one platelet, these molecules act as a cross-bridge to which other
+platelets within the blood can cohere.
 
 \section{Description of the priming project}
 \label{sec:priming-project}
 
-Cardiovascular disease is one of the leading causes of death in the
-U.S, and a common treatment for these diseases is to implant medical
+Treatment of cardiovascular diseases often involves implanting medical
 devices into the blood stream. For example, stents (an expandable
-solid mesh) are often used to treat stenotic arteries. However, the
-introduction of a foreign material into the blood stream will cause
-thrombosis unless the material is treated somehow, and while these
-devices have been effective in saving lives, they are still far from
-perfect. Patients with these implanted devices still must be placed on
-anticoagulants, as they have a higher risk of a thrombotic event even
-when the device is functional and surgery is successful
-\cite{Cannegieter1994}.
+solid mesh) are often used to treat stenotic (i.e. blocked or impeded)
+arteries. However, the introduction of a foreign material into the
+blood stream will cause thrombosis unless the material is treated
+somehow, and while these devices have been effective in treating
+disease they still have negative side effects. For example, patients
+with these implanted devices still must be placed on anticoagulants,
+as they have a higher risk of a thrombotic event even when the device
+is functional and surgery is successful \cite{Cannegieter1994}.
 
-% What has been done so far in hemocompatibility research, and what is
-% Vlado's group trying to add?
 Most hemocompatibility studies focus on local interactions and effects
-of the material on platelets. However recent work
-\cite{Corum2011,Corum2012} has shown that nonlocal effects are also
-important in understanding platelet interactions with implanted
-biomaterials. In particular they have shown that platelet interactions
-with immobilized agonists may not cause the platelets to adhere at the
-site of interaction, but can nonetheless prime them for downstream
-adhesion and full activation.
+of artificial biomaterial on platelets. However recent work
+\cite{Corum2011,Corum2012} carried out by Dr. Hlady's group has shown
+that non-local effects are also important in understanding platelet
+interactions with implanted bio-materials. In particular, while
+platelet interactions with immobilized agonists may not cause the
+platelets to adhere at the site of interaction, these interactions
+nonetheless prime platelets for downstream adhesion and full
+activation.
 
 \begin{figure}
   \centering
   \input{blood-vessel}
-  \caption{Cross-section of a blood vessel}
+  \caption[Cross-section of a blood vessel with a vascular
+  graft]{Cross-section of a blood vessel with a vascular graft. There
+    are two anastomotic regions at either end of the graft where
+    artificial material is joined to native tissue.}
   \label{fig:blood-vessel}
 \end{figure}
 
-One possible example of this in a vascular graft is shown in Figure
+One example of this is a vascular graft, shown in Figure
 \ref{fig:blood-vessel}. At either end of the implanted device, native
-tissue must be joined with the artificial device. At these points
-along the vessel wall the tissue is inflamed and anastomotic, which
-could expose platelet agonists on the surface of the
-wall. Additionally the increased shear rate in the stenotic regions
-could act as a platelet agonist through a phenomenon known as
-shear-induced platelet activation
-\cite{Fogelson2015,Kroll96,Shankaran2003}. Therefore while platelets
-may not bind to a single inflamed region of the vessel, the upstream
-region may prime platelets for adhesion, and then more readily bind to
-the downstream inflamed region. It is also possible that the inflamed
-tissue or the biomaterial may not cause platelets to bind locally, but
-nonetheless partially activate platelets and cause them to adhere
-downstream somewhere in the circulation.
-		
-% Describe experimental setup, ongoing experiments, etc
-In order to investigate nonlocal effects of priming, Dr. Hlady's group
-has designed a microfluidic assay with two regions printed with
+tissue must be joined with artificial material. At these points along
+the vessel wall the tissue is inflamed and stenosed, which could
+expose platelet agonists on the surface of the wall. Additionally the
+increased shear rate in the stenotic regions could act to prime
+platelets through a phenomenon known as shear-induced platelet
+activation \cite{Fogelson2015,Kroll96,Shankaran2003}. Therefore while
+platelets may not bind to a single inflamed region of the vessel, the
+upstream region can prime platelets for adhesion, and then more
+readily bind to the downstream inflamed region.
+
+In order to investigate non-local effects of priming, Dr. Hlady's
+group has designed a microfluidic assay with two regions printed with
 platelet agonists (see Figure \ref{fig:flow-chamber})
 \cite{Corum2012}. The upstream agonist region is called the priming
 region, and the downstream region with agonist is called the capture
-region. In the priming region, platelets that are close to the
-agonist-printed surface of the flow chamber may have transient
-contacts with the agonist, initiating activation pathways within the
-platelet. Some platelets may firmly adhere in this priming region, but
-many will not and instead reenter the flow and get washed downstream
-to the capture region. Once they reach the capture region, the
-platelets which contacted the agonist in the priming region will have
-more active integrin on their surfaces \cite{Corum2012}, more
-phosphatidylserine exposed (unpublished data), and probably heightened
-levels of intracellular activating chemicals like Ca$^{++}$. That is,
-they will be ``primed'' to adhere with the capture region, and
-therefore adhere with a greater frequency than unprimed platelets.
+region. While these two regions have different names, there is no
+chemical difference between them, the only difference is in their
+locations in the flow chamber.
+
+In the priming region, platelets close to the agonist-printed surface
+of the flow chamber may have transient contacts with the agonist,
+initiating activation pathways within the platelet. Some platelets may
+firmly adhere in this priming region, but many will not and instead
+will reenter the flow and get washed downstream to the capture
+region. Once they reach the capture region, the platelets which
+contacted the agonist in the priming region will have more active
+integrin on their surfaces \cite{Corum2012}, more phosphatidylserine
+exposed (unpublished data), and probably heightened levels of
+intracellular activating chemicals like Ca$^{++}$. That is, they will
+be primed to adhere with the capture region, and therefore adhere with
+a greater frequency than unprimed platelets.
 
 \begin{figure}
   \centering
   \input{flow-chamber}
-  \caption{Flow chamber}
+  \caption[The microfluidic chambers used in Dr. Hlady's priming
+  experiments.]{Schematic of the microfluidic chambers used in
+    Dr. Hlady's priming experiments. Blood is perfused from left to
+    right over the priming and capture regions. Either immobilized
+    agonist or a nonreactive control is printed in the priming and
+    capture regions}
   \label{fig:flow-chamber}
 \end{figure}
 
@@ -285,14 +237,41 @@ immobilized platelet agonists tested (vWF, collagen, and fibrinogen)
 in the upstream region increased adhesion of platelets in the capture
 region relative to a nonreactive control
 \cite{Corum2012,Eichinger2016}. Recent unpublished work has shown
-similar results when the upstream agonist printing is replaced by a
-stenotic region with higher wall shear rates (unpublished data). In
-addition, flow cytometry has revealed that platelets in blood which
-has been perfused over surface-immobilized agonists express higher
-levels of P-selectin (a marker for degranulation), high-affinity
-\ITA{IIb}\ITB{3}, exposed PS, and lysosomal glycoprotein (another
-marker of degranulation) (see \cite{Corum2012,Eichinger2016} and
-unpublished data).
+similar results when the upstream agonist printing was replaced by a
+stenotic region with higher wall shear rates. In addition, flow
+cytometry has revealed that platelets in blood which has been perfused
+over surface-immobilized agonists express higher concentrations of
+several different activation markers \cite{Corum2012,Eichinger2016}.
+
+In addition to the adhesion and flow cytometry experiments,
+Dr. Hlady's group is studying the effect of priming on the
+rolling behavior of platelets over immobilized agonists. In this set
+of experiments, a camera captures video of platelets rolling along the
+capture region, and from this data they extract average platelet
+rolling velocities, average step sizes, and dwell times of rolling
+platelets. The step size is the length a platelet travels in the
+direction of flow in between binding to the wall. The dwell time is
+the length of time a platelet spends transiently attached to the wall
+in between steps.
+
+While flow cytometry is a useful tool to precisely measure quantities
+of active receptors and other proteins, platelets must be incubated
+with marker chemicals for 20 minutes before measurement, making the
+measurements of platelet activation markers temporally imprecise. On
+the other hand, the behavior of rolling platelets can be observed in
+real time, but the relationship between rolling behavior and platelet
+activation state is not clear. The model presented below and the
+planned future work focuses on quantitatively connecting parameters of
+platelet receptor binding and unbinding to rolling behavior. The rest
+of this chapter lays out a brief review of published mathematical
+models of cell rolling in blood. Chapter \ref{cha:model} describes a
+new model of cell rolling which includes individual receptor and bond
+dynamics, but is simpler than existing models which treat individual
+bonds separately. Chapter \ref{cha:results} explores the behavior of
+the model under simplified conditions, and demonstrates that the model
+predicts different rolling behavior for different platelet activation
+states. Finally chapter \ref{cha:future-work} discusses extensions of the
+basic model which incorporate more physical and biological complexity.
 
 \section{Existing cell rolling models}
 \label{sec:exist-cell-roll}
@@ -300,25 +279,45 @@ unpublished data).
 A large body of work has been published on the subject of cell rolling
 and adhesion, including mathematical models of cell rolling
 \cite{Pospieszalska2009,Sundd2011}. However most of the modeling work
-has been done on leukocyte rolling on an agonist-coated surface, and
-relatively less work has been done on platelet rolling.
+focuses on leukocyte rolling on an agonist-coated surface. Modeling of
+platelet rolling is less common.
 
-\subsection{Adhesive dynamics (AD) models}
+The existing rolling models cover a wide range of assumptions and vary
+from simple and highly idealized to detailed and complex. The simplest
+rolling models often treat cells as a continuum and only reproduce
+population-wide averages of rolling velocity of rolling cells, and
+greatly simplify hydrodynamic and chemical forces. At the other end of
+the spectrum, the most complex models use much more detailed
+hydrodynamic and chemical forces, often explicitly tracking individual
+receptors and ligands on the surface of the cell and the surface of
+the vessel wall, and modeling the rolling behavior of individual cells
+as a stochastic process. 
+
+The data Dr. Hlady's group is collecting cannot be captured in a
+deterministic and continuous model of bond formation, so a model with
+stochastic bond formation that captures rolling behavior of individual
+platelets is the best fit for the available data. One common family of
+rolling models are the adhesive dynamics models, which model the
+formation and breaking of bonds as stochastic events, and these models
+lie on the more complex end of the spectrum of rolling models.
+
+\subsection{Adhesive dynamics models}
 \label{sec:adhesive-dynamics}
 
-Adhesive dynamics (AD) is a common modeling framework for leukocytes,
-and the first AD model was published in 1992 by Hammer \& Apte
-\cite{Hammer1992}. The Hammer and Apte paper provides a good example
-to describe the AD models in general. It is convenient to view the
+Adhesive dynamics (AD) is a common modeling framework for
+leukocytes. Hammer \& Apte \cite{Hammer1992} published the first
+adhesive dynamics model in 1992, and this model provides a good
+example to describe the AD models in general. It is convenient to view
 more recent models as modifications of this fundamental model. They
 model a leukocyte as a rigid sphere, with rigid microvilli protruding
 normally from the surface of the cell. Receptors are located only at
 the tips of these microvilli (multiple receptors can occupy a single
 microvillus), and can bind to ligand binding sites which are uniformly
-distributed along a flat wall. The positions and bound state of each
-receptor is tracked throughout the simulation. Binding and unbinding
-of receptors is modeled with a stochastic process with
-length-dependent rates given by the Dembo model \cite{Dembo1988}:
+distributed along a flat wall (Figure \ref{fig:ad-geom}). The
+positions and bound state of each receptor is tracked throughout the
+simulation. Binding and unbinding of receptors is modeled by a
+stochastic process with length-dependent rates given by the Dembo
+model \cite{Dembo1988}:
 \begin{align}
   \label{eq:dembo-on}
   k_\tn{on} \left(L_\tn{sep}\right)
@@ -334,33 +333,42 @@ $\boltzmann\temp$ is the thermal energy, $\sigma$ is the spring
 constant, and $\sigma_\tn{ts}$ is the transition state spring
 constant.
 
-The movement of the leukocyte is determined by balancing hydrodynamic
-forces and various chemical forces. The hydrodynamic forces are found
-by assuming that the fluid surrounding the leukocyte is a Newtonian
-fluid with $\Reynolds = 0$ at the revelent length and time scales of
-the problem, and the fluid is moving in a shear flow. Under this set
-of assumptions, there is a linear relationship between the drag force
-$\forceVec$ on the cell and the velocity $\velVec$: $\forceVec =
-\resMatrix \velVec$. The chemical forces on the cell are split up into
-5 different forces: bond forces between the cell and the surface, van
-der Waals forces, gravitational body force, electrostatic force, and
-steric stabilization force.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\textwidth]{hammer92scr.jpg}
+  \caption[Model geometry in the adhesive dynamics model of Hammer \&
+  Apte.]{Model geometry in the adhesive dynamics model of Hammer \&
+    Apte. The leukocyte is moving near a ligand-covered wall, and
+    receptors are clustered on the tips of microvilli protruding from
+    the cell. Figure is reproduced from \cite{Hammer1992}}
+  \label{fig:ad-geom}
+\end{figure}
+
+Force balance between hydrodynamic drag forces, bond forces, and
+colloidal forces defines the movement of the leukocyte. The
+hydrodynamic forces are found by assuming that the fluid surrounding
+the leukocyte is a Newtonian fluid with $\Reynolds = 0$ at the
+relevant length and time scales of the problem, and that the fluid is
+moving in a shear flow. Under these assumptions, there is a linear
+relationship between the drag force $\forceVec_\tn{drag}$ on the cell and the
+velocity $\velVec$: $\forceVec_\tn{drag} = \resMatrix \velVec$. The colloidal
+forces on the cell are split up into 4 different forces: van der Waals
+forces, gravitational body force, electrostatic force, and steric
+stabilization force.
 
 \subsubsection{Extensions of AD}
 \label{sec:extensions-ad}
 
 Many extensions and adaptations of the AD model have been made since
-its publication. \cite{King2001} uses the AD framework to model the
-dynamics and interactions of multiple cells rolling on a surface at
-once. In \cite{Bhatia2003}, Bhatia, King, and Hammer model leukocyte
-rolling with two classes of receptors: fast binding and unbinding
-selectins (P-selectin--sLe\textsuperscript{x}), and slow binding and
-unbinding integrins (\ITB{2}-integrin--ICAM-1). They plot the effect
-of modulating the selectin and integrin ligand surface densities by
-creating state diagrams which characterize the cell rolling behavior
-in different regions of this 2D parameter space. They showed the
-effect of neutrophil activation on these state diagrams by increasing
-the $k_\tn{on, integrin}^0$ value.
+its publication. In \cite{Bhatia2003}, Bhatia, King, and Hammer model
+leukocyte rolling with two classes of receptors: fast binding and
+unbinding selectins (P-selectin--sLe\textsuperscript{x}), and slow
+binding and unbinding integrins (\ITB{2}-integrin--ICAM-1). They plot
+the effect of modulating the selectin and integrin ligand surface
+densities by creating state diagrams which characterize the cell
+rolling behavior in different regions of this 2D parameter space. They
+showed the effect of neutrophil activation on these state diagrams by
+increasing the $k_\tn{on, integrin}^0$ value.
 
 A platelet adhesive dynamics (PAD) model is developed in
 \cite{Mody2008a} and \cite{Mody2008b}, which is used to model the
@@ -369,29 +377,120 @@ with vWF. The PAD model was later adapted to model the dynamics of
 platelet rolling on a vWF-coated wall, with collisions between rolling
 platelets and free-flowing platelets \cite{Wang2013}.
 
-Adhesive dynamics models are detailed and expensive, because they
-explicitly model individual receptors on the cell surface, and many of
-them require solving Stokes' equations at every time step. Of the
-receptors involved in rolling of platelets and leukocytes, there can
-be between thousands to tens of thousands of a specific receptor on
-the cell surface. In order to simulate the cell motion near the
-surface, these models require calculating all the forces generated by
-links between the cell and the surface, all forces arising from
-nonspecific chemical interactions, and all drag and shear forces
-exerted by the moving fluid on the cell. In the simplest possible
-case---a rigid sphere---this involves evaluating a $6 \times 6$
-resistance matrix as a function of the height $\height$ of the cell
-and then inverting it. For non-spherical geometries, Stokes' equations
-must be solved at every time step to generate the resistance matrix,
-greatly increasing the computational cost.
+Adhesive dynamics models are detailed and computationally expensive,
+because they explicitly model individual receptors on the cell
+surface, and many of them require solving Stokes' equations at every
+time step. Of the receptors involved in rolling of platelets and
+leukocytes, there can be between thousands to tens of thousands of a
+specific receptor on the cell surface. In order to simulate the cell
+motion near the surface, these models require calculating all the
+forces generated by links between the cell and the surface, all forces
+arising from nonspecific chemical interactions, and all drag and shear
+forces exerted by the moving fluid on the cell. In the simplest
+possible case---a rigid sphere---this involves evaluating a
+$6 \times 6$ resistance matrix as a function of the height $\height$
+of the cell and then inverting it. For non-spherical geometries,
+Stokes' equations must be solved at every time step to generate the
+resistance matrix, greatly increasing the computational cost.
 
-\subsection{Semi-analytic rolling models}
-\label{sec:semi-analytic}
+Adding to the computational cost of the AD models, they only simulate
+the rolling behavior of individual cells, meaning that in order find
+population-level rolling behavior of many platelets, a simulation must
+be carried out for each platelet and then statistics computed from the
+simulated data. To my knowledge, there is no mean-field model of
+adhesive dynamics. In summary, AD modeling accounts for most of the
+forces that a rolling cell experiences at the expense of computational
+speed. Other rolling models make more simplifying assumptions about
+the chemistry and physics of cell rolling, and therefore are simpler
+and faster to implement.
 
-In contrast to the expensive AD models, semi-analytic models save on
-computational cost by tracking bond and receptor densities in the
-cell-substrate contact region instead of tracking every bond
-individually \cite{Pospieszalska2009}. An early example of this comes
-from T\"{o}zeren and Ley \cite{Tozeren1992}. % I need to read a bit
-                                % more about this first before going
-                                % into the other rolling models
+\subsection{Other rolling models}
+\label{sec:other-models}
+
+It is more difficult to talk about the non-AD rolling models as a
+group because they have a greater diversity of assumptions and
+characteristics. In a review of leukocyte rolling models,
+Pospieszalska and Ley group these simplified models into semianalytic
+and analytic models \cite{Pospieszalska2009}. In their classification,
+semianalytic models are models which do not track individual receptors
+and ligands, but still track spatially variable bond densities with
+distance-dependent rate equations. Analytical models are even simpler
+and model cells moving in fluid as particles which have some overall
+rate of binding and unbinding with a surface.
+
+Often these simpler models ignore stochasticity and model cell rolling
+velocity as an average over a population of cells. They also ignore
+some or all of the colloidal forces treated by AD models and simplify
+the fluid dynamics around the rolling cells.
+
+\subsubsection{Semianalytic models of platelet rolling}
+\label{sec:semi-model-plat}
+
+As mentioned above, a critical difference between leukocytes and
+platelets is the difference in their shapes. Leukocytes are
+approximately spherical with a radius of approximately 4--5
+\textmugreek{m}, whereas platelets are oblate ellipsoids with major
+axes approximately 1.5 \textmugreek{m} and a minor axis of
+approximately 0.5 \textmugreek{m}. This makes computing the
+hydrodynamic drag on a platelet much more complicated than on a
+spherical leukocyte. Asymptotic approximations for the drag on a
+sphere with a small separation distance $\separation$ from the wall
+have been computed as a function of $\separation$
+\cite{Jeffrey1915,Brenner1961,Goldman1967a,Goldman1967b}. Therefore
+finding the drag on a sphere near a plane wall simply involves
+evaluating known functions.
+
+No such formulae exist for ellipsoids near a plane wall, and in order
+to find the drag on a platelet one must solve Stokes' equations around
+the platelet and then integrate the traction of the fluid on the
+platelet in order to find the total drag force. Section
+\ref{sec:ellipt-plat-3d} describes this in greater detail. Most
+published rolling models of individual platelets use a boundary
+element method to find the drag on the platelet
+(\cite{Fitzgibbon2014,Mody2008a,Mody2008b,Wang2013} for example).
+
+An example of a semianalytic platelet rolling model is the model of
+Fitzgibbon et. al. \cite{Fitzgibbon2014}. This model uses a
+continuous-time Markov process to describe platelet transitions among
+4 discrete states:
+\begin{enumerate}
+\item flowing freely in the blood vessel core,
+\item flowing freely in the red blood cell depleted layer,
+\item transiently bound to an agonist-coated surface, or
+\item irreversibly bound to an agonist-coated surface.
+\end{enumerate}
+The transition corresponding to platelet margination to the red blood
+cell depleted layer was estimated with previous whole-blood
+simulations of platelet margination. The transitions associated with
+platelet binding to the blood vessel surface were estimated with a
+stochastic model of platelet binding that incorporated drag forces
+computed using a boundary element method. Similar to the semianalytic
+model of leukocyte \cite{Tozeren1992} binding discussed above, the
+binding and unbinding rates were taken to be piecewise constant, and
+bonds that formed were placed randomly with a uniform distribution on
+the surface of the platelet and bound to the closest point on the
+wall.
+
+Analytical models of platelet rolling \cite{Pujos2018} and platelet
+adhesion \cite{Tokarev2011} have been developed as well. Both of these
+models use a continuum approximation of platelet concentration, and
+treat platelet adhesion as a boundary condition for a PDE describing
+platelet motion in the bulk flow. The advantage of both of these
+models is their simplicity; they can be fit to experimental data
+quickly, and they have few parameters relative to the AD models and
+even the semianalytic models.
+
+\section{Summary}
+\label{sec:summary-background}
+
+The sections above provide only a brief summary of a rich body of
+modeling work surrounding cell rolling. I have highlighted models that
+give a sense of the breadth of rolling models, and those which have
+features we would like to include in a new model of platelet rolling
+that incorporates stochasticity, fluid dynamics, specific binding
+kinetics, and is able to respond in some way to platelet activation.
+
+
+% Local Variables:
+% TeX-master: "oral-document.ltx"
+% End:

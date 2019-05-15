@@ -47,13 +47,16 @@
 %%% Package to write normal greek letters in text
 \usepackage{textgreek}
 
-\usepackage{booktabs}
-\usepackage{tabu}
+%%% Packages for more powerful tables
+\usepackage{booktabs,tabu,multirow}
+
+%%% Package for subfloats
 \usepackage{subcaption}
 
-%%% Define a shortcut for textnormal 
+%%% Define shortcuts for often-used commands
 \newcommand{\tn}{\textnormal}
 \newcommand{\inv}{^{-1}}
+\newcommand{\reals}{\mathbb{R}}
 
 %%% Macros for typesetting derivatives and integrals
 \newcommand{\dd}{d}
@@ -61,6 +64,7 @@
 \newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\Int}[4]{\int_{#3}^{#4} #1 \, \dd #2}
 
+%%% Macros for often-used integrals
 \newcommand{\DimReceptorSaturation}{\Int
   {\bondDensity\left(\wallDist,\recAngle,\dTime\right)} {\wallDist}
   {-\infty} {\infty}}
@@ -73,6 +77,9 @@
 \newcommand{\NDQuantity}[1]{\Int {\Int
     {#1 \ndBondDensity\left(\ndWallDist,\recAngle,\ndTime\right)}
     {\ndWallDist} {-\infty} {\infty}} {\recAngle} {-\pi/2} {\pi/2}}
+
+%%% Macro for notes to self
+\newcommand{\note}[1]{{\color{red}{\emph{#1}}}}
 
 %%% Input the definitions of model parameters
 \input{/Users/andrewwork/thesis/model-defs}

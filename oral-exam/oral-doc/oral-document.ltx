@@ -138,7 +138,7 @@
 %%% This tells BibTeX to read x-plain.bst from the first directory where
 %%% it is found in the BSTINPUTS search path:
 
-% \usepackage {x-bst}                     % for macros produced by x-plain.bst
+\usepackage {x-bst}                     % for macros produced by x-plain.bst
 \bibliographystyle {plain}
 
 %%% ====================================================================
@@ -195,7 +195,8 @@
 %%% ====================================================================
 %%% Support for hypertext links in PDF output:
 
-\usepackage [pdftex]{hyperref}          % for hypertext links
+\usepackage [pdftex,hidelinks]{hyperref}          % for hypertext
+                                % links
 
 %%% ====================================================================
 %%% This single user-specific file is where all personal customizations
@@ -209,13 +210,14 @@
 %%% The student-specific front matter fields are defined here:
 
 \author                 {Andrew Watson}
-\title                  {Platelet Priming}
-\thesistype             {}
+\title                  {Towards a model of platelet rolling along and
+  activation by a reactive surface} 
+\thesistype             {dissertation}
 
-\dedication             {Thanks to some people}
+\dedication             {For my parents, Nancy and David.}
 
 %%% Most students need just a short degree name, like this:
-\degree                 {}
+\degree                 {Doctor of Philosophy}
 %%% However, multiline degrees are possible, and are done like this:
 %% \degree                 {Doctor of Philosophy \\
 %%                          in \\
@@ -257,28 +259,28 @@
 
 %%% Dates that must be adjusted for each academic term, and be permitted
 %%% according to the University of Utah Thesis Office:
-\submitdate             {May 2018}
-\copyrightyear          {2018}
+\submitdate             {May 2019}
+\copyrightyear          {2019}
 
 %%% Dates on which committee members approved the thesis
-\chairdateapproved      {2018}
-\firstdateapproved      {2018}
-\seconddateapproved     {2018}
-\thirddateapproved      {2018}
-\fourthdateapproved     {2018}
+\chairdateapproved      {2019}
+\firstdateapproved      {2019}
+\seconddateapproved     {2019}
+\thirddateapproved      {2019}
+\fourthdateapproved     {2019}
 
 %%% ====================================================================
 %%% Typesetting begins here:
-% \includeonly{model}
+% \includeonly{intro}
 \begin{document}
 
 %% Comment out items by inserting a percent % character
 \titlepage                              % MANDATORY
-% \copyrightpage                          % optional, but strongly recommended
-% \dissertationapproval                   % MANDATORY
+\copyrightpage                          % optional, but strongly recommended
+\dissertationapproval                   % MANDATORY
 %% \include {latex-input}                  % ONLY for this sample document
 %% \include {latex-processing}             % ONLY for this sample document
-% \dedicationpage                         % optional
+\dedicationpage                         % optional
 
 %% Most theses have just one table of contents, like this:
 % \tableofcontents                        % MANDATORY
@@ -326,6 +328,7 @@
 \include {nondim}
 \include {scheme}
 \include {parest}
+\include {nreact}
 
 %%% The choice of bibliography style is a major decision, jointly made
 %%% by you, your thesis advisor and the thesis editor. Common choices are

@@ -27,8 +27,8 @@
   % Draws the arrows showing the shear flow
   \foreach \y in {0.5, 1, 1.5, 2, 2.5}
   \draw[->] (-\Length, \y) -- (-\Length + \slope*\y, \y);
-  \draw[gray, very thin] (-\Length, 0) -- node[midway, right, black]
-  {$V_\tn{fluid} = \shear y$} (-\Length + \slope*\Length, \Length);
+  \draw[gray, very thin] (-\Length, 0) -- node[midway, below right, black]
+  {$\tn{Shear rate} = \shear$} (-\Length + \slope*\Length, \Length);
 
   % Draws a bond between the platelet and wall
   \draw[decorate, decoration=zigzag] (pltcenter) ++(315:1)

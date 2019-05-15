@@ -5,7 +5,7 @@
 
 In order to eliminate redundant parameters in the system, we
 nondimensionalize equations
-\eqref{eq:bond-density}---~\eqref{eq:torque-balance} using the
+\eqref{eq:bond-density}--\eqref{eq:torque-balance} using the
 following nondimensional variables:
 $\wallDist \equiv \radius \ndWallDist$,
 $\ndTime \equiv \offConst \dTime$, and
@@ -186,55 +186,55 @@ simultaneously solving equations \eqref{eq:nd-density},
 \begin{table}
   \renewcommand{\arraystretch}{1.5}
   \centering
-  \begin{tabular}{ccl}
+  \begin{tabu}{ccX}
     \toprule
     ND Parameter & Parameter Definition & Description \\
-    \midrule
-    $\ndWallDist$ & $\wallDist = \radius\ndWallDist$ & ND distance
-                                                       coordinate \\
-    $\ndTime$ & $\offConst \dTime = \ndTime$ & ND time \\ 
+    \midrule $\ndWallDist$ & $\wallDist = \radius\ndWallDist$ & ND
+    distance
+    coordinate \\
+    $\ndTime$ & $\offConst \dTime = \ndTime$ & ND time \\
     $\ndBondDensity$ & $\bondDensity = \ndBondDensity
-                       \receptorDensity/\radius$ & ND bond density \\
+    \receptorDensity/\radius$ & ND bond density \\
     $\ndRotation$ & $\rotation = \ndRotation \offConst$ & ND angular
-                                                          velocity \\
+    velocity \\
     $\ndVelocity$ & $\velocity = \radius \offConst \ndVelocity$ & ND
-                                                                  linear
-                                                                  velocity
-    \\ 
+    linear velocity
+    \\
     $\ndSeparation$ & $\separation = \radius \ndSeparation$ & ND
-                                                              cell-surface
-                                                              separation
-    \\ 
+    cell-surface separation
+    \\
     $\ndAppliedRot$ & $\appliedRot = \ndAppliedRot \offConst$ & ND
-                                                                target
-                                                                angular
-                                                                velocity \\
+    target angular
+    velocity \\
     $\ndAppliedVel$ & $\appliedVel = \radius \offConst \ndAppliedVel$
-                                        & ND target linear velocity \\ 
+    & ND target linear velocity \\
     $\ndOnConst$ & $\ndOnConst = \frac{\radius \onConst}{\offConst}$
-                                        & ND max on rate \\
-    $\onForceScale$ & $\onForceScale = \frac{\stiffness
-                      \radius^2}{\boltzmann \temp}$ & ??? \\
+    & ND max on rate \\
+    $\onForceScale$ &
+    $\onForceScale = \frac{\stiffness \radius^2}{\boltzmann \temp}$ &
+    Ratio of characteristic bond energy to
+    thermal energy \\
     $\offForceScale$ & $\offForceScale = \stiffness \radius/\refForce$
-                                        & ??? \\
-    $\ndRotFriction$ & $\ndRotFriction = \frac{\offConst}{\stiffness
-                       \receptorDensity \radius^2} \rotFriction$ &
-                                                                   Nondimensional
-                                                                   drag
-                                                                   coefficient
-    \\ 
-    $\ndVelFriction$ & $\ndVelFriction = \frac{\offConst}{\stiffness
-                       \receptorDensity} \velFriction$ &
-                                                         Nondimensional
-                                                         drag
-                                                         coefficient
+    & Ratio of characteristic bond
+    force to breaking force\\
+    $\ndRotFriction$ &
+    $\ndRotFriction = \frac{\offConst}{\stiffness \receptorDensity
+      \radius^2} \rotFriction$ & ND drag coefficient
+    \\
+    $\ndVelFriction$ &
+    $\ndVelFriction = \frac{\offConst}{\stiffness \receptorDensity}
+    \velFriction$ & ND drag coefficient
     \\
     $\tau_s'$ & $\totalTorque = \stiffness \receptorDensity \radius^2
-                \tau_s'$ & ND torque \\
+    \tau_s'$ & ND torque \\
     $\ndHorzTotalForce$ & $\horzForce = \stiffness \receptorDensity
-                          \radius \ndHorzTotalForce$ & ND force \\
+    \radius \ndHorzTotalForce$ & ND force \\
     \bottomrule
-  \end{tabular}
+  \end{tabu}
   \caption{Nondimensional variables and parameters}
   \label{tab:nd-vars}
 \end{table}
+
+% Local Variables:
+% TeX-master: "oral-document.ltx"
+% End:
