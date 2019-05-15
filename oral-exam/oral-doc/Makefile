@@ -115,8 +115,8 @@ EPSFILES	=
 FIGFILES	= clot-path.tex			\
 		  model-geometry.tex		\
 		  blood-vessel.tex		\
-		  flow-chamber.tex
-
+		  flow-chamber.tex		
+		  
 PDFFILES	= 
 
 STYFILES	= amssymb.sty			\
@@ -142,8 +142,6 @@ TEXFILES        = abstract.tex			\
 		  nondim.tex			\
 		  scheme.tex			\
 		  parest.tex			\
-		  latex-input.tex		\
-		  latex-processing.tex		\
 		  notation.tex
 
 THESIS		= oral-document
@@ -184,6 +182,9 @@ clean:
 	-$(RM) core
 
 clobber:	distclean
+
+count:
+	./bin/texcount.pl -total $(TEXFILES)
 
 distclean:	mostlyclean
 	-$(RM) *.aux
@@ -242,13 +243,13 @@ pdf:	$(THESIS).stripped $(THESIS).pdf
 
 proof:
 	echo "weasel words: "
-	sh bin/weasel *.tex
+	sh bin/weasel $(TEXFILES)
 	echo
 	echo "passive voice: "
-	sh bin/passive *.tex
+	sh bin/passive $(TEXFILES)
 	echo
 	echo "duplicates: "
-	perl bin/dups *.tex
+	perl bin/dups $(TEXFILES)
 
 ps:	$(THESIS).ps
 
@@ -305,7 +306,7 @@ $(THESIS).ind:	FRC $(THESIS).idx $(THESIS).ist
 ### NB: Because of extensive cross-referencing in the thesis, and in
 ### the bibliography entries, we need FOUR complete passes to reach
 ### consistency!
-$(THESIS).pdf:	Makefile $(THESIS).bbl $(THESIS).stripped $(FIGFILES) $(PDFFILES) $(STYFILES) $(TEXFILES) $(TOPFILE)
+$(THESIS).pdf:	Makefile $(THESIS).bbl $(THESIS).stripped $(FIGFILES) $(PDFFILES) $(STYFILES) $(TEXFILES)  $(TOPFILE)
 	-$(MAKE) pdf-pass
 	-$(MAKE) pdf-pass
 	-$(MAKE) pdf-pass
