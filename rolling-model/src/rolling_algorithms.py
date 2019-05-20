@@ -884,7 +884,8 @@ if __name__ == '__main__':
     M, N = 64, 64
     T = float(5)
     time_steps = int(10240*T)
-    kappa = float(100)
+    kappa = float(10)
+    delta = float(1)
     # m0 = np.zeros(shape=(2*M+1, N+1))
     init = 'free'
     # init = 'tbound'  # One bond between the platelet and surface
@@ -895,9 +896,9 @@ if __name__ == '__main__':
     correct_flux = False
 
     write_deterministic_data(M, N, time_steps, init, bond_max=bond_max,
-                             scheme='bw', T=T, kappa=kappa)
+                             scheme='bw', T=T, kappa=kappa, delta=delta)
     write_stochastic_data(trials, proc, M, N, time_steps, init, bond_max,
-                          correct_flux, T=T, kappa=kappa)
+                          correct_flux, T=T, kappa=kappa, delta=delta)
 
     # count_variable(M, N, np.linspace(0, T, time_steps+1), time_steps, init,
     #                bond_max, correct_flux, T=T, kappa=kappa)
