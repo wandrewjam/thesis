@@ -1,0 +1,282 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx}
+
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_\tn{f}}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+
+\newcommand{\xdiff}{\frac{\partial^2}{\partial x^2}}
+\newcommand{\zdiff}{\frac{\partial^2}{\partial z^2}}
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\begin{document}
+\pagestyle{empty}
+
+
+\begin{center}
+  {\Large Notes on Mean Binding Time of a Diffusing Cell}
+\end{center}
+
+\section{Langevin and Fokker-Planck Equations}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.4\textwidth]{binding-schematic}
+  \caption{A diffusing cell with a diffusing receptor head}
+  \label{fig:binding-schematic}
+\end{figure}
+
+Our goal in these notes is to find the mean first binding time of a
+diffusing cell with a receptor with a diffusing head. The problem
+setup is sketched in Figure \ref{fig:binding-schematic}. The cell is a
+rectangle with a single receptor attached to the bottom face. The
+orientation of the cell is fixed, and the variable $x$ is the distance
+from the bottom face of the cell to the wall. We assume the cell
+diffuses perpendicular to the wall with a diffusion coefficient of
+$D_\tn{cell} \equiv D_c$. Therefore $x(t)$ is a continuous time random
+variable described by the Langevin equation
+\begin{equation}
+  dx(t) = \sqrt{2D_c}dW.
+  \label{eq:lang-x}
+\end{equation}
+
+We also assume the head of the receptor is diffusing perpendicular to
+the wall and is attached to a linear spring with a rest length of
+$\lambda$, so that the restoring force on the receptor is proportional
+to the deviation from its rest length. Let $z(t)$ denote the length of
+the spring, then $z$ is a random variable described by the Langevin
+equation
+\begin{equation}
+  dz(t) = -\stiff (z(t) - \lambda) dt + \sqrt{2D_s} dW.
+  \label{eq:lang-z}
+\end{equation}
+
+\subsection{Boundary conditions}
+
+$x(t)$ and $z(t)$ can be any positive quantity, so we have to define
+boundary conditions at $x = 0$ and $z = 0$. Both of these boundaries
+we assume are reflecting boundaries. We also assume the curve $x = z$
+is an absorbing boundary, that is as soon as the receptor head
+contacts the wall it binds.
+
+\subsection{Fokker-Planck equation}
+
+With the Langevin equations and boundary conditions specified above,
+we get a Fokker-Planck equation for the PDF of the system state $(x,
+z)$ at time $t$, given a previous state $(x_0, z_0)$ at previous time
+$t_0$:
+\begin{equation}
+  \Pder{}{t}p(x, z, t \mid x_0, z_0, t_0) = \left[D_c \xdiff + D_s \zdiff -
+    \stiff \Pder{}{z} (z - \lambda)\right] p(x, z, t \mid x_0, z_0, t_0).
+  \label{eq:fokker-planck}
+\end{equation}
+
+Equation (\ref{eq:fokker-planck}) is solved on the domain $\Omega =
+\{(x, z) \in \R^2  \mid  z \ge 0 \tn{ and } x \ge z\}$ for times $t >
+t_0$. The boundary conditions are:
+\begin{align}
+  \label{eq:x-noflux}
+  0 &= \Pder{}{x}p(x, z, t \mid x_0, z_0, t_0)_{|x = 0} \\
+  \label{eq:z-noflux}
+  0 &= \left[D_s \Pder{}{z} - \stiff (z - \lambda)\right]p(x, z,
+  t \mid x_0, z_0, t_0) _{|z = 0} \\
+  \label{eq:xz-absorb}
+  0 &= p(x, x, t \mid x_0, z_0, t_0) \quad \tn{for} \quad x > 0.
+\end{align}
+
+The Fokker-Planck equation is solved for the initial condition $p(x,
+z, t_0 \mid x_0, z_0, t_0) = \delta(x - x_0, z - z_0)$.
+
+Again, our goal is to find the mean first time the head of the
+receptor binds to the wall. However in order to solve this problem, we
+first need to know the \emph{backward Kolmogorov equation}, that is
+the equation that defines the conditional probability $p(x, z, t \mid x_0,
+z_0, t_0)$ as functions of $x_0$ and $z_0$.
+
+\section{The Backward Equation}
+
+Following Dr. Keener's notes, the backward equation is derived using
+the Chapman-Kolmogorov equation:
+\begin{equation}
+  p(x, z, t \mid x_0, z_0, t_0) = \Integral{\Integral{p(x, z, t \mid x', z', t')
+      p(x', z', t' \mid x_0, z_0, t_0)}{x'}{z'}{\infty}}{z'}{0}{\infty}.
+  \label{eq:chap-kolm}
+\end{equation}
+
+This equation just follows from the Markov property of the stochastic
+process. Differentiating both sides of equation (\ref{eq:chap-kolm})
+with respect to $t'$ gives
+\begin{equation}
+  0 = \Integral{\Integral{\left(
+      \Der{}{t'}p(x, z, t \mid x', z', t') p(x', z', t' \mid x_0, z_0, t_0)
+      + p(x, z, t \mid x', z', t') \Der{}{t'}p(x', z', t' \mid x_0, z_0,
+      t_0)\right)
+    }{x'}{z'}{\infty}}{z'}{0}{\infty}.
+\end{equation}
+
+For convenience, define the linear partial differential operator
+$L_{x, z}$:
+\begin{equation}
+  L_{x, z} \equiv \left[D_c \xdiff + D_s \zdiff - \stiff \Pder{}{z} (z
+    - \lambda)\right].
+  \label{eq:L-defn}
+\end{equation}
+
+Then applying equation (\ref{eq:fokker-planck}) to the second term gives 
+\begin{equation}
+  0 = \Integral{\Integral{\left(\Der{}{t'}p(x, z, t \mid x', z', t') p(x',
+      z', t' \mid x_0, z_0, t_0) + p(x, z, t \mid x', z', t') L_{x', z'} p(x',
+      z', t' \mid x_0, z_0, t_0)\right)}{x'}{z'}{\infty}}{z'}{0}{\infty}.
+\label{eq:back-deriv1}
+\end{equation}
+
+Then integrate by parts the second term in equation
+(\ref{eq:back-deriv1}):
+\begin{equation}
+  0 = \Integral{\Integral{p(x', z', t' \mid x_0, z_0, t_0) \left[\Der{}{t'}
+        + L^\dag_{x', z'}\right] p(x, z, t \mid x', z',
+      t')}{x'}{z'}{\infty}}{z'}{0}{\infty}
+  + \text{boundary terms}.
+  \label{eq:back-deriv2}
+\end{equation}
+where $L^\dag_{x', z'} = D_c \frac{\partial^2}{\partial x'^2} + D_s
+\frac{\partial^2}{\partial z'^2} + \stiff (z' - \lambda) \Pder{}{z'}$.
+
+The boundary terms that appear as a result of integrating by parts
+are:
+\begin{multline}
+  \Integral{D_c \left[p(x, z, t \mid x', z', t') \Pder{}{x'} p(x', z',
+      t' \mid x_0, z_0, t_0) - \Pder{}{x'} p(x, z, t \mid x', z', t') p(x_0,
+      z_0, t_0 \mid x', z', t')\right]_{x' = z'}^\infty}{z'}{0}{\infty} \\
+  + \Integral{\left[p(x, z, t \mid x', z', t') \left(D_s \Pder{}{z'} p(x',
+      z', t' \mid x_0, z_0, t_0) - \stiff(z' - \lambda)p(x', z', t' \mid x_0,
+      z_0, t_0)\right)\right]_{z' = 0}^{x'}}{x'}{0}{\infty} \\
+  - \Integral{\left[\Pder{}{z'}p(x, z, t \mid x', z', t') p(x', z', t' \mid x_0,
+      z_0, t_0)\right]_{z' = 0}^{x'}}{x'}{0}{\infty}.
+\end{multline}
+
+This can be simplified by applying known boundary conditions. In
+particular we know that $p(x', z', t' \mid x_0, z_0, t_0)_{|x' = z'} = 0$,
+$\left(D_s \Pder{}{z'} p(x', z', t' \mid x_0, z_0, t_0) - \stiff (z' -
+\lambda) p(x', z', t' \mid x_0, z_0, t_0)\right)_{|z' = 0}$, and $p(x', z',
+t' \mid x_0, z_0, t_0) \rightarrow 0$ and $\Pder{}{z'}p(x', z', t' \mid x_0,
+z_0, t_0) \rightarrow 0$ as $z' \rightarrow \infty$. After applying
+these and setting the boundary terms to 0:
+\begin{multline}
+  \label{eq:bdy-terms}
+  0 = \Integral{D_c \left(p(x, z, t \mid x', z', t') \Pder{}{x'}p(x',
+        z', t' \mid x_0, z_0, t_0)\right)_{|x' = z'}}{z'}{0}{\infty}
+  \\
+  + \Integral{\left(\Pder{}{z'}p(x, z, t \mid x', z', t') p(x', z',
+        t' \mid x_0, z_0, t_0)\right)_{|z'=0}}{x'}{0}{\infty}.
+\end{multline}
+
+Because the choices of $x'$, $z'$, $t'$ are arbitrary, equation
+(\ref{eq:bdy-terms}) implies the following boundary conditions on the
+backward equation:
+\begin{align}
+  \label{eq:bck-absorb}
+  0 &= p(x, z, t \mid x', z', t)_{|x' = z'} \\
+  \label{eq:bck-reflect}
+  0 &= \Pder{}{z'} p(x, z, t \mid x', z', t')_{|z' = 0}.
+\end{align}
+
+After cancelling the boundary terms in equation
+(\ref{eq:back-deriv2}), and again because $x', z', t'$ are all
+arbitrary, we get the \emph{backward equation}
+\begin{equation}
+  \Pder{}{t'} p(x, z, t \mid x', z', t') = -L^\dag_{x', z'} p(x, z, t \mid x',
+  z', t')
+  \label{eq:backward}
+\end{equation}
+for boundary conditions (\ref{eq:bck-absorb}) and
+(\ref{eq:bck-reflect}), and for $t' < t$ and $(x', z') \in \Omega$.
+
+\section{Mean First Binding Time}
+
+Now define the function $G(x', z', t)$ to be the probability that the
+cell is still unbound at time $t$ given that it was initially in state
+$(x, z)$ at time $0$:
+\begin{equation}
+  G(x', z', t) \equiv \iint_\Omega p(x, z, t \mid x', z', 0) dx dz.
+  \label{eq:G-defn}
+\end{equation}
+
+If $T(x', z')$ is the random variable for the first binding time, then
+the complement of the CDF is
+\begin{equation}
+  P(T(x', z') > t) = G(x', z', t) = -\Integral{\Pder{}{s} G(x', z',
+    s)}{s}{t}{\infty}
+  \label{eq:cdf-complement}
+\end{equation}
+and the CDF is 
+\begin{equation}
+  P(T(x', z') < t) = -\Integral{\Pder{}{s} G(x', z', s)}{s}{0}{t}.
+  \label{eq:cdf}
+\end{equation}
+
+Therefore the PDF of $T(x', z')$ is $-\Pder{}{t} G(x', z', t)$ and the
+mean first binding time is given by
+\begin{equation}
+  E(T(x', z')) = -\Integral{t \Pder{}{t} G(x', z', t)}{t}{0}{\infty}
+  \label{eq:expect}
+\end{equation}
+is the expected value of $T(x', z')$. Then because it is a
+time-autonomous process, we can shift time arbitrarily. In particular,
+$p(x, z, t \mid x', z', 0) = p(x, z, 0 \mid x', z', -t)$. Then
+\begin{align}
+  \Pder{}{t} G(x', z', t) &= \iint_\Omega \Pder{}{t} p(x, z, 0 \mid x', z',
+  -t) dx dz \\
+  &= -\iint_\Omega L^\dag_{x', z'} p(x, z, 0 \mid x', z', -t) dx dz \\
+  &= L^\dag_{x', z'} G(x', z', t)
+  \label{eq:mbt-deriv}
+\end{align}
+
+
+
+Define $S(x', z') = E(T(x', z'))$ to be the mean first binding time,
+and integrate equation (\ref{eq:mbt-deriv}) with respect to $t$. Then
+\begin{equation}
+  -1 = \Integral{\Pder{}{t}G(x', z', t)}{t}{0}{\infty}
+  = \Integral{L^\dag_{x', z'} G(x', z', t)}{t}{0}{\infty}
+  = L^\dag_{x', z'} \Integral{G(x', z', t)}{t}{0}{\infty}
+  = L^\dag_{x', z'} S(x', z').
+  \label{eq:mfbt}
+\end{equation}
+
+Then the mean first binding time for a cell starting in position $(x',
+z')$ can be found by integrating equation (\ref{eq:mfbt}). There are
+still boundary conditions to work out.
+
+\end{document}
+
+
+
+
