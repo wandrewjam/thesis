@@ -25,6 +25,7 @@ dissertation/thesis-templates/
 figures/
 dissertation/phd-thesis/*.bib
 *.stripped
+first-binding-model/*.dat
 
 # Copied from github/gitignore/Python.gitignore
 ###############################################
