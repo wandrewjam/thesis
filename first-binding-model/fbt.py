@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.tri import Triangulation
 from scipy.sparse import bmat, coo_matrix, diags, eye
 from scipy.sparse.linalg import spsolve
+from timeit import default_timer as timer
 
 
 def solve_system(N, h, Dc, Ds, kf, gam):
@@ -112,7 +113,12 @@ if __name__ == '__main__':
     x = np.linspace(0, L, num=N+1)
     h = x[1] - x[0]
 
+    start = timer()
     sol = solve_system(N, h, Dc, Ds, kf, gam)
+    end = timer()
+
+    print('It took {:g} seconds to solve the PDE'.format(end-start))
+    
     xtri, ztri, tri = generate_triangulation_arrays(x, z)
     plot_sol = inject_boundaries(sol)
 
