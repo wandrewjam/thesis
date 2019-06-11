@@ -99,45 +99,71 @@ def inject_boundaries(sol):
 
 if __name__ == '__main__':
     import sys
-    
+    save_filename = sys.argv[1]
+
     # Define parameters
-    Ds, Dc = 1, 1
-    kf, gam = 1, 1
-    lam = 0
-    N = 100
-    L = 5
+    Ds, Dc = 2.4, .012
+    kf, gam = 10, 2.8e-7
+    lam = 1.6e-3
+    N = 1000
+    L = 1
 
     z = np.linspace(0, L, num=N+1)
     x = np.linspace(0, L, num=N+1)
     h = x[1] - x[0]
 
     sol = solve_system(N, h, Dc, Ds, kf, gam)
-
     xtri, ztri, tri = generate_triangulation_arrays(x, z)
-
     plot_sol = inject_boundaries(sol)
 
-    plt.rcParams['figure.figsize'] = (8, 6)
+    try:
+        with open('{:s}.dat'.format(save_filename), 'r') as f:
+            while True:
+                overwrite = raw_input('{:s} already exists! Do you want to '
+                                      'overwrite it? Y or N: '
+                                      .format(save_filename))
+                overwrite = overwrite.lower()
+                if overwrite == 'y':
+                    np.savetxt('patch.dat', tri, fmt='%d', delimiter=',')
+                    np.savetxt('{:s}.dat'.format(save_filename),
+                               np.column_stack([xtri, ztri, plot_sol]),
+                               delimiter=',', header='x, z, c', comments='')
+                    break
+                elif overwrite == 'n':
+                    break
+    except IOError:
+        np.savetxt('patch.dat', tri, fmt='%d', delimiter=',')
+        np.savetxt('{:s}.dat'.format(save_filename),
+                   np.column_stack([xtri, ztri, plot_sol]),
+                   delimiter=',', header='x, z, c', comments='')
+
+    plt.rcParams['text.usetex'] = True
     triangulation = Triangulation(xtri, ztri, tri)
-    # plt.triplot(triangulation, 'k-', linewidth=0.1)
-    cs = plt.tricontour(triangulation, plot_sol, colors='k')
-    plt.clabel(cs)
-    plt.tripcolor(triangulation, plot_sol, shading='gouraud')
-    plt.xlabel('$x$')
-    plt.ylabel('$z$')
-    plt.colorbar()
-    plt.savefig('binding-times.png', dpi=300)
+
+    fig, ax = plt.subplots(figsize=(3.36, 3))
+    # cs = ax.tricontour(triangulation, plot_sol, 3, colors='k')
+    # ax.clabel(cs)
+    tpc = ax.tripcolor(triangulation, plot_sol)
+    ax.set_xlabel('$x$')
+    ax.set_ylabel('$z$')
+    ax.set_aspect('equal')
+    fig.colorbar(tpc)
+    fig.tight_layout()
+    fig.savefig('{:s}.png'.format(save_filename), dpi=300)
     plt.show()
 
     # Generate a sample mesh
-    Nsamp = 5
-    xsamp, zsamp = (np.linspace(0, L, num=Nsamp+1),
-                    np.linspace(0, L, num=Nsamp+1))
+    # Nsamp = 5
+    # xsamp, zsamp = (np.linspace(0, L, num=Nsamp+1),
+    #                 np.linspace(0, L, num=Nsamp+1))
 
-    xtrisamp, ztrisamp, trisamp = generate_triangulation_arrays(xsamp, zsamp)
+    # xtrisamp, ztrisamp, trisamp = generate_triangulation_arrays(xsamp, zsamp)
 
-    fig, ax = plt.subplots()
-    ax.triplot(xtrisamp, ztrisamp, trisamp, 'k-o')
-    ax.set_aspect('equal')
-    plt.savefig('sample-mesh.png', dpi=300)
-    plt.show()
+    # figsamp, axsamp = plt.subplots(figsize=(4.55, 4.55))
+    # axsamp.triplot(xtrisamp, ztrisamp, trisamp, 'k-o')
+    # axsamp.set_aspect('equal')
+    # axsamp.set_xlabel('$x$', fontsize=12)
+    # axsamp.set_ylabel('$z$', fontsize=12)
+    # figsamp.tight_layout()
+    # figsamp.savefig('sample-mesh.png', dpi=300)
+    # plt.show()
