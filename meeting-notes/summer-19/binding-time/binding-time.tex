@@ -6,7 +6,16 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage{graphicx}
+\usepackage{graphicx, subcaption}
+\graphicspath{{/Users/andrewwork/thesis/first-binding-model/}}
+
+\usepackage{tikz, pgfplots}
+\usepgfplotslibrary{colorbrewer}
+\pgfplotsset{
+  table/search path = {/Users/andrewwork/thesis/first-binding-model/},
+  table/col sep = comma,
+  colormap/YlGnBu,
+}
 
 \pagestyle{empty} 
 \oddsidemargin -0.25in
@@ -18,14 +27,17 @@
 %\font\cj=msbm10 at 12pt
 
 \newcommand{\tn}{\textnormal}
-\newcommand{\stiff}{\frac{k_\tn{f}}{\gamma}}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
 \newcommand{\dd}{d}
 \newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
 \newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
 
 \newcommand{\xdiff}{\frac{\partial^2}{\partial x^2}}
+\newcommand{\ydiff}{\frac{\partial^2}{\partial y^2}}
 \newcommand{\zdiff}{\frac{\partial^2}{\partial z^2}}
+\newcommand{\z}{\mathbf{z}}
+% Text width is 7 inches
 
 \def\R{\mathbb{R}}
 \def\N{\mathbb{N}}
@@ -36,20 +48,24 @@
 \def\B{\mathcal{B}} 
 %\topmargin -.5in 
 
+\setcounter{secnumdepth}{2}
 \begin{document}
-\pagestyle{empty}
-
+\pagestyle{plain}
 
 \begin{center}
-  {\Large Notes on Mean Binding Time of a Diffusing Cell}
+  {\Large Notes on Mean Binding Time of a Diffusing Cell (6/13/19)}
 \end{center}
 
-\section{Langevin and Fokker-Planck Equations}
+\section{Cell with a Single Receptor}
+\label{sec:cell-with-single}
 
-\begin{figure}
+\subsection{Langevin and Fokker-Planck Equations}
+\label{sec:lang-fokk-planck}
+
+\begin{figure}[h]
   \centering
   \includegraphics[width=.4\textwidth]{binding-schematic}
-  \caption{A diffusing cell with a diffusing receptor head}
+  \caption{A diffusing cell with a diffusing receptor head.}
   \label{fig:binding-schematic}
 \end{figure}
 
@@ -78,7 +94,8 @@ equation
   \label{eq:lang-z}
 \end{equation}
 
-\subsection{Boundary conditions}
+\subsubsection{Boundary conditions}
+\label{sec:boundary-conditions}
 
 $x(t)$ and $z(t)$ can be any positive quantity, so we have to define
 boundary conditions at $x = 0$ and $z = 0$. Both of these boundaries
@@ -86,15 +103,17 @@ we assume are reflecting boundaries. We also assume the curve $x = z$
 is an absorbing boundary, that is as soon as the receptor head
 contacts the wall it binds.
 
-\subsection{Fokker-Planck equation}
+\subsubsection{Fokker-Planck equation}
+\label{sec:fokk-planck-equat}
 
 With the Langevin equations and boundary conditions specified above,
 we get a Fokker-Planck equation for the PDF of the system state $(x,
 z)$ at time $t$, given a previous state $(x_0, z_0)$ at previous time
 $t_0$:
 \begin{equation}
-  \Pder{}{t}p(x, z, t \mid x_0, z_0, t_0) = \left[D_c \xdiff + D_s \zdiff -
-    \stiff \Pder{}{z} (z - \lambda)\right] p(x, z, t \mid x_0, z_0, t_0).
+  \Pder{}{t}p(x, z, t \mid x_0, z_0, t_0) = \left[D_c \xdiff + D_s
+    \zdiff + \stiff \Pder{}{z} (z - \lambda)\right] p(x, z, t \mid
+  x_0, z_0, t_0).
   \label{eq:fokker-planck}
 \end{equation}
 
@@ -102,10 +121,8 @@ Equation (\ref{eq:fokker-planck}) is solved on the domain $\Omega =
 \{(x, z) \in \R^2  \mid  z \ge 0 \tn{ and } x \ge z\}$ for times $t >
 t_0$. The boundary conditions are:
 \begin{align}
-  \label{eq:x-noflux}
-  0 &= \Pder{}{x}p(x, z, t \mid x_0, z_0, t_0)_{|x = 0} \\
   \label{eq:z-noflux}
-  0 &= \left[D_s \Pder{}{z} - \stiff (z - \lambda)\right]p(x, z,
+  0 &= \left[D_s \Pder{}{z} + \stiff (z - \lambda)\right]p(x, z,
   t \mid x_0, z_0, t_0) _{|z = 0} \\
   \label{eq:xz-absorb}
   0 &= p(x, x, t \mid x_0, z_0, t_0) \quad \tn{for} \quad x > 0.
@@ -120,7 +137,8 @@ first need to know the \emph{backward Kolmogorov equation}, that is
 the equation that defines the conditional probability $p(x, z, t \mid x_0,
 z_0, t_0)$ as functions of $x_0$ and $z_0$.
 
-\section{The Backward Equation}
+\subsection{The Backward Equation}
+\label{sec:backward-equation}
 
 Following Dr. Keener's notes, the backward equation is derived using
 the Chapman-Kolmogorov equation:
@@ -130,71 +148,77 @@ the Chapman-Kolmogorov equation:
   \label{eq:chap-kolm}
 \end{equation}
 
-This equation just follows from the Markov property of the stochastic
+Equation (\ref{eq:chap-kolm}) holds for any $t' \in [t_0, t]$, and
+follows from the Markov property of the stochastic
 process. Differentiating both sides of equation (\ref{eq:chap-kolm})
 with respect to $t'$ gives
 \begin{equation}
   0 = \Integral{\Integral{\left(
-      \Der{}{t'}p(x, z, t \mid x', z', t') p(x', z', t' \mid x_0, z_0, t_0)
-      + p(x, z, t \mid x', z', t') \Der{}{t'}p(x', z', t' \mid x_0, z_0,
-      t_0)\right)
-    }{x'}{z'}{\infty}}{z'}{0}{\infty}.
+      \Pder{}{t'}p(x, z, t \mid x', z', t') p(x', z', t' \mid x_0, z_0, t_0)
+      + p(x, z, t \mid x', z', t') \Pder{}{t'}p(x', z', t' \mid x_0,
+      z_0, t_0)\right)}{x'}{z'}{\infty}}{z'}{0}{\infty}. 
 \end{equation}
 
 For convenience, define the linear partial differential operator
 $L_{x, z}$:
 \begin{equation}
-  L_{x, z} \equiv \left[D_c \xdiff + D_s \zdiff - \stiff \Pder{}{z} (z
+  L_{x, z} \equiv \left[D_c \xdiff + D_s \zdiff + \stiff \Pder{}{z} (z
     - \lambda)\right].
   \label{eq:L-defn}
 \end{equation}
 
 Then applying equation (\ref{eq:fokker-planck}) to the second term gives 
 \begin{equation}
-  0 = \Integral{\Integral{\left(\Der{}{t'}p(x, z, t \mid x', z', t') p(x',
-      z', t' \mid x_0, z_0, t_0) + p(x, z, t \mid x', z', t') L_{x', z'} p(x',
-      z', t' \mid x_0, z_0, t_0)\right)}{x'}{z'}{\infty}}{z'}{0}{\infty}.
+  0 = \Integral{\Integral{\left(\Pder{}{t'}p(x, z, t \mid x', z', t')
+        p(x', z', t' \mid x_0, z_0, t_0) + p(x, z, t \mid x', z', t')
+        L_{x', z'} p(x', z', t' \mid x_0, z_0,
+        t_0)\right)}{x'}{z'}{\infty}}{z'}{0}{\infty}.
 \label{eq:back-deriv1}
 \end{equation}
 
 Then integrate by parts the second term in equation
 (\ref{eq:back-deriv1}):
 \begin{equation}
-  0 = \Integral{\Integral{p(x', z', t' \mid x_0, z_0, t_0) \left[\Der{}{t'}
-        + L^\dag_{x', z'}\right] p(x, z, t \mid x', z',
-      t')}{x'}{z'}{\infty}}{z'}{0}{\infty}
-  + \text{boundary terms}.
+  0 = \Integral{\Integral{p(x', z', t' \mid x_0, z_0, t_0)
+      \left[\Pder{}{t'} + L^\dag_{x', z'}\right] p(x, z, t \mid x', z',
+      t')}{x'}{z'}{\infty}}{z'}{0}{\infty} + \text{boundary terms}.
   \label{eq:back-deriv2}
 \end{equation}
 where $L^\dag_{x', z'} = D_c \frac{\partial^2}{\partial x'^2} + D_s
-\frac{\partial^2}{\partial z'^2} + \stiff (z' - \lambda) \Pder{}{z'}$.
+\frac{\partial^2}{\partial z'^2} - \stiff (z' - \lambda)
+\Pder{}{z'}$.
 
 The boundary terms that appear as a result of integrating by parts
 are:
 \begin{multline}
   \Integral{D_c \left[p(x, z, t \mid x', z', t') \Pder{}{x'} p(x', z',
-      t' \mid x_0, z_0, t_0) - \Pder{}{x'} p(x, z, t \mid x', z', t') p(x_0,
-      z_0, t_0 \mid x', z', t')\right]_{x' = z'}^\infty}{z'}{0}{\infty} \\
-  + \Integral{\left[p(x, z, t \mid x', z', t') \left(D_s \Pder{}{z'} p(x',
-      z', t' \mid x_0, z_0, t_0) - \stiff(z' - \lambda)p(x', z', t' \mid x_0,
-      z_0, t_0)\right)\right]_{z' = 0}^{x'}}{x'}{0}{\infty} \\
-  - \Integral{\left[\Pder{}{z'}p(x, z, t \mid x', z', t') p(x', z', t' \mid x_0,
-      z_0, t_0)\right]_{z' = 0}^{x'}}{x'}{0}{\infty}.
+      t' \mid x_0, z_0, t_0) - \Pder{}{x'} p(x, z, t \mid x', z', t')
+      p(x', z', t' \mid x_0, z_0, t_0)\right]_{x' =
+      z'}^\infty}{z'}{0}{\infty} \\ 
+  + \Integral{\left[p(x, z, t \mid x', z', t') \left(D_s \Pder{}{z'}
+        p(x', z', t' \mid x_0, z_0, t_0) + \stiff(z' - \lambda)p(x',
+        z', t' \mid x_0, z_0, t_0)\right)\right]_{z' =
+      0}^{x'}}{x'}{0}{\infty} \\
+  - \Integral{D_s \left[\Pder{}{z'}p(x, z, t \mid x', z', t') p(x', z', t'
+      \mid x_0, z_0, t_0)\right]_{z' = 0}^{x'}}{x'}{0}{\infty}.
 \end{multline}
 
 This can be simplified by applying known boundary conditions. In
-particular we know that $p(x', z', t' \mid x_0, z_0, t_0)_{|x' = z'} = 0$,
-$\left(D_s \Pder{}{z'} p(x', z', t' \mid x_0, z_0, t_0) - \stiff (z' -
-\lambda) p(x', z', t' \mid x_0, z_0, t_0)\right)_{|z' = 0}$, and $p(x', z',
-t' \mid x_0, z_0, t_0) \rightarrow 0$ and $\Pder{}{z'}p(x', z', t' \mid x_0,
-z_0, t_0) \rightarrow 0$ as $z' \rightarrow \infty$. After applying
-these and setting the boundary terms to 0:
+particular we know that
+$p(x', z', t' \mid x_0, z_0, t_0)_{|x' = z'} = 0$,
+$\left(D_s \Pder{}{z'} p(x', z', t' \mid x_0, z_0, t_0) + \stiff (z' -
+  \lambda) p(x', z', t' \mid x_0, z_0, t_0)\right)_{|z' = 0}$, and
+$p(x', z', t' \mid x_0, z_0, t_0) \rightarrow 0$ and
+$\Pder{}{z'}p(x', z', t' \mid x_0, z_0, t_0) \rightarrow 0$ as
+$z' \rightarrow \infty$. After applying these and setting the boundary
+terms to 0:
 \begin{multline}
   \label{eq:bdy-terms}
   0 = \Integral{D_c \left(p(x, z, t \mid x', z', t') \Pder{}{x'}p(x',
-        z', t' \mid x_0, z_0, t_0)\right)_{|x' = z'}}{z'}{0}{\infty}
-  \\
-  + \Integral{\left(\Pder{}{z'}p(x, z, t \mid x', z', t') p(x', z',
+      z', t' \mid x_0, z_0, t_0)\right)_{|x' = z'}}{z'}{0}{\infty} \\
+  + \Integral{D_s \left( p(x, z, t \mid x', z', t') \Pder{}{z'}p(x',
+        z', t' \mid x_0, z_0, t_0)\right)_{|x'=z'}}{x'}{0}{\infty} \\
+  + \Integral{D_s \left(\Pder{}{z'}p(x, z, t \mid x', z', t') p(x', z',
         t' \mid x_0, z_0, t_0)\right)_{|z'=0}}{x'}{0}{\infty}.
 \end{multline}
 
@@ -219,11 +243,12 @@ arbitrary, we get the \emph{backward equation}
 for boundary conditions (\ref{eq:bck-absorb}) and
 (\ref{eq:bck-reflect}), and for $t' < t$ and $(x', z') \in \Omega$.
 
-\section{Mean First Binding Time}
+\subsection{Mean First Binding Time}
+\label{sec:mean-first-binding}
 
 Now define the function $G(x', z', t)$ to be the probability that the
 cell is still unbound at time $t$ given that it was initially in state
-$(x, z)$ at time $0$:
+$(x', z')$ at time $0$:
 \begin{equation}
   G(x', z', t) \equiv \iint_\Omega p(x, z, t \mid x', z', 0) dx dz.
   \label{eq:G-defn}
@@ -246,6 +271,7 @@ Therefore the PDF of $T(x', z')$ is $-\Pder{}{t} G(x', z', t)$ and the
 mean first binding time is given by
 \begin{equation}
   E(T(x', z')) = -\Integral{t \Pder{}{t} G(x', z', t)}{t}{0}{\infty}
+  =^\tn{IBP} \Integral{G(x', z', t)}{t}{0}{\infty}
   \label{eq:expect}
 \end{equation}
 is the expected value of $T(x', z')$. Then because it is a
@@ -255,11 +281,19 @@ $p(x, z, t \mid x', z', 0) = p(x, z, 0 \mid x', z', -t)$. Then
   \Pder{}{t} G(x', z', t) &= \iint_\Omega \Pder{}{t} p(x, z, 0 \mid x', z',
   -t) dx dz \\
   &= -\iint_\Omega L^\dag_{x', z'} p(x, z, 0 \mid x', z', -t) dx dz \\
-  &= L^\dag_{x', z'} G(x', z', t)
+  &= L^\dag_{x', z'} G(x', z', t).
   \label{eq:mbt-deriv}
 \end{align}
 
-
+Applying the boundary conditions (\ref{eq:bck-absorb}) and
+(\ref{eq:bck-reflect}) in the definition of $G$ (equation
+(\ref{eq:G-defn})) results in the boundary conditions on $G$:
+\begin{align}
+  \label{eq:G-absorb}
+  0 &= G(x', z', t)_{|x' = z'} \\
+  \label{eq:G-reflect}
+  0 &= \Pder{}{z'}G(x', z', t)_{|z' = 0}.
+\end{align}
 
 Define $S(x', z') = E(T(x', z'))$ to be the mean first binding time,
 and integrate equation (\ref{eq:mbt-deriv}) with respect to $t$. Then
@@ -272,8 +306,606 @@ and integrate equation (\ref{eq:mbt-deriv}) with respect to $t$. Then
 \end{equation}
 
 Then the mean first binding time for a cell starting in position $(x',
-z')$ can be found by integrating equation (\ref{eq:mfbt}). There are
-still boundary conditions to work out.
+z')$ can be found by integrating equation (\ref{eq:mfbt}). Again by
+using the definition of $S$, the boundary conditions on $S$ are given
+by
+\begin{align}
+  \label{eq:S-absorb}
+  0 &= S(x', z')_{|x' = z'} \\
+  \label{eq:S-reflect}
+  0 &= \Pder{}{z'} S(x', z')_{|z'=0}.
+\end{align}
+
+Therefore the distribution of mean first binding times $S(x', z'):
+\Omega \rightarrow (0, \infty)$ is given by the elliptic PDE
+\begin{equation}
+  \label{eq:S-pde}
+  -1 = D_c \frac{\partial^2}{\partial x'^2}S(x', z') + D_s
+  \frac{\partial^2}{\partial z'^2}S(x', z') - \stiff (z' - \lambda)
+  \Pder{}{z'}S(x', z')
+\end{equation}
+subject to the boundary conditions (\ref{eq:S-absorb}) and
+(\ref{eq:S-reflect}).
+
+Question: this method gives a \emph{distribution} of binding times
+depending on the initial position of the cell, however we want a
+single binding time; so how do we define that? One option: take $x' =
+d$ (where $d$ is a parameter from the rolling model) and $z' =
+\lambda$.
+
+\subsection{Numerics}
+\label{sec:numerics}
+
+Start by defining a uniform mesh on the PDE domain $\Omega$: $x_i =
+ih$, $z_j = jh$. Because the node spacing is the same in the $x$ and
+$z$ directions, the numerical domain is $\Omega_h = \left\{ (ih, jh)
+  \mid i \ge j \ge 0\right\}$. Then for any $(x_i, z_j) \in \Omega_h$,
+\begin{equation}
+  \label{eq:num1}
+  -1 = D_c \frac{\partial^2}{\partial x'^2}S(x_i, z_j) + D_s
+  \frac{\partial^2}{\partial z'^2} S(x_i, z_j) - \stiff(z_j - \lambda)
+  \Pder{}{z'}S(x_j, z_j).
+\end{equation}
+
+Approximating the derivatives with 2nd order finite differences gives
+the equation
+\begin{multline}
+  -1 = D_c \left( \frac{S(x_{i-1}, z_j) - 2S(x_i, z_j) + S(x_{i+1},
+      z_j)}{h^2} \right) + D_s \left( \frac{S(x_i, z_{j-1}) - 2S(x_i,
+      z_j) + S(x_i, z_{j+1})}{h^2} \right) \\ 
+  - \stiff(z_j - \lambda) \left( \frac{-S(x_i, z_{j-1}) + S(x_i,
+      z_{j+1})}{2h} \right) + O(h^2) \quad i > j > 0.
+\end{multline}
+
+Then dropping the error term and letting $S_{i,j} \approx S(x_i, z_j)$
+gives the numerical scheme:
+\begin{equation}
+  \label{eq:scheme}
+  -1 = \frac{D_c}{h^2} \left(S_{i-1, j} + S_{i+1, j} \right) + \left(
+    \frac{D_s}{h^2} + \frac{k_f}{2h\gamma}(z_j - \lambda) \right)
+  S_{i, j-1} + \left( \frac{D_s}{h^2} - \frac{k_f}{2h\gamma}(z_j -
+    \lambda) \right) S_{i, j+1} - \frac{2}{h^2}(D_c + D_s) S_{i, j}.
+\end{equation}
+
+Equation (\ref{eq:scheme}) applies on the interior of $\Omega_h$: $i >
+j > 0$. On the boundaries, apply the Dirichlet and Neumann BCs as
+appropriate:
+\begin{align}
+  0 &= S_{i, i} \quad \tn{for} \quad i \ge 0 \\
+  0 &= S_{i, 0} - S_{i, 1} \quad \tn{for} \quad i > 0. \\
+\end{align}
+
+In order to solve the problem numerically we also need to truncate
+the domain, so take $N$ to be the maximum number of nodes in the $x$
+(or $z$) direction. Then apply a reflecting boundary condition at $i =
+N$:
+\begin{equation}
+  \label{eq:trunc-bdy}
+  0 = S_{N, j-1} - S_{N, j} \quad \tn{for} \quad N > j > 0.
+\end{equation}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.65\textwidth]{sample-mesh}
+  \caption[Sample mesh]{Sample mesh of the numerical domain. Nodes and
+    elements are plotted for $N = 5$.}
+  \label{fig:sample-mesh}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{no-flux.png}
+    \caption{}
+    \label{fig:no-flux-sym}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{no-flux-asym.png}
+    \label{fig:no-flux-asym}
+  \end{subfigure}
+  \caption{Heatmap of mean binding times for $D_c = 1$, $\lambda = 0$,
+    $k_f/\gamma = 0$, and $D_s = 1$ (left) or $D_s = 10$ (right).}
+  \label{fig:no-flux}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{flux.png}
+    \label{fig:flux-sym}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{flux-asym.png}
+    \label{fig:flux-asym}
+  \end{subfigure}
+  \caption{Heatmap of mean binding times for $D_c = 1$, $\lambda = 0$,
+    $k_f/\gamma = 1$, and $D_s = 1$ (left) or $D_s = 10$ (right).}
+  \label{fig:flux}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{large-flux.png}
+    \label{fig:large-flux-sym}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{large-flux-asym.png}
+    \label{fig:large-flux-asym}
+  \end{subfigure}
+  \caption{Heatmap of mean binding times for $D_c = 1$, $\lambda = 0$,
+    $k_f/\gamma = 5$, and $D_s = 1$ (left) or $D_s = 10$ (right).}
+  \label{fig:large-flux}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{nzlam.png}
+    \label{fig:nzlam-sym}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{nzlam-asym.png}
+    \label{fig:nzlam-asym}
+  \end{subfigure}
+  \caption{Heatmap of mean binding times for $D_c = 1$, $\lambda = 2$,
+    $k_f/\gamma = 1$, and $D_s = 1$ (left) or $D_s = 10$ (right).}
+  \label{fig:nzlam}
+\end{figure}
+
+\subsection{Nondimensionalization and Parameter Estimation}
+\label{sec:nondim}
+
+Recall the Fokker-Planck equation (\ref{eq:fokker-planck}) is
+\begin{equation*}
+  \Pder{}{t}p(x, z, t \mid x_0, z_0, t_0) = \left[D_c \xdiff + D_s
+    \zdiff + \stiff \Pder{}{z} (z - \lambda)\right] p(x, z, t \mid
+  x_0, z_0, t_0).
+\end{equation*}
+
+There are 4 parameters in the Fokker-Planck equation: $D_c$, $D_s$,
+$\stiff$, and $\lambda$. Estimate $k_f = 10 \tn{pN}/\tn{nm}$ and
+$\lambda = 4 \tn{nm}$ (from \cite{Dayananda2010,Fox1988}). The drag
+coefficient $\gamma$ comes from Stokes' law applied to the head of the
+receptor. The radius of the head of GP1b is estimated at
+$R_\tn{rec} = 5 \tn{nm}$ \cite{Dayananda2010,Fox1988}. This gives
+\begin{equation}
+  \gamma = 6\pi (3 \times 10^{-3} \tn{Pa}\cdot\tn{s}) (5 \tn{nm}) =
+  6\pi \left(3\times \frac{10^{9} \tn{pN}}{\left(10^9
+        \tn{nm}\right)^2} \cdot \tn{s} \right) (5 \tn{nm}) = 90\pi
+  \times 10^{-9} \frac{\tn{pN}\cdot\tn{s}}{\tn{nm}} \approx 2.8 \times
+  10^{-7} \frac{\tn{pN}\cdot\tn{s}}{\tn{nm}}.
+\end{equation}
+
+Then
+\begin{equation}
+  k_f/\gamma = \left.\left(10 \frac{\tn{pN}}{\tn{nm}} \right) \middle/
+    \left(2.8 \times 10^{-7}
+      \frac{\tn{pN}\cdot\tn{s}}{\tn{nm}}\right)\right. = 3.6 \times
+  10^7 \tn{s}^{-1}.
+\end{equation}
+
+Using the Stokes-Einstein equation to estimate the diffusion
+coefficient of the head of the spring:
+\begin{equation}
+  D_s = \frac{k_B T}{\gamma} = \frac{1.38 \times 10^{-23}
+    \frac{\tn{J}}{\tn{K}} \cdot 310 \tn{K}}{2.8 \times 10^{-7}
+    \frac{\tn{pN}\cdot\tn{s}}{\tn{nm}}} = \frac{4.28 \times 10^{-21}
+    \left(10^{12} \tn{pN}\right) \left(10^9 \tn{nm}\right)}{2.8 \times
+    10^{-7} \frac{\tn{pN}\cdot\tn{s}}{\tn{nm}}} = 1.5 \times 10^7 \frac{\tn{nm}^2}{\tn{s}}.
+\end{equation}
+
+The Stokes-Einstein equation can also be applied to a
+platelet. However, this only estimates the thermal diffusion of a
+platelet-sized sphere. In whole blood, platelets may be jostled by
+other platelets and RBCs which increases the apparent diffusion
+coefficient of platelets. Therefore, the Stokes-Einstein equation can
+only give a lower bound on the platelet diffusion coefficient. If we
+call $D_c^\tn{therm}$ the thermal diffusion coefficient of a platelet,
+then
+\begin{equation}
+  D_c > D_c^\tn{therm} = \frac{k_B T}{\gamma_\tn{plt}} = \frac{4.28
+    \tn{pN}\cdot\tn{nm}}{6\pi \left(3 \times 10^{-9}
+      \frac{\tn{pN}\cdot\tn{s}}{\tn{nm}^2} \right) \left(10^3
+      \tn{nm}\right)} = 7.5 \times 10^4 \frac{\tn{nm}^2}{\tn{s}}.
+\end{equation}
+
+Two-dimensional simulations of whole blood by Crowl \& Fogelson
+\cite{Crowl2011} found the RBC-free layer is approximately 2--3 $\mu$m
+thick, and they estimated a lateral diffusion coefficient of
+1.5--2.5$\times 10^{-7} \frac{\tn{cm}^2}{\tn{s}}$ for platelets in the
+RBC-free layer. If we approximate $D_c \approx 2 \times 10^{-7}
+\frac{\tn{cm}^2}{\tn{s}} = 2 \times 10^{-7} \frac{\left(10^7
+    \tn{nm}\right)^2}{\tn{s}} = 2 \times 10^7 \frac{\tn{nm}}{\tn{s}}$,
+then $D_s \approx D_c$. 
+
+In order to nondimensionalize the problem, define nondimensional
+variables $\xi$, $\zeta$, and $\tau$ defined so that $x = X \xi$, $z =
+X \zeta$, and $t = T \tau$ where $X$ and $T$ are characteristic length
+and time scales of the problem. Take $X = 2.5 \mu\tn{m}$ to be the
+approximate width of the RBC-free layer in whole blood with a normal
+hematocrit, and $T = 1 \tn{s}$. Then in nondimensional coordinates,
+the Fokker-Planck equation becomes
+\begin{equation}
+  \label{eq:nd-fp}
+  \Pder{}{\tau} p(\xi, \zeta, \tau \mid \xi_0, \zeta_0, \tau_0) =
+  \left[D_c \frac{T}{X^2} \frac{\partial^2}{\partial \xi^2} + D_s
+    \frac{T}{X^2} \frac{\partial^2}{\partial \zeta^2} + \frac{k_f
+      T}{\gamma} \Pder{}{\zeta} \left(\zeta - \frac{\lambda}{X}\right)
+  \right] p(\xi, \zeta, \tau \mid \xi_0, \zeta_0, \tau_0).
+\end{equation}
+
+Plugging in the estimates for the dimensional parameters and the
+characteristic scalings of the problem,
+\begin{align}
+  \label{eq:nd-Dc}
+  \tilde{D}_c^\tn{therm} &= D_c^\tn{therm} \frac{T}{X^2} = \left(7.5
+                           \times 10^4 \frac{\tn{nm}^2}{\tn{s}}\right)
+                           \frac{1\tn{s}}{\left(2.5 \times 10^3
+                           \tn{nm}\right)^2} = 1.2 \times 10^{-2} \\
+  \label{eq:nd-Ds}
+  \tilde{D}_s &= D_s \frac{T}{X^2} = \left(1.5 \times 10^7
+                \frac{\tn{nm}^2}{\tn{s}}\right)
+                \frac{1\tn{s}}{\left(2.5 \times 10^3 \tn{nm}\right)^2}
+                = 2.4 \\
+  \label{eq:nd-kappa}
+  \kappa &= \frac{k_f T}{\gamma} = \frac{10 \frac{\tn{pN}}{\tn{nm}}
+           \cdot 1\tn{s}}{2.8 \times 10^{-7}}
+           \frac{\tn{pN}\cdot\tn{s}}{\tn{nm}} = 3.6 \times 10^7 \\
+  \label{eq:nd-rest}
+  l &= \frac{\lambda}{X} = \frac{4 \tn{nm}}{2.5 \times 10^3 \tn{nm}} =
+      1.6 \times 10^{-3}. 
+\end{align}
+
+Equation (\ref{eq:nd-fp}) yields the following equation for the
+nondimensional mean first binding time of the cell:
+\begin{equation}
+  \label{eq:nd-mfbt}
+  -1 = \tilde{D}_c^\tn{therm} \frac{\partial^2}{\partial \xi^2} S(\xi,
+  \zeta) + \tilde{D}_s \frac{\partial^2}{\partial \zeta^2} S(\xi,
+  \zeta) - \kappa (\zeta - l) \Pder{}{\zeta} S(\xi, \zeta).
+\end{equation}
+
+I encountered numerical difficulties when trying to solve this
+equation. The result of trying to solve equation (\ref{eq:nd-mfbt})
+with realistic parameter values is shown in Figure
+\ref{fig:real-par}. I tried running the simulation with $N = 10^4$,
+but with that mesh size there are $5 \times 10^7$ nodes, and solving
+the problem requires inverting a matrix with $\sim 2.5 \times 10^8$
+nonzero entries and I ran into a memory error when trying to solve
+this. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.48\textwidth]{real-par.png}
+  \caption{Unstable numerical solution for equation (\ref{eq:nd-mfbt})
+  with parameter values given in
+  (\ref{eq:nd-Dc})---(\ref{eq:nd-rest}). For the mesh, $N = 1000$
+  which results in 500,500 nodes.}
+  \label{fig:real-par}
+\end{figure}
+
+Next, I experimented with some smaller---but still relatively
+large---values of $\kappa$ in Figure \ref{fig:vary-kappa} to get some
+intuition of what is occurring as $\kappa \rightarrow \infty$. There
+is a thin boundary layer that develops along the boundary $\xi =
+\zeta$ that seems to narrow as $\kappa$ increases. One possible
+reason for the numerical instability is that the mesh is not able to
+resolve this boundary layer for large enough values of $\kappa$. 
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{k1.png}
+    \caption{Solution of $S$ with $\kappa = 36$}
+    \label{fig:k1}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{k2.png}
+    \caption{Solution of $S$ with $\kappa = 360$}
+    \label{fig:k2}
+  \end{subfigure}
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{k3.png}
+    \caption{Solution of $S$ with $\kappa = 3.6 \times 10^3$}
+    \label{fig:k3}
+  \end{subfigure}
+  \caption{Increasing $\kappa$ with all other nondimensional parameters fixed.}
+  \label{fig:vary-kappa}
+\end{figure}
+
+The boundary layer that appears in the plots in Figure
+\ref{fig:vary-kappa} makes intuitive sense: if $\zeta$ is close to
+$\xi$, there is a chance for the receptor head to diffuse across the
+small distance to the wall (or for the cell to diffuse across this
+distance) before the restoring force on the spring pulls the receptor
+head to its rest length. As the stiffness of the spring increases, the
+spring force increases and reduces the time the receptor or cell has
+to diffuse to the wall before the receptor head is pulled away from
+the wall. Because the force on the receptor head increases as the
+distance from rest length increases, it is also possible that the
+width of the boundary layer decreases as $\xi$ and $\zeta$ increase,
+perhaps depending on the relative sizes of $D_c$ and $D_s$.
+
+I would also have expected that away from the boundary layer, $S(\xi,
+\zeta)$ would just be the mean first passage time of a cell diffusing
+perpendicular to the wall starting at position $\xi$. While the plots
+in Figure \ref{fig:vary-kappa} show that the outer solution away from
+the boundary layer is independent of $\zeta$, the mean binding times
+increase as $\kappa$ increases which disagrees with my intuition. It
+may be useful to find an asymptotic approximation of $S$ for large
+$\kappa$ to verify whether my intuition is incorrect or if there is
+some issue with the numerical implementation.
+
+I also wanted to verify that a too-coarse mesh could be the source of
+numerical instability in Figure \ref{fig:real-par}. To experiment with
+this, I chose $\kappa = 3.6 \times 10^3$ (with all other parameters as
+above) and generated numerical solutions for increasingly coarse
+meshes. A mesh with $N = 1000$ is able to solve the PDE with no
+apparent instability, as shown in Figure \ref{fig:stable-par}. In
+Figure \ref{fig:unstable-par} $N = 100$, there is some numerical
+instability that appears near the $\xi = \zeta$ boundary, but it is
+damped out quickly as it moves to the interior of the domain. Figure
+\ref{fig:unstable-small-mesh} shows the numerical solution with $N =
+50$, and the results are similar to the $N = 100$ solution, the only
+difference is that the instability travels farther into the domain
+before being damped out. At the coarsest mesh---$N = 20$---in Figure
+\ref{fig:very-small-mesh}, the instability pollutes the entire domain,
+and we get negative values for $S$ as we do in the solution for
+$\kappa = 3.6 \times 10^7$. 
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{stable-par.png}
+    \caption{Numerical solution of $S$ with $N = 1000$.}
+    \label{fig:stable-par}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{unstable-par.png}
+    \caption{Numerical solution of $S$ with $N = 100$.}
+    \label{fig:unstable-par}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{unstable-small-mesh.png}
+    \caption{Numerical solution of $S$ with $N = 50$.}
+    \label{fig:unstable-small-mesh}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{very-small-mesh.png}
+    \caption{Numerical solution of $S$ with $N = 20$.}
+    \label{fig:very-small-mesh}
+  \end{subfigure}
+  \caption[Numerical instability]{Numerical instability for
+    increasingly coarse mesh sizes, with $\kappa$ fixed at $3.6\times10^3$.}
+  \label{fig:numerical-instability}
+\end{figure}
+
+\section{Cell with Two Receptors}
+\label{sec:cell-two-rec}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.4\textwidth]{binding-schematic-3d.png}
+  \caption{A diffusing cell with two diffusing receptor heads.}
+  \label{fig:binding-schematic-2}
+\end{figure}
+
+Now consider a cell with two receptors that are identical and
+independent. Let $x(t)$ be the random variable giving the height of
+the cell, and $y(t)$ and $z(t)$ be the random variables that give the
+length of the two springs. The Langevin equation for $x(t)$ is the
+same as in the single receptor case:
+\begin{equation}
+  \label{eq:lang-x-2}
+  dx(t) = \sqrt{2D_c}dW,
+\end{equation}
+and the Langevin equation for both springs are the same as the
+equation for the single receptor:
+\begin{align}
+  \label{eq:lang-y-2}
+  dy(t) &= -\stiff (y(t) - \lambda) dt + \sqrt{2D_s} dW, \\
+  \label{eq:lang-z-2}
+  dz(t) &= -\stiff (z(t) - \lambda) dt + \sqrt{2D_s} dW.
+\end{align}
+
+The Fokker-Planck equation for the state of this system is:
+\begin{multline}
+  \label{eq:fokker-planck-2}
+  \Pder{}{t}p(x, y, z, t \mid x_0, y_0, z_0, t_0) \\
+  = \left[D_c \xdiff + D_s \ydiff + D_s \zdiff + \stiff \Pder{}{y} (y
+    - \lambda) + \stiff \Pder{}{z} (z - \lambda)\right] p(x, y, z, t
+  \mid x_0, y_0, z_0, t_0),
+\end{multline}
+subject to the boundary conditions
+\begin{align}
+  \label{eq:y-noflux-2}
+  0 &= \left[D_s \Pder{}{y} + \stiff (y - \lambda)\right]p(x, y, z, t
+      \mid x_0, y_0, z_0, t_0)_{|y = 0}, \\
+  \label{eq:z-noflux-2}
+  0 &= \left[D_s \Pder{}{z} + \stiff (z - \lambda)\right]p(x, y, z, t
+      \mid x_0, y_0, z_0, t_0)_{|z = 0}, \\
+  \label{eq:xy-xz--absorb}
+  0 &= p(x, y, z, t \mid x_0, y_0, z_0, t_0)_{|x=y \vee x=z}.
+\end{align}
+
+Without going through the derivation, the backward equation is
+\begin{multline}
+  \label{eq:backward-2}
+  \Pder{}{t}p(x, y, z, t \mid x', y', z', t') \\
+  = \left[D_c \frac{\partial^2}{\partial x'^2} + D_s
+    \frac{\partial^2}{\partial y'^2} + D_s \frac{\partial^2}{\partial
+      z'^2} - \stiff (y' - \lambda) \Pder{}{y'}  + \stiff (z' -
+    \lambda) \Pder{}{z'}\right] p(x, y, z, t \mid x', y', z', t')
+\end{multline}
+with the boundary conditions
+\begin{align}
+  \label{eq:bck-reflect-y}
+  0 &= \frac{\partial}{\partial y'} p(x, y, z, t \mid x', y', z',
+      t')_{|y'=0} \\
+  \label{eq:bck-reflect-z}
+  0 &= \frac{\partial}{\partial z'} p(x, y, z, t \mid x', y', z',
+      t')_{|z'=0} \\
+  \label{eq:bck-absorb-2}
+  0 &= p(x, y, z, t \mid x', y', z', t')_{|x'=y' \vee x'=z'}.
+\end{align}
+
+The derivation of the mean first binding time follows that in section
+\ref{sec:mean-first-binding}. There aren't any meaningful differences
+in the derivation, and so I skip it. The resulting equation for the
+mean first binding time of a cell with the initial state $(x', y', z',
+0)$ is
+\begin{equation}
+  \label{eq:mfbt}
+  -1 = \left[D_c \frac{\partial^2}{\partial x'^2} + D_s \frac{\partial^2}{\partial
+      y'^2} + D_s \frac{\partial^2}{\partial z'^2} - \stiff (y' -
+    \lambda) \Pder{}{y'}  + \stiff (z' - \lambda) \Pder{}{z'}\right]
+  S(x', y', z').
+\end{equation}
+
+This is solved on the domain $\Omega^3 = \left\{(x, y, z) \in \R \mid x >
+  y > 0 \wedge x > z > 0 \right\}$, which is sketched in Figure
+\ref{fig:wedge-domain}. The boundary conditions are similar to those
+in equations (\ref{eq:bck-reflect-y})--(\ref{eq:bck-absorb-2}).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.65\textwidth]{wedge-domain.png}
+  \caption[Diagram of $\Omega^3$]{Diagram of the $\Omega^3$ domain in 3
+    dimensions. In order to display the domain, it has to be truncated
+    at some maximum $x$ value, but in principle it extends to
+    infinity. The 4 black lines show the edges of the infinite
+    domain.}
+  \label{fig:wedge-domain}
+\end{figure}
+
+\subsection{Numerics}
+\label{sec:numerics-2receptors}
+
+Similar to the one receptor case, define a uniform mesh on the 3D
+domain $\Omega^3$ and set $x_i = ih$, $y_j = jh$, and $z_k = kh$. The
+numerical domain is $\Omega^3_h = \left\{(ih, jh, kh) \in \R^3 \mid i \ge
+  j \ge 0 \tn{ and }i \ge k \ge 0\right\}$. Figure \ref{fig:3d-mesh}
+shows a sample uniform mesh over $\Omega^3$. For any $(x_i, y_j, z_k)
+\in \Omega^3_h$,
+\begin{multline}
+  -1 = D_c \frac{\partial^2}{\partial x'^2}S(x_i, y_j, z_k) + D_s
+  \frac{\partial^2}{\partial y'^2} S(x_i, y_j, z_k) + D_s
+  \frac{\partial^2}{\partial z'^2} S(x_i, y_j, z_k) \\
+  - \stiff(y_j - \lambda) \Pder{}{y'}S(x_i, y_j, z_k) - \stiff(z_k -
+  \lambda) \Pder{}{z'}S(x_i, y_j, z_k).
+\end{multline}
+
+Then using centered finite differences on all the derivatives defines
+a numerical scheme for $S_{i, j, k} \approx S(x_i, y_j, z_k)$:
+\begin{multline}
+  -1 = \frac{D_c}{h^2} \left(S_{i-1, j, k} + S_{i+1, j, k} \right) +
+  \left( \frac{D_s}{h^2} + \frac{k_f}{2h\gamma}(y_j - \lambda) \right)
+  S_{i, j-1, k} + \left( \frac{D_s}{h^2} - \frac{k_f}{2h\gamma}(y_j -
+    \lambda) \right) S_{i, j+1, k} \\
+  + \left( \frac{D_s}{h^2} + \frac{k_f}{2h\gamma}(z_k - \lambda)
+  \right) S_{i, j, k-1} + \left( \frac{D_s}{h^2} -
+    \frac{k_f}{2h\gamma}(z_k - \lambda) \right) S_{i, j, k+1} -
+  \frac{2}{h^2}(D_c + 2D_s) S_{i, j, k}.
+\end{multline}
+
+The boundary conditions of the numerical scheme are given by:
+\begin{align}
+  0 &= S_{i,i,k} \quad \tn{for} \quad i \ge k \ge 0 \\
+  0 &= S_{i,j,i} \quad \tn{for} \quad i \ge j \ge 0 \\
+  0 &= S_{i,0,k} - S_{i,1,k} \quad \tn{for} \quad i \ge k \ge 0 \\
+  0 &= S_{i,j,0} - S_{i,j,1} \quad \tn{for} \quad i \ge j \ge 0.
+\end{align}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{3d-mesh.png}
+  \caption{Sample 3D mesh with $N = 5$.}
+  \label{fig:3d-mesh}
+\end{figure}
+
+\section{Cell with $n$ Receptors}
+\label{sec:cell-n-receptors}
+
+Writing the Fokker-Planck equation and the PDE for the mean first
+binding time follows the same process as the one and two variable
+cases. Define $x(t)$ the same as above (equation (\ref{eq:lang-x-2})),
+and for each receptor head, define its distance from the cell as
+$z_i(t)$ for $i = 1, \hdots n$. The Langevin equation for $z_i(t)$ is
+\begin{equation}
+  \label{eq:lang-z-n}
+  dz_i(t) = -\stiff (z_i - \lambda) dt + \sqrt{2D_s}dW.
+\end{equation}
+
+Define the vector $\z(t) \in \R^n$ so that $\z(t) = (z_1(t), z_2(t),
+\hdots, z_n(t))^T$. Define $\nabla_\z\cdot$ and $\Delta_\z$ to be the
+divergence and laplacian with respect to the $z_i$ variables. Then the
+Fokker-Planck equation for the probability distribution of system
+states $p(x, \z, t \mid x_0, \z_0, t_0)$ is given by the PDE
+\begin{equation}
+  \label{eq:fokker-planck-n}
+  \Pder{}{t}p(x, \z, t \mid x_0, \z_0, t_0) = D_c \xdiff p(x, \z, t
+  \mid x_0, \z_0, t_0) + D_s \Delta_\z p(x, \z, t \mid x_0, \z_0, t_0)
+  + \stiff \nabla_\z \cdot ((\z - \lambda) p(x, \z, t \mid x_0, \z_0,
+  t_0)).
+\end{equation}
+
+The state space of the system is $\Omega^n = \left\{ (x, \z) \in \R
+  \times \R^n \mid x > \max_i{z_i} \wedge \min_i{z_i} > 0
+\right\}$. Then at boundaries where $x = \max_i{z_i}$ we set an
+absorbing boundary condition and at boundaries where $\min_i{z_i} = 0$
+we set a reflecting boundary condition:
+\begin{align}
+  0 &= p(x, \z, t \mid x_0, \z_0, t_0)_{|x = \|\z\|_\infty} \\
+  0 &= \mathbf{n} \cdot \left(D_s \nabla_\z p(x, \z, t \mid x_0, \z_0,
+      t_0) + \stiff (\z - \lambda) \right)_{|\min_i{z_i} = 0}.
+\end{align}
+
+From equation (\ref{eq:fokker-planck-n}), the partial differential
+operator defining the Fokker-Planck equation is
+\begin{equation}
+  \label{eq:fpl-n}
+  L^{(n)} \equiv D_c \frac{\partial^2}{\partial x^2} + D_s \Delta_\z +
+  \stiff \nabla_\z \cdot (\z - \lambda).
+\end{equation}
+
+$L$'s adjoint $L^\dag$, which defines the backward equation and the
+mean first binding time, is
+\begin{equation}
+  \label{eq:backl-n}
+  L^\dag = \left[D_c \frac{\partial^2}{\partial x'^2} + D_s \Delta_{\z'} -
+  \stiff (\z' - \lambda) \nabla_{\z'} \cdot \right].
+\end{equation}
+
+\subsection{An alternative to an $n$-dimensional PDE}
+\label{sec:alternative-n}
+
+Obviously solving $n$-dimensional PDEs for increasing $n$ is not
+practical. By assuming that all the springs are independent of each
+other, we might be able to find a solution based on the mean first
+binding time of a cell with a single spring using the definition of
+independence from probability: $P(A, B) = P(A) P(B)$ if $A$ and $B$
+are independent.
+
+However, for two bonds it is not as simple as saying $p(x, y, z, t
+\mid x_0, y_0, z_0, t_0) = p(x, y, t \mid x_0, y_0, t_0) p(x, z, t
+\mid x_0, z_0, t_0)$ because there is a dependence of both $y$ and $z$
+on $x$, therefore $y$ and $z$ are not independent from each other.
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
 
 \end{document}
 
