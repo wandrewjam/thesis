@@ -1,0 +1,132 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption}
+\graphicspath{{/Users/andrewwork/thesis/}}
+
+% \usepackage{tikz, pgfplots}
+% \usepgfplotslibrary{colorbrewer}
+% \pgfplotsset{
+%   table/search path = {/Users/andrewwork/thesis/first-binding-model/},
+%   table/col sep = comma,
+%   colormap/YlGnBu,
+% }
+
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Notes on a Jump-Velocity Model of Platelet Rolling (6/17/19)}
+\end{center}
+
+\section{Description of the Jump-Velocity Model}
+\label{sec:jump-vel}
+
+Suppose we model platelets as particles in a moving fluid. Assume that
+unprimed platelets can exist in two states: unbound (U), and bound to
+vWF (V) (Figure \ref{fig:unprimed-states}). Platelets in the unbound
+state advect at velocity $v$ in the fluid, and platelets in the
+vWF-bound state are stationary. Platelets in the fluid can bind to vWF
+at a constant rate $k_\tn{on}$, and platelets bound to vWF can come
+unbound at constant rate $k_\tn{off}$.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.3\textwidth]{unprimed-states.png}
+  \caption[Possible states of unprimed platelets]{An unprimed platelet
+    can exist in two distinct states: (U) unbound from the surface and
+    advecting in the fluid, or (V) bound to vWF on the surface and
+    unmoving. Transitions between these states occur at constant rates
+    $k_\tn{on}$ and $k_\tn{off}$.}
+  \label{fig:unprimed-states}
+\end{figure}
+
+For primed platelets, assume that they can exist in 4 possible states:
+unbound (U), vWF-bound (V), fibrinogen-bound (F), and vWF- and
+fibrinogen-bound (VF) (Figure \ref{fig:primed-states}). The U and V
+states are the same as for the unprimed platelets, however in addition
+both the U and V states can bind with fibrinogen to transition to the
+F and VF states.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.3\textwidth]{primed-states.png}
+  \caption[Possible states of primed platelets]{A primed platelet can
+    exist in four states: (U) unbound from the surface and advecting
+    in the fluid, (V) bound to vWF on the surface, (F) bound to
+    fibrinogen on the surface, or (VF) bound to both vWF and
+    fibrinogen. In all three bound states, the platelet is immobilized
+    on the surface.}
+  \label{fig:primed-states}
+\end{figure}
+
+These models describe a jump-velocity process, where a particle is
+transitioning randomly between discrete states, which each move with a
+different deterministic motion. The Fokker-Planck equation for these
+processes are given by the following system of linear advection
+equations:
+\begin{equation}
+  \Pder{}{t}
+  \begin{pmatrix}
+    p_\tn{U} \\ p_\tn{V} \\ p_\tn{F} \\ p_\tn{VF}
+  \end{pmatrix}
+  =
+  \Pder{}{y}
+  \begin{pmatrix}
+    v p_\tn{U} \\ 0 \\ 0 \\ 0
+  \end{pmatrix}
+  +
+  \begin{pmatrix}
+    -(k_\tn{on} + k_\tn{on}^F) & k_\tn{off} & k_\tn{off}^F & 0 \\
+    k_\tn{on} & -(k_\tn{off} + k_\tn{on}^F) & 0 & k_\tn{off}^F \\
+    k_\tn{on}^F & 0 & -(k_\tn{on} + k_\tn{off}^F) & k_\tn{off} \\
+    0 & k_\tn{on}^F & k_\tn{on} & -(k_\tn{off} + k_\tn{off}^F)
+  \end{pmatrix}
+  \begin{pmatrix}
+    p_\tn{U} \\ p_\tn{V} \\ p_\tn{F} \\ p_\tn{VF}
+  \end{pmatrix}
+\end{equation}
+where $p_i = p_i(y, t \mid z, 0)$ is the probability the platelet is
+in state $i$ and position $y$ at time $t$ given it was 
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
