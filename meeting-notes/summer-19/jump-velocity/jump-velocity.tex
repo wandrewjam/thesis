@@ -7,7 +7,7 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{graphicx, subcaption}
-\graphicspath{{/Users/andrewwork/thesis/}}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/}}
 
 % \usepackage{tikz, pgfplots}
 % \usepgfplotslibrary{colorbrewer}
@@ -49,7 +49,7 @@
 \pagestyle{plain}
 
 \begin{center}
-  {\Large Notes on a Jump-Velocity Model of Platelet Rolling (6/17/19)}
+  {\Large Notes on a Jump-Velocity Model of Platelet Rolling (6/20/19)}
 \end{center}
 
 \section{Description of the Jump-Velocity Model}
@@ -63,7 +63,7 @@ vWF-bound state are stationary. Platelets in the fluid can bind to vWF
 at a constant rate $k_\tn{on}$, and platelets bound to vWF can come
 unbound at constant rate $k_\tn{off}$.
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics[width=.3\textwidth]{unprimed-states.png}
   \caption[Possible states of unprimed platelets]{An unprimed platelet
@@ -81,7 +81,7 @@ states are the same as for the unprimed platelets, however in addition
 both the U and V states can bind with fibrinogen to transition to the
 F and VF states.
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics[width=.3\textwidth]{primed-states.png}
   \caption[Possible states of primed platelets]{A primed platelet can
@@ -99,28 +99,243 @@ different deterministic motion. The Fokker-Planck equation for these
 processes are given by the following system of linear advection
 equations:
 \begin{equation}
+  \label{eq:fp-system}
   \Pder{}{t}
-  \begin{pmatrix}
-    p_\tn{U} \\ p_\tn{V} \\ p_\tn{F} \\ p_\tn{VF}
-  \end{pmatrix}
+  \underbrace{
+    \begin{pmatrix}
+      p_\tn{U} \\ p_\tn{V} \\ p_\tn{F} \\ p_\tn{VF}
+    \end{pmatrix}}_{\equiv \mathbf{p}}
   =
-  \Pder{}{y}
+  -\Pder{}{x}
   \begin{pmatrix}
     v p_\tn{U} \\ 0 \\ 0 \\ 0
   \end{pmatrix}
   +
+  \underbrace{
   \begin{pmatrix}
     -(k_\tn{on} + k_\tn{on}^F) & k_\tn{off} & k_\tn{off}^F & 0 \\
     k_\tn{on} & -(k_\tn{off} + k_\tn{on}^F) & 0 & k_\tn{off}^F \\
     k_\tn{on}^F & 0 & -(k_\tn{on} + k_\tn{off}^F) & k_\tn{off} \\
     0 & k_\tn{on}^F & k_\tn{on} & -(k_\tn{off} + k_\tn{off}^F)
-  \end{pmatrix}
+  \end{pmatrix}}_{\equiv A}
   \begin{pmatrix}
     p_\tn{U} \\ p_\tn{V} \\ p_\tn{F} \\ p_\tn{VF}
   \end{pmatrix}
 \end{equation}
-where $p_i = p_i(y, t \mid z, 0)$ is the probability the platelet is
-in state $i$ and position $y$ at time $t$ given it was 
+where $p_i = p_i(x, t \mid x_0, j, 0)$ is the probability the platelet
+is in state $i$ and position $x$ at time $t$ given it was previously
+in position $z$ and state $j$ at time $0$. If the platelets are
+unprimed, then the only difference is $k_\tn{on}^F = k_\tn{off}^F =
+0$.
+
+The goal is to find the probability density function of the average
+velocity across a segment of length $L$, so take the initial condition
+of the PDE system (\ref{eq:fp-system}) to be $\mathbf{p}(x, 0) =
+(\delta(x), 0, 0, 0)^T$. The probability density of the time it takes
+a platelet to cross the interval $[0, L]$ is $p_U(L, t)$. The average
+velocity associated with a crossing time $t^*$ is just
+$v^* = L/t^*$, and the probability density function
+of $v^*$ is given by $f(v^*) = p_U(L, L/v^*)$
+
+\subsection{Nondimensionalization}
+\label{sec:nondim}
+
+Define the nondimensional variables $s$ and $y$ so that $t = Ts$ and
+$x = Xy$. Let's scale $x$ by the domain length, so $X = L$, and scale
+$t$ by the velocity, so that $X/T = v \implies T = L/v$. That is, $T$
+is the shortest possible crossing time of a
+platelet. Finally---motivated by the adiabatic reduction in example
+3.6.1 in Dr. Keener's notes---define the nondimensional parameter
+$\epsilon = 1/(T(k_\tn{on} + k_\tn{off} + k_\tn{on}^F +
+k_\tn{off}^F))$. If the sum of the reaction rates is much larger than
+$1/T$, then $\epsilon$ is a small parameter. After the
+nondimensionalization, equation (\ref{eq:fp-system}) becomes
+\begin{equation}
+  \label{eq:nd-system}
+  \Pder{\mathbf{q}}{s} = -\Pder{}{y}
+  \begin{pmatrix}
+    q_\tn{U} \\ 0 \\ 0 \\ 0
+  \end{pmatrix}
+  + \frac{1}{\epsilon}
+  \begin{pmatrix}
+    - b - d & a & c & 0 \\
+    b & - a - d & 0 & c \\
+    d & 0 & - b - c & a \\
+    0 & d & b & - a - c
+  \end{pmatrix}
+  \mathbf{q},
+\end{equation}
+where $a = k_\tn{off} \epsilon T$, $b = k_\tn{on} \epsilon T$, $c =
+k_\tn{off}^F \epsilon T$, and $d = k_\tn{on}^F \epsilon T$ (note
+$1/(\epsilon T)$ is the sum of the reaction rates, and $a + b + c + d
+= 1$). When $k_\tn{on}^F = k_\tn{off}^F = 0$, this reduces to the
+example in Dr. Keener's notes.
+
+\subsection{Numerics and results for unprimed platelets}
+\label{sec:res-unpr}
+
+The system of equations for unprimed platelets reduces to
+\begin{align}
+  \label{eq:unprimed-1}
+  \Pder{q_\tn{U}}{s} &= -\Pder{q_\tn{U}}{y} - \frac{1}{\epsilon}
+                       \left(b q_\tn{U} + a q_\tn{V}\right) \\
+  \label{eq:unprimed-2}
+  \Pder{q_\tn{V}}{s} &= \frac{1}{\epsilon} \left(b q_\tn{U} - a
+                       q_\tn{V}\right).
+\end{align}
+
+To solve this system, I use a first order upwind scheme on a uniform
+mesh to discretize in $y$ and convert the problem to a system of
+ODEs. The nodes of the mesh are given by $y_i = ih$ for $i = 0,
+\hdots, N$ where $h = 1/N$. This results in the semi-discretized
+system
+\begin{align}
+  \Der{q_\tn{U}^i}{s} &= \frac{1}{h} \left(q_\tn{U}^{i-1} - q_\tn{U}^i
+                        \right) + \frac{1}{\epsilon} \left(-b
+                        q_\tn{U}^i + a q_\tn{V}^i \right) \quad
+                        \tn{for} \quad i = 1, \hdots, N
+  \\
+  \Der{q_\tn{V}^i}{s} &= \frac{1}{\epsilon} \left(b q_\tn{U}^i - a
+                        q_\tn{V}^i \right) \quad \tn{for} \quad i = 1,
+                        \hdots, N
+\end{align}
+which I solve with SciPy's implementation of the RK45 scheme.
+
+The initial condition $q_\tn{U}(y, 0) = \delta(y)$ must be
+approximated, so I use Peskin's approximate $\delta$-function
+\cite{Peskin2002}:
+\begin{equation}
+  \label{eq:delta-h}
+  \delta_h(y) =
+  \begin{cases}
+    \frac{1}{4h} \left( 1 + \cos\left(\frac{\pi y}{2h}\right) \right)
+    & \tn{if} \quad \left|\frac{y}{2h}\right| \le 1 \\
+    0 & \tn{otherwise.}
+  \end{cases}
+\end{equation}
+Therefore $q_\tn{U}^i(0) = \delta_h(y_i)$ and $q_\tn{V}^i(0) =
+0$. Half of $\delta_h$ is outside of the domain, so the other half
+must be advected into the domain as an inflow boundary condition:
+$q_\tn{U}^0(s) = \delta_h(-s)$.
+
+Because $a + b = 1$, there are only 2 nondimensional parameters to
+choose: $\epsilon$ and $a$. The parameter $\epsilon$ gives the ratio
+of the minimum crossing time to a characteristic reaction time, and
+$a$ gives the ratio of $k_\tn{off}$ to the sum of reaction
+rates. Below are some sample results for average velocity
+distributions $f(v^*) = q_U^N(1/v^*)$. 
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{avg-vel_a0.2_eps0.1}.png}
+    \caption{$\epsilon = 0.1$, $a = 0.2$: Reactions are fast, and
+      $k_\tn{on} > k_\tn{off}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{avg-vel_a0.2_eps1}.png}
+    \caption{$\epsilon = 1$, $a = 0.2$: Reactions and advection are
+      the same order, and $k_\tn{on} > k_\tn{off}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{avg-vel_a0.5_eps0.1}.png}
+    \caption{$\epsilon = 0.1$, $a = 0.5$: Reactions are fast, and
+      $k_\tn{on} = k_\tn{off}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{avg-vel_a0.5_eps1}.png}
+    \caption{$\epsilon = 0.1$, $a = 0.5$: Reactions and advection are
+      the same order, and $k_\tn{on} = k_\tn{off}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{avg-vel_a0.8_eps0.1}.png}
+    \caption{$\epsilon = 0.1$, $a = 0.8$: Reactions are fast, and
+      $k_\tn{on} < k_\tn{off}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{avg-vel_a0.8_eps1}.png}
+    \caption{$\epsilon = 0.1$, $a = 0.8$: Reactions and advection are
+      the same order, and $k_\tn{on} < k_\tn{off}$.}
+  \end{subfigure}
+  \caption[Probability density functions]{Probability density
+    functions for 6 different $(\epsilon, a)$ pairs}
+  \label{fig:prob-dens}
+\end{figure}
+
+Observations:
+\begin{itemize}
+\item Numerical diffusion in the upwind scheme causes some platelets
+  to exceed the theoretical maximum crossing velocity: $v_\tn{max} =
+  1$.
+\item There is some nonzero probability mass that a platelet crosses
+  the domain without ever binding. Specifically, this probability is
+  $\exp(-b/\epsilon)$. Therefore the exact probability density
+  function will have a $\delta$-function like spike at $v^* = 1$ that
+  integrates to $\exp(-b/\epsilon)$.
+\item As the off rate $a$ increases, the distribution of average
+  velocities shifts to the right, as expected.
+\end{itemize}
+
+\subsection{Adiabatic reduction}
+\label{sec:adb-red}
+
+The adiabatic reduction is solved in example 3.6.1 of Dr. Keener's
+stochastics notes. Starting with equations (\ref{eq:unprimed-1}) and
+(\ref{eq:unprimed-2}), assume that $\epsilon \ll 1$ and define $v =
+q_\tn{U} + q_\tn{V}$ to be the slow variable and $w = b q_\tn{U} - a
+q_\tn{V}$ to be the fast variable. Then $v$ evolves as an
+advection-diffusion equation:
+\begin{equation}
+  \label{eq:v}
+  \Pder{v}{s} = -a \Pder{v}{y} + \epsilon a b \frac{\partial^2
+    v}{\partial y^2}
+\end{equation}
+and $w$ satisfies the equation
+\begin{equation}
+  \label{eq:w}
+  w = -\epsilon a b \Pder{v}{y}.
+\end{equation}
+
+With the initial condition $v(y, 0) = \delta(y)$, equation
+(\ref{eq:v}) can be solved analytically:
+\begin{equation}
+  \label{eq:v-soln}
+  v(y, t) = \frac{1}{\sqrt{4 \pi \epsilon a b t}} \exp \left[ \frac{-(y
+      - at)^2}{4 \epsilon a b t} \right],
+\end{equation}
+and then using equation (\ref{eq:w}) to find $w$,
+\begin{equation}
+  \label{eq:w-soln}
+  w(y, t) = \frac{y - at}{4t\sqrt{\pi \epsilon a b t}} \exp \left[ \frac{-(y
+      - at)^2}{4 \epsilon a b t} \right].
+\end{equation}
+
+Then reversing the change of variables, $q_\tn{U} = av + w$ and
+$q_\tn{V} = bv - w$, resulting in the following solutions for
+$q_\tn{U}$ and $q_\tn{V}$:
+\begin{align}
+  \label{eq:qu-soln}
+  q_\tn{U} &= \frac{1}{\sqrt{4 \pi \epsilon a b t}} \left(a + \frac{y
+             - at}{2t} \right) \exp \left[ \frac{-(y - at)^2}{4
+             \epsilon a b t} \right], \\
+  \label{eq:qv-soln}
+  q_\tn{V} &= \frac{1}{\sqrt{4 \pi \epsilon a b t}} \left(b - \frac{y
+             - at}{2t} \right) \exp \left[ \frac{-(y - at)^2}{4
+             \epsilon a b t} \right].
+\end{align}
+
+The probability density function of the average velocity is then
+\begin{equation}
+  \label{eq:vel-dens}
+  f(v^*) = q_\tn{U}(1, 1/v^*) = \sqrt{\frac{v^*}{4 \pi \epsilon a b}}
+  \left(a + \frac{v^* - a}{2} \right) \exp\left[ \frac{-(v^* -
+      1)^2}{4\epsilon a b v^*} \right].
+\end{equation}
 
 \bibliographystyle{plain}
 \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
