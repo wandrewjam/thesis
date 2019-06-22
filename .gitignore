@@ -13,7 +13,10 @@
 *.jpg
 ss*.txt
 *.ai
+*.mp4
 *~
+\#*\#
+*.zip
 
 # Folders
 literature_repository/*
