@@ -1,4 +1,4 @@
-N 100
+N 50
 s_samp 100
 s_max 20
 scheme up
