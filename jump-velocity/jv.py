@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from scipy.integrate import solve_ivp, cumtrapz
+from scipy.linalg import lu_factor, lu_solve
 
 
 def two_state(t, p, h, eps1, a, b, scheme='up'):
@@ -42,6 +43,9 @@ def four_state(t, p, h, eps1, eps2, a, b, c, d, scheme='up'):
     return np.append(du, [dv, df, dvf])
 
 
+
+
+
 def delta_h(x, h):
     return phi(x/h) / h
     # return 1 - np.cos(2*np.pi*x)
@@ -64,7 +68,29 @@ def fast_w(y, t):
             * np.exp(-(y - a*t)**2 / (4 * eps1 * a * b * t)))
 
 
-def main(N, eps1, eps2, a, c, s_max, s_samp, scheme):
+def read_parameter_file(filename):
+    parlist = [('filename', filename.split('.')[0])]
+
+    with open(filename) as f:
+        while True:
+            command = f.readline().split()
+            if len(command) < 1:
+                continue
+            if command[0] == 'done':
+                break
+
+            key, value = command
+            if key == 'N' or key == 's_samp':
+                parlist.append((key, int(value)))
+            elif key == 'scheme':
+                parlist.append((key, value))
+            else:
+                parlist.append((key, float(value)))
+    return dict(parlist)
+
+
+def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename,
+         show_plots=False):
     def animate(i):
         line_u.set_ydata(np.append(delta_h(-sol.t[i], h), u_data[:, i]))
         line_v.set_ydata(v_data[:, i])
@@ -88,7 +114,10 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme):
     else:
         raise ValueError('parameter \'scheme\' is not valid!')
 
-    s_eval = np.linspace(0, s_max, num=s_samp)
+    s_eval = np.linspace(0, s_max, s_samp)
+    # s_eval = np.arange(start=0, stop=s_max + max_step, step=max_step)
+    # sol = solve_pde(s_eval, p0, h=h, eps1=eps1, eps2=eps2, a=a, b=b, c=c, d=d,
+    #                 scheme=scheme)
     sol = solve_ivp(
         lambda t, p: four_state(t, p, h=h, eps1=eps1, eps2=eps2, a=a, b=b,
                                 c=c, d=d, scheme=scheme),
@@ -113,24 +142,29 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme):
     ax.set_xlabel('$y$')
     ax.set_ylabel('Probability density')
 
-    file_format = 'a{:g}_eps{:g}'.format(a, eps1)
     ani = animation.FuncAnimation(
         fig, animate, frames=sol.t.shape[0], interval=25)
-    ani.save('ani_' + file_format + '.mp4')
-    plt.show()
+    ani.save('ani_' + filename + '.mp4')
+    if show_plots:
+        plt.show()
 
     s_mask = sol.t > 2./3
-    plt.plot(1 / s_eval[s_mask], s_eval[s_mask] ** 2 * u_data[-1, s_mask])
-    plt.axvline(1, color='k')
-    plt.xlabel('$v^*$')
-    plt.ylabel('Probability density')
-    plt.savefig('avg-vel_' + file_format + '.png')
-    plt.show()
+    fig_av, ax_av = plt.subplots()
+    ax_av.plot(1 / s_eval[s_mask], s_eval[s_mask] ** 2 * u_data[-1, s_mask])
+    ax_av.axvline(1, color='k')
+    ax_av.set_xlabel('$v^*$')
+    ax_av.set_ylabel('Probability density')
+    fig_av.savefig('avg-vel_' + filename + '.png')
+    if show_plots:
+        plt.show()
 
 
 if __name__ == '__main__':
-    main(N=50, eps1=.1, eps2=np.inf, a=.5, c=1, s_max=10, s_samp=100,
-         scheme='up')
+    import sys
+    filename = sys.argv[1]
+
+    pars = read_parameter_file(filename)
+    main(**pars)
 
     # Adiabatic reduction
 
