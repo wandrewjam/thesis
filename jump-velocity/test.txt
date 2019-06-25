@@ -1,6 +1,6 @@
-N 50
+N 100
 s_samp 100
-s_max 10
+s_max 20
 scheme up
 eps1 .1
 eps2 1
