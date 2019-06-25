@@ -49,38 +49,70 @@ def four_state(p, t, h, eps1, eps2, a, b, c, d, scheme='up'):
     return np.append(du0, [du1, dv, df, dvf])
 
 
-def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme):
+def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1000):
     u00, u10, v0, f0, vf0 = np.split(p0, 5)
+    N = u00.shape[0]
+    ystore = np.linspace(0, N, num=101, dtype='int')[1:] - 1
+    tstore = np.linspace(0, s_eval.shape[0]-1, num=s_samp+1, dtype='int')
     ka, kb = a / (1 + eps1 / eps2), b / (1 + eps1 / eps2)
     kc, kd = c / (1 + eps2 / eps1), d / (1 + eps2 / eps1)
-    I = eye(u00.shape[0], format='csc')
     dt = s_eval[1] - s_eval[0]
-    rxn = bmat([[-(kb+kd)*I, None, None, None, None], [None, -(kb+kd)*I, ka*I, kc*I, None], [kb*I, kb*I, -(ka+kd)*I, None, kc*I],
-                [kd*I, kd*I, None, -(kb+kc)*I, ka*I], [None, None, kd*I, kb*I, -(ka+kc)*I]], format='csc')
-    A = eye(5*u00.shape[0], format='csc') - (1 / eps1 + 1 / eps2) * dt*rxn
-    solve = factorized(A)
     bc = delta_h(-s_eval, h)
-    u0, u1, v, f, vf = u00[:, None], u10[:, None], v0[:, None], f0[:, None], vf0[:, None]
-    for i in range(s_eval.shape[0]-1):
-        # rhsu = (u[:, -1] + dt/h*(np.append(bc[i], u[:-1, -1]) - u[:, -1])
-        #         + (1 / eps1 + 1 / eps2) * dt/2*(-(kb + kd)*u[:, -1] + ka*v[:, -1] + kc*f[:, -1]))
-        # rhsv = v[:, -1] + (1 / eps1 + 1 / eps2) * dt/2*(kb*u[:, -1] - (ka + kd)*v[:, -1] + kc*vf[:, -1])
-        # rhsf = f[:, -1] + (1 / eps1 + 1 / eps2) * dt/2*(kd*u[:, -1] - (kc + kb)*f[:, -1] + ka*vf[:, -1])
-        # rhsvf = vf[:, -1] + (1 / eps1 + 1 / eps2) * dt/2*(kd*v[:, -1] + kb*f[:, -1] - (ka + kc)*vf[:, -1])
-        rhsu0 = u0[:, -1] + dt/h*(np.append(bc[i], u0[:-1, -1]) - u0[:, -1])
-        rhsu1 = u1[:, -1] + dt/h*(np.append(0, u1[:-1, -1]) - u1[:, -1])
-        rhsv = v[:, -1]
-        rhsf = f[:, -1]
-        rhsvf = vf[:, -1]
-        rhs = np.hstack([rhsu0, rhsu1, rhsv, rhsf, rhsvf])
-        p = solve(rhs)
-        u0temp, u1temp, vtemp, ftemp, vftemp = np.split(p, 5)
-        u0 = np.append(u0, u0temp[:, None], axis=1)
-        u1 = np.append(u1, u1temp[:, None], axis=1)
-        v = np.append(v, vtemp[:, None], axis=1)
-        f = np.append(f, ftemp[:, None], axis=1)
-        vf = np.append(vf, vftemp[:, None], axis=1)
-    return u0, u1, v, f, vf
+    u0, u1, v, f, vf = u00[ystore, None], u10[ystore, None], v0[ystore, None], f0[ystore, None], vf0[ystore, None]
+    u0_bdy, u1_bdy = u00[-1], u10[-1]
+    if fast:
+        rxn = np.array([[-(kb+kd), 0, 0, 0, 0], [0, -(kb+kd), ka, kc, 0], [kb, kb, -(ka+kd), 0, kc],
+                        [kd, kd, 0, -(kb+kc), ka], [0, 0, kd, kb, -(ka+kc)]])
+        A = np.eye(5) - (1 / eps1 + 1 / eps2) * dt * rxn
+        Ai = np.linalg.inv(A)
+        u0temp, u1temp, vtemp, ftemp, vftemp = u00, u10, v0, f0, vf0
+        for i in range(1, s_eval.shape[0]):
+            rhsu0 = u0temp + dt/h*(np.append(bc[i], u0temp[:-1]) - u0temp)
+            rhsu1 = u1temp + dt/h*(np.append(0, u1temp[:-1]) - u1temp)
+            rhsv = vtemp
+            rhsf = ftemp
+            rhsvf = vftemp
+            u0temp = Ai[0, 0] * rhsu0 + Ai[0, 1] * rhsu1 + Ai[0, 2] * rhsv + Ai[0, 3] * rhsf + Ai[0, 4] * rhsvf
+            u1temp = Ai[1, 0] * rhsu0 + Ai[1, 1] * rhsu1 + Ai[1, 2] * rhsv + Ai[1, 3] * rhsf + Ai[1, 4] * rhsvf
+            vtemp = Ai[2, 0] * rhsu0 + Ai[2, 1] * rhsu1 + Ai[2, 2] * rhsv + Ai[2, 3] * rhsf + Ai[2, 4] * rhsvf
+            ftemp = Ai[3, 0] * rhsu0 + Ai[3, 1] * rhsu1 + Ai[3, 2] * rhsv + Ai[3, 3] * rhsf + Ai[3, 4] * rhsvf
+            vftemp = Ai[4, 0] * rhsu0 + Ai[4, 1] * rhsu1 + Ai[4, 2] * rhsv + Ai[4, 3] * rhsf + Ai[4, 4] * rhsvf
+            u0_bdy = np.append(u0_bdy, u0temp[-1])
+            u1_bdy = np.append(u1_bdy, u1temp[-1])
+            if i in tstore:
+                u0 = np.append(u0, u0temp[ystore, None], axis=1)
+                u1 = np.append(u1, u1temp[ystore, None], axis=1)
+                v = np.append(v, vtemp[ystore, None], axis=1)
+                f = np.append(f, ftemp[ystore, None], axis=1)
+                vf = np.append(vf, vftemp[ystore, None], axis=1)
+            if i % 100 == 0:
+                print(i)
+    else:
+        I = eye(N, format='csc')
+        rxn = bmat([[-(kb+kd)*I, None, None, None, None], [None, -(kb+kd)*I, ka*I, kc*I, None], [kb*I, kb*I, -(ka+kd)*I, None, kc*I],
+                    [kd*I, kd*I, None, -(kb+kc)*I, ka*I], [None, None, kd*I, kb*I, -(ka+kc)*I]], format='csc')
+        A = eye(5*N, format='csc') - (1 / eps1 + 1 / eps2) * dt * rxn
+        solve = factorized(A)
+        for i in range(s_eval.shape[0]-1):
+            # rhsu = (u[:, -1] + dt/h*(np.append(bc[i], u[:-1, -1]) - u[:, -1])
+            #         + (1 / eps1 + 1 / eps2) * dt/2*(-(kb + kd)*u[:, -1] + ka*v[:, -1] + kc*f[:, -1]))
+            # rhsv = v[:, -1] + (1 / eps1 + 1 / eps2) * dt/2*(kb*u[:, -1] - (ka + kd)*v[:, -1] + kc*vf[:, -1])
+            # rhsf = f[:, -1] + (1 / eps1 + 1 / eps2) * dt/2*(kd*u[:, -1] - (kc + kb)*f[:, -1] + ka*vf[:, -1])
+            # rhsvf = vf[:, -1] + (1 / eps1 + 1 / eps2) * dt/2*(kd*v[:, -1] + kb*f[:, -1] - (ka + kc)*vf[:, -1])
+            rhsu0 = u0[:, -1] + dt/h*(np.append(bc[i], u0[:-1, -1]) - u0[:, -1])
+            rhsu1 = u1[:, -1] + dt/h*(np.append(0, u1[:-1, -1]) - u1[:, -1])
+            rhsv = v[:, -1]
+            rhsf = f[:, -1]
+            rhsvf = vf[:, -1]
+            rhs = np.hstack([rhsu0, rhsu1, rhsv, rhsf, rhsvf])
+            p = solve(rhs)
+            u0temp, u1temp, vtemp, ftemp, vftemp = np.split(p, 5)
+            u0 = np.append(u0, u0temp[:, None], axis=1)
+            u1 = np.append(u1, u1temp[:, None], axis=1)
+            v = np.append(v, vtemp[:, None], axis=1)
+            f = np.append(f, ftemp[:, None], axis=1)
+            vf = np.append(vf, vftemp[:, None], axis=1)
+    return ystore, tstore, u0_bdy, u1_bdy, u0, u1, v, f, vf
 
 
 def delta_h(x, h):
@@ -128,12 +160,12 @@ def read_parameter_file(filename):
 
 def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename, show_plots=False):
     def animate(i):
-        line_u0.set_ydata(np.append(delta_h(-s_eval[i], h), u0_data[:, i]))
+        line_u0.set_ydata(np.append(delta_h(-s_eval[t_store[i]], h), u0_data[:, i]))
         line_u1.set_ydata(u1_data[:, i])
         line_v.set_ydata(v_data[:, i])
         line_f.set_ydata(f_data[:, i])
         line_vf.set_ydata(vf_data[:, i])
-        vline.set_xdata([s_eval[i]] * 2)
+        vline.set_xdata([s_eval[t_store[i]]] * 2)
         return line_u0, line_u1, line_v, line_f, line_vf, vline
 
     b, d = 1 - a, 1 - c
@@ -145,8 +177,8 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename, show_plots=False)
     # Enforce the CFL condition
     if scheme == 'up':
         max_step = h
-        s_eval = np.arange(start=0, stop=s_max + max_step, step=max_step)
-        u0_data, u1_data, v_data, f_data, vf_data = solve_pde(s_eval, p0, h=h, eps1=eps1, eps2=eps2, a=a, b=b, c=c, d=d, scheme=scheme)
+        s_eval = np.linspace(start=0, stop=s_max, num=np.ceil(s_max / max_step)+1)
+        y_store, t_store, u0_bdy, u1_bdy, u0_data, u1_data, v_data, f_data, vf_data = solve_pde(s_eval, p0, h=h, eps1=eps1, eps2=eps2, a=a, b=b, c=c, d=d, scheme=scheme, s_samp=s_samp)
     elif scheme == 'bw':
         max_step = 2 * h
         s_eval = np.arange(start=0, stop=s_max + max_step, step=max_step)
@@ -161,8 +193,8 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename, show_plots=False)
 
     fig, ax = plt.subplots()
     line_u0, line_u1, line_v, line_f, line_vf = ax.plot(
-        y, np.append(delta_h(s_eval[0], h), u0_data[:, 0]), y[1:], u1_data[:, 0], y[1:], v_data[:, 0],
-        y[1:], f_data[:, 0], y[1:], vf_data[:, 0])
+        y[np.append(0, y_store+1)], np.append(delta_h(s_eval[0], h), u0_data[:, 0]), y[y_store], u1_data[:, 0], y[y_store], v_data[:, 0],
+        y[y_store], f_data[:, 0], y[y_store], vf_data[:, 0])
 
     line_u0.set_label('$q_U^0$')
     line_u1.set_label('$q_U^1$')
@@ -179,15 +211,15 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename, show_plots=False)
     ax.set_ylabel('Probability density')
 
     ani = animation.FuncAnimation(
-        fig, animate, frames=s_eval.shape[0], interval=25)
+        fig, animate, frames=t_store.shape[0], interval=25)
     ani.save('ani_' + filename + '.mp4')
     if show_plots:
         plt.show()
 
     s_mask = s_eval > 2./3
-    F = cumtrapz(u1_data[-1, 1:], s_eval[1:], initial=0)
+    F = cumtrapz(u1_bdy, s_eval, initial=0)
     fig_av, ax_av = plt.subplots()
-    ax_av.plot(1 / s_eval[s_mask], s_eval[s_mask] ** 2 * u1_data[-1, s_mask])
+    ax_av.plot(1 / s_eval[s_mask], s_eval[s_mask] ** 2 * u1_bdy[s_mask], 1 / s_eval[s_mask], 1 - F[s_mask])
     ax_av.axvline(1, color='k')
     ax_av.set_xlabel('$v^*$')
     ax_av.set_ylabel('Probability density')
