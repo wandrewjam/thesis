@@ -184,8 +184,10 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename):
 
 
 if __name__ == '__main__':
+    import os
     import sys
     filename = sys.argv[1]
+    os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
 
     pars = read_parameter_file(filename)
     main(**pars)

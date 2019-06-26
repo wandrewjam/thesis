@@ -46,7 +46,9 @@ def main(filename, show_ani=False):
 
 
 if __name__ == '__main__':
+    import os
     import sys
     filename = sys.argv[1]
+    os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
 
-    main(filename, show_ani=True)
+    main(filename)

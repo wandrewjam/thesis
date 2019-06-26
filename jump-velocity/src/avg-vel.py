@@ -23,7 +23,9 @@ def main(filename, show_plot=False):
 
 
 if __name__ == '__main__':
+    import os
     import sys
     filename = sys.argv[1]
+    os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
 
-    main(filename, show_plot=True)
+    main(filename)
