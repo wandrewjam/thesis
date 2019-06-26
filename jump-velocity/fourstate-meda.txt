@@ -1,9 +1,0 @@
-N 10000
-s_samp 1000
-s_max 10
-scheme up
-eps1 .1
-eps2 1
-a .5
-c .5
-done
