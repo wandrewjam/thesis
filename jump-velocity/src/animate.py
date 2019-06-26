@@ -14,8 +14,8 @@ def main(filename, show_ani=False):
         vline.set_xdata([s_eval[t_store[i]]] * 2)
         return line_u0, line_u1, line_v, line_f, line_vf, vline
 
-    npz_dir = '/Users/andrewwork/thesis/jump-velocity/npz-files/'
-    plot_dir = '/Users/andrewwork/thesis/jump-velocity/plots/'
+    npz_dir = '../npz-files/'
+    plot_dir = '../plots/'
     data = np.load(npz_dir + filename + '.npz')
     y_store, t_store = data['y_store'], data['t_store']
     y, s_eval = data['y'], data['s_eval']

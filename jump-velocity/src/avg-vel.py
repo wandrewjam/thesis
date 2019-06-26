@@ -4,8 +4,8 @@ from scipy.integrate import cumtrapz
 
 
 def main(filename, show_plot=False):
-    npz_dir = '/Users/andrewwork/thesis/jump-velocity/npz-files/'
-    plot_dir = '/Users/andrewwork/thesis/jump-velocity/plots/'
+    npz_dir = '../npz-files/'
+    plot_dir = '../plots/'
     data = np.load(npz_dir + filename + '.npz')
     y, s_eval = data['y'], data['s_eval']
     u1_bdy = data['u1_bdy']

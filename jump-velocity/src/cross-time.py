@@ -4,7 +4,7 @@ from scipy.integrate import cumtrapz
 
 
 def read_parameter_file(filename):
-    txt_dir = '/Users/andrewwork/thesis/jump-velocity/par-files/'
+    txt_dir = '../par-files/'
     parlist = [('filename', filename)]
 
     with open(txt_dir + filename + '.txt') as f:

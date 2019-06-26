@@ -127,7 +127,7 @@ def fast_w(y, t):
 
 
 def read_parameter_file(filename):
-    txt_dir = '/Users/andrewwork/thesis/jump-velocity/par-files/'
+    txt_dir = '../par-files/'
     parlist = [('filename', filename)]
 
     with open(txt_dir + filename + '.txt') as f:
@@ -177,7 +177,7 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename):
     else:
         raise ValueError('parameter \'scheme\' is not valid!')
 
-    npz_dir = '/Users/andrewwork/thesis/jump-velocity/npz-files/'
+    npz_dir = '../npz-files/'
     np.savez_compressed(npz_dir + filename, y_store, t_store, y, s_eval, u0_data, u1_data, v_data, f_data, vf_data, u0_bdy, u1_bdy,
                         y_store=y_store, t_store=t_store, y=y, s_eval=s_eval, u0_data=u0_data, u1_data=u1_data, v_data=v_data,
                         f_data=f_data, vf_data=vf_data, u0_bdy=u0_bdy, u1_bdy=u1_bdy)
