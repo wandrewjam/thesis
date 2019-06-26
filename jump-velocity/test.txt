@@ -1,7 +1,7 @@
-N 10000
+N 100
 s_samp 1000
-s_max 20
-scheme up
+s_max 50
+scheme MoL
 eps1 .1
 eps2 1
 a .5

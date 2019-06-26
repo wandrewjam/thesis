@@ -85,8 +85,6 @@ def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1
                 v = np.append(v, vtemp[ystore, None], axis=1)
                 f = np.append(f, ftemp[ystore, None], axis=1)
                 vf = np.append(vf, vftemp[ystore, None], axis=1)
-            if i % 100 == 0:
-                print(i)
     else:
         I = eye(N, format='csc')
         rxn = bmat([[-(kb+kd)*I, None, None, None, None], [None, -(kb+kd)*I, ka*I, kc*I, None], [kb*I, kb*I, -(ka+kd)*I, None, kc*I],
@@ -185,9 +183,11 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename, show_plots=False)
         u0_data, u1_data, v_data, f_data, vf_data = solve_pde(s_eval, p0, h=h, eps1=eps1, eps2=eps2, a=a, b=b, c=c, d=d, scheme=scheme)
     elif scheme == 'MoL':
         max_step = h
-        s_eval = np.linspace(0, s_max, s_samp)
+        s_eval = np.linspace(0, s_max, s_samp + 1)
         sol = odeint(four_state, y0=p0, t=s_eval, args=(h, eps1, eps2, a, b, c, d), hmax=max_step)
         u0_data, u1_data, v_data, f_data, vf_data = np.split(sol.T, 5)
+        y_store = np.linspace(0, N, num=101, dtype='int')[1:] - 1
+        t_store = np.linspace(0, s_eval.shape[0]-1, num=s_samp+1, dtype='int')
     else:
         raise ValueError('parameter \'scheme\' is not valid!')
 
@@ -217,6 +217,7 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename, show_plots=False)
         plt.show()
 
     s_mask = s_eval > 2./3
+    u0_bdy, u1_bdy = u0_data[-1, :], u1_data[-1, :]
     F = cumtrapz(u1_bdy, s_eval, initial=0)
     fig_av, ax_av = plt.subplots()
     ax_av.plot(1 / s_eval[s_mask], s_eval[s_mask] ** 2 * u1_bdy[s_mask], 1 / s_eval[s_mask], 1 - F[s_mask])
@@ -227,9 +228,9 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename, show_plots=False)
     if show_plots:
         plt.show()
 
-    # plt.plot(s_eval, u1_data[-1, :], s_eval, cumtrapz(u1_data[-1, :], s_eval, initial=0))
-    # plt.axhline(1 - np.exp(-(1/eps1 + 1/eps2) * (b / (1 + eps1/eps2) + d / (1 + eps2/eps1))), color='k')
-    # plt.show()
+    plt.plot(s_eval, u1_bdy, s_eval, u0_bdy, s_eval, cumtrapz(u1_bdy + u0_bdy, s_eval, initial=0))
+    plt.axhline(1 - np.exp(-(1/eps1 + 1/eps2) * (b / (1 + eps1/eps2) + d / (1 + eps2/eps1))), color='k')
+    plt.show()
 
 
 if __name__ == '__main__':
