@@ -29,6 +29,7 @@ figures/
 dissertation/phd-thesis/*.bib
 *.stripped
 first-binding-model/*.dat
+jump-velocity/npz-files/*
 
 # Copied from github/gitignore/Python.gitignore
 ###############################################
