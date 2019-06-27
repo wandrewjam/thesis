@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from jv import delta_h
+from jv import delta_h, read_parameter_file
 import numpy as np
 
 
@@ -21,6 +21,8 @@ def main(filename, show_ani=False):
     y, s_eval = data['y'], data['s_eval']
     u0_data, u1_data, v_data, f_data, vf_data = data['u0_data'], data['u1_data'], data['v_data'], data['f_data'], data['vf_data']
 
+    pars = read_parameter_file(filename)
+
     h = y[1] - y[0]
     fig, ax = plt.subplots()
     line_u0, line_u1, line_v, line_f, line_vf = ax.plot(
@@ -38,6 +40,7 @@ def main(filename, show_ani=False):
     ax.legend(loc='upper right')
     ax.set_xlabel('$y$')
     ax.set_ylabel('Probability density')
+    ax.set_title('$\\epsilon_1 = {}$, $\\epsilon_2 = {}$, $a = {}$, $b = {}$'.format(pars['eps1'], pars['eps2'], pars['a'], pars['c']))
     ani = animation.FuncAnimation(
         fig, animate, frames=t_store.shape[0], interval=25)
     ani.save(plot_dir + filename + '.mp4')

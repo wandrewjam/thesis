@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import cumtrapz
+from jv import read_parameter_file
 
 
 def main(filename, show_plot=False):
@@ -9,6 +10,7 @@ def main(filename, show_plot=False):
     data = np.load(npz_dir + filename + '.npz')
     y, s_eval = data['y'], data['s_eval']
     u0_bdy, u1_bdy = data['u0_bdy'], data['u1_bdy']
+    pars = read_parameter_file(filename)
 
     s_mask = s_eval > 4./5
     F = cumtrapz(u0_bdy + u1_bdy, s_eval, initial=0)
@@ -19,6 +21,7 @@ def main(filename, show_plot=False):
     ax_av.legend(loc='upper right')
     ax_av.set_xlabel('$v^*$')
     ax_av.set_ylabel('Probability density')
+    ax_av.set_title('$\\epsilon_1 = {}$, $\\epsilon_2 = {}$, $a = {}$, $b = {}$'.format(pars['eps1'], pars['eps2'], pars['a'], pars['c']))
     fig_av.savefig(plot_dir + filename + '.png')
     if show_plot:
         plt.show()
