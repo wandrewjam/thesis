@@ -40,7 +40,7 @@ def main(filename, show_ani=False):
     ax.legend(loc='upper right')
     ax.set_xlabel('$y$')
     ax.set_ylabel('Probability density')
-    ax.set_title('$\\epsilon_1 = {}$, $\\epsilon_2 = {}$, $a = {}$, $b = {}$'.format(pars['eps1'], pars['eps2'], pars['a'], pars['c']))
+    ax.set_title('$\\epsilon_1 = {}$, $\\epsilon_2 = {}$, $a = {}$, $c = {}$'.format(pars['eps1'], pars['eps2'], pars['a'], pars['c']))
     ani = animation.FuncAnimation(
         fig, animate, frames=t_store.shape[0], interval=25)
     ani.save(plot_dir + filename + '.mp4')

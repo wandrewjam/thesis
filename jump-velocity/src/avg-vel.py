@@ -18,10 +18,10 @@ def main(filename, show_plot=False):
     ax_av.plot(1 / s_eval[s_mask], s_eval[s_mask] ** 2 * u1_bdy[s_mask], label='Velocity PDF of filtered plts')
     ax_av.plot(1 / s_eval[s_mask], 1 - F[s_mask], label='Velocity CDF of all plts')
     ax_av.axvline(1, color='k')
-    ax_av.legend(loc='upper right')
+    ax_av.legend(loc='best')
     ax_av.set_xlabel('$v^*$')
     ax_av.set_ylabel('Probability density')
-    ax_av.set_title('$\\epsilon_1 = {}$, $\\epsilon_2 = {}$, $a = {}$, $b = {}$'.format(pars['eps1'], pars['eps2'], pars['a'], pars['c']))
+    ax_av.set_title('$\\epsilon_1 = {}$, $\\epsilon_2 = {}$, $a = {}$, $c = {}$'.format(pars['eps1'], pars['eps2'], pars['a'], pars['c']))
     fig_av.savefig(plot_dir + filename + '.png')
     if show_plot:
         plt.show()
