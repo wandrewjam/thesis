@@ -1,5 +1,8 @@
 import numpy as np
+from jv import solve_pde, delta_h
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+from scipy.integrate import cumtrapz
 
 
 # def read_parameter_file(filename):
@@ -57,6 +60,25 @@ import matplotlib.pyplot as plt
 
 
 def experiment(rate_a, rate_b, rate_c, rate_d):
+    """Runs a single jump-velocity experiment based on the given rates
+
+    Parameters
+    ----------
+    rate_a : float
+        Value of rate a
+    rate_b : float
+        Value of rate b
+    rate_c : float
+        Value of rate c
+    rate_d : float
+        Value of rate d
+
+    Returns
+    -------
+    avg_velocity : float
+        Average velocity of the platelet across the domain
+    """
+
     assert np.minimum(rate_a, rate_b) > 0
     t = np.zeros(shape=1)
     y = np.zeros(shape=1)
@@ -123,29 +145,275 @@ def experiment(rate_a, rate_b, rate_c, rate_d):
     return 1 / t[-1]
 
 
-def main():
-    a, c = .5, .2
+def change_vars(p, forward=True):
+    """Convert between model parameters and fitting parameters
+
+    Parameters
+    ----------
+    p : array_like
+        Parameter values to convert
+    forward : bool, optional
+        If True, converts model parameters to fitting parameters. If
+        False, converts fitting parameters to model parameters.
+
+    Returns
+    -------
+    ndarray
+        Corresponding fitting (if forward is True) or model (if forward
+        is False) parameters
+    """
+
+    result = np.zeros(shape=2)
+    if forward:
+        result[0] = (2 * p[0] - 1) / (2 * p[0] * (1 - p[0]))
+        result[1] = np.log(p[1])
+    else:
+        result[0] = (p[0] - 1 + np.sqrt(p[0]**2 + 1))/(2*p[0])
+        result[1] = np.exp(p[1])
+    return result
+
+
+def plot_experiments(vels, reduced=None, full_model=None):
+    """Plots histogram and ECDF of average velocity data
+
+    Parameters
+    ----------
+    vels : array_like
+        Array of average rolling velocities
+    reduced : callable
+    full_model : callable
+
+    Returns
+    -------
+    None
+    """
+    if reduced is not None or full_model is not None:
+        x_plot = np.linspace(0, 1.5, num=500)[1:]
+
+    density_fig, density_ax = plt.subplots()
+    density_ax.hist(vels, density=True, label='Sample data')
+
+    if reduced is not None:
+        density_ax.plot(x_plot, reduced(x_plot), label='Adiabatic reduction')
+    if full_model is not None:
+        density_ax.plot(x_plot, full_model(x_plot), label='Full model')
+    density_ax.legend(loc='best')
+    plt.show()
+
+    x_cdf = np.sort(vels)
+    x_cdf = np.insert(x_cdf, 0, 0)
+    y_cdf = np.linspace(0, 1, len(x_cdf))
+    x_cdf = np.append(x_cdf, 1.5)
+    y_cdf = np.append(y_cdf, 1)
+
+    cdf_fig, cdf_ax = plt.subplots()
+    cdf_ax.step(x_cdf, y_cdf, where='post', label='Sample data')
+    cdf_ax.plot(x_plot[::-1],
+                1 + cumtrapz(reduced(x_plot[::-1]), x_plot[::-1], initial=0),
+                label='Adiabatic reduction')
+    cdf_ax.plot(x_plot[::-1],
+                1 + cumtrapz(full_model(x_plot[::-1]), x_plot[::-1],
+                             initial=0),
+                label='Full model')
+    cdf_ax.legend(loc='best')
+    plt.show()
+
+
+def fit_models(vels, initial_guess=None):
+    """Fits the adiabatic reduction and full PDE model to data
+
+    Parameters
+    ----------
+    vels : array_like
+        Array of average rolling velocities
+    initial_guess : array_like or None, optional
+        Initial guess for the minimization procedure. If None, then
+        infer a reasonable starting guess from the mean and standard
+        deviation of the data
+
+    Returns
+    -------
+    reduced_fit : ndarray
+        Maximum likelihood parameters of the reduced model
+    full_fit : ndarray
+        Maximum likelihood parameters of the full PDE model
+    """
+    from scipy.optimize import minimize
+
+    def q(y, s, a, eps):
+        return (1 / np.sqrt(4 * np.pi * eps * a * (1 - a) * s)
+                * (a + (y - a * s) / (2 * s))
+                * np.exp(-(y - a * s) ** 2 / (4 * eps * a * (1 - a) * s)))
+
+    def reduced_objective(p, vectorized=False):
+        if vectorized:
+            v = np.array(vels)[:, None, None]
+            s = p[0][None, :, None]
+            ap = np.select([s == 0, s != 0],
+                           [0.5, (s - 1 + np.sqrt(s ** 2 + 1)) / (2 * s)])
+            epsp = np.exp(p[1][None, None, :])
+            return -np.sum(np.log(q(1, 1. / v, ap, epsp)), axis=0)
+        else:
+            v = np.array(vels)
+            s = p[0]
+            if s == 0:
+                ap = .5
+            else:
+                ap = (s - 1 + np.sqrt(s ** 2 + 1)) / (2 * s)
+            epsp = np.exp(p[1])
+            return -np.sum(np.log(q(1, 1. / v, ap, epsp)))
+
+    def full_objective(p):
+        """ Log likelihood function of the full model"""
+        # Transform the parameters back to a and epsilon
+        s = p[0]
+        if s == 0:
+            ap = .5
+        else:
+            ap = (s - 1 + np.sqrt(s ** 2 + 1)) / (2 * s)
+        eps = np.exp(p[1])
+
+        # Find the minimum sampled average velocity
+        v = np.array(vels)
+        vmin = np.amin(v)
+
+        N = 100
+        h = 1. / N
+        s_eval = (np.arange(0, np.ceil(1. / (vmin * h))) + 1) * h
+
+        # Define initial conditions for solve_pde
+        y = np.linspace(0, 1, num=N + 1)
+        u_init = delta_h(y[1:], h)
+        p0 = np.append(u_init, np.zeros(4 * N))
+
+        u1_bdy = solve_pde(s_eval, p0, h, eps1=eps, eps2=np.inf, a=ap,
+                           b=1 - ap, c=1, d=0, scheme='up')[3]
+        cdf = np.interp(1. / v, s_eval, u1_bdy)
+        return -np.sum(np.log(cdf))
+
+    if initial_guess is None:
+        a0 = np.mean(vels)
+        e0 = np.std(vels)**2 / (2 * a0 * (1 - a0))
+        s0 = (2 * a0 - 1) / (2 * a0 * (1 - a0))
+        le0 = np.log(e0)
+        initial_guess = np.array([s0, le0])
+
+    # It may not be necessary to fit the reduced model to the data
+    sol1 = minimize(reduced_objective, initial_guess)
+    sol2 = minimize(full_objective, sol1.x)
+    # sol_test = minimize(full_objective, initial_guess)
+
+    # Don't need to print out the number of function evaluations
+    print(sol1.nfev)
+    print(sol2.nfev)
+    # print(sol_test.nfev)
+
+    return sol1.x, sol2.x
+
+
+def boot_trial(vels, initial_guess=None):
+    """Run a single bootstrap trial
+
+    Parameters
+    ----------
+    vels : array_like
+        Array of average rolling velocities
+    initial_guess : array_like or None, optional
+        Initial guess for the minimization procedure. If None, then
+        infer a reasonable starting guess from the mean and standard
+        deviation of the data
+
+    Returns
+    -------
+    reduced_trial : ndarray
+        Bootstrap ML parameters of the reduced model
+    full_trial : ndarray
+        Bootstrap ML parameters of the full PDE model
+    """
+    new_data = np.random.choice(vels, size=len(vels))
+    reduced_trial, full_trial = fit_models(new_data,
+                                           initial_guess=initial_guess)
+    return reduced_trial, full_trial
+
+
+def bootstrap(vels, boot_trials=10, proc=1):
+    """Run a bootstrapping procedure on average velocity data
+
+    Parameters
+    ----------
+    vels : array_like
+        Array of average rolling velocities
+    boot_trials : int
+        Number of boostrap trials to run
+    proc : int
+        Number of parallel processes to run
+
+    Returns
+    -------
+    ndarray
+        Bounds of 95% confidence intervals for model parameters
+    """
+    import multiprocessing as mp
+    pool = mp.Pool(processes=proc)
+    result = [pool.apply_async(boot_trial, (vels,))
+              for _ in range(boot_trials)]
+
+    result = [res.get() for res in result]
+    parameter_trials = [np.concatenate(change_vars(res, forward=False),
+                                       axis=None) for res in result]
+    parameter_trials = np.stack(parameter_trials, axis=0)
+
+    return np.percentile(parameter_trials, q=(5, 95), axis=0)
+
+
+def main(a=.5, c=.2, eps1=.1, eps2=1, num_expt=1000):
     b, d = 1 - a, 1 - c
-    eps1, eps2 = .1, 1
 
     rate_a, rate_b = a / eps1, b / eps1
     rate_c, rate_d = c / eps2, d / eps2
 
-    num_expt = 1000
     vels = list()
     for i in range(num_expt):
         vels.append(experiment(rate_a, rate_b, rate_c, rate_d))
 
-    plt.hist(vels, density=True)
-    plt.show()
+    def reduced(v, a_reduced, eps_reduced):
+        b_reduced = 1 - a_reduced
+        return (1 / np.sqrt(4 * np.pi * eps_reduced
+                            * a_reduced * b_reduced * v ** 3)
+                * (a_reduced + (v - a_reduced) / 2)
+                * np.exp(-(v - a_reduced) ** 2 / (4 * eps_reduced * a_reduced
+                                                  * b_reduced * v)))
 
-    x = np.sort(vels)
-    x = np.insert(x, 0, 0)
-    y = np.linspace(0, 1, len(x))
-    x = np.append(x, 1.5)
-    y = np.append(y, 1)
-    plt.step(x, y, where='post')
-    plt.show()
+    N = 1000
+    s_max = 50
+    s_eval = np.linspace(0, s_max, num=s_max*N + 1)
+    h = 1./N
+    scheme = None
+    y = np.linspace(0, 1, num=N + 1)
+    u_init = delta_h(y[1:], h)
+    p0 = np.append(u_init, np.zeros(4 * N))
+
+    # sol = solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme)[3]
+    # full_model = interp1d(1/s_eval[1:], sol[1:] * s_eval[1:]**2,
+    #                       bounds_error=False, fill_value=0)
+
+    # reduced_fit, full_fit = fit_models(vels)
+    # a_rfit, eps_rfit = change_vars(reduced_fit, forward=False)
+    #
+    # a_ffit, eps_ffit = change_vars(full_fit, forward=False)
+    # sol_fit = solve_pde(s_eval, p0, h, eps_ffit, np.inf, a_ffit, 1 - a_ffit,
+    #                     1, 0, scheme)[3]
+    # full_model = interp1d(1/s_eval[1:], sol_fit[1:] * s_eval[1:]**2,
+    #                       bounds_error=False, fill_value=0)
+    # plot_experiments(vels, reduced=lambda v: reduced(v, a_rfit, eps_rfit),
+    #                  full_model=full_model)
+
+    quantiles = bootstrap(vels, boot_trials=4, proc=2)
+
+    # print(reduced_fit)
+    print(quantiles[:, :2])
+    # print(full_fit)
+    print(quantiles[:, 2:])
 
 
 if __name__ == '__main__':
@@ -154,4 +422,4 @@ if __name__ == '__main__':
     #
     # pars = read_parameter_file(filename)
     # main(**pars)
-    main()
+    main(eps1=.1, eps2=np.inf, num_expt=1000)
