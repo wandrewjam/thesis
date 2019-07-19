@@ -6,7 +6,7 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage{graphicx, subcaption}
+\usepackage{graphicx, subcaption, algorithmic}
 \graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
 
 % \usepackage{tikz, pgfplots}
@@ -49,7 +49,7 @@
 \pagestyle{plain}
 
 \begin{center}
-  {\Large Notes on a Jump-Velocity Model of Platelet Rolling (6/27/19)}
+  {\Large Notes on a Jump-Velocity Model of Platelet Rolling (\today)}
 \end{center}
 
 \section{Description of the Jump-Velocity Model}
@@ -189,7 +189,7 @@ $kd = d/(1 + \epsilon_2/\epsilon_1)$. When
 $k_\tn{on}^F = k_\tn{off}^F = 0$, this reduces to the example in
 Dr. Keener's notes.
 
-\subsection{Numerics and results for unprimed platelets}
+\section{Numerics and results for unprimed platelets}
 \label{sec:res-unpr}
 
 The system of equations for unprimed platelets reduces to
@@ -243,7 +243,7 @@ choose: $\epsilon$ and $a$. The parameter $\epsilon$ gives the ratio
 of the minimum crossing time to a characteristic reaction time, and
 $a$ gives the ratio of $k_\tn{off}$ to the sum of reaction
 rates. Below are some sample results for average velocity
-distributions $f(v^*) = q_U^N(1/v^*)$. 
+distributions $f(v^*) = 1/{v^*}^2 q_U^N(1/v^*)$. 
 
 \begin{figure}
   \centering
@@ -298,7 +298,7 @@ Observations:
   velocities shifts to the right, as expected.
 \end{itemize}
 
-\subsection{Adiabatic reduction}
+\section{Adiabatic reduction}
 \label{sec:adb-red}
 
 The adiabatic reduction is solved in example 3.6.1 of Dr. Keener's
@@ -355,7 +355,146 @@ The probability density function of the average velocity is then
       a)^2}{4\epsilon a b v^*} \right].
 \end{equation}
 
+\section{Parameter Estimation}
+\label{sec:parameter-estimation}
 
+Chapter 15 from \textit{Numerical Recipes in Fortran} describes
+methods for fitting proposed models to data. In the situation they
+describe, data is collected at several values of some independent
+variable (say $x$) with some measurement error $\sigma$ that may vary
+with $x$, and the goal is to fit a deterministic model to that
+data. They develop a maximum-likelihood estimate for model parameters
+based on the data collected $(x_i, y_i)$ and measurement errors
+$\sigma_i$. 
+
+In our jump-velocity model, the situation is a little different. We
+have a stochastic model of a jump-velocity process, which is used to
+derive a Fokker-Planck equation for platelet position as a function of
+time. From the Fokker-Planck equation we derive a probability
+distribution for the average velocity of a platelet rolling across
+some domain. Basically the average velocity of a platelet (or
+equivalently, the time it takes a platelet to cross) is a random
+variable. The Fokker-Planck equation defines a probability
+distribution for this random variable as a function of model
+parameters, and the data Vlado's group are collecting on average
+velocity are realizations of this random variable. Then we want to fit
+the probability distribution defined by model parameters to the
+realizations collected by Vlado's group.
+
+One way to fit the model to average velocity data is to use a
+maximum-likelihood estimate. This is analogous to the procedure
+described in Chapter 15 of \textit{Numerical Recipes}. Let
+$\{v_i\}_{i=1}^N$ be a set of observations of average velocities, and
+define $f(v;a, \epsilon)$ to be the probability distribution of
+velocities given parameters $a$ and $\epsilon$ (for simplicity, assume
+we're working with the two-state model). Define the likelihood
+function
+\begin{equation}
+  \label{eq:likelihood}
+  L(a, \epsilon) = \prod_{i=1}^N f(v_i; a, \epsilon),
+\end{equation}
+and then the maximum likelihood estimates for $a$ and $\epsilon$ are
+``simply'' those that maximize $L$. As usual, define the
+log-likelihood function: $\tilde{\ell}(a, \epsilon) = \log(L(a, \epsilon))$,
+and then maximizing $\tilde{\ell}$ is equivalent to maximizing $L$.
+
+We found $f(v; a, \epsilon)$ above in terms of the solution of the
+Fokker-Planck equation: $f(v; a, \epsilon) = 1/v^2 q_{U^1}(1, 1/v; a,
+\epsilon)$ where $q_{U^1}(x, t; a, \epsilon)$ is part of the solution
+of the Fokker-Planck equation with parameters $a$ and $\epsilon$. Then
+we can write $\tilde{\ell}$ in terms of $q_{U^1}$:
+$\tilde{\ell} = \sum_{i=1}^N \log(f(v_i; a, \epsilon)) = \sum_{i=1}^N
+\log(q_{U^1}(1, 1/v_i; a, \epsilon)) - 2\sum_{i=1}^N \log(v_i)$. The
+second term is a constant factor with respect to $a$ and $\epsilon$,
+and so can be excluded from the optimization. Therefore we can
+maximize the modified log-likelihood function
+\begin{equation}
+  \label{eq:mod-log-like}
+  \ell(a, \epsilon) = \sum_{i=1}^N \log(q_{U^1}(1, 1/v_i; a, \epsilon)).
+\end{equation}
+
+\subsection{Numerical Optimization}
+\label{sec:numer-optim}
+
+Clearly $\ell(a, \epsilon)$ must be maximized iteratively. We haven't
+even found an analytical expression for $q_{U^1}$. Unless we do, the
+Fokker-Planck equation must be re-solved each time the parameters $a$
+and $\epsilon$ are changed. Fortunately the PDE only needs to be
+solved once for each evaluation of $\ell(a, \epsilon)$. We have to
+find $q_{U^1}(1, t)$ up to time $t = 1/\min(v_i)$, but then to
+evaluate the probability density at each time $1/v_i$, we only need to
+interpolate the solution.
+
+Another important consideration is that the model parameters $a$ and
+$\epsilon$ have bounds, in particular $a \in (0, 1)$ and
+$\epsilon > 0$. One option to deal with this is to choose a numerical
+method that optimizes within a bounded domain, however when I tried
+this the optimization function I was using ran into overflow errors
+when it got too close to the edge of the domain. Restricting the
+parameters to even tighter domains fixed this problem, but the bounds
+were chosen arbitrarily, and with prior knowledge of the true
+parameters of the ``data''. I have achieved good results in my
+experiments by transforming the model parameters $a$ and $\epsilon$ to
+``fitting'' parameters $a'$ and $\epsilon'$ which can vary over all
+$\R$. The transformations I have chosen are:
+\begin{align}
+  \label{eq:a-fwd-trns}
+  a' &= \frac{2a + 1}{2a(a + 1)} \\
+  \label{eq:e-fwd-trns}
+  \epsilon' &= \log \epsilon.
+\end{align}
+$a'$ is defined so that $a'=0$ at $a=1/2$, $a' \rightarrow -\infty$ as
+$a \rightarrow 0$, and $a' \rightarrow \infty$ as $a \rightarrow
+1$. With the fitting parameters, the optimization problem becomes an
+unconstrained optimization in $\R^2$. To actually carry out the
+optimization I use SciPy's \verb|minimize| function, which implements
+the BFGS algorithm.
+
+An iterative algorithm needs an intial guess, which at least in the
+two-state model, can be chosen as an estimate of $a$ and $\epsilon$
+from the adiabatic reduction. Equation (\ref{eq:vel-dens}) gives the
+pdf of velocities from the adiabatic reduction, and can be used to
+derive the mean $\mu(a, \epsilon)$ and variance $\sigma^2(a,
+\epsilon)$ as functions of $a$ and $\epsilon$. These moments actually
+have simple analytical expressions (according to Mathematica):
+\begin{align}
+  \label{eq:mean-ar}
+  \mu(a, \epsilon) &= a(1 + \epsilon - a \epsilon) \\
+  \label{eq:var-ar}
+  \sigma^2(a, \epsilon) &= a^2 \epsilon (1 - a) (2 + 5(1 - a) \epsilon).
+\end{align}
+
+Then we can equate $\mu$ and $\sigma^2$ to the first two sample
+moments ($\bar{v}$ and $s^2$) of the data to estimate $a$ and
+$\epsilon$ (this is called the method of moments). $a$ and $\epsilon$
+can be expressed in terms of $\mu$ and $\sigma^2$ analytically, but
+the formulas are messy. Note that $\sigma^2 = O(\epsilon)$ and
+$\epsilon << 1$, so we can use an asymptotic approximation instead of
+the full formulas. The estimate is only being used to initialize the
+optimization algorithm, so there is no need to be exact. Therefore up
+to $O(\sigma^2)$, the method of moments gives the following estimates
+for $a$ and $\epsilon$ based on a data set with sample mean $\bar{v}$
+and sample variance $s^2$:
+\begin{align}
+  \label{eq:mean-est}
+  a &= \bar{v} - \frac{s^2}{2\bar{v}} \\
+  \label{eq:var-est}
+  \epsilon &= \frac{s^2}{2(1 - \bar{v})(\bar{v})^2}.
+\end{align}
+
+\subsubsection{Numerical experiments}
+\label{sec:numer-exper}
+
+\subsection{Bootstrapping}
+\label{sec:bootstrapping}
+
+The maximum likelihood estimator only gives a point estimate of the
+parameters $a$ and $\epsilon$. In order to get confidence intervals,
+we can use a bootstrapping approach. The basic idea is that for a set
+of data ${V_i}_{i=1}^N$, a ``new'' data set can be generated by
+randomly picking $N$ samples from the ${V_i}$ with replacement. Then
+the MLE for the new data can be found, and in this way we get a bunch
+of $\hat{a}$ and $\hat{\epsilon}$ estimates. 
 
 \bibliographystyle{plain}
 \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
