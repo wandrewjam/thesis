@@ -145,7 +145,7 @@ def experiment(rate_a, rate_b, rate_c, rate_d):
     return 1 / t[-1]
 
 
-def change_vars(p, forward=True):
+def change_vars(p, forward=True, vectorized=False):
     """Convert between model parameters and fitting parameters
 
     Parameters
@@ -155,6 +155,8 @@ def change_vars(p, forward=True):
     forward : bool, optional
         If True, converts model parameters to fitting parameters. If
         False, converts fitting parameters to model parameters.
+    vectorized : bool, optional
+        Use a vectorized implementation of the function
 
     Returns
     -------
@@ -162,13 +164,17 @@ def change_vars(p, forward=True):
         Corresponding fitting (if forward is True) or model (if forward
         is False) parameters
     """
+    if p.ndim < 2:
+        p = p[:, None]
 
-    result = np.zeros(shape=2)
+    result = np.zeros(shape=p.shape)
     if forward:
         result[0] = (2 * p[0] - 1) / (2 * p[0] * (1 - p[0]))
         result[1] = np.log(p[1])
     else:
-        result[0] = (p[0] - 1 + np.sqrt(p[0]**2 + 1))/(2*p[0])
+        result[p != 0] = ((p[p != 0] - 1 + np.sqrt(p[p != 0] ** 2 + 1))
+                          / (2 * p[p != 0]))
+        result[p == 0] = 0.5
         result[1] = np.exp(p[1])
     return result
 
@@ -245,7 +251,7 @@ def fit_models(vels, initial_guess=None):
                 * (a + (y - a * s) / (2 * s))
                 * np.exp(-(y - a * s) ** 2 / (4 * eps * a * (1 - a) * s)))
 
-    def reduced_objective(p, vectorized=False):
+    def reduced_objective(p, v, vectorized=False):
         if vectorized:
             v = np.array(vels)[:, None, None]
             s = p[0][None, :, None]
@@ -263,19 +269,21 @@ def fit_models(vels, initial_guess=None):
             epsp = np.exp(p[1])
             return -np.sum(np.log(q(1, 1. / v, ap, epsp)))
 
-    def full_objective(p):
-        """ Log likelihood function of the full model"""
-        # Transform the parameters back to a and epsilon
-        s = p[0]
-        if s == 0:
-            ap = .5
-        else:
-            ap = (s - 1 + np.sqrt(s ** 2 + 1)) / (2 * s)
-        eps = np.exp(p[1])
+    def full_objective(p, v, vmin):
+        """ Log likelihood function of the full model
 
-        # Find the minimum sampled average velocity
-        v = np.array(vels)
-        vmin = np.amin(v)
+        Parameters
+        ----------
+        p
+        v
+        vmin
+
+        Returns
+        -------
+        float
+        """
+        # Transform the parameters back to a and epsilon
+        a, eps = change_vars(p, forward=False)[:, 0]
 
         N = 100
         h = 1. / N
@@ -286,21 +294,25 @@ def fit_models(vels, initial_guess=None):
         u_init = delta_h(y[1:], h)
         p0 = np.append(u_init, np.zeros(4 * N))
 
-        u1_bdy = solve_pde(s_eval, p0, h, eps1=eps, eps2=np.inf, a=ap,
-                           b=1 - ap, c=1, d=0, scheme='up')[3]
+        u1_bdy = solve_pde(s_eval, p0, h, eps1=eps, eps2=np.inf, a=a,
+                           b=1 - a, c=1, d=0, scheme='up')[3]
         cdf = np.interp(1. / v, s_eval, u1_bdy)
         return -np.sum(np.log(cdf))
 
     if initial_guess is None:
-        a0 = np.mean(vels)
-        e0 = np.std(vels)**2 / (2 * a0 * (1 - a0))
+        v_bar = np.mean(vels)
+        s2 = np.std(vels) ** 2
+        a0 = v_bar - s2 / (2 * v_bar)
+        e0 = s2 / (2 * v_bar ** 2 * (1 - v_bar))
         s0 = (2 * a0 - 1) / (2 * a0 * (1 - a0))
         le0 = np.log(e0)
         initial_guess = np.array([s0, le0])
 
+    v = np.array(vels)
+    vmin = np.amin(v)
     # It may not be necessary to fit the reduced model to the data
-    sol1 = minimize(reduced_objective, initial_guess)
-    sol2 = minimize(full_objective, sol1.x)
+    sol1 = minimize(reduced_objective, initial_guess, args=(v,))
+    sol2 = minimize(full_objective, sol1.x, args=(v, vmin))
     # sol_test = minimize(full_objective, initial_guess)
 
     # Don't need to print out the number of function evaluations
@@ -330,10 +342,11 @@ def boot_trial(vels, initial_guess=None):
     full_trial : ndarray
         Bootstrap ML parameters of the full PDE model
     """
+    np.random.seed()
     new_data = np.random.choice(vels, size=len(vels))
     reduced_trial, full_trial = fit_models(new_data,
                                            initial_guess=initial_guess)
-    return reduced_trial, full_trial
+    return np.stack([reduced_trial, full_trial], axis=-1)
 
 
 def bootstrap(vels, boot_trials=10, proc=1):
@@ -351,7 +364,8 @@ def bootstrap(vels, boot_trials=10, proc=1):
     Returns
     -------
     ndarray
-        Bounds of 95% confidence intervals for model parameters
+        2x2xboot_trials array of parameter estimates for each bootstrap
+        trial
     """
     import multiprocessing as mp
     pool = mp.Pool(processes=proc)
@@ -359,11 +373,10 @@ def bootstrap(vels, boot_trials=10, proc=1):
               for _ in range(boot_trials)]
 
     result = [res.get() for res in result]
-    parameter_trials = [np.concatenate(change_vars(res, forward=False),
-                                       axis=None) for res in result]
-    parameter_trials = np.stack(parameter_trials, axis=0)
+    parameter_trials = [change_vars(res, forward=False) for res in result]
+    parameter_trials = np.stack(parameter_trials, axis=-1)
 
-    return np.percentile(parameter_trials, q=(5, 95), axis=0)
+    return parameter_trials
 
 
 def main(a=.5, c=.2, eps1=.1, eps2=1, num_expt=1000):
@@ -386,8 +399,8 @@ def main(a=.5, c=.2, eps1=.1, eps2=1, num_expt=1000):
 
     N = 1000
     s_max = 50
-    s_eval = np.linspace(0, s_max, num=s_max*N + 1)
-    h = 1./N
+    s_eval = np.linspace(0, s_max, num=s_max * N + 1)
+    h = 1. / N
     scheme = None
     y = np.linspace(0, 1, num=N + 1)
     u_init = delta_h(y[1:], h)
@@ -397,23 +410,24 @@ def main(a=.5, c=.2, eps1=.1, eps2=1, num_expt=1000):
     # full_model = interp1d(1/s_eval[1:], sol[1:] * s_eval[1:]**2,
     #                       bounds_error=False, fill_value=0)
 
-    # reduced_fit, full_fit = fit_models(vels)
-    # a_rfit, eps_rfit = change_vars(reduced_fit, forward=False)
-    #
-    # a_ffit, eps_ffit = change_vars(full_fit, forward=False)
-    # sol_fit = solve_pde(s_eval, p0, h, eps_ffit, np.inf, a_ffit, 1 - a_ffit,
-    #                     1, 0, scheme)[3]
-    # full_model = interp1d(1/s_eval[1:], sol_fit[1:] * s_eval[1:]**2,
-    #                       bounds_error=False, fill_value=0)
-    # plot_experiments(vels, reduced=lambda v: reduced(v, a_rfit, eps_rfit),
-    #                  full_model=full_model)
+    reduced_fit, full_fit = fit_models(vels)
+    a_rfit, eps_rfit = change_vars(reduced_fit, forward=False)[:, 0]
 
-    quantiles = bootstrap(vels, boot_trials=4, proc=2)
+    a_ffit, eps_ffit = change_vars(full_fit, forward=False)[:, 0]
+    sol_fit = solve_pde(s_eval, p0, h, eps_ffit, np.inf, a_ffit, 1 - a_ffit,
+                        1, 0, scheme)[3]
+    full_model = interp1d(1 / s_eval[1:], sol_fit[1:] * s_eval[1:] ** 2,
+                          bounds_error=False, fill_value=0)
+    plot_experiments(vels, reduced=lambda v: reduced(v, a_rfit, eps_rfit),
+                     full_model=full_model)
 
-    # print(reduced_fit)
-    print(quantiles[:, :2])
-    # print(full_fit)
-    print(quantiles[:, 2:])
+    parameter_trials = bootstrap(vels, boot_trials=4, proc=2)
+
+    print(np.array([[a_rfit, a_ffit], [eps_rfit, eps_ffit]]))
+    print(a, eps1)
+    print(parameter_trials)
+    print(parameter_trials.shape)
+    print(np.percentile(parameter_trials, q=(2.5, 97.5), axis=-1))
 
 
 if __name__ == '__main__':

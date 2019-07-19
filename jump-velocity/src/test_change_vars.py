@@ -30,4 +30,4 @@ class TestChange_vars(TestCase):
     def test_2x3arraybck(self):
         sol_dist = np.linalg.norm(change_vars(self.fit_all, forward=False)
                                   - self.model_all)
-        self.assertEqual(sol_dist, 0)
+        self.assertAlmostEqual(sol_dist, 0, places=15)
