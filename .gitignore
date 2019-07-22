@@ -30,6 +30,7 @@ dissertation/phd-thesis/*.bib
 *.stripped
 first-binding-model/*.dat
 jump-velocity/npz-files/*
+meeting-notes/summer-19/intro-to-prob/
 
 # Copied from github/gitignore/Python.gitignore
 ###############################################
