@@ -1,6 +1,6 @@
 import numpy as np
 from unittest import TestCase
-from simulate import change_vars
+from src.mle import change_vars
 
 
 class TestChange_vars(TestCase):
