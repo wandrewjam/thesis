@@ -1,6 +1,6 @@
 import numpy as np
 from unittest import TestCase
-from jv_simulation import change_vars
+from simulate import change_vars
 
 
 class TestChange_vars(TestCase):
