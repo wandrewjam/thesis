@@ -26,6 +26,13 @@ def main(filename, show_plot=False):
     if show_plot:
         plt.show()
 
+    dat_dir = 'dat-files/distributions/'
+    dat_array = np.stack((1 / s_eval[s_mask],
+                          s_eval[s_mask] ** 2 * u1_bdy[s_mask],
+                          1 - F[s_mask]), axis=-1)
+    skip = dat_array.shape[0] / 1000
+    np.savetxt(dat_dir + filename + '-dst.dat', dat_array[::skip])
+
 
 if __name__ == '__main__':
     import os
