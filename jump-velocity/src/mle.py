@@ -1,6 +1,63 @@
 import numpy as np
+from scipy.integrate import cumtrapz
+from scipy.interpolate import interp1d
+from jv import solve_pde, delta_h
 
-from src.jv import delta_h, solve_pde
+
+def change_vars(p, forward=True):
+    """Convert between model parameters and fitting parameters
+
+    Parameters
+    ----------
+    p : array_like
+        Parameter values to convert
+    forward : bool, optional
+        If True, converts model parameters to fitting parameters. If
+        False, converts fitting parameters to model parameters.
+
+    Returns
+    -------
+    ndarray
+        Corresponding fitting (if forward is True) or model (if forward
+        is False) parameters
+    """
+    if p.ndim < 2:
+        p = p[:, None]
+
+    result = np.zeros(shape=p.shape)
+    if forward:
+        result[0] = (2 * p[0] - 1) / (2 * p[0] * (1 - p[0]))
+        result[1] = np.log(p[1])
+    else:
+        result[p != 0] = ((p[p != 0] - 1 + np.sqrt(p[p != 0] ** 2 + 1))
+                          / (2 * p[p != 0]))
+        result[p == 0] = 0.5
+        result[1] = np.exp(p[1])
+    return result
+
+
+def save_data(reduced, full_model, filename):
+    """
+
+    Parameters
+    ----------
+    filename
+    reduced
+    full_model
+
+    """
+    save_array = np.zeros(shape=(500, 5))
+    x_plot = np.linspace(0, 1.5, num=501)[1:]
+    save_array[:, 0] = x_plot
+    save_array[:, 1] = reduced(x_plot)
+    save_array[:, 2] = 1 + cumtrapz(reduced(x_plot[::-1]), x_plot[::-1],
+                                    initial=0)[::-1]
+    save_array[:, 3] = full_model(x_plot)
+    save_array[:, 4] = 1 + cumtrapz(full_model(x_plot[::-1]), x_plot[::-1],
+                                    initial=0)[::-1]
+
+    est_dir = 'dat-files/ml-estimates/'
+    np.savetxt(est_dir + filename + '-est.dat', save_array)
 
 
 def fit_models(vels, initial_guess=None):
@@ -13,7 +70,7 @@ def fit_models(vels, initial_guess=None):
     initial_guess : array_like or None, optional
         Initial guess for the minimization procedure. If None, then
         infer a reasonable starting guess from the mean and standard
-        deviation of the data
+        deviation of the data using a method of moments estimate.
 
     Returns
     -------
@@ -29,7 +86,7 @@ def fit_models(vels, initial_guess=None):
                 * (a + (y - a * s) / (2 * s))
                 * np.exp(-(y - a * s) ** 2 / (4 * eps * a * (1 - a) * s)))
 
-    def reduced_objective(p, v, vectorized=False):
+    def reduced_objective(p, vels, vectorized=False):
         if vectorized:
             v = np.array(vels)[:, None, None]
             s = p[0][None, :, None]
@@ -88,48 +145,61 @@ def fit_models(vels, initial_guess=None):
 
     v = np.array(vels)
     vmin = np.amin(v)
-    # It may not be necessary to fit the reduced model to the data
+
     sol1 = minimize(reduced_objective, initial_guess, args=(v,))
     sol2 = minimize(full_objective, sol1.x, args=(v, vmin))
-    # sol_test = minimize(full_objective, initial_guess)
-
-    # Don't need to print out the number of function evaluations
-    print(sol1.nfev)
-    print(sol2.nfev)
-    # print(sol_test.nfev)
 
     return sol1.x, sol2.x
 
 
-def change_vars(p, forward=True, vectorized=False):
-    """Convert between model parameters and fitting parameters
+def main(filename):
+    sim_dir = 'dat-files/simulations/'
+    vels = np.loadtxt(sim_dir + filename + '-sim.dat')
 
-    Parameters
-    ----------
-    p : array_like
-        Parameter values to convert
-    forward : bool, optional
-        If True, converts model parameters to fitting parameters. If
-        False, converts fitting parameters to model parameters.
-    vectorized : bool, optional
-        Use a vectorized implementation of the function
+    def reduced(v, a_reduced, eps_reduced):
+        b_reduced = 1 - a_reduced
+        return (1 / np.sqrt(4 * np.pi * eps_reduced
+                            * a_reduced * b_reduced * v ** 3)
+                * (a_reduced + (v - a_reduced) / 2)
+                * np.exp(-(v - a_reduced) ** 2 / (4 * eps_reduced * a_reduced
+                                                  * b_reduced * v)))
 
-    Returns
-    -------
-    ndarray
-        Corresponding fitting (if forward is True) or model (if forward
-        is False) parameters
-    """
-    if p.ndim < 2:
-        p = p[:, None]
+    reduced_fit, full_fit = fit_models(vels)
+    a_rfit, eps_rfit = change_vars(reduced_fit, forward=False)[:, 0]
+    a_ffit, eps_ffit = change_vars(full_fit, forward=False)[:, 0]
 
-    result = np.zeros(shape=p.shape)
-    if forward:
-        result[0] = (2 * p[0] - 1) / (2 * p[0] * (1 - p[0]))
-        result[1] = np.log(p[1])
-    else:
-        result[p != 0] = ((p[p != 0] - 1 + np.sqrt(p[p != 0] ** 2 + 1))
-                          / (2 * p[p != 0]))
-        result[p == 0] = 0.5
-        result[1] = np.exp(p[1])
-    return result
+    # Define numerical parameters to find the PDE at the ML estimates
+    N = 1000
+    s_max = 50
+    s_eval = np.linspace(0, s_max, num=s_max * N + 1)
+    h = 1. / N
+    scheme = None
+    y = np.linspace(0, 1, num=N + 1)
+    u_init = delta_h(y[1:], h)
+    p0 = np.append(u_init, np.zeros(4 * N))
+
+    sol_fit = solve_pde(s_eval, p0, h, eps_ffit, np.inf, a_ffit, 1 - a_ffit,
+                        1, 0, scheme)[3]
+    full_model = interp1d(1 / s_eval[1:], sol_fit[1:] * s_eval[1:] ** 2,
+                          bounds_error=False, fill_value=0)
+
+    save_data(lambda v: reduced(v, a_rfit, eps_rfit), full_model, filename)
+    # plot_experiments(vels, reduced=lambda v: reduced(v, a_rfit, eps_rfit),
+    #                  full_model=full_model)
+
+    # parameter_trials = bootstrap(vels, boot_trials=4, proc=2)
+    #
+    # print(np.array([[a_rfit, a_ffit], [eps_rfit, eps_ffit]]))
+    # print(parameter_trials)
+    # print(parameter_trials.shape)
+    # print(np.percentile(parameter_trials, q=(50*alpha, 100 - 50*alpha),
+    #                     axis=-1))
+
+
+if __name__ == '__main__':
+    import os
+    import sys
+    filename = sys.argv[1]
+    os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
+
+    main(filename)

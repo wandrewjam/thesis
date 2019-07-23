@@ -1,34 +1,31 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
-from scipy.integrate import cumtrapz
-from src.jv import solve_pde, delta_h
-from src.bootstrap import bootstrap
-from src.mle import fit_models, change_vars
 
 
-# def read_parameter_file(filename):
-#     txt_dir = 'par-files/'
-#     parlist = [('filename', filename)]
-#
-#     with open(txt_dir + filename + '.txt') as f:
-#         while True:
-#             command = f.readline().split()
-#             if len(command) < 1:
-#                 continue
-#             if command[0] == 'done':
-#                 break
-#
-#             key, value = command
-#             if key == 'trials':
-#                 parlist.append((key, int(value)))
-#             else:
-#                 parlist.append((key, float(value)))
-#     return dict(parlist)
+def read_parameter_file(filename):
+    txt_dir = 'par-files/experiments/'
+    parlist = [('filename', filename)]
+
+    with open(txt_dir + filename + '.txt') as f:
+        while True:
+            command = f.readline().split()
+            if len(command) < 1:
+                continue
+            if command[0] == 'done':
+                break
+
+            key, value = command
+            if key == 'num_expt':
+                parlist.append((key, int(value)))
+            else:
+                parlist.append((key, float(value)))
+    return dict(parlist)
 
 
 def experiment(rate_a, rate_b, rate_c, rate_d):
     """Runs a single jump-velocity experiment based on the given rates
+
+    Note that this experiment does not exclude platelets that pass
+    through the domain without binding.
 
     Parameters
     ----------
@@ -113,53 +110,7 @@ def experiment(rate_a, rate_b, rate_c, rate_d):
     return 1 / t[-1]
 
 
-def plot_experiments(vels, reduced=None, full_model=None):
-    """Plots histogram and ECDF of average velocity data
-
-    Parameters
-    ----------
-    vels : array_like
-        Array of average rolling velocities
-    reduced : callable
-    full_model : callable
-
-    Returns
-    -------
-    None
-    """
-    if reduced is not None or full_model is not None:
-        x_plot = np.linspace(0, 1.5, num=500)[1:]
-
-    density_fig, density_ax = plt.subplots()
-    density_ax.hist(vels, density=True, label='Sample data')
-
-    if reduced is not None:
-        density_ax.plot(x_plot, reduced(x_plot), label='Adiabatic reduction')
-    if full_model is not None:
-        density_ax.plot(x_plot, full_model(x_plot), label='Full model')
-    density_ax.legend(loc='best')
-    plt.show()
-
-    x_cdf = np.sort(vels)
-    x_cdf = np.insert(x_cdf, 0, 0)
-    y_cdf = np.linspace(0, 1, len(x_cdf))
-    x_cdf = np.append(x_cdf, 1.5)
-    y_cdf = np.append(y_cdf, 1)
-
-    cdf_fig, cdf_ax = plt.subplots()
-    cdf_ax.step(x_cdf, y_cdf, where='post', label='Sample data')
-    cdf_ax.plot(x_plot[::-1],
-                1 + cumtrapz(reduced(x_plot[::-1]), x_plot[::-1], initial=0),
-                label='Adiabatic reduction')
-    cdf_ax.plot(x_plot[::-1],
-                1 + cumtrapz(full_model(x_plot[::-1]), x_plot[::-1],
-                             initial=0),
-                label='Full model')
-    cdf_ax.legend(loc='best')
-    plt.show()
-
-
-def main(a=.5, c=.2, eps1=.1, eps2=1, num_expt=1000):
+def main(a, c, eps1, eps2, num_expt, filename):
     b, d = 1 - a, 1 - c
 
     rate_a, rate_b = a / eps1, b / eps1
@@ -169,47 +120,15 @@ def main(a=.5, c=.2, eps1=.1, eps2=1, num_expt=1000):
     for i in range(num_expt):
         vels.append(experiment(rate_a, rate_b, rate_c, rate_d))
 
-    def reduced(v, a_reduced, eps_reduced):
-        b_reduced = 1 - a_reduced
-        return (1 / np.sqrt(4 * np.pi * eps_reduced
-                            * a_reduced * b_reduced * v ** 3)
-                * (a_reduced + (v - a_reduced) / 2)
-                * np.exp(-(v - a_reduced) ** 2 / (4 * eps_reduced * a_reduced
-                                                  * b_reduced * v)))
-
-    N = 1000
-    s_max = 50
-    s_eval = np.linspace(0, s_max, num=s_max * N + 1)
-    h = 1. / N
-    scheme = None
-    y = np.linspace(0, 1, num=N + 1)
-    u_init = delta_h(y[1:], h)
-    p0 = np.append(u_init, np.zeros(4 * N))
-
-    reduced_fit, full_fit = fit_models(vels)
-    a_rfit, eps_rfit = change_vars(reduced_fit, forward=False)[:, 0]
-
-    a_ffit, eps_ffit = change_vars(full_fit, forward=False)[:, 0]
-    sol_fit = solve_pde(s_eval, p0, h, eps_ffit, np.inf, a_ffit, 1 - a_ffit,
-                        1, 0, scheme)[3]
-    full_model = interp1d(1 / s_eval[1:], sol_fit[1:] * s_eval[1:] ** 2,
-                          bounds_error=False, fill_value=0)
-    plot_experiments(vels, reduced=lambda v: reduced(v, a_rfit, eps_rfit),
-                     full_model=full_model)
-
-    parameter_trials = bootstrap(vels, boot_trials=4, proc=2)
-
-    print(np.array([[a_rfit, a_ffit], [eps_rfit, eps_ffit]]))
-    print(a, eps1)
-    print(parameter_trials)
-    print(parameter_trials.shape)
-    print(np.percentile(parameter_trials, q=(2.5, 97.5), axis=-1))
+    sim_dir = 'dat-files/simulations/'
+    np.savetxt(sim_dir + filename + '-sim.dat', np.sort(vels))
 
 
 if __name__ == '__main__':
-    # import sys
-    # filename = sys.argv[1]
-    #
-    # pars = read_parameter_file(filename)
-    # main(**pars)
-    main(eps1=.1, eps2=np.inf, num_expt=1000)
+    import os
+    import sys
+    filename = sys.argv[1]
+    os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
+
+    pars = read_parameter_file(filename)
+    main(**pars)
