@@ -17,7 +17,7 @@ clean : exact-clean
 distclean : exact-clean simulate-clean
 
 .PHONY : exact
-exact-all : exact-animations exact-plots
+exact : exact-animations exact-plots
 
 .PHONY : exact-animations
 exact-animations: $(MP4_FILES)
