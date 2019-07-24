@@ -3,7 +3,7 @@ TXT_FILES = $(wildcard par-files/*.txt)
 PNG_FILES = $(patsubst par-files/%.txt, plots/%.png, $(TXT_FILES))
 MP4_FILES = $(patsubst par-files/%.txt, plots/%.mp4, $(TXT_FILES))
 NPZ_FILES = $(patsubst par-files/%.txt, npz-files/%.npz, $(TXT_FILES))
-DST_FILES = $(patsubst par-files/%.txt, dat-files/distributions/%.dat, $(TXT_FILES))
+DST_FILES = $(patsubst par-files/%.txt, dat-files/distributions/%-dst.dat, $(TXT_FILES))
 
 EXP_FILES = $(wildcard par-files/experiments/*.txt)
 SIM_FILES = $(patsubst par-files/experiments/%.txt, dat-files/simulations/%-sim.dat, $(EXP_FILES))
