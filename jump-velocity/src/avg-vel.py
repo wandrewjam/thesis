@@ -27,11 +27,12 @@ def main(filename, show_plot=False):
         plt.show()
 
     dat_dir = 'dat-files/distributions/'
-    dat_array = np.stack((1 / s_eval[s_mask],
-                          s_eval[s_mask] ** 2 * u1_bdy[s_mask],
-                          1 - F[s_mask]), axis=-1)
-    skip = dat_array.shape[0] / 1000
-    np.savetxt(dat_dir + filename + '-dst.dat', dat_array[::skip])
+    v_dat = np.linspace(1/s_eval[-1], 1.5, num=1001)
+    f_dat = np.interp(v_dat, (1 / s_eval[s_mask])[::-1],
+                      (s_eval[s_mask] ** 2 * u1_bdy[s_mask])[::-1])
+    F_dat = np.interp(v_dat, (1 / s_eval[s_mask])[::-1], (1 - F[s_mask])[::-1])
+    np.savetxt(dat_dir + filename + '-dst.dat',
+               np.stack((v_dat, f_dat, F_dat), axis=-1))
 
 
 if __name__ == '__main__':
