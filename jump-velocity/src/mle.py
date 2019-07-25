@@ -36,11 +36,12 @@ def change_vars(p, forward=True):
     return result
 
 
-def save_data(reduced, full_model, filename):
+def save_data(reduced, full_model, filename, head_str=''):
     """
 
     Parameters
     ----------
+    head_str
     filename
     reduced
     full_model
@@ -57,7 +58,7 @@ def save_data(reduced, full_model, filename):
                                     initial=0)[::-1]
 
     est_dir = 'dat-files/ml-estimates/'
-    np.savetxt(est_dir + filename + '-est.dat', save_array)
+    np.savetxt(est_dir + filename + '-est.dat', save_array, header=head_str)
 
 
 def fit_models(vels, initial_guess=None):
@@ -183,7 +184,10 @@ def main(filename):
     full_model = interp1d(1 / s_eval[1:], sol_fit[1:] * s_eval[1:] ** 2,
                           bounds_error=False, fill_value=0)
 
-    save_data(lambda v: reduced(v, a_rfit, eps_rfit), full_model, filename)
+    head_fmt = 'a_rfit = {:g}, eps_rfit = {:g}, a_ffit = {:g}, eps_ffit = {:g}'
+    head_str = head_fmt.format(a_rfit, eps_rfit, a_ffit, eps_ffit)
+    save_data(lambda v: reduced(v, a_rfit, eps_rfit), full_model, filename,
+              head_str=head_str)
     # plot_experiments(vels, reduced=lambda v: reduced(v, a_rfit, eps_rfit),
     #                  full_model=full_model)
 
