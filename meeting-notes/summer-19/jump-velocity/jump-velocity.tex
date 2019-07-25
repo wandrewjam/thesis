@@ -9,14 +9,20 @@
 \usepackage{graphicx, subcaption, algorithmic}
 \graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
 
-% \usepackage{tikz, pgfplots}
-% \usepgfplotslibrary{colorbrewer}
-% \pgfplotsset{
-%   table/search path = {/Users/andrewwork/thesis/first-binding-model/},
-%   table/col sep = comma,
-%   colormap/YlGnBu,
-% }
+\usepackage{tikz, pgfplots}
+\usepgfplotslibrary{colorbrewer, statistics}
+\pgfplotsset{
+  exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+    legend entries={PDF, CDF},},
+  every axis plot post/.append style={thick},
+  table/search
+  path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+  colormap/YlGnBu,
+  cycle list/Set1-5,
+  legend style={legend cell align=left,},
+}
 
+\renewcommand{\arraystretch}{1.2}
 \pagestyle{empty} 
 \oddsidemargin -0.25in
 \evensidemargin -0.25in 
@@ -189,7 +195,7 @@ $kd = d/(1 + \epsilon_2/\epsilon_1)$. When
 $k_\tn{on}^F = k_\tn{off}^F = 0$, this reduces to the example in
 Dr. Keener's notes.
 
-\section{Numerics and results for unprimed platelets}
+\section{Numerics and results for unprimed platelets (the two-state model)}
 \label{sec:res-unpr}
 
 The system of equations for unprimed platelets reduces to
@@ -222,8 +228,8 @@ can solve the advection part exactly.
 % which I solve with SciPy's implementation of the RK45 scheme.
 
 The initial condition $q_{\tn{U}^0}(y, 0) = \delta(y)$ must be
-approximated, so I use Peskin's approximate $\delta$-function
-\cite{Peskin2002}:
+approximated, so I use Peskin's approximate $\delta$-function:
+%\cite{Peskin2002}:
 \begin{equation}
   \label{eq:delta-h}
   \delta_h(y) =
@@ -248,42 +254,115 @@ distributions $f(v^*) = 1/{v^*}^2 q_U^N(1/v^*)$.
 \begin{figure}
   \centering
   \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{{twostate-smalleps-smalla}.png}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-smalla}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-smalleps-smalla-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-smalleps-smalla-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
     \caption{$\epsilon = 0.1$, $a = 0.2$: Reactions are fast, and
       $k_\tn{on} > k_\tn{off}$.}
   \end{subfigure}
   \hfill
   \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{{twostate-largeeps-smalla}.png}
+    % \includegraphics[width=\textwidth]{{twostate-largeeps-smalla}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-largeeps-smalla-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-largeeps-smalla-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
     \caption{$\epsilon = 1$, $a = 0.2$: Reactions and advection are
       the same order, and $k_\tn{on} > k_\tn{off}$.}
   \end{subfigure}
   \\
   \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{{twostate-smalleps-meda}.png}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-meda}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-smalleps-meda-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-smalleps-meda-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
     \caption{$\epsilon = 0.1$, $a = 0.5$: Reactions are fast, and
       $k_\tn{on} = k_\tn{off}$.}
   \end{subfigure}
   \hfill
   \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{{twostate-largeeps-meda}.png}
+    % \includegraphics[width=\textwidth]{{twostate-largeeps-meda}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-largeeps-meda-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-largeeps-meda-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
     \caption{$\epsilon = 1$, $a = 0.5$: Reactions and advection are
       the same order, and $k_\tn{on} = k_\tn{off}$.}
   \end{subfigure}
   \\
   \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{{twostate-smalleps-largea}.png}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-largea}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-smalleps-largea-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-smalleps-largea-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
     \caption{$\epsilon = 0.1$, $a = 0.8$: Reactions are fast, and
       $k_\tn{on} < k_\tn{off}$.}
   \end{subfigure}
   \hfill
   \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{{twostate-largeeps-largea}.png}
+    % \includegraphics[width=\textwidth]{{twostate-largeeps-largea}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-largeeps-largea-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-largeeps-largea-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
     \caption{$\epsilon = 1$, $a = 0.8$: Reactions and advection are
       the same order, and $k_\tn{on} < k_\tn{off}$.}
   \end{subfigure}
   \caption[Probability density functions]{Probability density
-    functions for 6 different $(\epsilon, a)$ pairs}
+    functions for 6 different $(\epsilon, a)$ pairs in the two-state
+    jump-velocity model.}
   \label{fig:prob-dens}
 \end{figure}
 
@@ -298,15 +377,15 @@ Observations:
   velocities shifts to the right, as expected.
 \end{itemize}
 
-\section{Adiabatic reduction}
-\label{sec:adb-red}
+\subsection{Adiabiatic reduction}
+\label{sec:adiabiatic-reduction}
 
-The adiabatic reduction is solved in example 3.6.1 of Dr. Keener's
-stochastics notes. Starting with equations (\ref{eq:unprimed-1}) and
-(\ref{eq:unprimed-2}), assume that $\epsilon \ll 1$ and define $v =
-q_\tn{U} + q_\tn{V}$ to be the slow variable and $w = b q_\tn{U} - a
-q_\tn{V}$ to be the fast variable. Then $v$ evolves as an
-advection-diffusion equation:
+The adiabatic reduction for the two-state model is solved in example
+3.6.1 of Dr. Keener's stochastics notes. Starting with equations
+(\ref{eq:unprimed-1}) and (\ref{eq:unprimed-2}), assume that
+$\epsilon \ll 1$ and define $v = q_\tn{U} + q_\tn{V}$ to be the slow
+variable and $w = b q_\tn{U} - a q_\tn{V}$ to be the fast
+variable. Then $v$ evolves as an advection-diffusion equation:
 \begin{equation}
   \label{eq:v}
   \Pder{v}{s} = -a \Pder{v}{y} + \epsilon a b \frac{\partial^2
@@ -355,7 +434,7 @@ The probability density function of the average velocity is then
       a)^2}{4\epsilon a b v^*} \right].
 \end{equation}
 
-\section{Parameter Estimation}
+\subsection{Parameter Estimation}
 \label{sec:parameter-estimation}
 
 Chapter 15 from \textit{Numerical Recipes in Fortran} describes
@@ -413,7 +492,7 @@ maximize the modified log-likelihood function
   \ell(a, \epsilon) = \sum_{i=1}^N \log(q_{U^1}(1, 1/v_i; a, \epsilon)).
 \end{equation}
 
-\subsection{Numerical Optimization}
+\subsubsection{Numerical Optimization}
 \label{sec:numer-optim}
 
 Clearly $\ell(a, \epsilon)$ must be maximized iteratively. We haven't
@@ -482,10 +561,15 @@ and sample variance $s^2$:
   \epsilon &= \frac{s^2}{2(1 - \bar{v})(\bar{v})^2}.
 \end{align}
 
-\subsubsection{Numerical experiments}
-\label{sec:numer-exper}
+In figure \ref{fig:model-fits}, a histogram of 1000 sample velocities
+(not filtered, \textcolor{red}{need to fix this}) is shown along with
+the PDEs generated by the reduced and full models with maximum
+likelihood parameter estimates. The CDFs of the models are also
+compared with the ECDF of the data. Visually these models fit well (as
+they should), and provide parameter estimates with less than 10\%
+relative error.
 
-\subsection{Bootstrapping}
+\subsubsection{Bootstrapping}
 \label{sec:bootstrapping}
 
 The maximum likelihood estimator only gives a point estimate of the
@@ -504,10 +588,304 @@ $97.5$th percentiles also provides a good estimate for the confidence
 interval, and doesn't rely on assuming the parameter estimate is
 distributed normally.
 
+Figure \ref{fig:bootstraps} summarizes results from 100 bootstrap
+trials on the sample data. In each case, the distribution of estimated
+parameters looks symmetrical, and the two methods of estimating a 95\%
+confidence interval described above give similar results (Table
+\ref{tab:conf-int}).
 
+While the MLE of $a$ looks unbiased (i.e. it is near the center of the
+distribution of $a$s shown in figure \ref{fig:bootstraps}), the MLE of
+$\epsilon$ is clearly biased to the upper end of the distribution of
+$\epsilon$ estimates from the bootstrap procedure. Part of this may be
+because I haven't filtered out platelets that didn't pause on the
+surface, but it is still something to look out for. 
 
-\bibliographystyle{plain}
-\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+\begin{table}
+  \centering
+  \begin{tabular}{cccc}
+    \hline
+    Parameter & Model & Normal method & Quantile method \\
+    \hline
+    $a$ & Reduced & $[0.5079, 0.5269]$ & $[0.5083, 0.5266]$ \\
+    $a$ & Full & $[0.4854, 0.5043]$ & $[0.4856, 0.5034]$ \\
+    $\epsilon$ & Reduced & $[0.0864, 0.1023]$ & $[0.0875, 0.1025]$ \\
+    $\epsilon$ & Full & $[0.0808, 0.0952]$ & $[0.0817, 0.0951]$\\
+    \hline
+  \end{tabular}
+  \caption[Summary of confidence intervals]{Summary of 95\% confidence
+    intervals of model parameters estimated by bootstrapping}
+  \label{tab:conf-int}
+\end{table}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Reduced model, Full model},
+        xlabel=$v^*$,
+        ylabel={Probability density},
+        ]
+        \addplot+[hist=density, fill]
+        table[y index=0] {simulations/test-sim.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/test-est.dat};
+        \addplot table[x index=0, y index=3]
+        {ml-estimates/test-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Reduced model, Full model},
+        legend pos=south east,
+        xlabel=$v^*$,
+        ylabel={$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y expr=\coordindex/1000]
+        {simulations/test-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/test-est.dat};
+        \addplot table[x index=0, y index=4]
+        {ml-estimates/test-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[Model fits]{Results of the ML estimates for the reduced
+    (i.e. adiabatic reduction) and full models. For this simulated
+    data, the maximum likelihood parameters are $a = 0.5208$ and
+    $\epsilon = 0.1011$ for the reduced model, and $a = 0.4967$ and
+    $\epsilon = 0.0950$ for the full model. Total number of simulated
+    data points: $N = 1000$}
+  \label{fig:model-fits}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}[baseline]
+      \begin{axis}[
+        ytick={1, 2},
+        yticklabels={Reduced model, Full model},
+        title={Distributions of $a$ estimates},
+        ]
+        \draw[thin, dashed] ({axis cs:.5, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:.5, 0}|-{rel axis cs:0, 1});
+        \addplot+ [boxplot] table[y index=0]
+        {bootstrap/test-boot.dat};
+        \addplot+ [boxplot] table[y index=2]
+        {bootstrap/test-boot.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}[baseline]
+      \begin{axis}[
+        ytick={1, 2},
+        yticklabels={},
+        xticklabel style={/pgf/number format/precision=3,
+          /pgf/number format/fixed},
+        title={Distributions of $\epsilon$ estimates},
+        ]
+        \draw[thin, dashed] ({axis cs:.1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:.1, 0}|-{rel axis cs:0, 1});
+        \addplot+ [boxplot] table[y index=1]
+        {bootstrap/test-boot.dat};
+        \addplot+ [boxplot] table[y index=3]
+        {bootstrap/test-boot.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[Boxplots of bootstap trials]{Boxplots of parameter
+    estimates from 100 bootstap trials. The left plot summarizes estimates
+    of $a$ and the right plot summarizes estimates of $\epsilon$. The
+    true parameter values are shown with a dashed vertical
+    line.} 
+  \label{fig:bootstraps}
+\end{figure}
+
+\newpage
+
+\subsubsection{Goodness-of-fit}
+\label{sec:goodness-fit}
+
+The final step in parameter estimation (at least according to
+\textit{Numerical Recipes}) is to find the goodness-of-fit of the
+model. In \textit{Numerical Recipes}, they use the $\chi^2$ statistic
+to estimate the fit of the model to the data. Briefly, this arises
+because they assume that their data $\{Y(x_i)\}$ are drawn from a
+normal distribution. We have to use a different approach to estimate
+the fit, because there isn't an obvious connection between the sample
+probability distribution and a normal distribution.
+
+Chapter 13 in \textit{Introduction to Probability and Mathematical
+  Statistics} by Bain and Engelhardt suggests two approaches. One
+approach is to group the data into bins, and then compare the observed
+observations in each bin to the expected number of observations in
+each bin. In particular,
+\begin{equation}
+  \label{eq:chi2}
+  \chi^2 = \sum_{j=1}^c \frac{(o_j - \hat{e}_j)^2}{\hat{e}_j} \sim
+  \chi^2(c - 1 - k)
+\end{equation}
+where $c$ is the number of bins, $k$ is the number of estimated
+parameters, $o_j$ is the number of data points in bin $j$, and
+$\hat{e}_j$ is the expected number of data points in bin $j$. Here
+$\hat{e}_j = n \hat{p}_j$ where $n$ is the total number of data
+points, and $\hat{p}_j$ is the model probability of picking a data
+point from bin $j$. A weakness of this approach is that information is
+lost by grouping the data, and there are other tests that depend
+directly on the individual observations.
+
+One of these tests is the Kolmogorov-Smirnov test, which essentially
+uses the maximum difference between the predicted CDF and the
+ECDF. The KS statistic is $D = \max(D^+, D^-)$ where
+$D^+ = \max_i(i/n - F(x_{i:n}))$ and
+$D^- = \max_i(F(x_{i:n}) - (i - 1)/n)$. A small value of $D$ indicates
+a good fit (though precisely what value of $D$ means the fit is
+``good'' depends on $n$). The weakness of this approach is that the
+distribution of the KS statistic is derived assuming no parameters
+have been estimated, which is obviously not true in our case. The
+Kolmogorov-Smirnov test returned a p-value of 0.54 for the reduced
+model, and 0.52 for the full model, indicating a good fit of these
+models to the data (obviously, because the data were derived from the
+jump-velocity model).
+
+\section{Numerics and results for primed platelets}
+\label{sec:numer-results-prim}
+
+For primed platelets, $k_\tn{on}^F > 0$ and the Fokker-Planck equation
+for the platelets' positions is given in equation
+(\ref{eq:nd-system}). The numerics for solving these equations are
+similar to the two-state case, and so I won't go into detail on that
+here. The idea behind including these two extra states is to model the
+slow binding/unbinding dynamics of fibrinogen, and so in practice we
+take $\epsilon_1 \ll \epsilon_2$.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-smalla-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-smalla-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon_1 = 0.1$, $\epsilon_2 = 1$, $a = 0.2$,
+      $c = 0.5$: $k_\tn{on} > k_\tn{off}$ and
+      $k_\tn{on}^F = k_\tn{off}^F$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-meda-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-meda-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon_1 = .1$, $\epsilon_2 = 1$, $a = 0.5$,
+      $c = 0.5$: $k_\tn{on} = k_\tn{off}$ and
+      $k_\tn{on}^F = k_\tn{off}^F$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-meda}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-largea-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-largea-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon_1 = 0.1$, $\epsilon_2 = 1$, $a = 0.8$,
+      $c = 0.5$: $k_\tn{on} < k_\tn{off}$ and
+      $k_\tn{on}^F = k_\tn{off}^F$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-largeeps-meda}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-smallc-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-smallc-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
+    \caption{$\epsilon_1 = .1$, $\epsilon_2 = 1$, $a = 0.5$,
+      $c = 0.2$: $k_\tn{on} = k_\tn{off}$ and
+      $k_\tn{on}^F > k_\tn{off}^F$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-largea}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-vsmalleps-smallc-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-vsmalleps-smallc-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
+    \caption{$\epsilon_1 = 0.01$, $\epsilon_2 = 1$, $a = 0.5$,
+      $c = 0.2$: $k_\tn{on} = k_\tn{off}$ and
+      $k_\tn{on}^F > k_\tn{off}^F$.}
+  \end{subfigure}
+  % \hfill
+  % \begin{subfigure}{0.48\textwidth}
+  %   % \includegraphics[width=\textwidth]{{twostate-largeeps-largea}.png}
+  %   \begin{tikzpicture}
+  %     \begin{axis}[
+  %       exact axis,
+  %       ]
+  %       \addplot table[x index=0, y index=1]
+  %       {distributions/twostate-largeeps-largea-dst.dat}; 
+  %       \addplot table[x index=0, y index=2]
+  %       {distributions/twostate-largeeps-largea-dst.dat}; 
+  %       \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+  %       -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+  %     \end{axis}
+  %   \end{tikzpicture}    
+  %   \caption{$\epsilon = 1$, $a = 0.8$: Reactions and advection are
+  %     the same order, and $k_\tn{on} < k_\tn{off}$.}
+  % \end{subfigure}
+  \caption[Probability density functions]{Probability density
+    functions for selected $(\epsilon_1, \epsilon_2, a, c)$ quadruples
+    in the four-state jump-velocity model.}
+  \label{fig:prob-dens}
+\end{figure}
+
+% \bibliographystyle{plain}
+% \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
 
 \end{document}
 
