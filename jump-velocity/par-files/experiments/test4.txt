@@ -1,0 +1,6 @@
+num_expt 1000
+a .5
+c .2
+eps1 .1
+eps2 1
+done
