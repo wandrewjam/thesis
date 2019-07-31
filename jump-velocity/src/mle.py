@@ -156,7 +156,7 @@ def fit_models(vels, two_par, initial_guess=None):
             a, eps1 = change_vars(p[:2], forward=False)[:, 0]
             c, eps2 = change_vars(p[2:], forward=False)[:, 0]
 
-        N = 128
+        N = 512
         h = 1. / N
         s_eval = (np.arange(0, np.ceil(1. / (vmin * h))) + 1) * h
 

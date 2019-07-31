@@ -114,15 +114,18 @@ def experiment(rate_a, rate_b, rate_c, rate_d):
     return 1 / t[-1]
 
 
-def main(a, c, eps1, eps2, num_expt, filename):
+def multiple_experiments(a, c, eps1, eps2, num_expt):
     b, d = 1 - a, 1 - c
-
     rate_a, rate_b = a / eps1, b / eps1
     rate_c, rate_d = c / eps2, d / eps2
-
     vels = list()
     for i in range(num_expt):
         vels.append(experiment(rate_a, rate_b, rate_c, rate_d))
+    return vels
+
+
+def main(a, c, eps1, eps2, num_expt, filename):
+    vels = multiple_experiments(a, c, eps1, eps2, num_expt)
 
     sim_dir = 'dat-files/simulations/'
     if eps2 == np.inf:

@@ -53,7 +53,10 @@ def boot_trial(vels, initial_guess=None, k=None, trials=None, two_par=True):
     else:
         print('Completed one bootstrap trial. This run took {:g} seconds.'
               .format(end-start))
-    return np.stack((reduced_trial, full_trial), axis=-1)
+    if two_par:
+        return np.stack((reduced_trial, full_trial), axis=-1)
+    else:
+        return full_trial
 
 
 def bootstrap(vels, boot_trials=16, proc=1, initial_guess=None, two_par=True):
@@ -83,21 +86,25 @@ def bootstrap(vels, boot_trials=16, proc=1, initial_guess=None, two_par=True):
             2 - a_ffit
             3 - eps_ffit
     """
-    import multiprocessing as mp
-    pool = mp.Pool(processes=proc)
-    result = [pool.apply_async(boot_trial,
-                               (vels, initial_guess, k, boot_trials, two_par))
-              for k in range(boot_trials)]
+    if proc > 1:
+        import multiprocessing as mp
+        pool = mp.Pool(processes=proc)
+        result = [pool.apply_async(boot_trial,
+                                   (vels, initial_guess, k, boot_trials, two_par))
+                  for k in range(boot_trials)]
 
-    result = [res.get() for res in result]
+        result = [res.get() for res in result]
+    else:
+        result = [boot_trial(vels, initial_guess, k, boot_trials, two_par)
+                  for k in range(boot_trials)]
     if two_par:
         parameter_trials = [change_vars(res, forward=False) for res in result]
         parameter_trials = np.stack(parameter_trials, axis=-1)
     else:
-        parameter_trials = [np.stack((change_vars(res[:2], forward=False),
-                                      change_vars(res[2:], forward=False)),
-                                     axis=0) for res in result]
-        parameter_trials = np.stack(parameter_trials, axis=-1)
+        parameter_trials = [np.concatenate(
+            (change_vars(res[:2], forward=False),
+             change_vars(res[2:], forward=False)), axis=0) for res in result]
+        parameter_trials = np.concatenate(parameter_trials, axis=-1)
 
     return np.reshape(parameter_trials, newshape=(4, -1), order='F')
 
