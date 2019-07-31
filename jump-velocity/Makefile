@@ -3,7 +3,19 @@
 ### Current target list:
 ###	all
 ###	clean
-###	avg-vel_test
+###	distclean
+###	exact
+###	exact-animations
+###	exact-clean
+###	exact-data
+###	exact-plots
+###	install
+###	simulate
+###	simulate-bootstrap
+###	simulate-clean
+###	simulate-data
+###	simulate-estimate
+###	variables
 
 include config.mk
 
