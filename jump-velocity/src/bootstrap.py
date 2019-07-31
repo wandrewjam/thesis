@@ -3,11 +3,12 @@ from timeit import default_timer as timer
 from mle import fit_models, change_vars
 
 
-def boot_trial(vels, initial_guess=None, k=None, trials=None):
+def boot_trial(vels, initial_guess=None, k=None, trials=None, two_par=True):
     """Run a single bootstrap trial
 
     Parameters
     ----------
+    two_par
     vels : array_like
         Array of average rolling velocities
     initial_guess : array_like or None, optional
@@ -32,7 +33,11 @@ def boot_trial(vels, initial_guess=None, k=None, trials=None):
     start = timer()
     np.random.seed()
     new_data = np.random.choice(vels, size=len(vels))
-    reduced_trial, full_trial = fit_models(new_data, two_par, initial_guess=initial_guess)
+    if two_par:
+        reduced_trial, full_trial = fit_models(new_data, two_par,
+                                               initial_guess=initial_guess)
+    else:
+        full_trial = fit_models(new_data, two_par, initial_guess=initial_guess)
     end = timer()
 
     if k is not None and trials is not None:
@@ -51,11 +56,12 @@ def boot_trial(vels, initial_guess=None, k=None, trials=None):
     return np.stack((reduced_trial, full_trial), axis=-1)
 
 
-def bootstrap(vels, boot_trials=10, proc=1, initial_guess=None):
+def bootstrap(vels, boot_trials=10, proc=1, initial_guess=None, two_par=True):
     """Run a bootstrapping procedure on average velocity data
 
     Parameters
     ----------
+    two_par
     vels : array_like
         Array of average rolling velocities
     boot_trials : int
@@ -80,12 +86,18 @@ def bootstrap(vels, boot_trials=10, proc=1, initial_guess=None):
     import multiprocessing as mp
     pool = mp.Pool(processes=proc)
     result = [pool.apply_async(boot_trial,
-                               (vels, initial_guess, k, boot_trials))
+                               (vels, initial_guess, k, boot_trials, two_par))
               for k in range(boot_trials)]
 
     result = [res.get() for res in result]
-    parameter_trials = [change_vars(res, forward=False) for res in result]
-    parameter_trials = np.stack(parameter_trials, axis=-1)
+    if two_par:
+        parameter_trials = [change_vars(res, forward=False) for res in result]
+        parameter_trials = np.stack(parameter_trials, axis=-1)
+    else:
+        parameter_trials = [np.stack((change_vars(res[:2], forward=False),
+                                      change_vars(res[2:], forward=False)),
+                                     axis=0) for res in result]
+        parameter_trials = np.stack(parameter_trials, axis=-1)
 
     return np.reshape(parameter_trials, newshape=(4, -1), order='F')
 
@@ -94,7 +106,13 @@ def main(filename, boot_trials, proc):
     sim_dir = 'dat-files/simulations/'
     vels = np.loadtxt(sim_dir + filename + '-sim.dat')
 
-    parameter_trials = bootstrap(vels, boot_trials, proc)
+    with open(sim_dir + filename + '-sim.dat') as f:
+        par_number = f.readline().split()[1]
+
+    two_par = (par_number == 'two')
+
+    parameter_trials = bootstrap(vels=vels, boot_trials=boot_trials, proc=proc,
+                                 two_par=two_par)
 
     boot_dir = 'dat-files/bootstrap/'
     np.savetxt(boot_dir + filename + '-boot.dat', parameter_trials.T)

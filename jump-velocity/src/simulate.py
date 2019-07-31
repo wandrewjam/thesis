@@ -125,7 +125,11 @@ def main(a, c, eps1, eps2, num_expt, filename):
         vels.append(experiment(rate_a, rate_b, rate_c, rate_d))
 
     sim_dir = 'dat-files/simulations/'
-    np.savetxt(sim_dir + filename + '-sim.dat', np.sort(vels))
+    if eps2 == np.inf:
+        header = 'two par'
+    else:
+        header = 'four par'
+    np.savetxt(sim_dir + filename + '-sim.dat', np.sort(vels), header=header)
 
 
 if __name__ == '__main__':

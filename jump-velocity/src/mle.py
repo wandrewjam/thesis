@@ -196,9 +196,14 @@ def fit_models(vels, two_par, initial_guess=None):
         return sol.x
 
 
-def main(filename, two_par=True):
+def main(filename):
     sim_dir = 'dat-files/simulations/'
     vels = np.loadtxt(sim_dir + filename + '-sim.dat')
+
+    with open(sim_dir + filename + '-sim.dat') as f:
+        par_number = f.readline().split()[1]
+
+    two_par = (par_number == 'two')
 
     if two_par:
         def reduced(v, a_reduced, eps_reduced):
@@ -265,4 +270,4 @@ if __name__ == '__main__':
     filename = sys.argv[1]
     os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
 
-    main(filename, two_par=False)
+    main(filename)
