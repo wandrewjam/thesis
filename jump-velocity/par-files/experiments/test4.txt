@@ -1,4 +1,4 @@
-num_expt 1000
+num_expt 1024
 a .5
 c .2
 eps1 .1

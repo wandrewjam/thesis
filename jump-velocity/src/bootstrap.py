@@ -56,7 +56,7 @@ def boot_trial(vels, initial_guess=None, k=None, trials=None, two_par=True):
     return np.stack((reduced_trial, full_trial), axis=-1)
 
 
-def bootstrap(vels, boot_trials=10, proc=1, initial_guess=None, two_par=True):
+def bootstrap(vels, boot_trials=16, proc=1, initial_guess=None, two_par=True):
     """Run a bootstrapping procedure on average velocity data
 
     Parameters

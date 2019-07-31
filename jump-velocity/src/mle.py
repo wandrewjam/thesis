@@ -47,8 +47,9 @@ def save_data(reduced, full_model, filename, head_str=''):
     full_model
 
     """
-    save_array = np.zeros(shape=(500, 5))
-    x_plot = np.linspace(0, 1.5, num=501)[1:]
+    N_save = 512
+    save_array = np.zeros(shape=(N_save, 5))
+    x_plot = np.linspace(0, 1.5, num=N_save+1)[1:]
     save_array[:, 0] = x_plot
     save_array[:, 1] = reduced(x_plot)
     save_array[:, 2] = 1 + cumtrapz(reduced(x_plot[::-1]), x_plot[::-1],
@@ -74,8 +75,9 @@ def save_data4(full_model, filename, head_str=''):
     -------
 
     """
-    save_array = np.zeros(shape=(500, 3))
-    x_plot = np.linspace(0, 1.5, num=501)[1:]
+    N_save = 512
+    save_array = np.zeros(shape=(N_save, 3))
+    x_plot = np.linspace(0, 1.5, num=N_save+1)[1:]
     save_array[:, 0] = x_plot
     save_array[:, 1] = full_model(x_plot)
     save_array[:, 2] = 1 + cumtrapz(full_model(x_plot[::-1]), x_plot[::-1],
@@ -154,7 +156,7 @@ def fit_models(vels, two_par, initial_guess=None):
             a, eps1 = change_vars(p[:2], forward=False)[:, 0]
             c, eps2 = change_vars(p[2:], forward=False)[:, 0]
 
-        N = 100
+        N = 128
         h = 1. / N
         s_eval = (np.arange(0, np.ceil(1. / (vmin * h))) + 1) * h
 
@@ -223,7 +225,7 @@ def main(filename):
         c_ffit, eps2_ffit = change_vars(full_fit[2:], forward=False)[:, 0]
 
     # Define numerical parameters to find the PDE at the ML estimates
-    N = 1000
+    N = 1024
     s_max = 50
     s_eval = np.linspace(0, s_max, num=s_max * N + 1)
     h = 1. / N
