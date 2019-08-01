@@ -34,8 +34,7 @@ def boot_trial(vels, initial_guess=None, k=None, trials=None, two_par=True):
     np.random.seed()
     new_data = np.random.choice(vels, size=len(vels))
     if two_par:
-        reduced_trial, full_trial = fit_models(new_data, two_par,
-                                               initial_guess=initial_guess)
+        reduced_trial, full_trial = fit_models(new_data, two_par, initial_guess=initial_guess)
     else:
         full_trial = fit_models(new_data, two_par, initial_guess=initial_guess)
     end = timer()

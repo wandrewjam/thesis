@@ -10,7 +10,7 @@ def change_vars(p, forward=True):
     Parameters
     ----------
     p : array_like
-        Parameter values to convert
+        Parameter values to convert. First dimension must have size 2.
     forward : bool, optional
         If True, converts model parameters to fitting parameters. If
         False, converts fitting parameters to model parameters.
@@ -87,11 +87,12 @@ def save_data4(full_model, filename, head_str=''):
     np.savetxt(est_dir + filename + '-est.dat', save_array, header=head_str)
 
 
-def fit_models(vels, two_par, initial_guess=None):
+def fit_models(vels, two_par, initial_guess=None, N_obj=512):
     """Fits the adiabatic reduction and full PDE model to data
 
     Parameters
     ----------
+    N_obj
     vels : array_like
         Array of average rolling velocities
     two_par : bool
@@ -135,11 +136,12 @@ def fit_models(vels, two_par, initial_guess=None):
                 epsp = np.exp(p[1])
                 return -np.sum(np.log(q(1, 1. / v, ap, epsp)))
 
-    def full_objective(p, v, vmin, two_par):
+    def full_objective(p, v, vmin, two_par, N_obj):
         """ Log likelihood function of the full model
 
         Parameters
         ----------
+        N_obj
         p
         v
         vmin
@@ -156,14 +158,13 @@ def fit_models(vels, two_par, initial_guess=None):
             a, eps1 = change_vars(p[:2], forward=False)[:, 0]
             c, eps2 = change_vars(p[2:], forward=False)[:, 0]
 
-        N = 512
-        h = 1. / N
+        h = 1. / N_obj
         s_eval = (np.arange(0, np.ceil(1. / (vmin * h))) + 1) * h
 
         # Define initial conditions for solve_pde
-        y = np.linspace(0, 1, num=N + 1)
+        y = np.linspace(0, 1, num=N_obj + 1)
         u_init = delta_h(y[1:], h)
-        p0 = np.append(u_init, np.zeros(4 * N))
+        p0 = np.append(u_init, np.zeros(4 * N_obj))
 
         u1_bdy = solve_pde(s_eval, p0, h, eps1=eps1, eps2=eps2, a=a,
                            b=1 - a, c=c, d=1-c, scheme='up')[3]
@@ -190,11 +191,11 @@ def fit_models(vels, two_par, initial_guess=None):
 
     if two_par:
         sol1 = minimize(reduced_objective, initial_guess, args=(v,))
-        sol2 = minimize(full_objective, sol1.x, args=(v, vmin, two_par))
+        sol2 = minimize(full_objective, sol1.x, args=(v, vmin, two_par, N_obj))
 
         return sol1.x, sol2.x
     else:
-        sol = minimize(full_objective, initial_guess, args=(v, vmin, two_par))
+        sol = minimize(full_objective, initial_guess, args=(v, vmin, two_par, N_obj))
         return sol.x
 
 
