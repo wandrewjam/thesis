@@ -50,6 +50,7 @@ def four_state(p, t, h, eps1, eps2, a, b, c, d, scheme='up'):
 def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1000):
     u00, u10, v0, f0, vf0 = np.split(p0, 5)
     N = u00.shape[0]
+    yi = np.linspace(0, 1, num=N+1)
     ystore = np.linspace(0, N, num=101, dtype='int')[1:] - 1
     tstore = np.linspace(0, s_eval.shape[0]-1, num=s_samp+1, dtype='int')
     ka, kb = a / (1 + eps1 / eps2), b / (1 + eps1 / eps2)
@@ -57,6 +58,7 @@ def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1
     dt = s_eval[1] - s_eval[0]
     bc = delta_h(-s_eval, h)
     u0, u1, v, f, vf = u00[ystore, None], u10[ystore, None], v0[ystore, None], f0[ystore, None], vf0[ystore, None]
+    e = np.zeros(shape=u0)
     u0_bdy, u1_bdy = u00[-1], u10[-1]
     if fast:
         rxn = np.array([[-(kb+kd), 0, 0, 0, 0], [0, -(kb+kd), ka, kc, 0], [kb, kb, -(ka+kd), 0, kc],
@@ -64,6 +66,7 @@ def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1
         A = np.eye(5) - (1 / eps1 + 1 / eps2) * dt * rxn
         Ai = np.linalg.inv(A)
         u0temp, u1temp, vtemp, ftemp, vftemp = u00, u10, v0, f0, vf0
+        etemp = e[:, 0]
         for i in range(1, s_eval.shape[0]):
             rhsu0 = u0temp + dt/h*(np.append(bc[i-1], u0temp[:-1]) - u0temp)
             rhsu1 = u1temp + dt/h*(np.append(0, u1temp[:-1]) - u1temp)
@@ -75,6 +78,7 @@ def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1
             vtemp = Ai[2, 0] * rhsu0 + Ai[2, 1] * rhsu1 + Ai[2, 2] * rhsv + Ai[2, 3] * rhsf + Ai[2, 4] * rhsvf
             ftemp = Ai[3, 0] * rhsu0 + Ai[3, 1] * rhsu1 + Ai[3, 2] * rhsv + Ai[3, 3] * rhsf + Ai[3, 4] * rhsvf
             vftemp = Ai[4, 0] * rhsu0 + Ai[4, 1] * rhsu1 + Ai[4, 2] * rhsv + Ai[4, 3] * rhsf + Ai[4, 4] * rhsvf
+            etemp += dt * np.exp((b/eps1 + d/eps2) * (yi[ystore] - 1)) * (b/eps1 * vtemp[ystore] + d/eps2 * ftemp[ystore])
             u0_bdy = np.append(u0_bdy, u0temp[-1])
             u1_bdy = np.append(u1_bdy, u1temp[-1])
             if i in tstore:
@@ -83,6 +87,7 @@ def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1
                 v = np.append(v, vtemp[ystore, None], axis=1)
                 f = np.append(f, ftemp[ystore, None], axis=1)
                 vf = np.append(vf, vftemp[ystore, None], axis=1)
+                e = np.append(e, etemp[:, None], axis=1)
     else:
         I = eye(N, format='csc')
         rxn = bmat([[-(kb+kd)*I, None, None, None, None], [None, -(kb+kd)*I, ka*I, kc*I, None], [kb*I, kb*I, -(ka+kd)*I, None, kc*I],
@@ -103,7 +108,7 @@ def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1
             v = np.append(v, vtemp[:, None], axis=1)
             f = np.append(f, ftemp[:, None], axis=1)
             vf = np.append(vf, vftemp[:, None], axis=1)
-    return ystore, tstore, u0_bdy, u1_bdy, u0, u1, v, f, vf
+    return ystore, tstore, u0_bdy, u1_bdy, u0, u1, v, f, vf, e
 
 
 def delta_h(x, h):
