@@ -168,8 +168,9 @@ def fit_models(vels, two_par, initial_guess=None, N_obj=512):
 
         u1_bdy = solve_pde(s_eval, p0, h, eps1=eps1, eps2=eps2, a=a,
                            b=1 - a, c=c, d=1-c, scheme='up')[3]
-        cdf = np.interp(1. / v, s_eval, u1_bdy)
-        return -np.sum(np.log(cdf))
+        pdf = np.interp(1. / v, s_eval,
+                        u1_bdy / (1 - np.exp((a - 1) / eps1 + (c - 1) / eps2)))
+        return -np.sum(np.log(pdf))
 
     if initial_guess is None:
         if two_par:
@@ -218,8 +219,9 @@ def main(filename):
 
     if two_par:
         reduced_fit, full_fit = fit_models(vels, two_par)
-        a_rfit, eps_rfit = change_vars(reduced_fit, forward=False)[:, 0]
-        a_ffit, eps_ffit = change_vars(full_fit, forward=False)[:, 0]
+        a_rfit, eps1_rfit = change_vars(reduced_fit, forward=False)[:, 0]
+        a_ffit, eps1_ffit = change_vars(full_fit, forward=False)[:, 0]
+        c_ffit, eps2_ffit = 0.5, np.inf
     else:
         full_fit = fit_models(vels, two_par)
         a_ffit, eps1_ffit = change_vars(full_fit[:2], forward=False)[:, 0]
@@ -235,32 +237,31 @@ def main(filename):
     u_init = delta_h(y[1:], h)
     p0 = np.append(u_init, np.zeros(4 * N))
 
-    if two_par:
-        sol_fit = solve_pde(s_eval, p0, h, eps_ffit, np.inf, a_ffit, 1 - a_ffit,
-                            1, 0, scheme)[3]
-    else:
-        sol_fit = solve_pde(s_eval, p0, h, eps1_ffit, eps2_ffit, a_ffit,
-                            1 - a_ffit, c_ffit, 1 - c_ffit, scheme)[3]
-    full_model = interp1d(1 / s_eval[1:], sol_fit[1:] * s_eval[1:] ** 2,
-                          bounds_error=False, fill_value=0)
+    sol_fit = solve_pde(s_eval, p0, h, eps1_ffit, eps2_ffit, a_ffit,
+                        1 - a_ffit, c_ffit, 1 - c_ffit, scheme)[3]
+
+    full_model = interp1d(1 / s_eval[1:], sol_fit[1:]
+                          / (1 - np.exp((a_ffit - 1) / eps1_ffit
+                                        + (c_ffit - 1) / eps2_ffit))
+                          * s_eval[1:] ** 2, bounds_error=False, fill_value=0)
 
     if two_par:
-        head_fmt = 'a_rfit = {:g}, eps_rfit = {:g}, ' \
-                   'a_ffit = {:g}, eps_ffit = {:g}'
-        head_str = head_fmt.format(a_rfit, eps_rfit, a_ffit, eps_ffit)
-        save_data(lambda v: reduced(v, a_rfit, eps_rfit), full_model, filename,
+        head_fmt = 'a_rfit = {:g}, eps1_rfit = {:g}, ' \
+                   'a_ffit = {:g}, eps1_ffit = {:g}'
+        head_str = head_fmt.format(a_rfit, eps1_rfit, a_ffit, eps1_ffit)
+        save_data(lambda v: reduced(v, a_rfit, eps1_rfit), full_model, filename,
                   head_str=head_str)
     else:
         head_fmt = 'a_ffit = {:g}, eps1_ffit = {:g}, ' \
                    'c_ffit = {:g}, eps2_ffit = {:g}'
         head_str = head_fmt.format(a_ffit, eps1_ffit, c_ffit, eps2_ffit)
         save_data4(full_model, filename, head_str=head_str)
-    # plot_experiments(vels, reduced=lambda v: reduced(v, a_rfit, eps_rfit),
+    # plot_experiments(vels, reduced=lambda v: reduced(v, a_rfit, eps1_rfit),
     #                  full_model=full_model)
 
     # parameter_trials = bootstrap(vels, boot_trials=4, proc=2)
     #
-    # print(np.array([[a_rfit, a_ffit], [eps_rfit, eps_ffit]]))
+    # print(np.array([[a_rfit, a_ffit], [eps1_rfit, eps1_ffit]]))
     # print(parameter_trials)
     # print(parameter_trials.shape)
     # print(np.percentile(parameter_trials, q=(50*alpha, 100 - 50*alpha),
