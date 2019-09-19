@@ -33,6 +33,7 @@ first-binding-model/*.dat
 jump-velocity/npz-files/*
 meeting-notes/summer-19/intro-to-prob/
 jump-velocity/dat-files/*
+vlado-data/*
 *core.*
 
 # Copied from github/gitignore/Python.gitignore
