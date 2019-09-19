@@ -47,22 +47,23 @@ def four_state(p, t, h, eps1, eps2, a, b, c, d, scheme='up'):
     return np.append(du0, [du1, dv, df, dvf])
 
 
-def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1000):
+def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1024):
     u00, u10, v0, f0, vf0 = np.split(p0, 5)
     N = u00.shape[0]
     yi = np.linspace(0, 1, num=N+1)
-    ystore = np.linspace(0, N, num=101, dtype='int')[1:] - 1
+    ystore = np.linspace(0, N, num=129, dtype='int')[1:] - 1
     tstore = np.linspace(0, s_eval.shape[0]-1, num=s_samp+1, dtype='int')
     ka, kb = a / (1 + eps1 / eps2), b / (1 + eps1 / eps2)
     kc, kd = c / (1 + eps2 / eps1), d / (1 + eps2 / eps1)
     dt = s_eval[1] - s_eval[0]
     bc = delta_h(-s_eval, h)
     u0, u1, v, f, vf = u00[ystore, None], u10[ystore, None], v0[ystore, None], f0[ystore, None], vf0[ystore, None]
-    e = np.zeros(shape=u0)
+    e = np.zeros(shape=u0.shape)
     u0_bdy, u1_bdy = u00[-1], u10[-1]
     if fast:
-        rxn = np.array([[-(kb+kd), 0, 0, 0, 0], [0, -(kb+kd), ka, kc, 0], [kb, kb, -(ka+kd), 0, kc],
-                        [kd, kd, 0, -(kb+kc), ka], [0, 0, kd, kb, -(ka+kc)]])
+        rxn = np.array([[-(kb+kd), 0, 0, 0, 0], [0, -(kb+kd), ka, kc, 0],
+                        [kb, kb, -(ka+kd), 0, kc], [kd, kd, 0, -(kb+kc), ka],
+                        [0, 0, kd, kb, -(ka+kc)]])
         A = np.eye(5) - (1 / eps1 + 1 / eps2) * dt * rxn
         Ai = np.linalg.inv(A)
         u0temp, u1temp, vtemp, ftemp, vftemp = u00, u10, v0, f0, vf0
@@ -73,12 +74,14 @@ def solve_pde(s_eval, p0, h, eps1, eps2, a, b, c, d, scheme, fast=True, s_samp=1
             rhsv = vtemp
             rhsf = ftemp
             rhsvf = vftemp
+
             u0temp = Ai[0, 0] * rhsu0 + Ai[0, 1] * rhsu1 + Ai[0, 2] * rhsv + Ai[0, 3] * rhsf + Ai[0, 4] * rhsvf
             u1temp = Ai[1, 0] * rhsu0 + Ai[1, 1] * rhsu1 + Ai[1, 2] * rhsv + Ai[1, 3] * rhsf + Ai[1, 4] * rhsvf
             vtemp = Ai[2, 0] * rhsu0 + Ai[2, 1] * rhsu1 + Ai[2, 2] * rhsv + Ai[2, 3] * rhsf + Ai[2, 4] * rhsvf
             ftemp = Ai[3, 0] * rhsu0 + Ai[3, 1] * rhsu1 + Ai[3, 2] * rhsv + Ai[3, 3] * rhsf + Ai[3, 4] * rhsvf
             vftemp = Ai[4, 0] * rhsu0 + Ai[4, 1] * rhsu1 + Ai[4, 2] * rhsv + Ai[4, 3] * rhsf + Ai[4, 4] * rhsvf
             etemp += dt * np.exp((b/eps1 + d/eps2) * (yi[ystore] - 1)) * (b/eps1 * vtemp[ystore] + d/eps2 * ftemp[ystore])
+
             u0_bdy = np.append(u0_bdy, u0temp[-1])
             u1_bdy = np.append(u1_bdy, u1temp[-1])
             if i in tstore:
@@ -121,12 +124,12 @@ def phi(r):
     return np.select(condlist, choicelist)
 
 
-def slow_v(y, t):
+def slow_v(y, t, eps1, a, b):
     return (1 / np.sqrt(4 * np.pi * eps1 * a * b * t)
             * np.exp(-(y - a*t)**2 / (4 * eps1 * a * b * t)))
 
 
-def fast_w(y, t):
+def fast_w(y, t, eps1, a, b):
     return (-(y - a*t) / (4 * t * np.sqrt(np.pi * eps1 * a * b * t))
             * np.exp(-(y - a*t)**2 / (4 * eps1 * a * b * t)))
 
@@ -166,7 +169,7 @@ def main(N, eps1, eps2, a, c, s_max, s_samp, scheme, filename):
         s_eval = np.linspace(start=0, stop=s_max, num=np.ceil(s_max / max_step)+1)
         y_store, t_store, u0_bdy, u1_bdy, u0_data, u1_data, v_data, f_data, vf_data = (
             solve_pde(s_eval, p0, h=h, eps1=eps1, eps2=eps2,
-                      a=a, b=b, c=c, d=d, scheme=scheme, s_samp=s_samp))
+                      a=a, b=b, c=c, d=d, scheme=scheme, s_samp=s_samp))[:-1]
     elif scheme == 'bw':
         max_step = 2 * h
         s_eval = np.arange(start=0, stop=s_max + max_step, step=max_step)

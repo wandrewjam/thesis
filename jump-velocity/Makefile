@@ -1,23 +1,34 @@
 ### ====================================================================
 ### Makefile for the jump-velocity plots
 ### Current target list:
-###	all
-###	clean
-###	distclean
-###	exact
-###	exact-animations
-###	exact-clean
-###	exact-data
-###	exact-plots
-###	install
-###	simulate
-###	simulate-bootstrap
-###	simulate-clean
-###	simulate-data
-###	simulate-estimate
-###	variables
+###	all			generate all plots and data files		
+###	clean			same as exact-clean
+###	distclean		same as exact-clean and simulate-clean
+###	exact			generate all plots of FP solns
+###	exact-animations	generate all animations of the FP solns
+###	exact-clean		remove plots and animations of solutions
+###				to the Fokker-Planck equations
+###	exact-data		save data from FP solns to .dat files
+###	exact-plots		plot exit time distributions for all
+###				parameter files
+###	install			install files on system (dummy target)
+###	simulate		run all simulate scripts
+###	simulate-bootstrap	run bootstrap trials
+###	simulate-clean		remove all simulated data, MLE fits, and
+###				bootstrap data
+###	simulate-data		generate simulated data
+###	simulate-estimate	find MLE of parameter values
+###	uninstall		uninstall installed files (dummy target)
+###	variables		print definitions of all variables in
+###				this Makefile
+###
+###	[23-Aug-2019]
+### ====================================================================
 
+### Variables are defined in config.mk
 include config.mk
+
+### ====================================================================
 
 .PHONY : all
 all : exact simulate
@@ -69,6 +80,9 @@ simulate-data : $(SIM_FILES)
 .PHONY : simulate-estimate
 simulate-estimate : $(EST_FILES)
 
+.PHONY : uninstall
+uninstall :
+	@echo There is nothing to uninstall for this package
 .PHONY : variables
 variables :
 	@echo TXT_FILES: $(TXT_FILES)
@@ -83,28 +97,47 @@ variables :
 	@echo TRIALS: $(TRIALS)
 	@echo PROC: $(PROC)
 
-###########################################
-# Defines rules for specific targets
+### ====================================================================
+### Define rules for specific targets
 
-# Exact numerical simulations
+### Exact numerical simulations
+
+## Animate solution to the FP equations
 plots/%.mp4 : npz-files/%.npz $(ANI_SRC)
 	$(ANI_EXE) $*
 
+## Plot PDF and CDF of exit times
 plots/%.png : npz-files/%.npz $(PNG_SRC)
 	$(PNG_EXE) $*
 
+###### IS THIS CORRECT?
 dat-files/distributions/%-dst.dat : npz-files/%.npz $(PNG_SRC)
 	$(PNG_EXE) $*
 
+### Solve FP equations and save to .npz file
 npz-files/%.npz : par-files/%.txt $(NPZ_SRC)
 	$(NPZ_EXE) $*
 
-# Statistical simulations
+### Statistical simulations
+
+## Simulate test data from a given set of parameter values
 dat-files/simulations/%-sim.dat : par-files/experiments/%.txt $(SIM_SRC)
 	$(SIM_EXE) $*
 
+## Estimate parameters from the simulated data
 dat-files/ml-estimates/%-est.dat : dat-files/simulations/%-sim.dat $(EST_SRC)
 	$(EST_EXE) $*
 
+## Run bootstrap trials on the simulated data
+dat-files/bootstrap/%-boot.dat : dat-files/simulations/%-sim.dat $(BOO_SRC)
+	$(BOO_EXE) $* $(TRIALS) $(PROC)
+
+### Fit model parameters to experimental data
+
+## Estimate maximum likelihood parameters based on both models
+dat-files/ml-estimates/%-est.dat : dat-files/simulations/%-sim.dat $(EST_SRC)
+	$(EST_EXE) $*
+
+## Run bootstrap trials on the data
 dat-files/bootstrap/%-boot.dat : dat-files/simulations/%-sim.dat $(BOO_SRC)
 	$(BOO_EXE) $* $(TRIALS) $(PROC)

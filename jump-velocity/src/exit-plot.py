@@ -17,11 +17,20 @@ def main(a, c, eps1, eps2, num_expt, filename):
     u_init = delta_h(y[1:], h)
     p0 = np.append(u_init, np.zeros(4 * N))
 
-    pde = solve_pde(s_eval, p0, h, eps1, eps2, a, 1 - a, c, 1 - c, scheme)[3]
-    marg_x =
+    pde_sol = solve_pde(s_eval, p0, h, eps1, eps2, a, 1 - a, c, 1 - c, scheme)
+    y_store = pde_sol[0]
+    t_store = pde_sol[1]
+    pde_exit = pde_sol[-1]
+    marg_y = np.trapz(pde_exit, s_eval[t_store], axis=1)
+    marg_s = np.trapz(pde_exit, y[y_store], axis=0)
 
     plt.hist(exits[:, 0], density=True)
-    plt.plot()
+    plt.plot(y[y_store], marg_y)
+    plt.show()
+
+    plt.step(np.sort(exits[:, 1]), np.linspace(0, 1, num=exits.shape[0]))
+    plt.plot(s_eval[t_store], marg_s)
+    plt.show()
     return None
 
 
