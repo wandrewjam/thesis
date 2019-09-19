@@ -31,8 +31,12 @@ dissertation/phd-thesis/*.bib
 *.stripped
 first-binding-model/*.dat
 jump-velocity/npz-files/*
+jump-velocity/dat-files/bootstrap/*
+jump-velocity/dat-files/data/*
+jump-velocity/dat-files/distributions/*
+jump-velocity/dat-files/ml-estimates/*
+jump-velocity/dat-files/ml-trials/*
 meeting-notes/summer-19/intro-to-prob/
-jump-velocity/dat-files/*
 vlado-data/*
 *core.*
 
