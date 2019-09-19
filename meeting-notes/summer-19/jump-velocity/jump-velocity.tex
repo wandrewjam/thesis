@@ -9,7 +9,7 @@
 \usepackage{graphicx, subcaption, algorithmic}
 \graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
 
-\usepackage{tikz, pgfplots}
+\usepackage{tikz, pgfplots, chemfig}
 \usepgfplotslibrary{colorbrewer, statistics}
 \pgfplotsset{
   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
@@ -21,6 +21,8 @@
   cycle list/Set1-5,
   legend style={legend cell align=left,},
 }
+\usepgfplotslibrary{external}
+\tikzexternalize
 
 \renewcommand{\arraystretch}{1.2}
 \pagestyle{empty} 
@@ -38,6 +40,7 @@
 \newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
 \newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
 
 % Text width is 7 inches
 
@@ -249,7 +252,7 @@ choose: $\epsilon$ and $a$. The parameter $\epsilon$ gives the ratio
 of the minimum crossing time to a characteristic reaction time, and
 $a$ gives the ratio of $k_\tn{off}$ to the sum of reaction
 rates. Below are some sample results for average velocity
-distributions $f(v^*) = 1/{v^*}^2 q_U^N(1/v^*)$. 
+distributions $f(v^*) = 1/{v^*}^2 q_U^N(1/v^*)$.
 
 \begin{figure}
   \centering
@@ -912,6 +915,114 @@ guess this comes down to the accuracy of the initial guess. In any
 case, this problem is easy to spot and fix as long as the mirror
 parameters aren't too similar.
 
+\subsection{Adiabatic reduction in the 4-parameter model}
+\label{sec:adiab-reduct-4}
+
+
+If we only assume $\epsilon_1 \ll 1$, then the adiabatic reduction
+follows the two-parameter reduction closely. It will be more
+convenient to rewrite the Fokker-Planck equation of the system as:
+\begin{equation}
+  \label{eq:4-par-ad-fp}
+  \Pder{\mathbf{q}}{s} = - \Pder{q_{U}}{y} \mathbf{e}_1 +
+  \frac{1}{\epsilon_1} \underline{\underline{A}}\mathbf{q} +
+  \frac{1}{\epsilon_2} \underline{\underline{B}}\mathbf{q},
+\end{equation}
+where
+$\underline{\underline{A}} = \begin{pmatrix} -b & a & 0 & 0 \\ b & -a
+  & 0 & 0 \\ 0 & 0 & -b & a \\ 0 & 0 & b & -a \end{pmatrix}$ and
+$\underline{\underline{B}} = \begin{pmatrix} -d & 0 & c & 0 \\ 0 & -d
+  & 0 & c \\ d & 0 & -c & 0 \\ 0 & d & 0 & -c \end{pmatrix}$. The fast
+reactions are those captured in matrix $\underline{\underline{A}}$, so
+this matrix defines the separation of the system into fast and slow
+subsystems. In linear algebra terms, the left 0-eigenvectors of
+$\underline{\underline{A}}$ define the projection onto the slow
+manifold, and the orthogonal projection projects onto the fast
+manifold, but I think it makes more sense to refer to the reaction
+diagram to see the fast-slow separation.
+
+\tikzexternaldisable
+\begin{center}
+  \schemestart
+  U \arrow{<=>[$b/\epsilon_1$][$a/\epsilon_1$]}
+  V \arrow{<=>[*{0}$d/\epsilon_2$][*{0}$c/\epsilon_2$]}[270]
+  VF \arrow{<=>[$b/\epsilon_1$][$a/\epsilon_1$]}[180]
+  F \arrow{<=>[*{0}$d/\epsilon_2$][*{0}$c/\epsilon_2$]}[90]
+  \schemestop\par
+\end{center}
+\tikzexternalenable
+
+The fast reactions are represented by the two horizontal reaction
+lines in the diagram, and so the U and V states define one subsystem
+where the reactions within that system are fast, and transitions into
+or out of that system are slow, and F and VF define the other such
+subsystem. Thus we define two slow variables: $v_1 = q_{U} + q_{V}$
+and $v_2 = q_{F} + q_{VF}$.
+
+The two fast variables are harder to intuit, but they end up being
+$w_1 = b q_{U} - a q_{V}$ and $w_2 = b q_{F} - a q_{VF}$. These two
+fast variables basically represent the net formation of fast bonds (or
+the net transition rate of U to V and F to VF) within the two fast
+subsystems.
+
+Then after changing variables in equation (\ref{eq:4-par-ad-fp}), we
+get
+\begin{align}
+  \Pder{v_1}{t} &= -\Pder{}{y}(a v_1 + w_1) - \frac{d}{\epsilon_2} v_1
+                  + \frac{c}{\epsilon_2} v_2 \label{eq:v1} \\
+  \Pder{v_2}{t} &= \frac{d}{\epsilon_2} v_1 - \frac{c}{\epsilon_2} v_2
+  \label{eq:v2} \\
+  \Pder{w_1}{t} &= -\frac{w_1}{\epsilon_1} - b\Pder{}{y} (a v_1 + w_1)
+                  - \frac{d}{\epsilon_2} w_1 + \frac{c}{\epsilon_2}
+                  w_2 \label{eq:w1} \\
+  \Pder{w_2}{t} &= -\frac{w_2}{\epsilon_1} + \frac{d}{\epsilon_2} w_1
+                  - \frac{c}{\epsilon_2} w_2. \label{eq:w2}
+\end{align}
+
+Because we are assuming the system is in quasi-steady-state, $w_1 =
+\mathcal{O}(\epsilon_1)$ and $w_2 = \mathcal{O}(\epsilon_1)$. Then
+multiplying equation (\ref{eq:w1}) and equation (\ref{eq:w2}) by
+$\epsilon_1$ and excluding higher order terms, we get the following
+QSS equations for $w_1$ and $w_2$:
+\begin{align}
+  w_1 &= -\epsilon_1 a b \Pder{v_1}{y} + \mathcal{O}(\epsilon_1^2) \\
+  w_2 &= 0 + \mathcal{O}(\epsilon_1^2).
+\end{align}
+
+Thus at least to first order in $\epsilon_1$, the fast dynamics
+between F and VF don't affect the average velocity of platelets. Then
+substituting $w_1$ into equation (\ref{eq:v1}) gives us the following
+system defining the evolution of the slow dynamics:
+\begin{align}
+  \Pder{v_1}{t} &= -a \Pder{v_1}{y} + \epsilon_1 a b \frac{\partial^2
+                  v_1}{\partial y^2} - \frac{d}{\epsilon_2} v_1 +
+                  \frac{c}{\epsilon_2} v_2 \\
+  \Pder{v_2}{t} &= \frac{d}{\epsilon_2} v_1 - \frac{c}{\epsilon_2} v_2.
+\end{align}
+
+So the slow system evolves like its own jump-velocity process, except
+that now the advecting quantity also has a small diffusion
+component. In view of the adiabatic reduction for the two-parameter
+model, this solution makes perfect sense. In the two-parameter system,
+fast bond dynamics introduced a small diffusion component in the slow
+variable, and in the four-parameter system the fast bonds introduced
+exactly the same diffusion component, and the slow bond dynamics
+remain unchanged.
+
+Now this reduced model isn't particularly easier to solve numerically
+than the full model (it doesn't seem like we've reduced the asymptotic
+complexity at all, and we've traded stiff reaction terms for a
+diffusion term), so we may want to try reducing on $\epsilon_2$ as
+well. I'm not sure what the best way to proceed from here is. I tried
+doing another adiabatic reduction by assuming that $1 \gg \epsilon_2
+\gg \epsilon_1$, but then you run into the problem that only taking
+the first order in $\epsilon_2$ eliminates all terms containing
+$\epsilon_1$.
+
+I think we need to relate $\epsilon_2$ to $\epsilon_1$ somehow,
+possibly taking $\epsilon_2^\alpha = \epsilon_1$ and then re-doing the
+asymptotic analysis on $\epsilon_2$, and keeping some higher-order terms.
+
 \begin{figure}
   \centering
   \begin{subfigure}{0.48\textwidth}
@@ -1095,6 +1206,660 @@ parameters aren't too similar.
     estimates in the 4-parameter model from 64 bootstrap trials.}
   \label{fig:4-par-boxplots}
 \end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = $v^*$,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCC-vels-sim.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCC-vels-est.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel=$v^*$,
+        ylabel={$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y expr=\coordindex/42]
+        {simulations/CCC-vels-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CCC-vels-est.dat}; `
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Model fit to CCC platelets. Parameter estimates are $a =
+    0.16$, $\epsilon_1 = 0.13$, $c = 0.84$, $\epsilon_2 = 13.3$.}
+  \label{fig:ccc}
+\end{figure}
+
+\newpage
+
+\section{Step size in the jump-velocity model}
+\label{sec:step-size-jump}
+
+The jump-velocity model predicts that step sizes should be
+exponentially distributed in both the two-parameter and four-parameter
+models. In the two-parameter model, $\tn{step size} \sim
+\Exp\left(\lambda = k_\tn{on}/V\right)$ and in the four-parameter
+model $\tn{step size} \sim \Exp\left(\lambda = (k_\tn{on} +
+  k_\tn{on}^F)/V \right)$ where $\lambda$ is the rate parameter of the
+exponential distribution. The maximum likelihood estimate for the
+parameter $\lambda$ is easy, it is just the sample mean of the
+observations.
+
+In order to test the hypothesis that the step sizes are exponentially
+distributed, I fit exponential curves to the observed step sizes in
+four sets of experiments: unprimed platelets in PRP (albumin in
+priming region, collagen in rolling region), unprimed platlets in
+whole blood, primed platelets in PRP (collagen in both regions), and
+primed platelets in whole blood. Then I used the Anderson-Darling
+goodness-of-fit test for an exponential distribution.
+
+Plots of the step size distribution at the maximum-likelihood
+parameter value are shown in Figures \ref{fig:hc-step-fit} and
+\ref{fig:cc-step-fit}. The Anderson-Darling test rejects the
+hypothesis that the step sizes are exponentially distributed for both
+experiments with $p < 0.01$ for the HC experiment and $p < 0.025$ for
+the CC experiment. That is, the test is more than 95\% sure the step
+sizes are \emph{not} distributed exponentially in either experiment.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HC-exp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/21]
+        {simulations/HC-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/HC-exp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC step size fit]{Data and fit of the step size
+    distribution model to HC step size data. ($N = 21$) The vertical
+    black line is located at 1 $\mu$m, or approximately one platelet
+    radius. $\hat{\mu} = 2.38 \mu\tn{m}$}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-exp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/40]
+        {simulations/CC-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CC-exp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC step size fit]{Data and fit of the step size
+    distribution model to CC step size data. ($N = 40$) The vertical
+    black line is located at 1 $\mu$m, or approximately one platelet
+    radius. $\hat{\mu} = 2.48 \mu\tn{m}$}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HCwhole-exp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/11]
+        {simulations/HCwhole-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/HCwhole-exp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC whole blood step size]{Data and fit of the step size
+    distribution model to HC whole blood step size data. ($N = 11$)
+    The vertical black line is located at 1 $\mu$m, or approximately
+    one platelet radius. $\hat{\mu} = 1.98 \mu\tn{m}$}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCwhole-exp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/76]
+        {simulations/CCwhole-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CCwhole-exp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC whole blood step size]{Data and fit of the step size
+    distribution model to CC whole blood step size data. ($N = 76$)
+    The vertical black line is located at 1 $\mu$m, or approximately
+    one platelet radius. $\hat{\mu} = 2.37 \mu\tn{m}$.}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/21] {simulations/HC-step.dat};
+        \addplot table[x index=0, y expr=exp(-1/2.385*\thisrowno{0})]
+        {simulations/HC-step.dat}; 
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{HC PRP experiment}
+    \label{fig:log-cdf-hc}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/40] {simulations/CC-step.dat};
+        \addplot table[x index=0, y expr=exp(-1/2.476*\thisrowno{0}]
+        {simulations/CC-step.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{CC PRP experiment}
+    \label{fig:log-cdf-cc}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/11] {simulations/HCwhole-step.dat};
+        \addplot table[x index=0, y expr=exp(-1/1.981*\thisrowno{0})]
+        {simulations/HCwhole-step.dat}; 
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{HC whole blood experiment}
+    \label{fig:log-cdf-hcwhole}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/76] {simulations/CCwhole-step.dat};
+        \addplot table[x index=0, y expr=exp(-1/2.375*\thisrowno{0})]
+        {simulations/CCwhole-step.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{CC whole blood experiment}
+    \label{fig:log-cdf-ccwhole}
+  \end{subfigure}
+  \caption{Log plots of $1 - \tn{CDF}$ for each of the 4 experiments,
+    with a simple exponential fit.}
+  \label{fig:semilogy-cdf}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HC-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/21]
+        {simulations/HC-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/HC-dexp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC step size fit]{Data and fit of the step size
+    distribution model to HC step size data. ($N = 21$) The vertical
+    black line is located at 1 $\mu$m, or approximately one platelet
+    radius. $\alpha = 0.764$,
+    $\hat{\lambda_1} = 1.462 \mu\tn{m}^{-1}$,
+    $\hat{\lambda_2} = 0.127 \mu\tn{m}^{-1}$.}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/40]
+        {simulations/CC-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CC-dexp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC step size fit]{Data and fit of the step size
+    distribution model to CC step size data. ($N = 40$) The vertical
+    black line is located at 1 $\mu$m, or approximately one platelet
+    radius. $\alpha = 0.781$,
+    $\hat{\lambda_1} = 0.756 \mu\tn{m}^{-1}$,
+    $\hat{\lambda_2} = 0.152 \mu\tn{m}^{-1}$.}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HCwhole-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/11]
+        {simulations/HCwhole-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/HCwhole-dexp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC whole blood step size]{Data and fit of the step size
+    distribution model to HC whole blood step size data. ($N = 11$)
+    The vertical black line is located at 1 $\mu$m, or approximately
+    one platelet radius. $\alpha = 0.865$,
+    $\hat{\lambda_1} = 1.849 \mu\tn{m}^{-1}$,
+    $\hat{\lambda_2} = 0.0676 \mu\tn{m}^{-1}$.}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCwhole-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/76]
+        {simulations/CCwhole-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CCwhole-dexp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC whole blood step size]{Data and fit of the step size
+    distribution model to CC whole blood step size data. ($N = 76$)
+    The vertical black line is located at 1 $\mu$m, or approximately
+    one platelet radius. $\alpha = 0.620$,
+    $\hat{\lambda_1} = 1.049 \mu\tn{m}^{-1}$,
+    $\hat{\lambda_2} = 0.213 \mu\tn{m}^{-1}$..}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/21] {simulations/HC-step.dat};
+        \addplot table[x index=0, y
+        expr=.764*exp(-1.462*\thisrowno{0}) +
+        .236*exp(-.127*\thisrowno{0})] {ml-estimates/HC-dexp.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{HC PRP experiment}
+    \label{fig:log-cdf-hc}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/40] {simulations/CC-step.dat};
+        \addplot table[x index=0, y
+        expr=.781*exp(-0.756*\thisrowno{0}) +
+        .219*exp(-.152*\thisrowno{0})]
+        {ml-estimates/CC-dexp.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{CC PRP experiment}
+    \label{fig:log-cdf-cc}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/11] {simulations/HCwhole-step.dat};
+        \addplot table[x index=0, y
+        expr=.865*exp(-1.849*\thisrowno{0}) +
+        .135*exp(-.0676*\thisrowno{0}]
+        {ml-estimates/HCwhole-dexp.dat}; 
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{HC whole blood experiment}
+    \label{fig:log-cdf-hcwhole}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/76] {simulations/CCwhole-step.dat};
+        \addplot table[x index=0, y
+        expr=.62*exp(-1.049*\thisrowno{0}) +
+        .38*exp(-.213*\thisrowno{0}]
+        {ml-estimates/CCwhole-dexp.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{CC whole blood experiment}
+    \label{fig:log-cdf-ccwhole}
+  \end{subfigure}
+  \caption{Log plots of $1 - \tn{CDF}$ for each of the 4 experiments,
+    with a double exponential fit.}
+  \label{fig:semilogy-cdf}
+\end{figure}
+
+What are potential reasons for this discrepancy?
+\begin{enumerate}
+\item The velocity of free-flowing platelets is not constant. In
+  reality, the velocity of a platelet can vary depending on its
+  distance from the vessel wall, collisions with other cells, and
+  probably other factors I'm not thinking of right now.
+\item In reality, multiple bonds can form between the platelet and the
+  wall, and small steps can occur even when a platelet doesn't fully
+  detach from the wall. Based on this, we would expect to find a
+  higher proportion of small steps ($< 1 \mu\tn{m}$) than predicted by
+  an exponential distribution.
+\item If the platelets can be in either a primed or an unprimed state,
+  the step size distribution will no longer be an exponential
+  distribution. Instead it will be something like a sum of
+  exponentials.
+\end{enumerate}
+
+Out of curiosity, I made a log plot of $1 - \tn{CDF}$ for the CC whole
+blood experiment (simply because it has the most data) in Figure
+\ref{fig:log-cdf}. It is hard to say, but it \emph{might} be fit well
+by a piecewise linear function, which would suggest the step size
+distribution is a sum of exponentials.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{CCwhole-velfit.png}
+    \caption{Velocity data}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{CCwhole-stepfit.png}
+    \caption{Step data}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{CCwhole-dwellfit.png}
+    \caption{Pause data}
+  \end{subfigure}
+  \caption{Fit of velocity model to CC whole blood data and compared
+    with step size and dwell time distribution. Fit parameters:
+    $\hat{a} = 0.126$, $\hat{\epsilon_1} = 0.11$, $\hat{c} = 0.635$,
+    $\hat{\epsilon_2} = 37.5$.}
+  \label{fig:ccwhole-velfit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{HC-velfit.png}
+    \caption{Velocity data}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{HC-dwellfit.png}
+    \caption{Pause data}
+  \end{subfigure}
+  \caption{Fit of velocity model to HC PRP data and compared
+    with step size and dwell time distribution}
+  \label{fig:hc-velfit}
+\end{figure}
+
+\section{Dwell time in the jump-velocity model}
+\label{sec:dwell-time-jump}
+
+I haven't fit any of the dwell time data yet, but I think I have
+figured out the theoretical dwell time distribution for the
+four-parameter model. Obviously in the two-parameter model, $\tn{dwell
+  time} \sim \Exp\left(\lambda = k_\tn{off}\right)$.
+
+For the four-parameter model, finding the dwell time distribution
+requires solving an ODE that models transitions between the three
+bound states. That is, the dwell time distribution is found by solving
+the system:
+\begin{align}
+  \Der{p_V}{t} &= -(k_\tn{off} + k_\tn{on}^F)p_V + k_\tn{off}^F p_{VF}
+  \\
+  \Der{p_F}{t} &= -(k_\tn{on} + k_\tn{off}^F)p_F + k_\tn{off} p_{VF}
+  \\
+  \Der{p_{VF}}{t} &= k_\tn{on}^F p_V + k_\tn{on} p_F - (k_\tn{off} +
+                    k_\tn{off}^F) p_{VF},
+\end{align}
+and the dwell time distribution is given by
+$k_\tn{off} p_V(t) + k_\tn{off}^F p_F(t)$. This ODE is solved with the
+initial condition $p_V(0) = P[\tn{the V bond forms first}]$,
+$p_F(0) = P[\tn{the F bond forms first}]$, and $p_{VF}(0) = 0$.
 
 % \bibliographystyle{plain}
 % \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
