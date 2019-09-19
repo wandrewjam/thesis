@@ -10,7 +10,7 @@
 \newcommand{\dTime}{t}
 \newcommand{\ndTime}{s}
 
-%% Unknown functions
+%% Unknown Functions
 \newcommand{\velocity}{V}
 \newcommand{\rotation}{\Omega}
 \newcommand{\ndVelocity}{v}
@@ -18,7 +18,7 @@
 \newcommand{\bondDensity}{n}
 \newcommand{\ndBondDensity}{m}
 
-%% Model Parameters
+%% Model Parameters (Dimensional)
 \newcommand{\radius}{R}
 \newcommand{\separation}{d}
 \newcommand{\height}{h}
@@ -37,28 +37,28 @@
 \newcommand{\receptorNumber}{N_R}
 \newcommand{\appliedVel}{V_f}
 \newcommand{\appliedRot}{\Omega_f}
-\newcommand{\horzForce}{f_h}
-\newcommand{\torque}{\tau_s}
-\newcommand{\horzTotalForce}{F_h}
-\newcommand{\totalTorque}{\tau}
 \newcommand{\velFriction}{\xi_V}
 \newcommand{\rotFriction}{\xi_\Omega}
 \newcommand{\compliance}{\Gamma}
 \newcommand{\width}{w}
 \newcommand{\viscosity}{\mu}
 
+%% Force and Torque Functions
+\newcommand{\horzForce}{f_h}
+\newcommand{\torque}{\tau_s}
+\newcommand{\horzTotalForce}{F_h}
+\newcommand{\totalTorque}{\tau}
+
+%% Force, Velocity, and Resistance Tensors
 \newcommand{\forceVec}{\mathbf{F}}
 \newcommand{\velVec}{\mathbf{U}}
 \newcommand{\resMatrix}{\underline{\underline{R}}}
 
+%% Model Parameters (Nondimensional)
 \newcommand{\ndSeparation}{d'}
 \newcommand{\ndLength}{\ell}
 \newcommand{\ndAppliedRot}{\omega_f}
 \newcommand{\ndAppliedVel}{v_f}
-\newcommand{\ndHorzForce}{f_h'}
-\newcommand{\ndTorque}{\tau_s'}
-\newcommand{\ndHorzTotalForce}{F_h'}
-\newcommand{\ndTotalTorque}{\tau'}
 \newcommand{\ndOnConst}{\kappa}
 \newcommand{\newOnConst}{\kappa_\textnormal{new}}
 \newcommand{\onForceScale}{\eta}
@@ -66,9 +66,19 @@
 \newcommand{\ndVelFriction}{\eta_v}
 \newcommand{\ndRotFriction}{\eta_\omega}
 
+%% Nondimensional Force and Torque Functions
+\newcommand{\ndHorzForce}{f_h'}
+\newcommand{\ndTorque}{\tau_s'}
+\newcommand{\ndHorzTotalForce}{F_h'}
+\newcommand{\ndTotalTorque}{\tau'}
+
+%% Shorthands for Chemical Species
 \newcommand{\ITA}[1]{\textalpha\textsubscript{#1}}
 \newcommand{\ITB}[1]{\textbeta\textsubscript{#1}}
 \newcommand{\Ca}{$\tn{Ca}^{++}$}
 
+%% Reynolds Number
 \newcommand{\Reynolds}{\mathrm{Re}}
+
+%% Bin Midpoint
 \newcommand{\binMidpoint}[1]{\theta^*_{#1}}

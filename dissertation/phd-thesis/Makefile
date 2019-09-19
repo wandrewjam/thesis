@@ -169,6 +169,7 @@ TOPFILE		= $(THESIS).ltx
 
 ### all:	dvi
 all:	pdf
+	open $(THESIS).pdf
 
 aux:	$(THESIS).aux
 
