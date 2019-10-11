@@ -1,0 +1,431 @@
+% I USED PDFLATEX TO COMPILE THIS PRESENTATION BECAUSE OF THE
+%   GRAPHIC FILE TYPES I HAD.
+% IF YOU WOULD LIKE TO COMPILE IT YOURSELF, COMMENT OUT
+%   ALL OF THE FIGURES AND MOVIE AND YOU WILL BE ABLE TO
+%   COMPILE WITH BOTH PDFLATEX AND LATEX+DVIPS.
+
+\documentclass{beamer}
+% \usepackage{pgfpages}
+% \setbeameroption{show only notes}
+\usetheme{Frankfurt}
+\usecolortheme{beaver}
+
+\usepackage{time}             % date and time
+\usepackage{graphicx,epsfig,subcaption}
+% \usepackage[T1]{fontenc}      % european characters
+\usepackage{amssymb,amsmath}  % use mathematical symbols
+\usepackage{textgreek}
+% \usepackage{palatino}         % use palatino as the default font
+% \usepackage{multimedia}
+% \usepackage{mathrsfs}
+
+% CREATES SHADED INSTEAD OF HIDDEN OVERLAYS
+\setbeamercovered{transparent}
+
+% package for customizing figures and backgrounds
+\usepackage{tikz, chemfig}
+\usetikzlibrary{decorations.pathmorphing}
+\newcommand{\tn}{\textnormal}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Int}[4]{\int_{#3}^{#4} #1 \, \dd #2}
+
+\newcommand{\DimReceptorSaturation}{\Int
+  {\bondDensity\left(\wallDist,\recAngle,\dTime\right)} {\wallDist}
+  {-\infty} {\infty}}
+\newcommand{\NDReceptorSaturation}{\Int
+  {\ndBondDensity\left(\ndWallDist,\recAngle,\ndTime\right)}{\ndWallDist}
+  {-\infty} {\infty}}
+\DeclareMathOperator{\Exp}{Exp}
+\input{../../../model-defs}
+
+
+\title{A Jump-Velocity Model of Platelet Rolling}
+% \subtitle{An Introduction}
+\author{Andrew Watson}
+\institute{University of Utah} % COMMAND UNIQUE TO BEAMER
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+  \note[item]{Platelet rolling---important first step in the formation
+    of blood clots}
+  \note[item]{Talk about a simpler approach to modeling rolling that
+    Aaron and I have been working on over the summer}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%
+\section[Outline]{}
+%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \tableofcontents
+
+  \note{I want to start by talking about the biology behind platelet
+    rolling, and describe some rolling experiments that are being
+    conducted by a biomedical engineering group on campus. Then I'll
+    describe some previous mathematical models of cell rolling, talk
+    about our current model, and finally where we want to go with this
+    model}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%
+\section{Background}
+%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Platelet activation}
+  \centering
+  \includegraphics[width=.8\textwidth]{platelet-overview.png}
+  \note[item]{Platelets have to be activated to do all the things
+    they do to facilitate blood clot formation}
+  \note[item]{Agonists---chemicals that cause platelets to activate}
+  \note[item]{Soluble agonists released into the bloodstream}
+  \note[item]{Immobilized agonists are bound to the vessel wall or
+    to platelets. Because these chemical signals don't diffuse in
+    the blood, platelets have to be close enough to a surface to
+    bind.}
+  \note[item]{}
+  \note[item]{Immobilized agonists are exposed on damaged vessels;
+    not present on healthy vessels}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Activation through rolling}
+  \begin{columns}
+    \begin{column}{.49\textwidth}
+      \begin{itemize}
+      \item Fast receptors---transient binding \& rolling
+        \note[item]{``Fast receptors''---receptors with fast binding
+          and unbinding kinetics; form bonds quickly while the
+          platelet is moving past the wall, but are short-lived}
+      \item Agonist-receptor bonds trigger activation signals
+        \note[item]{When the receptor is bound to an agonist, it
+          triggers intracellular activation signals}
+        \note[item]{Enough binding events with the agonist causes the
+          platelet to activate}
+      \item Slow receptors---firm adhesion
+        \note[item]{Platelets also have slow receptors. Part of
+          platelet activation involves activation of these slow
+          receptors, which mediate stable adhesion.} 
+      % \item Examples: fast receptor---GP1b, slow
+      %   receptor---\ITA{IIb}\ITB{3}, agonist---vWF
+      \end{itemize}
+      \note[item]{Be sure to distinguish between transient binding
+        and firm adhesion}
+    \end{column}
+    \begin{column}{.49\textwidth}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{transient-binding}
+        \caption{An example of a platelet binding to an immobilized
+          agonist}
+        \label{fig:transient-binding}
+      \end{figure}
+      \note[item]{The figure on right shows an example of a
+        platelet transiently binding to an immobilized agonist
+        vWF. The unbound platelet has fast receptors (GP1b) and
+        inactive slow receptors (\ITA{IIb}\ITB{3}). The GP1b can bind
+        to the vWF, and trigger platelet activation, causing the slow
+        \ITA{IIb}\ITB{3} receptors to activate.} 
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Rolling experiments}
+  \begin{figure}
+    \centering
+    \includegraphics[width=.75\textwidth]{expt-sideview}
+    \caption{Side view of the priming microfluidic
+      chambers. Eichinger, Ph.D. dissertation, 2016.}
+    \label{fig:flow-chamber}
+  \end{figure}
+
+  \begin{itemize}
+    \note[item]{Activation of platelets through rolling is an
+      important concern in biomedical engineering as well}
+    \note[item]{Artificial devices implanted in the blood must be
+      engineered to not trigger immune or clotting responses}
+  % \item Nonlocal effects---experiments from
+  %   Proteins-Polymers-Interfaces group led by Dr. Hlady
+  % \item Basic idea: platelets can transiently bind to agonists without
+  %   firmly adhering, and be primed for full activation downstream
+  \item Question: how does priming (i.e. previous exposure to agonist)
+    affect rolling behavior?
+  \item Setup:
+    $\tn{Control} = \tn{Unprimed (inert material in priming region)}$
+    vs $\tn{Experimental} = \tn{Primed (agonist in priming region)}$
+  \item Data extracted: platelet velocities, step sizes, pause
+    times 
+  \end{itemize}
+  \note[item]{This general setup underpins several different
+    experiments they are carrying out. Essentially there are two
+    regions printed with agonist, and platelets get primed in the
+    upstream region, and then are more likely to adhere to the surface
+    downstream in the capture region.}
+  \note[item]{They have a set of experiments looking at how priming
+    state affects rolling behavior.}
+  \note[item]{Extract the following data...}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example platelet trajectories}
+  \begin{figure}
+    \centering \includegraphics[width=.75\textwidth]{plt-trajectories}
+    \caption{Examples of platelet trajectories from a single
+      experiment. Resolution: ($\Delta t = 80 \tn{ms}$, $\Delta x
+      \approx 150\tn{nm} \tn{, maybe?}$)}
+    \label{fig:plt-trajectory}
+  \end{figure}
+  \note[item]{Our goal: simulate platelet trajectories, get some mechanistic
+    insight into the rolling process}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%
+\section{Model}
+%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{A simple model of rolling}
+  \begin{figure}
+    \centering
+    \includegraphics[width=.75\textwidth]{jump-velocity-sketch}
+    \caption{A simple stochastic binding model}
+    \label{fig:jump-velocity-sketch}
+  \end{figure}
+
+  \begin{figure}
+    \centering
+    \schemestart
+    U \arrow{<=>[$k_\tn{on}$][$k_\tn{off}$]} V
+    \schemestop\par
+    \caption{Two-state reaction diagram for the binding model}
+    \label{fig:two-state-scheme}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The word story}
+  \begin{center}
+    \schemestart
+    U \arrow{<=>[$k_\tn{on}$][$k_\tn{off}$]} V
+    \schemestop\par    
+  \end{center}
+  \begin{itemize}
+  \item Stochastic switching between states U and V with constant
+    rates $k_\tn{on}$ and $k_\tn{off}$
+  \item When the platelet is in state U, it translates with
+    $\tn{velocity} = V^*$, while platelets in the V state remain stationary
+  \item Defines a stochastic process called a jump-velocity process
+  \item Easy to define quantities analogous to the experimental data:
+    average velocity (of a single trajectory), step sizes, pause times
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{A mathematical description}
+  \begin{equation}
+    \frac{dy}{dt} = X(t), \quad \tn{where } X =
+    \begin{cases}
+      0 & \tn{when state} = V \\
+      1 & \tn{when state} = U 
+    \end{cases}
+  \end{equation}
+  
+  \begin{itemize}
+  \item Nondimensionalize the model, scaling out $L$ and $V^*$
+  \item Nondimensional parameters: $a = \frac{k_\tn{off}}{k_\tn{off} +
+      k_\tn{on}}$ and $\epsilon = \frac{V^*/L}{k_\tn{off} + k_\tn{on}}$
+  \item $X$ switches between $0$ and $1$ at rates $a/\epsilon$ and
+    $b/\epsilon$ where $b = 1 - a$
+  \item $y(t)$---continuous, piecewise linear stochastic process
+  \item $T^*$---nondimensional crossing time, $y\left(T^*\right) = 1$
+  \item $1/T^*$---average velocity
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Four state model}
+  \begin{itemize}
+  \item Motivation: rolling is mediated by two types of receptors,
+    fast receptors and slow receptors
+  \item The two state model may be a good model of unprimed platelets,
+    because the slow receptors aren't activated
+  \item The four state model may be a better choice for primed
+    platelets
+  \end{itemize}
+  \begin{center}
+    \schemestart
+    U \arrow{<=>[$k_\tn{on}$][$k_\tn{off}$]}
+    V \arrow{<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}[270]
+    VF \arrow{<=>[$k_\tn{on}$][$k_\tn{off}$]}[180]
+    F \arrow{<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}[90]
+    \schemestop\par
+  \end{center}
+\end{frame}
+
+\section{Analysis and Improved Model}
+\label{sec:analys-impr-model}
+
+\begin{frame}
+  \frametitle{Fokker-Planck equation}
+  \begin{itemize}
+  \item $p_i(x, t)$---probability that at time $t$, a platelet is in
+    position $x$ and state $i$
+  \item The Fokker-Planck equation for the two-state model:
+    \begin{align}
+      \Pder{p_U}{t} &= -\Pder{p_U}{y} - \frac{b}{\epsilon} p_U +
+                      \frac{a}{\epsilon} p_V \\ 
+      \Pder{p_V}{t} &= \frac{b}{\epsilon} p_U - \frac{a}{\epsilon} p_V
+    \end{align}
+  \item Initial condition: $p_U(y, 0) = \delta(y)$, $p_V(y, 0) = 0$
+  \item $\tn{PDF of crossing times} = p_U(1, t)$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \includegraphics[width=.75\textwidth]{jump-velocity-figure6.pdf}
+    \caption{Sample fit of average velocity to simulated data}
+    \label{fig:avg-vel-fit}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Step size}
+  \begin{itemize}
+  \item Step size---information about on rates
+  \item In both models, we expect the step sizes to be exponentially
+    distributed
+  \item Define $\mathcal{S}$ to be the step size random variable, then
+    \begin{itemize}
+    \item $\mathcal{S} \sim \Exp(b/\epsilon)$ in the two-state model, and
+    \item $\mathcal{S} \sim \Exp(b/\epsilon_1 + d/\epsilon_2)$ in the four-state model.
+    \end{itemize}
+  \item Fit experimental step size data to an exponential distribution
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+      \includegraphics[width=\textwidth]{jump-velocity-figure31.pdf}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+      \includegraphics[width=\textwidth]{jump-velocity-figure32.pdf}
+    \end{subfigure}
+    \caption{Maximum likelihood fit of an exponential model to step
+      size data of primed platelets ($N=76$). The Anderson-Darling
+      goodness-of-fit test rejects the hypothesis that the steps are
+      exponentially distributed ($p < 0.01$). The plots for the other
+      available data are similar (but have fewer data points).}
+    \label{fig:step-fit}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \includegraphics[width=.75\textwidth]{jump-velocity-figure33.pdf}
+    \caption{Log plot of $1 - \tn{CDF}$}
+    \label{fig:log-cdf}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Mixture of exponential processes}
+  \begin{itemize}
+  \item Steps are not exponentially distributed; could be a mixture of
+    exponentials: $f(s) = \alpha\lambda_1\exp(-\lambda_1 s) + (1 -
+    \alpha)\lambda_2\exp(-\lambda_2 s)$
+  \item Source of the mixture?
+  \item One possibility: some cells in a primed state, others unprimed
+    \begin{itemize}
+    \item Not consistent with results of fitting to an exponential
+      mixture model
+    \end{itemize}
+  \item Another possibility: platelets can form multiple bonds, and
+    step without unbinding
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+      \includegraphics[width=\textwidth]{jump-velocity-figure43.pdf}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+      \includegraphics[width=\textwidth]{jump-velocity-figure44.pdf}
+    \end{subfigure}
+    \caption{Maximum likelihood fit of a mixture of two exponentials
+      to step size data of primed platelets ($N = 76$). }
+    \label{fig:step-fit}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{A new model}
+  \begin{itemize}
+  \item Extend the two-state model to allow bonds to form in different
+    positions---fake space
+  \end{itemize}
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{double-binding-model.png}
+    \caption{Schematic of the two-state, two-position model}
+    \label{fig:two-state-two-position}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Next steps}
+  \begin{itemize}
+  \item Implement the two-state, two-position model: stochastic and
+    deterministic versions
+  \item Fit the new model to experimental data
+  \item Long-term/Speculative:
+    \begin{itemize}
+    \item Include formation of multiple bonds of a single
+      type---model platelets that remain bound throughout an
+      experiment
+    \item Integrate findings into more detailed model of rolling
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Summary}
+  \begin{itemize}
+  \item Platelet contacts with an agonist-coated surface are important
+    in initial stages of blood clot formation
+  \item Platelet rolling behavior cannot be described by simple
+    first-order binding and unbinding with the surface
+  \item Hypothesis: overrepresentation of small steps (relative to an
+    exponential distribution) is due to stepping without full
+    unbinding
+  \end{itemize}
+\end{frame}
+
+\section{}
+\begin{frame}
+  \frametitle{Acknowledgements}
+  \begin{itemize}
+  \item My advisor and my committee
+  \item Biofluids research group
+  \item Proteins-Polymers-Interfaces group
+  \item Funding---NIH Grant 1R01HL126864 'Upstream Priming of
+    Platelets for Adhesion to Biomaterials'
+  \end{itemize}
+\end{frame}
+
+\end{document}
