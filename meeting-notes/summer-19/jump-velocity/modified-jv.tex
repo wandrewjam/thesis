@@ -1,0 +1,171 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+\usepgfplotslibrary{colorbrewer, statistics}
+\pgfplotsset{
+  exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+    legend entries={PDF, CDF},},
+  every axis plot post/.append style={thick},
+  table/search
+  path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+  colormap/YlGnBu,
+  cycle list/Set1-5,
+  legend style={legend cell align=left,},
+}
+\usepgfplotslibrary{external}
+\tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Notes on a Modification to the Jump-Velocity Rolling Model
+    (\today)}
+\end{center}
+
+\section{A modification to the single bond model of rolling}
+\label{sec:modif-single-bond}
+
+Experimental step size data does not fit a simple one-step model of
+binding and unbinding. We want to test the hypothesis that the
+distribution of step sizes can be explained by a mixture of two types
+of steps: (1) steps where the platelet comes completely unbound from
+the surface, and (2) steps where a platelet is multiply bound to the
+vessel wall, and the rearmost load-bearing bond breaks, causing the
+platelet to lurch forward.
+
+We want to test this with a model that approximates this behavior,
+without the expense of tracking an arbitrary number of bonds that can
+bind in arbitrary locations along the wall. Therefore, we will use a
+model that allows bonds to form in two positions: on the front of the
+platelet and on the back of the platelet (see Figure
+\ref{fig:four-states}).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\textwidth]{double-binding-model.png}
+  \caption{Four states in the modified jump-velocity model}
+  \label{fig:four-states}
+\end{figure}
+
+In the unbound state $S_U$, the platelet translates forward at the
+free-flowing velocity $V^*$. A bond can form on the back of the
+platelet at a constant binding rate $k_\tn{on}$ (or rather, a bond
+forms \emph{somewhere} between the platelet and wall, but the platelet
+keeps translating forward until the force applied by the bond balances
+the drag force on the platelet). Let's call this state $S_b$. This
+bond can then break at a rate $k_\tn{off}$, returning the platelet to
+the unbound state.
+
+An $S_b$ platelet can form a second bond with the surface on the front
+(downstream) end of the platelet at rate $k_\tn{on, f}$, and we'll
+call this the $S_{bf}$ state. Then, either the back or the front bonds
+of a $S_{bf}$ platelet can break. The back bond breaks at a rate
+$k_\tn{off, b}$ and the front bond breaks at a rate $k_\tn{off,
+  f}$. If the front bond breaks, the platelet returns to the $S_b$
+state, and if the back bond breaks, the platelet is temporarily left
+with a single front bond. However, because of the flow, the platelet
+is pushed downstream until the front bond becomes a back bond, and the
+bond force balances with the drag force on the platelet. We'll call
+this state the transition state---$S_T$.
+
+Now we have to make a choice to model how long platelets remain in the
+$S_T$ state. One possible choice is to say that every platelet stays
+in the $S_T$ state for the exact same length of time and travels the
+same distance. While one could argue this agrees geometrically with
+the series of pictures drawn in Figure \ref{fig:four-states}, this
+isn't a realistic representation of small step sizes in the more
+complicated case that bonds can form continuously along the vessel
+wall. If we instead say that platelets transition out of state $S_T$
+with some rate $\kappa$, that is equivalent (I think) to assuming
+that the small step sizes are distributed exponentially with mean step
+length $V^*/\kappa$.
+
+How can we choose a reasonable transition rate $\kappa$ out of the
+$S_T$ state? One possibility is to define a characteristic step length
+$\ell$, and then assert that some fraction $q$ of the small steps must
+be smaller than the characteristic step length. To choose a $\kappa$
+based on some given $\ell$ and $q$, we can use the CDF of small step
+times. For a constant transition rate $\kappa$, the small step times
+are distributed as an exponential distribution with mean
+$1/\kappa$. Therefore, the CDF of step times is
+$F(t) = 1 - \exp(-\kappa t)$. Then $q = 1 - \exp(-\kappa \ell/V^*)$
+enforces the condition that the fraction of steps which are less than
+the characteristic step size is $q$. Solving this condition for
+$\kappa$ gives us
+\begin{equation}
+  \label{eq:kappa-defn}
+  \kappa = -\frac{\ln(1 - q)}{\ell/V^*}.
+\end{equation}
+
+\subsection{Fokker-Planck equation}
+\label{sec:fokk-planck-equat}
+
+The resulting Fokker-Planck equation of this process is an
+advection-reaction system similar to that of the ordinary jump
+velocity process. One major difference is that there are 2 states
+which translate in the flow, not just one.
+
+Clearly the Fokker-Planck equation will depend on the assumption made
+about the distribution of transition times (or small step sizes), but
+for the case where transition times are distributed exponentially, the
+Fokker-Planck equation is a simple linear advection-reaction PDE:
+\begin{align}
+  \Pder{p_U}{t} &= -V^* \Pder{p_U}{x} - k_\tn{on} p_U + k_\tn{off} p_b
+  \\
+  \Pder{p_b}{t} &= k_\tn{on} p_U - (k_\tn{off} + k_\tn{on, f}) p_b +
+                  k_\tn{off, f} p_{bf} + \kappa p_T \\
+  \Pder{p_{bf}}{t} &= k_\tn{on, f} p_b - (k_\tn{off, f} + k_\tn{off,
+                     b}) p_{bf} \\
+  \Pder{p_T}{t} &= -V^* \Pder{p_T}{x} + k_\tn{off} p_{bf} - \kappa p_T.
+\end{align}
+
+
+
+% \bibliographystyle{plain}
+% \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
