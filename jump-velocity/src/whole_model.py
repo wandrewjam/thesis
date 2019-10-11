@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.integrate import odeint
+from scipy.optimize import brentq
 from mle import fit_models, change_vars, delta_h, solve_pde
+from generate_test import multiple_experiments
 
 
 def construct_dwell_fun(d, a, c, eps1, eps2):
@@ -18,7 +20,7 @@ def construct_dwell_fun(d, a, c, eps1, eps2):
 
     result = odeint(fun, ic, d)
 
-    return a/eps1*result[:, 0] + c/eps2*result[:, 1]
+    return a/eps1*result[:, 0] + c/eps2*result[:, 1], 1 - np.sum(result, axis=1)
 
 
 def main(filename):
@@ -28,20 +30,48 @@ def main(filename):
     dwell = np.loadtxt(sim_dir + filename + '-dwell.dat')
 
     V, L = 1., 1.
+    # V, L = 60., 80.
     T = L/V
 
     nd_steps = steps/L
     nd_vels = vels/V
     nd_dwell = dwell/(1*T)
+    # nd_dwell = dwell/(1000*T)
 
-    fit = fit_models(nd_vels, two_par=False, N_obj=32)
-    print('Done fitting')
-    a_fit, eps1_fit = change_vars(fit[:2], forward=False)[:, 0]
-    c_fit, eps2_fit = change_vars(fit[2:], forward=False)[:, 0]
+    # fit = fit_models(nd_vels, two_par=False, N_obj=32)
+    # print('Done fitting')
+    # a_fit, eps1_fit = change_vars(fit[:2], forward=False)[:, 0]
+    # c_fit, eps2_fit = change_vars(fit[2:], forward=False)[:, 0]
 
+    # Fit to step size first
+    # def objective(eps1):
+    #     # What if I fix eps1 and only fit a?
+    #     a = .5
+    #     test_steps = multiple_experiments(a, .5, eps1, np.inf, 2**10)[1]
+    #     print(np.mean(test_steps) - np.mean(nd_steps))
+    #     return np.mean(test_steps) - np.mean(nd_steps)
+    #
+    # res = brentq(objective, 0.01, 10)
+    # print('The result is')
+    # print(res)
     # fit = fit_models(nd_vels, two_par=True, N_obj=128)[1]
     # a_fit, eps1_fit = change_vars(fit, forward=False)[:, 0]
     # c_fit, eps2_fit = 0.5, np.inf
+
+    # a_fit, eps1_fit = .5, .1
+    # c_fit, eps2_fit = .2, np.inf
+    # fit1, fit2 = change_vars(np.array([.5, res]), forward=True)[:, 0]
+    rate_fit = float(nd_dwell.size)/nd_vels.size
+    print(rate_fit)
+    c_fit, eps2_fit = 0.2, np.inf
+    #
+    constraints = {'type': 'eq', 'fun': lambda x: x[0]/x[1] - rate_fit}
+    vel_fit = fit_models(nd_vels, two_par=True, N_obj=128,
+                         constraints=constraints,
+                         initial_guess=np.array([.3, .7/rate_fit]))[1]
+    a_fit, eps1_fit = vel_fit
+
+    # a_fit, eps1_fit = 0.5, 0.8
 
     # Define numerical parameters to find the PDE at the ML estimates
     N = 256
@@ -63,12 +93,14 @@ def main(filename):
     plt.hist(nd_vels, density=True)
     v = np.linspace(0, np.amax(nd_vels), num=200)
     plt.plot(v, full_model(v))
+    plt.legend(['Data', 'Model'])
     plt.show()
 
     plt.hist(nd_steps, density=True)
     s = np.linspace(0, np.amax(nd_steps), num=200)
     tot_bind = (1-a_fit)/eps1_fit + (1-c_fit)/eps2_fit
     plt.plot(s, tot_bind*np.exp(-tot_bind*s))
+    plt.legend(['Data', 'Model'])
     plt.show()
 
     x_cdf = np.sort(nd_steps)
@@ -76,16 +108,27 @@ def main(filename):
     y_cdf = np.linspace(0, 1, len(x_cdf))
     plt.step(x_cdf, y_cdf, where='post')
     plt.plot(s, 1 - np.exp(-tot_bind*s))
+    plt.legend(['Data', 'Model'])
     plt.show()
 
     plt.semilogy(x_cdf, 1 - y_cdf)
     plt.semilogy(s, np.exp(-tot_bind*s))
+    plt.legend(['Data', 'Model'])
     plt.show()
 
     plt.hist(nd_dwell, density=True)
     d = np.linspace(0, np.amax(nd_dwell), num=200)
-    dwell_model = construct_dwell_fun(d, a_fit, c_fit, eps1_fit, eps2_fit)
+    dwell_model, dwell_cdf = construct_dwell_fun(d, a_fit, c_fit, eps1_fit, eps2_fit)
     plt.plot(d, dwell_model)
+    plt.legend(['Data', 'Model'])
+    plt.show()
+
+    x_cdf = np.sort(nd_dwell)
+    x_cdf = np.insert(x_cdf, 0, 0)
+    y_cdf = np.linspace(0, 1, len(x_cdf))
+    plt.step(x_cdf, y_cdf, where='post')
+    plt.plot(d, dwell_cdf)
+    plt.legend(['Data', 'Model'])
     plt.show()
 
     print(a_fit, eps1_fit, c_fit, eps2_fit)
@@ -94,7 +137,8 @@ def main(filename):
 if __name__ == '__main__':
     import os
     import sys
-    filename = sys.argv[1]
+    # filename = sys.argv[1]
+    filename = raw_input('Enter filename: ')
     os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
 
     main(filename)

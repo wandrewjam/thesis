@@ -1556,7 +1556,7 @@ sizes are \emph{not} distributed exponentially in either experiment.
     black line is located at 1 $\mu$m, or approximately one platelet
     radius. $\alpha = 0.764$,
     $\hat{\lambda_1} = 1.462 \mu\tn{m}^{-1}$,
-    $\hat{\lambda_2} = 0.127 \mu\tn{m}^{-1}$.}
+    $\hat{\lambda_2} = 0.127 \mu\tn{m}^{-1}$. $\chi^2 = 11.95$, $p = \tn{nan}$.}
   \label{fig:hc-step-fit}
 \end{figure}
 
@@ -1599,7 +1599,7 @@ sizes are \emph{not} distributed exponentially in either experiment.
     black line is located at 1 $\mu$m, or approximately one platelet
     radius. $\alpha = 0.781$,
     $\hat{\lambda_1} = 0.756 \mu\tn{m}^{-1}$,
-    $\hat{\lambda_2} = 0.152 \mu\tn{m}^{-1}$.}
+    $\hat{\lambda_2} = 0.152 \mu\tn{m}^{-1}$. $\chi^2 = 8.0$, $p = 0.09$}
   \label{fig:cc-step-fit}
 \end{figure}
 
@@ -1642,7 +1642,7 @@ sizes are \emph{not} distributed exponentially in either experiment.
     The vertical black line is located at 1 $\mu$m, or approximately
     one platelet radius. $\alpha = 0.865$,
     $\hat{\lambda_1} = 1.849 \mu\tn{m}^{-1}$,
-    $\hat{\lambda_2} = 0.0676 \mu\tn{m}^{-1}$.}
+    $\hat{\lambda_2} = 0.0676 \mu\tn{m}^{-1}$. $\chi^2 = 0.82$, $p = \tn{nan}$}
   \label{fig:hc-step-fit}
 \end{figure}
 
@@ -1685,7 +1685,7 @@ sizes are \emph{not} distributed exponentially in either experiment.
     The vertical black line is located at 1 $\mu$m, or approximately
     one platelet radius. $\alpha = 0.620$,
     $\hat{\lambda_1} = 1.049 \mu\tn{m}^{-1}$,
-    $\hat{\lambda_2} = 0.213 \mu\tn{m}^{-1}$..}
+    $\hat{\lambda_2} = 0.213 \mu\tn{m}^{-1}$. $\chi^2 = 20.3$, $p = 0.04$}
   \label{fig:cc-step-fit}
 \end{figure}
 
@@ -1791,11 +1791,42 @@ What are potential reasons for this discrepancy?
   exponentials.
 \end{enumerate}
 
-Out of curiosity, I made a log plot of $1 - \tn{CDF}$ for the CC whole
-blood experiment (simply because it has the most data) in Figure
-\ref{fig:log-cdf}. It is hard to say, but it \emph{might} be fit well
-by a piecewise linear function, which would suggest the step size
-distribution is a sum of exponentials.
+Figure \ref{fig:semilogy-cdf} suggests the step sizes \emph{may} be
+distributed as a convex combination of exponentials, that is a
+distribution where the PDF is given by the function $f(x) = \alpha
+\lambda_1 \exp(-\lambda_1 x) + (1 - \alpha) \lambda_2 \exp(-\lambda_2
+x).$ Therefore, I fit this double exponential model to the 4 sets of
+data, the results of which are displayed in Figures
+\ref{fig:hc-step-fit}---\ref{fig:semilogy-cdf}.
+
+I tested the goodness of fit in each case using the $\chi^2$ test. The
+way this works is the data gets binned, and then the actual number of
+observations ($o_j$) in each bin is compared to the expected number of
+observations in each bin
+($e_j \equiv N_\tn{obs} \left[ F(x_{j+1}) - F(x_{j}) \right]$). Here
+$F(x)$ is the CDF for the double exponential distribution, and
+$x_{j+1}$ and $x_{j}$ are the upper and lower bounds of bin $j$. Then
+the $\chi^2$ statistic is calculated using $\sum_{j=1}^{N_\tn{bins}}
+\frac{(o_j - e_j)^2}{e_j^2}$.
+
+I chose this test because it is agnostic of the underlying probability
+distribution, and it is relatively quick to implement. However, there
+are significant drawbacks as well.
+\begin{enumerate}
+\item Resolution is lost by binning the data
+\item The result of the test seems to be sensitive to the choice of
+  bins. Bain \& Engelhardt say that $e_j \ge 5$ should be maintained
+  ``to ensure that the chi-squared approximation is fairly accurate.''
+  However the $p$-value varied by an order of magnitude when I varied
+  the bin width between $e_j \approx 5$ and $e_j \approx 15$.
+\item Probably because of the loss of resolution, this test can only
+  be applied in situations where there is a lot of data. The degrees
+  of freedom of the $\chi^2$ statistic is $N_\tn{bins} - 1 -
+  N_\tn{pars}$, and this quantity must be positive, meaning there must
+  be at least 5 bins. If we are enforcing $e_j \approx 5$, that means
+  we must have at least 25 data points, otherwise we end up with 0 or
+  negative d.o.f.
+\end{enumerate}
 
 \begin{figure}
   \centering
@@ -1860,6 +1891,65 @@ and the dwell time distribution is given by
 $k_\tn{off} p_V(t) + k_\tn{off}^F p_F(t)$. This ODE is solved with the
 initial condition $p_V(0) = P[\tn{the V bond forms first}]$,
 $p_F(0) = P[\tn{the F bond forms first}]$, and $p_{VF}(0) = 0$.
+
+\section{Step size revisited}
+\label{sec:step-size-revisited}
+
+In trying to fit the step-size data along with the velocity data, I
+noticed that the step size is \emph{not} distributed according to the
+exponential distribution $\Exp(\lambda = (k_\tn{on} +
+k_\tn{on}^F)/V)$. Figure \ref{fig:test-stepsize-cmp} shows the
+discrepancy between the simulated data and the model prediction. The
+simulated data is still exponentially distributed, but at a different
+rate than I originally predicted. I think this is due to the fact
+there is a finite domain, and the distance traveled before the first
+binding event is not counted as a step.
+
+First, it is clear that a (nondimensional) step size of greater than 1
+cannot be observed, because the domain is only length 1. This suggests
+the step size is distributed as a truncated exponential
+distribution. The second part is more difficult to capture, and I'm
+not sure what to do with that yet. I tried coming up with an analytic
+function describing the distribution of step sizes, but was
+unsuccessful.
+
+In lieu of an analytic distribution, I tried fitting the parameters by
+generating sample step size distributions, and then matching the mean
+of the sample step size distribution with the observed step size
+mean. So far, this has been unsuccessful, it seems like the minimizer
+just generates step size distributions until it stumbles upon a sample
+that matches the ``observed'' step size distribution.
+
+I've tried increasing the number of samples taken in the objective
+function, but so far no luck. I've gone up to $2^{14} = 16\,384$
+samples so far, with a tolerance of $10^{-3}$. That is, the minimizer
+terminates when it takes a step resulting in an improvement of less
+than $10^{-3}$ in the solution.
+
+\emph{A thought on fitting the on-rates}\\
+Instead of fitting the step size data, we could fit the number of
+dwells to a Poisson distribution. In the jump-velocity process, the
+number of binding events is Poisson distributed (because the waiting
+times for binding are exponentially distributed). This would also
+provide an estimate for the binding rate $k_\tn{on}$ without having to
+worry about this issue of not counting the first step as a step size.
+
+I implemented an algorithm to find the on rate $k_\tn{on}$ using the
+average number of dwells per tracked platelet, and then tries to
+estimate $a$ and $\epsilon$ separately by fitting to the velocity
+distribution. This works for a test case with $a=0.5$ and $\epsilon_1
+= 0.1$, but it isn't working for test cases with $(a, \epsilon_1) =
+(0.2, 0.1), \, (0.8, 0.1)\, (0.5, 0.8)$. It also isn't working for the
+experimental data.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\textwidth]{test-stepsize-cmp.png}
+  \caption{Comparison of the ECDF of simulated step size data to the
+    CDF of the assumed step size distribution. $a = 0.5$, $\epsilon_1
+    = .1$}
+  \label{fig:test-stepsize-cmp}
+\end{figure}
 
 % \bibliographystyle{plain}
 % \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}

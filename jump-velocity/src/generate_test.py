@@ -34,13 +34,13 @@ def multiple_experiments(a, c, eps1, eps2, num_expt):
 
 if __name__ == '__main__':
     a, c = .5, .2
-    eps1, eps2 = .1, 1
+    eps1, eps2 = .8, np.inf
     num_expt = 1024
     vels, steps, dwells = multiple_experiments(a, c, eps1, eps2, num_expt)
 
     import os
     os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
-    filename = 'test'
+    filename = 'test4'
     sim_dir = 'dat-files/simulations/'
     np.savetxt(sim_dir + filename + '-step.dat', steps)
     np.savetxt(sim_dir + filename + '-vel.dat', vels)

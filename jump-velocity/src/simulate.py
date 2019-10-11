@@ -24,8 +24,8 @@ def read_parameter_file(filename):
 def experiment(rate_a, rate_b, rate_c, rate_d):
     """Runs a single jump-velocity experiment based on the given rates
 
-    Note that this experiment does not exclude platelets that pass
-    through the domain without binding.
+    Note that this experiment excludes platelets that pass through the
+    domain without binding.
 
     Parameters
     ----------
@@ -40,8 +40,10 @@ def experiment(rate_a, rate_b, rate_c, rate_d):
 
     Returns
     -------
-    avg_velocity : float
-        Average velocity of the platelet across the domain
+    y : ndarray
+        List of platelet positions along the channel at times given in t
+    t : ndarray
+        List of times in the experiment
     """
 
     assert np.minimum(rate_a, rate_b) > 0
@@ -120,7 +122,7 @@ def multiple_experiments(a, c, eps1, eps2, num_expt):
     rate_c, rate_d = c / eps2, d / eps2
     expts = [experiment(rate_a, rate_b, rate_c, rate_d)
              for _ in range(num_expt)]
-    vels = [1/(expt[1][-1]) for expt in expts]
+    vels = [1/expt[1][-1] for expt in expts]
     exits = [(expt[0][-2], expt[1][-2]) for expt in expts]
     return vels, exits
 

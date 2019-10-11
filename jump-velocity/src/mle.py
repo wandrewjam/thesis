@@ -87,7 +87,7 @@ def save_data4(full_model, filename, head_str=''):
     np.savetxt(est_dir + filename + '-est.dat', save_array, header=head_str)
 
 
-def fit_models(vels, two_par, initial_guess=None, N_obj=512):
+def fit_models(vels, two_par, initial_guess=None, N_obj=512, constraints=()):
     """Fits the adiabatic reduction and full PDE model to data
 
     Parameters
@@ -128,12 +128,13 @@ def fit_models(vels, two_par, initial_guess=None, N_obj=512):
                 return -np.sum(np.log(q(1, 1. / v, ap, epsp)), axis=0)
             else:
                 v = np.array(vels)
-                s = p[0]
-                if s == 0:
-                    ap = .5
-                else:
-                    ap = (s - 1 + np.sqrt(s ** 2 + 1)) / (2 * s)
-                epsp = np.exp(p[1])
+                # s = p[0]
+                # if s == 0:
+                #     ap = .5
+                # else:
+                #     ap = (s - 1 + np.sqrt(s ** 2 + 1)) / (2 * s)
+                # epsp = np.exp(p[1])
+                ap, epsp = p
                 return -np.sum(np.log(q(1, 1. / v, ap, epsp)))
 
     def full_objective(p, v, vmin, two_par, N_obj):
@@ -152,7 +153,8 @@ def fit_models(vels, two_par, initial_guess=None, N_obj=512):
         """
         # Transform the parameters back to a and epsilon
         if two_par:
-            a, eps1 = change_vars(p, forward=False)[:, 0]
+            # a, eps1 = change_vars(p, forward=False)[:, 0]
+            a, eps1 = p
             c, eps2 = 1, np.inf
         else:
             a, eps1 = change_vars(p[:2], forward=False)[:, 0]
@@ -191,12 +193,17 @@ def fit_models(vels, two_par, initial_guess=None, N_obj=512):
     vmin = np.amin(v)
 
     if two_par:
-        sol1 = minimize(reduced_objective, initial_guess, args=(v,))
-        sol2 = minimize(full_objective, sol1.x, args=(v, vmin, two_par, N_obj))
+        sol1 = minimize(reduced_objective, initial_guess, args=(v,),
+                        bounds=[(0.1, .9), (0.01, None)],
+                        constraints=constraints)
+        sol2 = minimize(full_objective, sol1.x, args=(v, vmin, two_par, N_obj),
+                        bounds=[(0.1, .9), (0.01, None)],
+                        constraints=constraints)
 
         return sol1.x, sol2.x
     else:
-        sol = minimize(full_objective, initial_guess, args=(v, vmin, two_par, N_obj))
+        sol = minimize(full_objective, initial_guess, args=(v, vmin, two_par, N_obj),
+                       constraints=constraints)
         return sol.x
 
 
