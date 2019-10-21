@@ -21,8 +21,8 @@
   cycle list/Set1-5,
   legend style={legend cell align=left,},
 }
-\usepgfplotslibrary{external}
-\tikzexternalize
+% \usepgfplotslibrary{external}
+% \tikzexternalize
 
 \renewcommand{\arraystretch}{1.2}
 \pagestyle{empty} 
@@ -156,10 +156,278 @@ Fokker-Planck equation is a simple linear advection-reaction PDE:
                   k_\tn{off, f} p_{bf} + \kappa p_T \\
   \Pder{p_{bf}}{t} &= k_\tn{on, f} p_b - (k_\tn{off, f} + k_\tn{off,
                      b}) p_{bf} \\
-  \Pder{p_T}{t} &= -V^* \Pder{p_T}{x} + k_\tn{off} p_{bf} - \kappa p_T.
+  \Pder{p_T}{t} &= -V^* \Pder{p_T}{x} + k_\tn{off, b} p_{bf} - \kappa
+                  p_T.
 \end{align}
 
+If we choose the same nondimensionalization as the first jump-velocity
+model, i.e. scaling space by the chamber length $L$ and time by the
+time it takes to cross the chamber $T \equiv L/V$, then we end up with the
+following nondimensional set of equations:
+\begin{align}
+  \Pder{p_U}{t} &= - \Pder{p_U}{x} - \beta p_U + \alpha
+                  p_b \label{eq:nd-U} \\
+  \Pder{p_b}{t} &= \beta p_U - (\alpha + \delta) p_b +
+                  \gamma p_{bf} + \lambda p_T \label{eq:nd-B} \\
+  \Pder{p_{bf}}{t} &= \delta p_b - (\gamma + \eta)
+                     p_{bf} \label{eq:nd-BF} \\
+  \Pder{p_T}{t} &= -\Pder{p_T}{x} + \eta p_{bf} - \lambda
+                  p_T. \label{eq:nd-T}
+\end{align}
 
+There are 6 nondimensional rate constants in this system of equations:
+$\alpha = k_\tn{off}T$, $\beta = k_\tn{on}T$, $\gamma = k_\tn{off,
+  f}T$, $\delta = k_\tn{on, f}T$, $\eta = k_\tn{off, b} T$, $\lambda =
+\kappa T$. We can make further simplifying assumptions to reduce the
+number of rate constants if that is required, but this is the general
+form.
+
+\subsubsection{Other distributions of small steps}
+\label{sec:other-distr-small}
+
+What if we don't make the assumption that the small step sizes are
+distributed exponentially? How can we implement other distributions of
+small step sizes? One possibility is to use a distributed
+delay. Briefly, distributed delay differential equations extend the
+concept of delay differential equations by allowing for a probability
+distribution of delays, instead of specifying a single (or multiple)
+discrete, deterministic delay(s). In the following section, I develop
+the system of equations that I think should describe the rolling model
+with a general probability distribution $f(x)$ of small step sizes.
+
+First, let's consider the case where every platelet spends the exact
+same time $\tau$  in the transition state, that is the small steps are
+deterministic and length $\tau$ (in the nondimensional model). The
+Fokker-Planck equation remains the same, except for the $\lambda p_T$
+terms in equations (\ref{eq:nd-B}) and (\ref{eq:nd-T}) which give the
+transition of platelets out of the $S_T$ state. This term is replaced
+by $\eta p_{bf}(x - \tau, t - \tau)$ in each of these equations, giving
+us a delay partial differential equation.
+
+Now we can think of this single discrete delay as a delay that is
+distributed as a $\delta$-function centered at $\tau$. We can also
+rewrite the delay term to emphasize this point:
+$\eta p_{bf}(x - \tau, t - \tau) = \eta \Integral{p_{bf}(x - t', t - t')
+  \delta(t' - \tau)}{t'}{0}{\infty}$. Written in this form, we can see
+that we can generalize the delays to a distribution of possible delays
+$f(t)$ by replacing $\delta(t' - \tau)$ with $f(t')$ in the integral,
+resulting in a delay term $\eta \Integral{p_{bf}(x - t', t - t')
+  f(t')}{t'}{0}{\infty}$. Therefore with an arbitrary distribution of
+small steps, where $f(x)$ is the distribution of small step sizes, the
+Fokker-Planck equation is a system of partial integro-differential
+equations:
+\begin{align}
+  \Pder{p_U}{t} &= - \Pder{p_U}{x} - \beta p_U + \alpha
+                  p_b \label{eq:nd-U-dst} \\
+  \Pder{p_b}{t} &= \beta p_U - (\alpha + \delta) p_b +
+                  \gamma p_{bf} + \eta \Integral{p_{bf}(x - t', t -
+                  t') f(t')} {t'} {0} {\infty} \label{eq:nd-B-dst} \\
+  \Pder{p_{bf}}{t} &= \delta p_b - (\gamma + \eta)
+                     p_{bf} \label{eq:nd-BF-dst} \\
+  \Pder{p_T}{t} &= -\Pder{p_T}{x} + \eta p_{bf} - \eta
+                  \Integral{p_{bf}(x - t', t - t') f(t')} {t'} {0}
+                  {\infty}. \label{eq:nd-T-dst}
+\end{align}
+
+\section{Simulations of the modified jump velocity model}
+\label{sec:simul-modif-jump}
+
+I wrote code to run stochastic trials of the modified jump-velocity
+process (with exponentially distributed small steps), and compared the
+results to the distribution of average velocities predicted by the
+Fokker-Planck equation for a couple different choices of
+parameters. Figure \ref{fig:exact-cmp-equal-rates} shows the case
+where all off and on rates are equal, figure
+\ref{fig:exact-cmp-small-a} shows the case where the on rates are
+larger than the off rates, and figure \ref{fig:exact-cmp-large-a}
+shows the case where the on rates are smaller than the off rates.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        xlabel = $v^*$,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-sim.dat};
+        \addplot table[x index=0, y expr=\thisrowno{1}/(1 - exp(-10))]
+        {distributions/testmod-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Model fit},
+        legend pos = south east,
+        xlabel = $v^*$,
+        ylabel = {$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y
+        expr=\coordindex/1024] {simulations/testmod-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {distributions/testmod-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of average velocities with $\alpha = \beta =
+    \gamma = \delta = \eta = 10$, $\lambda = 100$, and
+    $N_\tn{simulations} = 1024$}
+  \label{fig:exact-cmp-equal-rates}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        xlabel = $v^*$,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod1-sim.dat};
+        \addplot table[x index=0, y expr=\thisrowno{1}/(1 - exp(-10))]
+        {distributions/testmod1-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Model fit},
+        legend pos = south east,
+        xlabel = $v^*$,
+        ylabel = {$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y
+        expr=\coordindex/1024] {simulations/testmod1-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {distributions/testmod1-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of average velocities with $\alpha = \gamma =
+    5$, $\beta = \delta = \eta = 15$, $\lambda = 100$, and
+    $N_\tn{simulations} = 1024$}
+  \label{fig:exact-cmp-small-a}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        xlabel = $v^*$,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod2-sim.dat};
+        \addplot table[x index=0, y expr=\thisrowno{1}/(1 - exp(-10))]
+        {distributions/testmod2-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Model fit},
+        legend pos = south east,
+        xlabel = $v^*$,
+        ylabel = {$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y
+        expr=\coordindex/1024] {simulations/testmod2-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {distributions/testmod2-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of average velocities with $\alpha = \gamma =
+    15$, $\beta = \delta = \eta = 5$, $\lambda = 100$, and
+    $N_\tn{simulations} = 1024$}
+  \label{fig:exact-cmp-large-a}  
+\end{figure}
+
+\section{Step sizes}
+\label{sec:step-sizes}
+
+The distribution of step sizes in this model should be a mixture of
+exponential distributions. There are two separate random variables
+representing the two different types of steps: $S_1 \sim \Exp(\beta)$
+is the random variable representing a complete unbinding and
+reattachment of the platelet, and $S_2 \sim \Exp(\lambda)$ is the
+random variable representing a step without complete unbinding (which
+I am calling ``small'' steps).
+
+Then the PDF of the mixture of these two random variables should be
+$g(x) = \beta \exp(-\beta t) \cdot P[\tn{step is }S_1] + \lambda
+\exp(-\lambda t) \cdot P[\tn{step is }S_2]$. To fully specify $g(x)$,
+we need to figure out the probability that a particular step is a step
+of type 1.
+
+In order to find the probability of each type of step, and to find the
+distribution of dwell times later, we need to consider a subsystem of
+the platelet state transition diagram. In particular, we want to model
+the evolution of platelet states during a single pause. The reaction
+diagram for this subsystem is given in Figure
+\ref{fig:pause-subsystem}. Clearly all 4 platelet states are still
+present, but not all the reactions from the full system are
+present. In this subsystem, state U and state T are absorbing states
+because there are no transitions out of these states. In the model
+this corresponds to the platelet transitioning from a paused state to
+a moving state.
+
+\begin{figure}
+  \centering
+  \schemestart
+  U \arrow{<-[$\alpha$]}[-135]
+  B \arrow{<=>[*{0}$\delta$][*{0}$\gamma$]}[-45]
+  BF \arrow{->[*{0}$\eta$]}[45] T
+  \schemestop  
+  \caption[Pause subsystem]{Subsystem describing transitions within a
+    single pause}
+  \label{fig:pause-subsystem}
+\end{figure}
+
+Then the splitting probability of this system gives the probability of
+a platelet taking a ``large'' step versus a ``small'' step. Also, the
+distribution of first exit times gives the distribution of dwell times
+in the modified model.
+
+If we define $q_i(t)$ to be the probability that a platelet is in
+state $i$ at time $t$ after a binding event, then the evolution of the
+$q_i$s is given by the ODE system:
+\begin{align}
+  \Der{q_U}{t} &= \alpha q_b \\
+  \Der{q_T}{t} &= \eta q_{bf} \\
+  \Der{q_b}{t} &= -(\alpha + \delta) q_b + \gamma q_{bf} \\
+  \Der{q_{bf}}{t} &= \delta q_b - (\gamma + \eta) q_{bf}.
+\end{align}
+
+From Dr. Keener's stochastics notes, the splitting probability for this
+system is given by $Q^\infty = - B A^{-1} P(0)$ where $B
+= \begin{pmatrix} \alpha & 0 \\ 0 & \eta \end{pmatrix}$, $A
+= \begin{pmatrix} -(\alpha + \delta) & \gamma \\ \delta & -(\gamma +
+  \eta) \end{pmatrix}$, and $P(t) = (q_b(t), q_{bf}(t))^T$. The
+splitting probability (and the first exit time) depends on the initial
+state $P(0)$. I think the appropriate initial state is $q_b(0) = 1$
+and $q_{bf}(0) = 0$, because every pause begins in the $B$ state, with
+a single bond between the platelet and the surface.
+
+To do:
+\begin{itemize}
+\item Test the step size distribution
+\item Write code to fit the step size distribution to data
+\item Research goodness-of-fit tests for mixture models
+\end{itemize}
 
 % \bibliographystyle{plain}
 % \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
