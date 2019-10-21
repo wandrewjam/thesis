@@ -34,7 +34,7 @@ def main(filename, model='simple'):
         def icdf(t):
             return a*np.exp(-lam1*t) + (1 - a)*np.exp(-lam2*t)
 
-        ## Find goodness-of-fit
+        # Find goodness-of-fit
         num_bins = steps.size//5
         si = np.zeros(shape=num_bins+1)
         for i in range(num_bins-1):
