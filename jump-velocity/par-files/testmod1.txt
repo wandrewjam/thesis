@@ -1,0 +1,10 @@
+N 1024
+s_samp 1024
+s_max 50
+alpha 5
+beta 15
+gamma 5
+delta 15
+eta 15
+lam 100
+done

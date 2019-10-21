@@ -1,0 +1,8 @@
+num_expt 1024
+alpha 15
+beta 5
+gamma 15
+delta 5
+eta 5
+lam 100
+done

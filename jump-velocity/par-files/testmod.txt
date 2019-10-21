@@ -1,4 +1,6 @@
-num_expt 1024
+N 1024
+s_samp 1024
+s_max 50
 alpha 10
 beta 10
 gamma 10
