@@ -94,7 +94,7 @@ def experiment_corrected(rate_a, rate_b, rate_c, rate_d, length):
 def main():
     a, eps1 = .5, .1
     c, eps2 = .3, 1.
-    length = 2**14.
+    length = 2**12.
 
     b, d = 1 - a, 1 - c
     rate_a, rate_b = a / eps1, b / eps1
