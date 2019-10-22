@@ -21,8 +21,8 @@
   cycle list/Set1-5,
   legend style={legend cell align=left,},
 }
-% \usepgfplotslibrary{external}
-% \tikzexternalize
+\usepgfplotslibrary{external}
+\tikzexternalize
 
 \renewcommand{\arraystretch}{1.2}
 \pagestyle{empty} 
@@ -368,10 +368,13 @@ random variable representing a step without complete unbinding (which
 I am calling ``small'' steps).
 
 Then the PDF of the mixture of these two random variables should be
-$g(x) = \beta \exp(-\beta t) \cdot P[\tn{step is }S_1] + \lambda
-\exp(-\lambda t) \cdot P[\tn{step is }S_2]$. To fully specify $g(x)$,
-we need to figure out the probability that a particular step is a step
-of type 1.
+\begin{equation}
+  g(x) = \beta \exp(-\beta t) \cdot P[\tn{step is }S_1] + \lambda
+  \exp(-\lambda t) \cdot P[\tn{step is }
+  S_2]. \label{eq:partially-specified-pdf}
+\end{equation}
+To fully specify $g(x)$, we need to figure out the probability that a
+particular step is a step of type 1.
 
 In order to find the probability of each type of step, and to find the
 distribution of dwell times later, we need to consider a subsystem of
@@ -385,6 +388,7 @@ because there are no transitions out of these states. In the model
 this corresponds to the platelet transitioning from a paused state to
 a moving state.
 
+\tikzexternaldisable
 \begin{figure}
   \centering
   \schemestart
@@ -396,6 +400,7 @@ a moving state.
     single pause}
   \label{fig:pause-subsystem}
 \end{figure}
+\tikzexternalenable
 
 Then the splitting probability of this system gives the probability of
 a platelet taking a ``large'' step versus a ``small'' step. Also, the
@@ -406,21 +411,69 @@ If we define $q_i(t)$ to be the probability that a platelet is in
 state $i$ at time $t$ after a binding event, then the evolution of the
 $q_i$s is given by the ODE system:
 \begin{align}
-  \Der{q_U}{t} &= \alpha q_b \\
-  \Der{q_T}{t} &= \eta q_{bf} \\
-  \Der{q_b}{t} &= -(\alpha + \delta) q_b + \gamma q_{bf} \\
-  \Der{q_{bf}}{t} &= \delta q_b - (\gamma + \eta) q_{bf}.
+  \Der{q_U}{t} &= \alpha q_b \label{eq:qu-nd} \\
+  \Der{q_T}{t} &= \eta q_{bf} \label{eq:qt-nd} \\
+  \Der{q_b}{t} &= -(\alpha + \delta) q_b + \gamma
+                 q_{bf} \label{eq:qb-nd} \\
+  \Der{q_{bf}}{t} &= \delta q_b - (\gamma + \eta)
+                    q_{bf}. \label{eq:qbf-nd}
 \end{align}
 
-From Dr. Keener's stochastics notes, the splitting probability for this
-system is given by $Q^\infty = - B A^{-1} P(0)$ where $B
-= \begin{pmatrix} \alpha & 0 \\ 0 & \eta \end{pmatrix}$, $A
-= \begin{pmatrix} -(\alpha + \delta) & \gamma \\ \delta & -(\gamma +
-  \eta) \end{pmatrix}$, and $P(t) = (q_b(t), q_{bf}(t))^T$. The
-splitting probability (and the first exit time) depends on the initial
-state $P(0)$. I think the appropriate initial state is $q_b(0) = 1$
-and $q_{bf}(0) = 0$, because every pause begins in the $B$ state, with
-a single bond between the platelet and the surface.
+Following Dr. Keener's stochastics notes, we can group the absorbing
+and non-absorbing states separately by defining
+$Q(t) \equiv (q_U(t), q_T(t))^T$ to be the absorbing states and
+$P(t) \equiv (q_b(t), q_{bf}(t))^T$ to be the non-absorbing
+states. Then we can write the system of equations
+(\ref{eq:qu-nd})---(\ref{eq:qbf-nd}) as
+\begin{equation}
+  \label{eq:abs-nabs-sys}
+  \Der{}{t}
+  \begin{pmatrix}
+    Q \\ P
+  \end{pmatrix}
+  =
+  \begin{pmatrix}
+    0 & B \\
+    0 & A
+  \end{pmatrix}
+  \begin{pmatrix}
+    Q \\ P
+  \end{pmatrix},
+\end{equation}
+where $B = \begin{pmatrix} \alpha & 0 \\ 0 & \eta \end{pmatrix}$, and
+$A = \begin{pmatrix} -(\alpha + \delta) & \gamma \\ \delta & -(\gamma
+  + \eta) \end{pmatrix}$.
+
+The splitting probability $Q^\infty$ is the vector of probabilities
+that the platelet is in one of the absorbing states as $t \rightarrow
+\infty$. This can be found by integrating $\Der{Q}{t}$ from $0$ to
+$\infty$, which gives us:
+\begin{equation*}
+  Q^\infty = \Integral{\Der{Q}{t}}{t}{0}{\infty} = \Integral{B
+    P}{t}{0}{\infty} = \Integral{B A^{-1} P}{t}{0}{\infty} = B A^{-1}
+  \left(P(\infty) - P(0) \right) = - B A^{-1} P(0).
+\end{equation*}
+
+The splitting probability (and the first exit time) depends on the
+initial state $P(0)$. I think the appropriate initial state is
+$q_b(0) = 1$ and $q_{bf}(0) = 0$, because every pause begins in the
+$B$ state, with a single bond between the platelet and the
+surface. Therefore, the splitting probability is
+$Q^\infty = (q_U^\infty, q_T^\infty)^T = \frac{1}{\delta \eta +
+  \alpha(\gamma + \eta)} \left( \alpha (\gamma + \eta), \delta \eta
+\right)^T$. In the context of equation
+(\ref{eq:partially-specified-pdf}),
+$P[\tn{step is } S_1] = q_U^\infty$ and
+$P[\tn{step is } S_2] = q_T^\infty$. Therefore, the fully-specified
+PDF of step sizes is the mixture model:
+\begin{equation}
+  \label{eq:fully-specified-pdf}
+  g(x) = \beta \frac{\alpha (\gamma + \eta)}{\alpha (\gamma + \eta) +
+    \delta\eta} \exp(-\beta x) + \delta \frac{\delta \eta}{\alpha
+    (\gamma + \eta) + \delta \eta} \exp(-\delta x).
+\end{equation}
+
+
 
 To do:
 \begin{itemize}
