@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import kstest
 from generate_test import get_steps_dwells
 
 
@@ -55,14 +56,32 @@ def main():
     alpha, beta = 10., 10.
     gamma, delta = 10., 10.
     eta, lam = 10., 10.
-    length = 2048.
+    length = 2**12.
 
     y, t = modified_experiment_corrected(alpha, beta, gamma, delta, eta,
                                          lam, length)
     steps, dwell = get_steps_dwells(y, t)
+    pdf_fun = lambda x: ((alpha * beta * (gamma + eta) * np.exp(-beta * x)
+                          + delta**2 * eta * np.exp(-delta * x))
+                         / (alpha * (gamma + eta) + delta * eta))
 
+    cdf_fun = lambda x: 1 - ((alpha * (gamma + eta) * np.exp(-beta * x)
+                              + delta * eta * np.exp(-delta * x))
+                             / (alpha * (gamma + eta) + delta * eta))
+
+    xplot = np.linspace(start=0, stop=steps.max(), num=512)
     plt.hist(steps, density=True)
+    plt.plot(xplot, pdf_fun(xplot))
     plt.show()
+
+    s = np.sort(steps)
+    s = np.insert(s, values=0, obj=0)
+    y_cdf = np.arange(0., len(s))/(len(s) - 1)
+    plt.step(s, y_cdf)
+    plt.plot(xplot, cdf_fun(xplot))
+    plt.show()
+
+    print(kstest(steps, cdf_fun))
 
 
 if __name__ == '__main__':
