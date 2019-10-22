@@ -21,7 +21,7 @@ def read_parameter_file(filename):
     return dict(parlist)
 
 
-def experiment(rate_a, rate_b, rate_c, rate_d):
+def experiment(rate_a, rate_b, rate_c, rate_d, filter=True):
     """Runs a single jump-velocity experiment based on the given rates
 
     Note that this experiment excludes platelets that pass through the
@@ -29,6 +29,7 @@ def experiment(rate_a, rate_b, rate_c, rate_d):
 
     Parameters
     ----------
+    filter : bool
     rate_a : float
         Value of rate a
     rate_b : float
@@ -107,6 +108,8 @@ def experiment(rate_a, rate_b, rate_c, rate_d):
                         state = np.append(state, 1)
                 else:
                     raise ValueError('State must be one of 0, 1, 2, or 3')
+        if not filter:
+            break
         if y.shape[0] > 2:  # Filter out plts that don't bind
             break
 
