@@ -19,6 +19,7 @@ The four algorithms are named as follows:
 
 import multiprocessing as mp
 import numpy as np
+import warnings
 from scipy.integrate import simps
 from scipy.special import erf
 from scipy.stats import truncnorm
@@ -468,11 +469,19 @@ def _run_stochastic_model(master_list, v, om, t_mesh, th_mesh, L, T, nu,
             v = np.append(arr=v, values=v_f_interp(t_mesh[-1]) + force/eta_v)
             om = np.append(arr=om, values=om_f_interp(t_mesh[-1])
                                           + torque/eta_om)
-            try:
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', category=RuntimeWarning)
                 avg_lengths = np.append(arr=avg_lengths,
                                         values=np.mean(bond_lengths))
-            except RuntimeWarning:
-                pass
+            # with np.errstate(invalid='ignore'):
+            #     avg_lengths = np.append(arr=avg_lengths,
+            #                             values=np.mean(bond_lengths))
+
+            # try:
+            #     avg_lengths = np.append(arr=avg_lengths,
+            #                             values=np.mean(bond_lengths))
+            # except RuntimeWarning:
+            #     pass
 
     elif master_list.ndim == 1:
         while t_mesh[-1] < T:
@@ -885,18 +894,18 @@ if __name__ == '__main__':
     T = float(5)
     time_steps = int(10240*T)
     kappa = float(10)
-    delta = float(1)
+    delta = float(16)
     # m0 = np.zeros(shape=(2*M+1, N+1))
     init = 'free'
     # init = 'tbound'  # One bond between the platelet and surface
     model_outputs = []
     bond_max = 10
     trials = 16
-    proc = 4
+    proc = 1
     correct_flux = False
 
-    write_deterministic_data(M, N, time_steps, init, bond_max=bond_max,
-                             scheme='bw', T=T, kappa=kappa, delta=delta)
+    # write_deterministic_data(M, N, time_steps, init, bond_max=bond_max,
+    #                          scheme='bw', T=T, kappa=kappa, delta=delta)
     write_stochastic_data(trials, proc, M, N, time_steps, init, bond_max,
                           correct_flux, T=T, kappa=kappa, delta=delta)
 
