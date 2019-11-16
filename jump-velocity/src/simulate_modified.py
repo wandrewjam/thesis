@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import expon, gamma, truncnorm, uniform
 
 
 def read_parameter_file(filename):
@@ -21,7 +22,7 @@ def read_parameter_file(filename):
     return dict(parlist)
 
 
-def modified_experiment(alpha, beta, gamma, delta, eta, lam):
+def modified_experiment(alpha, beta, gam, delta, eta, lam, dwell_type):
     """Run a single experiment of the modified jump-velocity process
 
     This experiment excludes platelets that pass through the domain
@@ -31,7 +32,7 @@ def modified_experiment(alpha, beta, gamma, delta, eta, lam):
     ----------
     alpha
     beta
-    gamma
+    gam
     delta
     eta
     lam
@@ -40,6 +41,21 @@ def modified_experiment(alpha, beta, gamma, delta, eta, lam):
     -------
 
     """
+
+    if dwell_type == 'exp':
+        rv = expon(scale = 1./lam)
+    elif dwell_type == 'unif':
+        rv = uniform(scale=2./lam)
+    elif dwell_type == 'gamma':
+        rv = gamma(a=3, scale=1 / (3 * lam))
+    elif dwell_type == 'norm':
+        myclip_a, myclip_b = 0, 2./lam
+        my_mean, my_std = 1./lam, 1./(2*lam)
+        a, b = (myclip_a - my_mean) / my_std, (myclip_b - my_mean) / my_std
+        rv = truncnorm(a, b, my_mean, my_std)
+    else:
+        raise ValueError('dwell_type is not valid')
+
     while True:
         t = np.zeros(shape=1)
         y = np.zeros(shape=1)
@@ -57,12 +73,15 @@ def modified_experiment(alpha, beta, gamma, delta, eta, lam):
                 state = np.append(state, dt.argmin() * 2)  # Choose the correct
                                                            # state transition
             elif state[-1] == 2:
-                dt = np.random.exponential([1/gamma, 1/eta])
+                dt = np.random.exponential([1 / gam, 1 / eta])
                 t = np.append(t, t[-1] + dt.min())
                 y = np.append(y, y[-1])
                 state = np.append(state, (dt.argmin() * 2) + 1)
             elif state[-1] == 3:
-                dt = np.random.exponential(1/lam)
+                # Choose the time spent in the transition state
+                # dt = np.random.exponential(1/lam)
+                dt = rv.rvs()
+
                 t = np.append(t, t[-1] + dt)
                 y = np.append(y, y[-1] + dt)
                 state = np.append(state, 1)
@@ -78,7 +97,7 @@ def modified_experiment(alpha, beta, gamma, delta, eta, lam):
     return y, t
 
 
-def multiple_mod_experiments(alpha, beta, gamma, delta, eta, lam, num_expt):
+def multiple_mod_experiments(alpha, beta, gamma, delta, eta, lam, num_expt, dwell_type):
     """Run many trials of the modified rolling experiment
 
     Parameters
@@ -95,18 +114,19 @@ def multiple_mod_experiments(alpha, beta, gamma, delta, eta, lam, num_expt):
     -------
 
     """
-    expts = [modified_experiment(alpha, beta, gamma, delta, eta, lam)
+    expts = [modified_experiment(alpha, beta, gamma, delta, eta, lam, dwell_type)
              for _ in range(num_expt)]
     vels = [1/expt[1][-1] for expt in expts]
     return vels
 
 
-def main(filename, alpha, beta, gamma, delta, eta, lam, num_expt):
+def main(filename, alpha, beta, gamma, delta, eta, lam, num_expt, dwell_type='exp'):
     vels = multiple_mod_experiments(alpha, beta, gamma, delta, eta, lam,
-                                    num_expt)
+                                    num_expt, dwell_type)
 
     sim_dir = 'dat-files/simulations/'
-    np.savetxt(sim_dir + filename + '-sim.dat', np.sort(vels))
+    np.savetxt(sim_dir + filename + '-{}-sim.dat'.format(dwell_type),
+               np.sort(vels))
     return None
 
 
@@ -115,7 +135,8 @@ if __name__ == '__main__':
     import sys
 
     filename = sys.argv[1]
+    dwell_type = sys.argv[2]
     os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
 
     pars = read_parameter_file(filename)
-    main(**pars)
+    main(dwell_type=dwell_type, **pars)
