@@ -469,17 +469,599 @@ PDF of step sizes is the mixture model:
 \begin{equation}
   \label{eq:fully-specified-pdf}
   g(x) = \beta \frac{\alpha (\gamma + \eta)}{\alpha (\gamma + \eta) +
-    \delta\eta} \exp(-\beta x) + \delta \frac{\delta \eta}{\alpha
-    (\gamma + \eta) + \delta \eta} \exp(-\delta x).
+    \delta\eta} \exp(-\beta x) + \lambda \frac{\delta \eta}{\alpha
+    (\gamma + \eta) + \delta \eta} \exp(-\lambda x).
 \end{equation}
 
+There are really three identifiable(?) parameters in this PDF:
+$\beta$, $\lambda$, and the convexity parameter. If we call the
+convexity parameter $\chi$ (because we're running out of letters),
+then
+$\chi = \frac{\alpha (\gamma + \eta)}{\alpha (\gamma + \eta) +
+  \delta\eta}$ and we can rewrite equation
+(\ref{eq:fully-specified-pdf}) as
+\begin{equation}
+  \label{eq:pdf-three-par}
+  g(x; \chi, \beta, \lambda) = \chi \beta \exp(-\beta x) + (1 - \chi)
+  \lambda \exp(-\lambda x).
+\end{equation}
 
+Figures \ref{fig:exact-step-cmp-equal-rates},
+\ref{fig:exact-step-cmp-small-a}, and \ref{fig:exact-step-cmp-large-a}
+compare equation (\ref{eq:fully-specified-pdf}) with data from
+stochastic simulation. The step data is extracted from a single long
+experiment ($L = 1024$) in order eliminate the filtering effect that
+occurs when an experiment is terminated at length $L = 1$ (that is,
+steps greater than length $L$ cannot be observed). For the parameters
+chosen, the PDF (\ref{eq:fully-specified-pdf}) and its CDF agree well
+with the simulated data, and this was confirmed by running
+Kolmogorov-Smirnov tests for each case.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exact PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-step.dat};
+        \addplot table[x index=0, y index=1]
+        {distributions/testmod-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Exact CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod-step-cdf.dat};
+        \addplot+[dashed] table[x index=0, y index=2]
+        {distributions/testmod-step-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with $\alpha = \beta = \gamma =
+    \delta = \eta = 10$, $\lambda = 100$, and $N_\tn{steps} =
+    14\,556$}
+  \label{fig:exact-step-cmp-equal-rates}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exact PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod1-step.dat};
+        \addplot table[x index=0, y index=1]
+        {distributions/testmod1-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Exact CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod1-step-cdf.dat}; 
+        \addplot+[dashed] table[x index=0, y index=2]
+        {distributions/testmod1-step-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with $\alpha = \gamma =
+    5$, $\beta = \delta = \eta = 15$, $\lambda = 100$, and
+    $N_\tn{steps} = 37\,782$}
+  \label{fig:exact-step-cmp-small-a}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exact PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod2-step.dat};
+        \addplot table[x index=0, y index=1]
+        {distributions/testmod2-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Exact CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod2-step-cdf.dat};
+        \addplot+[dashed] table[x index=0, y index=2]
+        {distributions/testmod2-step-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with $\alpha = \gamma = 15$,
+    $\beta = \delta = \eta = 5$, $\lambda = 100$, and $N_\tn{steps} =
+    5604$}
+  \label{fig:exact-step-cmp-large-a}  
+\end{figure}
+
+Next, I estimated the three parameters in equation
+(\ref{eq:pdf-three-par}) from the simulated data sets by numerically
+maximizing the log-likelihood function
+\begin{equation*}
+  \ell(\chi, \beta, \lambda) = \sum_{i=1}^{N_\tn{steps}} \ln(g(x_i;
+  \chi, \beta, \lambda)).
+\end{equation*}
+The optimization process terminated quickly ($< 1\,\tn{s}$), but the
+estimation could be made faster if necessary. In particular, we can at
+least write down a set of algebraic equations that we can solve to
+find the values of parameters that maximize $\ell$. However, for these
+test cases, the optimization algorithm converged quickly and gave
+accurate estimates to the true parameter values (results shown in
+Figures \ref{fig:fit-step-cmp-equal-rates},
+\ref{fig:fit-step-cmp-small-a}, and \ref{fig:fit-cmp-large-a}).
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Fit PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-step.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/testmod-dexp.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Fit CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod-step-cdf.dat};
+        \addplot+[dashed] table[x index=0, y index=2]
+        {ml-estimates/testmod-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with ML parameter
+    estimates. $\alpha = \beta = \gamma = \delta = \eta = 10$,
+    $\lambda = 100$, and $N_\tn{steps} = 14\,556$. For these parameter
+    values, $\chi = 2/3$. Estimated parameters are
+    $\hat{\chi} = 0.6683$, $\hat{\beta} = 9.972$,
+    $\hat{\lambda} = 99.96$, and the $\chi^2$ goodness-of-fit test
+    gave $p = 0.86$.}
+  \label{fig:fit-step-cmp-equal-rates}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Fit PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod1-step.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/testmod1-dexp.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Fit CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod1-step-cdf.dat}; 
+        \addplot+[dashed] table[x index=0, y index=2]
+        {ml-estimates/testmod1-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with ML parameter
+    estimates. $\alpha = \gamma = 5$, $\beta = \delta = \eta = 15$,
+    $\lambda = 100$, and $N_\tn{steps} = 37\,782$. For these parameter
+    values, $\chi = 4/13 \approx 0.3077$. Estimated parameters are
+    $\hat{\chi} = 0.3078$, $\hat{\beta} = 15.23$,
+    $\hat{\lambda} = 100.2$, and the $\chi^2$ goodness-of-fit test
+    gave $p = 0.26$.}
+  \label{fig:fit-step-cmp-small-a}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Fit PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod2-step.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/testmod2-dexp.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Fit CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod2-step-cdf.dat};
+        \addplot+[dashed] table[x index=0, y index=2]
+        {ml-estimates/testmod2-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with ML parameter
+    estimates. $\alpha = \gamma = 15$, $\beta = \delta = \eta = 5$,
+    $\lambda = 100$, and $N_\tn{steps} = 5604$. For these parameter
+    values, $\chi = 12/13 \approx 0.9231$. Estimated parameters are
+    $\hat{\chi} = 0.9225$, $\hat{\beta} = 5.073$,
+    $\hat{\lambda} = 97.65$, and the $\chi^2$ goodness-of-fit test
+    gave $p = 0.68$.}
+  \label{fig:fit-cmp-large-a}  
+\end{figure}
+
+\subsection{Experimental step stize distributions}
+\label{sec:exper-step-stize}
+
+Figures \ref{fig:hc-step-fit}---\ref{fig:cc-step-fit} show the
+distribution of small steps (steps less than $2 \mu\tn{m}$ in length)
+in four experiments: HC PRP, CC PRP, HC whole blood, and CC whole
+blood. I also fit 3 different models to these small steps: uniform,
+normal, and gamma distributions.
+
+I also ran simulations of the stochastic model with these three
+distributions, as well as a deterministic step and plotted histograms
+of small steps in Figure \ref{fig:exact-unif-step-cmp-equal-rates}.
+
+To the eyeball norm, it isn't clear if any of these models provide a
+better fit than any of the others. Put another way, we may not have
+enough data to distinguish between these models. 
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Uniform fit, Normal fit, Gamma fit},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/HC-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Uniform fit, Normal fit, Gamma fit},
+        legend pos = south east,
+        xmin=0, xmax=2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/17]
+        {simulations/HC-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/HC-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC step size fit]{Data and fit of several distributions to
+    small step size data in the HC PRP experiment ($N =
+    17$). Parameters of the distributions are:
+    $(a, b) = (0.128, 1.163)$, $(\mu, \sigma) = (0.659, 0.304)$, and
+    $(\theta, k) = (0.141, 4.685)$}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Uniform fit, Normal fit, Gamma fit},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/CC-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Uniform fit, Normal fit, Gamma fit},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/28]
+        {simulations/CC-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/CC-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC step size fit]{Data and fit of several distributions to
+    small step size data in the CC PRP experiment ($N =
+    28$). Parameters of the distributions are:
+    $(a, b) = (0.291, 1.839)$, $(\mu, \sigma) = (0.912, 0.525)$, and
+    $(\theta, k) = (0.302, 3.023)$.}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Uniform fit, Normal fit, Gamma fit},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/HCwhole-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Uniform fit, Normal fit, Gamma fit},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/10]
+        {simulations/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/HCwhole-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC whole blood step size]{Data and fit of several
+    distributions to small step size data in the HC whole blood
+    experiment ($N = 10$). Parameters of the distributions are:
+    $(a, b) = (0.145, 1.458)$, $(\mu, \sigma) = (0.638, 0.413)$, and
+    $(\theta, k) = (0.267, 2.392)$}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Uniform fit, Normal fit, Gamma fit},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/CCwhole-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Uniform fit, Normal fit, Gamma fit},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/54]
+        {simulations/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/CCwhole-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC whole blood step size]{Data and fit of several
+    distributions to small step size data in the CC whole blood
+    experiment ($N = 54$). Parameters of the distributions are:
+    $(a, b) = (0.013, 1.744)$, $(\mu, \sigma) = (0.776, 0.433)$, and
+    $(\theta, k) = (0.242, 3.209)$}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\tikzexternaldisable
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Uniform step},
+        ymin=0,
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-unif-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Normal step},
+        ymin=0,
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-norm-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Gamma step},
+        ymin=0,
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-gamma-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Deterministic step},
+        ymin=0,
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-delta-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Distribution of ``small'' step sizes for 4 different models
+  of transition. All distributions chosen so that $\mu = 1/\lambda$.}
+  \label{fig:exact-unif-step-cmp-equal-rates}
+\end{figure}
+\tikzexternalenable
+
+\section{Pause times}
+\label{sec:pause-times}
+
+As mentioned above, the distribution of pause times is given by the
+distribution of exit times from the pause subsystem shown in Figure
+\ref{fig:pause-subsystem}. The system of ODEs that describe the
+probabilities of a paused platelet being in a certain state is given
+in equations (\ref{eq:qu-nd})---(\ref{eq:qbf-nd}). For convenience, I
+reproduce them here:
+\begin{align*}
+  \Der{q_U}{t} &= \alpha q_b \\
+  \Der{q_T}{t} &= \eta q_{bf} \\
+  \Der{q_b}{t} &= -(\alpha + \delta) q_b + \gamma q_{bf} \\
+  \Der{q_{bf}}{t} &= \delta q_b - (\gamma + \eta) q_{bf}.
+\end{align*}
+Here $t$ is the time elapsed since the beginning of a pause event, and
+$q_i(t)$ is the probability that a platelet is in state $i$ at time
+$t$. Because all pause events start with the platelet in state $B$,
+$q_b(0) = 1$ and $q_i(0) = 0$ for $i \neq b$. The probability that a
+platelet is bound at time $t$ is given by $q_b(t) + q_{bf}(t)$.
 
 To do:
 \begin{itemize}
-\item Test the step size distribution
-\item Write code to fit the step size distribution to data
-\item Research goodness-of-fit tests for mixture models
+\item Finish deriving the PDF of dwell times, and verify with simulations
+\item Fit the dwell time distribution to simulated dwell time data to
+  estimate parameters
+\item Write a script to fit both dwell time and step size models to
+  data (simultaneously or sequentially?)
 \end{itemize}
 
 % \bibliographystyle{plain}
