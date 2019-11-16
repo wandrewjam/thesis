@@ -66,7 +66,7 @@ def set_parameters(**kwargs):
                  'will be set using gamma instead.')
         v_f = _parameters['gamma'] * (1 + d)
         om_f = _parameters['gamma']/2.
-        print('Set v_f and om_f using the shear rate')
+        # print('Set v_f and om_f using the shear rate')
 
     return (v_f, om_f, kappa, eta, d, delta, on, off, sat, xi_v, xi_om,
             L, T, save_bond_history)
