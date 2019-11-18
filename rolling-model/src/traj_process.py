@@ -26,7 +26,7 @@ def main(filename):
     data = np.load(filename)
     vels = data['v_array']
     t = data['t_sample']
-    step_thresh = 1
+    step_thresh = 2
 
     trajs = np.cumsum(vels[:, :-1] * (t[1:] - t[:-1]), axis=1)
     trajs = np.insert(trajs, 0, 0, axis=1)
