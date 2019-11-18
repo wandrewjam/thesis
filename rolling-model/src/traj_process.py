@@ -26,12 +26,10 @@ def main(filename):
     data = np.load(filename)
     vels = data['v_array']
     t = data['t_sample']
+    step_thresh = 1
 
     trajs = np.cumsum(vels[:, :-1] * (t[1:] - t[:-1]), axis=1)
     trajs = np.insert(trajs, 0, 0, axis=1)
-
-    # plt.plot(t, trajs.T)
-    # plt.show()
 
     steps_dwells = [_get_steps_dwells(t, traj) for traj in trajs]
     steps, dwells = zip(*steps_dwells)
@@ -40,14 +38,17 @@ def main(filename):
     dwells = np.concatenate(dwells)
     avg_vels = trajs[:, -1] / t[-1]
 
-    plt.hist(steps, density=True)
-    plt.show()
+    steps = np.sort(steps)
+    small_steps = steps[steps < step_thresh]
+    dwells = np.sort(dwells)
+    avg_vels = np.sort(avg_vels)
 
-    plt.hist(dwells, density=True)
-    plt.show()
+    # Still need to write a model fitting code
 
-    plt.hist(avg_vels, density=True)
-    plt.show()
+    np.savetxt(filename[:-4] + '-step.dat', steps)
+    np.savetxt(filename[:-4] + '-small-step.dat', small_steps)
+    np.savetxt(filename[:-4] + '-dwell.dat', dwells)
+    np.savetxt(filename[:-4] + '-vel.dat', avg_vels)
 
 
 if __name__ == '__main__':
