@@ -17,12 +17,14 @@ def read_parameter_file(filename):
             key, value = command
             if key == 'num_expt':
                 parlist.append((key, int(value)))
+            elif key == 'dwell_type':
+                parlist.append((key, value))
             else:
                 parlist.append((key, float(value)))
     return dict(parlist)
 
 
-def modified_experiment(alpha, beta, gam, delta, eta, lam, dwell_type):
+def modified_experiment(alpha, beta, gam, delta, eta, dwell_type, **kwargs):
     """Run a single experiment of the modified jump-velocity process
 
     This experiment excludes platelets that pass through the domain
@@ -35,7 +37,7 @@ def modified_experiment(alpha, beta, gam, delta, eta, lam, dwell_type):
     gam
     delta
     eta
-    lam
+    sstep_pars
 
     Returns
     -------
@@ -43,16 +45,19 @@ def modified_experiment(alpha, beta, gam, delta, eta, lam, dwell_type):
     """
 
     if dwell_type == 'exp':
-        rv = expon(scale = 1./lam)
+        lam = kwargs['lam']
+        rv = expon(scale=1. / lam)
     elif dwell_type == 'unif':
-        rv = uniform(scale=2./lam)
+        upper = kwargs['upper']
+        rv = uniform(scale=upper)
     elif dwell_type == 'gamma':
-        rv = gamma(a=3, scale=1 / (3 * lam))
+        k, theta = kwargs['k'], kwargs['theta']
+        rv = gamma(a=k, scale=theta)
     elif dwell_type == 'norm':
-        myclip_a, myclip_b = 0, 2./lam
-        my_mean, my_std = 1./lam, 1./(2*lam)
-        a, b = (myclip_a - my_mean) / my_std, (myclip_b - my_mean) / my_std
-        rv = truncnorm(a, b, my_mean, my_std)
+        myclip_a = 0
+        my_mean, my_std = kwargs['mean'], kwargs['std']
+        a = (myclip_a - my_mean) / my_std
+        rv = truncnorm(a, loc=my_mean, scale=my_std)
     else:
         raise ValueError('dwell_type is not valid')
 
@@ -97,7 +102,8 @@ def modified_experiment(alpha, beta, gam, delta, eta, lam, dwell_type):
     return y, t
 
 
-def multiple_mod_experiments(alpha, beta, gamma, delta, eta, lam, num_expt, dwell_type):
+def multiple_mod_experiments(alpha, beta, gamma, delta, eta, num_expt,
+                             dwell_type, **kwargs):
     """Run many trials of the modified rolling experiment
 
     Parameters
@@ -107,22 +113,24 @@ def multiple_mod_experiments(alpha, beta, gamma, delta, eta, lam, num_expt, dwel
     gamma
     delta
     eta
-    lam
+    sstep_pars
     num_expt
 
     Returns
     -------
 
     """
-    expts = [modified_experiment(alpha, beta, gamma, delta, eta, lam, dwell_type)
+    expts = [modified_experiment(alpha, beta, gamma, delta, eta, dwell_type,
+                                 **kwargs)
              for _ in range(num_expt)]
     vels = [1/expt[1][-1] for expt in expts]
     return vels
 
 
-def main(filename, alpha, beta, gamma, delta, eta, lam, num_expt, dwell_type='exp'):
-    vels = multiple_mod_experiments(alpha, beta, gamma, delta, eta, lam,
-                                    num_expt, dwell_type)
+def main(filename, alpha, beta, gamma, delta, eta, num_expt, dwell_type='exp',
+         **kwargs):
+    vels = multiple_mod_experiments(alpha, beta, gamma, delta, eta,
+                                    num_expt, dwell_type, **kwargs)
 
     sim_dir = 'dat-files/simulations/'
     np.savetxt(sim_dir + filename + '-{}-sim.dat'.format(dwell_type),
@@ -139,4 +147,4 @@ if __name__ == '__main__':
     os.chdir(os.path.expanduser('~/thesis/jump-velocity'))
 
     pars = read_parameter_file(filename)
-    main(dwell_type=dwell_type, **pars)
+    main(**pars)
