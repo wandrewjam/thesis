@@ -1,8 +1,7 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-def _get_steps_dwells(t, traj, thresh=20, samples=10000):
+def _get_steps_dwells(t, traj, thresh=1, samples=15):
     # How is the threshold defined? Right now, it is just picked to get a ''reasonable'' number of steps and dwells
     # How is the number of samples defined? Right now, pretty arbitrary
     # Dwells are already defined so that the final dwell isn't counted
