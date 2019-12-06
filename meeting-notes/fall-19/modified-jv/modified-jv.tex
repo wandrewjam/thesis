@@ -1464,7 +1464,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Step size ($\mu$m),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HC-step.dat};
@@ -1496,7 +1496,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Pause time (s),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HC-dwell.dat};
@@ -1528,6 +1528,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Average velocity,
+        ylabel = Probability Density,
         fill opacity = 0.75,
         ]
         \addplot+[hist=density, fill] table [y index=0]
@@ -1555,9 +1556,9 @@ fitting:
     \end{tikzpicture}
   \end{subfigure}
   \caption{Fit of step size and dwell time distributions to HC PRP
-    data $\chi = 0.22$, $\beta = 0.12$, $k = 2.13$, $\theta = 0.43$,
-    $\alpha = 0.14$, $\gamma = 22.56$, $\delta = 2.95$, $\eta =
-    2.64$. $V^* = 52$}
+    data $\chi = 0.22$, $\beta = 0.12$, $k = 4.31$, $\theta = 0.15$,
+    $\alpha = 0.41$, $\gamma = 0.04$, $\delta = 1.58$, $\eta =
+    0.41$. $V^* = 52$}
   \label{fig:HC-whole-model-fit}
 \end{figure}
 
@@ -1569,7 +1570,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Step size ($\mu$m),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CC-step.dat};
@@ -1601,7 +1602,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Pause time (s),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CC-dwell.dat};
@@ -1633,6 +1634,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Average velocity,
+        ylabel = Probability Density,
         fill opacity = 0.75,
         ]
         \addplot+[hist=density, fill] table [y index=0]
@@ -1661,8 +1663,8 @@ fitting:
   \end{subfigure}
   \caption{Fit of step size and dwell time distributions to CC PRP
     data $\chi = 0.27$, $\beta = 0.16$, $k = 2.13$, $\theta = 0.54$,
-    $\alpha = 0.13$, $\gamma = 8.62$, $\delta = 2.95$, $\eta =
-    1.18$. $V^* = 53$}
+    $\alpha = 0.37$, $\gamma = 0.08$, $\delta = 1.25$, $\eta =
+    0.37$. $V^* = 53$}
   \label{fig:CC-whole-model-fit}
 \end{figure}
 
@@ -1674,7 +1676,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Step size ($\mu$m),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HCwhole-step.dat};
@@ -1706,7 +1708,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Pause time (s),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HCwhole-dwell.dat};
@@ -1738,6 +1740,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Average velocity,
+        ylabel = Probability Density,
         fill opacity = 0.75,
         ]
         \addplot+[hist=density, fill] table [y index=0]
@@ -1766,8 +1769,8 @@ fitting:
   \end{subfigure}
   \caption{Fit of step size and dwell time distributions to HC whole
     blood data $\chi = 0.10$, $\beta = 0.07$, $k = 1.89$, $\theta =
-    0.36$, $\alpha = 0.05$, $\gamma = 5.23$, $\delta = 1.88$, $\eta =
-    1.57$. $V^* = 68$}
+    0.36$, $\alpha = 0.34$, $\gamma = 0.002$, $\delta = 2.96$, $\eta =
+    0.34$. $V^* = 68$}
   \label{fig:HCwhole-whole-model-fit}
 \end{figure}
 
@@ -1779,7 +1782,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Step size ($\mu$m),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CCwhole-step.dat};
@@ -1811,7 +1814,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Pause time (s),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CCwhole-dwell.dat};
@@ -1843,6 +1846,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Average velocity,
+        ylabel = Probability Density,
         fill opacity = 0.75,
         ]
         \addplot+[hist=density, fill] table [y index=0]
@@ -1871,8 +1875,8 @@ fitting:
   \end{subfigure}
   \caption{Fit of step size and dwell time distributions to CC whole
     blood data $\chi = 0.40$, $\beta = 0.21$, $k = 2.033$, $\theta =
-    0.43$, $\alpha = 0.30$, $\gamma = 6.50$, $\delta = 3.65$, $\eta =
-    0.89$. $V^* = 25$}
+    0.43$, $\alpha = 0.62$, $\gamma = 0.09$, $\delta = 1.05$, $\eta =
+    0.62$. $V^* = 25$}
   \label{fig:CCwhole-whole-model-fit}
 \end{figure}
 
@@ -1884,7 +1888,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Step size ($\mu$m),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HC-step.dat};
@@ -1916,7 +1920,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Pause time (s),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HC-dwell.dat};
@@ -1948,12 +1952,13 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Average velocity,
+        ylabel = Probability Density,
         fill opacity = 0.75,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HC-vel.dat};
         \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
-        {simulations/HCsamp-gamma-sim.dat};
+        {simulations/HCsamp2-gamma-sim.dat};
       \end{axis}
     \end{tikzpicture}
   \end{subfigure}
@@ -1970,14 +1975,14 @@ fitting:
         expr=(\coordindex+1)/38] {simulations/HC-vel.dat};
         \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
         expr=(\coordindex+1)/1024]
-        {simulations/HCsamp-gamma-sim.dat};
+        {simulations/HCsamp2-gamma-sim.dat};
       \end{axis}
     \end{tikzpicture}
   \end{subfigure}
   \caption{Fit of step size and dwell time distributions to HC PRP
-    data $\chi = 0.22$, $\beta = 0.12$, $k = 2.13$, $\theta = 0.43$,
-    $\alpha = 0.14$, $\gamma = 22.56$, $\delta = 2.95$, $\eta =
-    2.64$. $V^* = 68$}
+    data $\chi = 0.22$, $\beta = 0.12$, $k = 4.31$, $\theta = 0.15$,
+    $\alpha = 0.41$, $\gamma = 0.04$, $\delta = 1.58$, $\eta =
+    0.41$. $V^* = 68$}
   \label{fig:HC-whole-model-fit}
 \end{figure}
 
@@ -1989,7 +1994,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Step size ($\mu$m),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CC-step.dat};
@@ -2021,7 +2026,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Pause time (s),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CC-dwell.dat};
@@ -2053,12 +2058,13 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Average velocity,
+        ylabel = Probability Density,
         fill opacity = 0.75,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CC-vel.dat};
         \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
-        {simulations/CCsamp-gamma-sim.dat};
+        {simulations/CCsamp2-gamma-sim.dat};
       \end{axis}
     \end{tikzpicture}
   \end{subfigure}
@@ -2075,14 +2081,14 @@ fitting:
         expr=(\coordindex+1)/49] {simulations/CC-vel.dat};
         \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
         expr=(\coordindex+1)/1024]
-        {simulations/CCsamp-gamma-sim.dat};
+        {simulations/CCsamp2-gamma-sim.dat};
       \end{axis}
     \end{tikzpicture}
   \end{subfigure}
   \caption{Fit of step size and dwell time distributions to CC PRP
     data $\chi = 0.27$, $\beta = 0.16$, $k = 2.13$, $\theta = 0.54$,
-    $\alpha = 0.13$, $\gamma = 8.62$, $\delta = 2.95$, $\eta =
-    1.18$. $V^* = 68$}
+    $\alpha = 0.37$, $\gamma = 0.08$, $\delta = 1.25$, $\eta =
+    0.37$. $V^* = 68$}
   \label{fig:CC-whole-model-fit}
 \end{figure}
 
@@ -2094,7 +2100,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Step size ($\mu$m),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HCwhole-step.dat};
@@ -2126,7 +2132,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Pause time (s),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HCwhole-dwell.dat};
@@ -2158,12 +2164,13 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Average velocity,
+        ylabel = Probability Density,
         fill opacity = 0.75,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/HCwhole-vel.dat};
         \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
-        {simulations/HCwholesamp-gamma-sim.dat};
+        {simulations/HCwholesamp2-gamma-sim.dat};
       \end{axis}
     \end{tikzpicture}
   \end{subfigure}
@@ -2180,14 +2187,14 @@ fitting:
         expr=(\coordindex+1)/30] {simulations/HCwhole-vel.dat};
         \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
         expr=(\coordindex+1)/1024]
-        {simulations/HCwholesamp-gamma-sim.dat};
+        {simulations/HCwholesamp2-gamma-sim.dat};
       \end{axis}
     \end{tikzpicture}
   \end{subfigure}
   \caption{Fit of step size and dwell time distributions to HC whole
     blood data $\chi = 0.10$, $\beta = 0.07$, $k = 1.89$, $\theta =
-    0.36$, $\alpha = 0.05$, $\gamma = 5.23$, $\delta = 1.88$, $\eta =
-    1.57$. $V^* = 68$}
+    0.36$, $\alpha = 0.34$, $\gamma = 0.002$, $\delta = 2.96$, $\eta =
+    0.34$. $V^* = 68$}
   \label{fig:HCwhole-whole-model-fit}
 \end{figure}
 
@@ -2199,7 +2206,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Step size ($\mu$m),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CCwhole-step.dat};
@@ -2231,7 +2238,7 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Pause time (s),
-        ylabel = Cumulative Probability,
+        ylabel = Probability Density,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CCwhole-dwell.dat};
@@ -2263,12 +2270,13 @@ fitting:
         legend entries={Data, Model},
         legend pos = north east,
         xlabel = Average velocity,
+        ylabel = Probability Density,
         fill opacity = 0.75,
         ]
         \addplot+[hist=density, fill] table [y index=0]
         {simulations/CCwhole-vel.dat};
         \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
-        {simulations/CCwholesamp-gamma-sim.dat};
+        {simulations/CCwholesamp3-gamma-sim.dat};
       \end{axis}
     \end{tikzpicture}
   \end{subfigure}
@@ -2285,17 +2293,131 @@ fitting:
         expr=(\coordindex+1)/43] {simulations/CCwhole-vel.dat};
         \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
         expr=(\coordindex+1)/1024]
-        {simulations/CCwholesamp-gamma-sim.dat};
+        {simulations/CCwholesamp2-gamma-sim.dat};
       \end{axis}
     \end{tikzpicture}
   \end{subfigure}
   \caption{Fit of step size and dwell time distributions to CC whole
     blood data $\chi = 0.40$, $\beta = 0.21$, $k = 2.033$, $\theta =
-    0.43$, $\alpha = 0.30$, $\gamma = 6.50$, $\delta = 3.65$, $\eta =
-    0.89$. $V^* = 68$}
+    0.43$, $\alpha = 0.62$, $\gamma = 0.09$, $\delta = 1.05$, $\eta =
+    0.62$. $V^* = 68$}
   \label{fig:CCwhole-whole-model-fit}
 \end{figure}
 
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size,
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/6818]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time,
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/7711]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*40.4]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0samp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/1024] {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*40.4, y
+        expr=(\coordindex+1)/1024]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0samp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to full model
+    simulations $\kappa = 10$. In this plot, all quantities are
+    nondimensional, with the scalings $L = 1 \mu\tn{m}$, $T = 5
+    \tn{s}$, and $V = L/T$. $\chi = 0.89$, $\beta = 0.05$, $k = 5.76$, $\theta =
+    0.10$, $\alpha = 14.9$, $\gamma = 46.5$, $\delta = 7.77$, $\eta =
+    14.9$. $V^* = 40.3$}
+  \label{fig:full-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{likelihood-plot.png}
+  \caption{Heatmap of $-\ln(L)$ in $\ln(\alpha)$ and $\ln(\gamma)$}
+  \label{fig:likelihood-plot}
+\end{figure}
 % To do:
 % \begin{itemize}
 % \item Finish deriving the PDF of dwell times, and verify with simulations
