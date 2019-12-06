@@ -27,11 +27,35 @@ def fit_trunc_gamma(data, b=2, initial_guess=None):
     return np.exp(res.x)
 
 
+def dwell_pdf_fun(t, pars):
+    a, g, d, et = pars
+
+    aa = a + d
+    bb = g + et
+    dd = np.sqrt((aa - bb)**2 + 4 * g * d)
+    l1 = -(aa + bb + dd) / 2
+    l2 = (dd - aa - bb) / 2
+
+    pb = ((aa - bb + dd) / (2 * dd) * np.exp(l1 * t)
+          + (bb - aa + dd) / (2 * dd) * np.exp(l2 * t))
+    pbf = (((aa - bb)**2 - dd**2) / (4 * dd * g) * np.exp(l1 * t)
+           + (dd**2 - (aa - bb)**2) / (4 * dd * g) * np.exp(l2 * t))
+
+    return a * pb + et * pbf
+
+
+def dwell_obj(fit_pars, dwells):
+    pars = np.exp(fit_pars)
+    g_fun = dwell_pdf_fun(dwells, pars)
+    return -np.sum(np.log(g_fun))
+
+
 def main(filename):
     # np.seterr(all='raise')
     sim_dir = 'dat-files/simulations/'
     steps = np.loadtxt(sim_dir + filename + '-step.dat')
-    small_step_thresh = 1
+    small_step_thresh = 2
+    L = 100
 
     # The function is fitting the exponential to the short steps and the
     # gamma to the long ones. I could fit the small steps first, get
@@ -42,7 +66,6 @@ def main(filename):
     k, theta = fit_trunc_gamma(small_steps, b=small_step_thresh)
 
     # Then fit all steps
-
     def step_pdf_fun(x, pars):
         conv, beta = pars
         return (conv * expon.pdf(x, scale=1./beta)
@@ -105,47 +128,8 @@ def main(filename):
     dwells = np.sort(dwells)
     # t_sym = symbols('t')
 
-    def dwell_pdf_fun(t, pars):
-        a, g, d, et = pars
-
-        # Use CN
-        def dy(y0, t0):
-            b, bf = y0
-            db = g * bf - (a + d) * b
-            dbf = d * b - (g + et) * bf
-            return np.array([db, dbf])
-
-        def dfun(y0, t0):
-            return np.array([[-(a + d), g], [d, -(g + et)]])
-
-        y = odeint(dy, np.array([1, 0]), np.append(0, t))
-        y = y[1:]
-
-        return a * y[:, 0] + et * y[:, 1]
-
-        # N = 2**13
-        # t_tmp = np.linspace(0, np.amax(t), num=N+1)
-        # dt = t_tmp[1] - t_tmp[0]
-        # a_mat = np.array([[-(a + d), g], [d, -(g + et)]])
-        # pb = np.zeros(N+1)
-        # pbf = np.zeros(N+1)
-        # pb[0] = 1
-        #
-        # for index in range(N):
-        #     curr_y = np.array([pb[index], pbf[index]])
-        #     tmp = np.linalg.solve(np.eye(2) - dt * a_mat, curr_y)
-        #     pb[index+1], pbf[index+1] = tmp
-        #
-        # return a * np.interp(t, t_tmp, pb) + et * np.interp(t, t_tmp, pbf)
-
-    def dwell_obj(fit_pars):
-        pars = np.exp(fit_pars)
-        g_fun = dwell_pdf_fun(dwells, pars)
-        return -np.sum(np.log(g_fun))
-
     def const_fun(fit_pars):
         a, g, d, et = np.exp(fit_pars)
-        # a, g, d, et = pars
         return a * (g + et) / (a * (g + et) + d * et) - conv
 
     def const_jac(fit_pars):
@@ -158,16 +142,17 @@ def main(filename):
     const1 = {'type': 'eq', 'fun': const_fun, 'jac': const_jac}
     const2 = {'type': 'eq', 'fun': lambda p: p[0] - p[3],
               'jac': lambda p: np.array([1, 0, 0, -1])}
-    bds = ((None, 20),) * 4
+
     p0 = 0 * np.ones(shape=(4,))
-    p0[1] = np.floor(np.log(conv/(1 - conv)))
+    p0[2] = 0
+    p0[1] = np.floor(np.log(conv/(1 - conv)) + p0[2])
     p0[0] = np.log(
         (np.exp(p0[1]) * (1 - conv) - conv * np.exp(p0[2])) / (conv - 1)
     )
     p0[3] = p0[0]
 
-    dwell_res = minimize(dwell_obj, p0, constraints=[const1, const2],
-                         bounds=bds)
+    dwell_res = minimize(lambda p: dwell_obj(p, dwells), p0,
+                         constraints=[const1, const2])
 
     def dwell_pdf(t):
         return dwell_pdf_fun(t, np.exp(dwell_res.x))
@@ -207,8 +192,12 @@ def main(filename):
     # v = 67.9
     # sim_filename = filename + 'samp2'
 
-    main_sim(sim_filename, alpha=a, beta=beta*v, gamma=g, delta=d, eta=et,
-             num_expt=2**10, dwell_type='gamma', k=k, theta=theta)
+    # v = 200.
+    # sim_filename = filename + 'samp3'
+
+    main_sim(sim_filename, alpha=a*L/v, beta=beta*L, gamma=g*L/v, delta=d*L/v,
+             eta=et*L/v, num_expt=2**10, dwell_type='gamma', k=k,
+             theta=theta/L)
 
     # What else can I do? Decide based on the filename whether it is data or a
     # full simulation, then choose the upper bound for small step sizes
