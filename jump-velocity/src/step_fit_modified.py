@@ -3,11 +3,11 @@ import numpy as np
 from scipy.optimize import brentq, minimize
 from scipy.stats import chisquare, expon, gamma
 from scipy.special import gammainc, gammaln
-from scipy.integrate import odeint, cumtrapz
+from scipy.integrate import cumtrapz
 from simulate_modified import main as main_sim
 
 
-def fit_trunc_gamma(data, b=2, initial_guess=None):
+def fit_trunc_gamma(data, b=2., initial_guess=None):
     n = data.size
 
     def objective_fn(pars):
@@ -53,16 +53,17 @@ def dwell_obj(fit_pars, dwells):
 def main(filename):
     # np.seterr(all='raise')
     sim_dir = 'dat-files/simulations/'
-    steps = np.loadtxt(sim_dir + filename + '-step.dat')
-    small_step_thresh = 2
     L = 100
+    steps = np.loadtxt(sim_dir + filename + '-step.dat')
+    nd_steps = steps / L
+    small_step_thresh = 2. / L
 
     # The function is fitting the exponential to the short steps and the
     # gamma to the long ones. I could fit the small steps first, get
     # gamma parameters, and then fit the whole thing?
 
     # Fit small steps
-    small_steps = steps[steps < small_step_thresh]
+    small_steps = nd_steps[nd_steps < small_step_thresh]
     k, theta = fit_trunc_gamma(small_steps, b=small_step_thresh)
 
     # Then fit all steps
@@ -73,9 +74,9 @@ def main(filename):
 
     def objective(pars):
         pdf = lambda x: step_pdf_fun(x, pars)
-        return -np.sum(np.log(pdf(steps)))
+        return -np.sum(np.log(pdf(nd_steps)))
 
-    initial_guess = np.array([.5, .2])  # Change to estimate with MoM if necessary
+    initial_guess = np.array([.5, .2 * L])  # Change to estimate with MoM if necessary
     res = minimize(objective, x0=initial_guess,
                    bounds=[(0, 1), (0.01, None)])
     conv, beta = res.x
@@ -90,43 +91,45 @@ def main(filename):
                 - (1 - conv)*gamma.cdf(t, k, scale=theta))
 
     # Find goodness-of-fit
-    num_bins = steps.size//5
+    num_bins = nd_steps.size//5
     si = np.zeros(shape=num_bins+1)
     for i in range(num_bins-1):
         si[i+1] = brentq(lambda s: icdf(s) - (num_bins - (i + 1.))/num_bins,
-                         si[i], np.amax(steps))
+                         si[i], np.amax(nd_steps))
     si[-1] = np.inf
 
-    f_obs = np.histogram(steps, si)[0]
+    f_obs = np.histogram(nd_steps, si)[0]
     print(chisquare(f_obs, ddof=3))
 
-    t = np.linspace(0, np.amax(steps), num=257)
+    t = np.linspace(0, np.amax(nd_steps), num=257)
 
-    plt.hist(steps, density=True)
-    plt.plot(t, step_pdf(t))
-    plt.show()
-
-    plt.plot(t, 1 - icdf(t))
-    plt.step(np.append(0, np.sort(steps)),
-             np.append(0, (np.arange(0, steps.size) + 1.)/steps.size),
-             where='post')
-    # for s in si[:-1]:
-    #     plt.axvline(s, color='k')
-    plt.show()
+    # plt.hist(nd_steps, density=True)
+    # plt.plot(t, step_pdf(t))
+    # plt.show()
+    #
+    # plt.plot(t, 1 - icdf(t))
+    # plt.step(np.append(0, np.sort(nd_steps)),
+    #          np.append(0, (np.arange(0, nd_steps.size) + 1.)/nd_steps.size),
+    #          where='post')
+    # # for s in si[:-1]:
+    # #     plt.axvline(s, color='k')
+    # plt.show()
 
     est_dir = 'dat-files/ml-estimates/'
     step_save_array = np.zeros(shape=(t.size, 3))
-    step_save_array[:, 0] = t
-    step_save_array[:, 1] = step_pdf(t)
+    step_save_array[:, 0] = t * L
+    step_save_array[:, 1] = step_pdf(t) / L
     step_save_array[:, 2] = 1 - icdf(t)
 
     np.savetxt(est_dir + filename + '-step-dst.dat', step_save_array)
 
     # Now fit dwells subject to the constraints that we already fitted step parameters
     dwells = np.loadtxt(sim_dir + filename + '-dwell.dat')
-    # dwells = np.sort(dwells) / 1000
+    avg_vels = np.loadtxt(sim_dir + filename + '-vel.dat')
+    V = np.amax(avg_vels)
+
     dwells = np.sort(dwells)
-    # t_sym = symbols('t')
+    nd_dwells = dwells * V / L
 
     def const_fun(fit_pars):
         a, g, d, et = np.exp(fit_pars)
@@ -151,7 +154,7 @@ def main(filename):
     )
     p0[3] = p0[0]
 
-    dwell_res = minimize(lambda p: dwell_obj(p, dwells), p0,
+    dwell_res = minimize(lambda p: dwell_obj(p, nd_dwells), p0,
                          constraints=[const1, const2])
 
     def dwell_pdf(t):
@@ -162,32 +165,31 @@ def main(filename):
     print('alpha = {}, gamma = {}, delta = {}, eta = {}'.format(a, g, d, et))
     print(dwell_res.fun)
 
-    t_plot = np.linspace(0, dwells[-1], num=257)
-    plt.hist(dwells, density=True)
-    plt.plot(t_plot, dwell_pdf(t_plot))
-    plt.show()
-
-    plt.plot(t_plot, cumtrapz(dwell_pdf(t_plot), t_plot, initial=0))
-    plt.step(np.append(0, np.sort(dwells)),
-             np.append(0, (np.arange(0, dwells.size) + 1.)/dwells.size),
-             where='post')
-    plt.show()
+    t_plot = np.linspace(0, nd_dwells[-1], num=257)
+    # plt.hist(nd_dwells, density=True)
+    # plt.plot(t_plot, dwell_pdf(t_plot))
+    # plt.show()
+    #
+    # plt.plot(t_plot, cumtrapz(dwell_pdf(t_plot), t_plot, initial=0))
+    # plt.step(np.append(0, np.sort(nd_dwells)),
+    #          np.append(0, (np.arange(0, nd_dwells.size) + 1.)/nd_dwells.size),
+    #          where='post')
+    # plt.show()
 
     dwell_save_array = np.zeros(shape=(t_plot.size, 3))
-    dwell_save_array[:, 0] = t_plot
-    dwell_save_array[:, 1] = dwell_pdf(t_plot)
-    dwell_save_array[:, 2] = cumtrapz(dwell_save_array[:, 1], t_plot, initial=0)
+    dwell_save_array[:, 0] = t_plot * L / V
+    dwell_save_array[:, 1] = dwell_pdf(t_plot) * V / L
+    dwell_save_array[:, 2] = cumtrapz(dwell_save_array[:, 1], t_plot * L / V,
+                                      initial=0)
 
     np.savetxt(est_dir + filename + '-dwell-dst.dat', dwell_save_array)
 
-    np.savetxt(sim_dir + filename + '-dwell.dat', np.sort(dwells))
+    # np.savetxt(sim_dir + filename + '-dwell.dat', np.sort(dwells))
 
     # To-Do generate trials of average velocity and compare with experimental velocity
     # I could save the parameter file, and then run the simulation from simulate_modified
     # Import avg vels
 
-    avg_vels = np.loadtxt(sim_dir + filename + '-vel.dat')
-    v = np.amax(avg_vels)
     sim_filename = filename + 'samp'
     # v = 67.9
     # sim_filename = filename + 'samp2'
@@ -195,9 +197,9 @@ def main(filename):
     # v = 200.
     # sim_filename = filename + 'samp3'
 
-    main_sim(sim_filename, alpha=a*L/v, beta=beta*L, gamma=g*L/v, delta=d*L/v,
-             eta=et*L/v, num_expt=2**10, dwell_type='gamma', k=k,
-             theta=theta/L)
+    main_sim(sim_filename, alpha=a, beta=beta, gamma=g, delta=d,
+             eta=et, num_expt=2**10, dwell_type='gamma', k=k,
+             theta=theta)
 
     # What else can I do? Decide based on the filename whether it is data or a
     # full simulation, then choose the upper bound for small step sizes
