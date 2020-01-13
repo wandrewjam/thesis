@@ -27,6 +27,12 @@ def fit_trunc_gamma(data, b=2., initial_guess=None):
     return np.exp(res.x)
 
 
+def step_pdf_fun(x, k, theta, pars):
+    conv, beta = pars
+    return (conv * expon.pdf(x, scale=1. / beta)
+            + (1 - conv) * gamma.pdf(x, k, scale=theta))
+
+
 def dwell_pdf_fun(t, pars):
     a, g, d, et = pars
 
@@ -50,6 +56,57 @@ def dwell_obj(fit_pars, dwells):
     return -np.sum(np.log(g_fun))
 
 
+def fit_parameters(L, nd_steps, nd_dwells, small_step_thresh):
+    # The function is fitting the exponential to the short steps and the
+    # gamma to the long ones. I could fit the small steps first, get
+    # gamma parameters, and then fit the whole thing? Yes, this is now
+    # what I am doing.
+
+    # Fit small steps
+    small_steps = nd_steps[nd_steps < small_step_thresh]
+    k, theta = fit_trunc_gamma(small_steps, b=small_step_thresh)
+
+    # Then fit all steps
+    def objective(pars, k, theta):
+        pdf = lambda x: step_pdf_fun(x, k, theta, pars)
+        return -np.sum(np.log(pdf(nd_steps)))
+
+    # Change to estimate with MoM if necessary
+    initial_guess = np.array([.5, .2 * L])
+    res = minimize(objective, args=(k, theta), x0=initial_guess,
+                   bounds=[(0, 1), (0.01, None)])
+    conv, beta = res.x
+    print('chi = {}, beta = {}, k = {}, theta = {}'
+          .format(conv, beta, k, theta))
+
+    def const_fun(fit_pars):
+        a, g, d, et = np.exp(fit_pars)
+        return a * (g + et) / (a * (g + et) + d * et) - conv
+
+    def const_jac(fit_pars):
+        a, g, d, et = np.exp(fit_pars)
+        # a, g, d, et = pars
+        coeff = (a * (g + et) + d * et) ** 2
+        arr = np.array([d * et * (g + et), a * d * et,
+                        -a * et * (g + et), -a * et * d])
+        return arr / coeff
+
+    const1 = {'type': 'eq', 'fun': const_fun, 'jac': const_jac}
+    const2 = {'type': 'eq', 'fun': lambda p: p[0] - p[3],
+              'jac': lambda p: np.array([1, 0, 0, -1])}
+    p0 = 0 * np.ones(shape=(4,))
+    p0[2] = 0
+    p0[1] = np.floor(np.log(conv / (1 - conv)) + p0[2])
+    p0[0] = np.log(
+        (np.exp(p0[1]) * (1 - conv) - conv * np.exp(p0[2])) / (conv - 1)
+    )
+    p0[3] = p0[0]
+    dwell_res = minimize(lambda p: dwell_obj(p, nd_dwells), p0,
+                         constraints=[const1, const2])
+    a, g, d, et = np.exp(dwell_res.x)
+    return a, conv, beta, d, dwell_res, et, g, k, theta
+
+
 def main(filename):
     # np.seterr(all='raise')
     sim_dir = 'dat-files/simulations/'
@@ -58,33 +115,18 @@ def main(filename):
     nd_steps = steps / L
     small_step_thresh = 2. / L
 
-    # The function is fitting the exponential to the short steps and the
-    # gamma to the long ones. I could fit the small steps first, get
-    # gamma parameters, and then fit the whole thing?
+    dwells = np.loadtxt(sim_dir + filename + '-dwell.dat')
+    avg_vels = np.loadtxt(sim_dir + filename + '-vel.dat')
+    V = np.amax(avg_vels)
 
-    # Fit small steps
-    small_steps = nd_steps[nd_steps < small_step_thresh]
-    k, theta = fit_trunc_gamma(small_steps, b=small_step_thresh)
+    dwells = np.sort(dwells)
+    nd_dwells = dwells * V / L
 
-    # Then fit all steps
-    def step_pdf_fun(x, pars):
-        conv, beta = pars
-        return (conv * expon.pdf(x, scale=1./beta)
-                + (1 - conv) * gamma.pdf(x, k, scale=theta))
-
-    def objective(pars):
-        pdf = lambda x: step_pdf_fun(x, pars)
-        return -np.sum(np.log(pdf(nd_steps)))
-
-    initial_guess = np.array([.5, .2 * L])  # Change to estimate with MoM if necessary
-    res = minimize(objective, x0=initial_guess,
-                   bounds=[(0, 1), (0.01, None)])
-    conv, beta = res.x
-    print('chi = {}, beta = {}, k = {}, theta = {}'
-          .format(conv, beta, k, theta))
+    a, conv, beta, d, dwell_res, et, g, k, theta = fit_parameters(
+        L, nd_steps, nd_dwells, small_step_thresh)
 
     def step_pdf(x):
-        return step_pdf_fun(x, np.array([conv, beta]))
+        return step_pdf_fun(x, k, theta, np.array([conv, beta]))
 
     def icdf(t):
         return (1 - conv*expon.cdf(t, scale=1./beta)
@@ -123,45 +165,8 @@ def main(filename):
 
     np.savetxt(est_dir + filename + '-step-dst.dat', step_save_array)
 
-    # Now fit dwells subject to the constraints that we already fitted step parameters
-    dwells = np.loadtxt(sim_dir + filename + '-dwell.dat')
-    avg_vels = np.loadtxt(sim_dir + filename + '-vel.dat')
-    V = np.amax(avg_vels)
-
-    dwells = np.sort(dwells)
-    nd_dwells = dwells * V / L
-
-    def const_fun(fit_pars):
-        a, g, d, et = np.exp(fit_pars)
-        return a * (g + et) / (a * (g + et) + d * et) - conv
-
-    def const_jac(fit_pars):
-        a, g, d, et = np.exp(fit_pars)
-        # a, g, d, et = pars
-        coeff = (a * (g + et) + d * et)**2
-        arr = np.array([d*et*(g + et), a*d*et, -a*et*(g + et), -a*et*d])
-        return arr / coeff
-
-    const1 = {'type': 'eq', 'fun': const_fun, 'jac': const_jac}
-    const2 = {'type': 'eq', 'fun': lambda p: p[0] - p[3],
-              'jac': lambda p: np.array([1, 0, 0, -1])}
-
-    p0 = 0 * np.ones(shape=(4,))
-    p0[2] = 0
-    p0[1] = np.floor(np.log(conv/(1 - conv)) + p0[2])
-    p0[0] = np.log(
-        (np.exp(p0[1]) * (1 - conv) - conv * np.exp(p0[2])) / (conv - 1)
-    )
-    p0[3] = p0[0]
-
-    dwell_res = minimize(lambda p: dwell_obj(p, nd_dwells), p0,
-                         constraints=[const1, const2])
-
     def dwell_pdf(t):
         return dwell_pdf_fun(t, np.exp(dwell_res.x))
-
-    a, g, d, et = np.exp(dwell_res.x)
-
     print('alpha = {}, gamma = {}, delta = {}, eta = {}'.format(a, g, d, et))
     print(dwell_res.fun)
 
@@ -186,8 +191,10 @@ def main(filename):
 
     # np.savetxt(sim_dir + filename + '-dwell.dat', np.sort(dwells))
 
-    # To-Do generate trials of average velocity and compare with experimental velocity
-    # I could save the parameter file, and then run the simulation from simulate_modified
+    # To-Do: generate trials of average velocity and compare with
+    # experimental velocity. I could save the parameter file, and then
+    # run the simulation from simulate_modified.
+
     # Import avg vels
 
     sim_filename = filename + 'samp'

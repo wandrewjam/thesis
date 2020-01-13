@@ -113,7 +113,6 @@ def multiple_mod_experiments(alpha, beta, gamma, delta, eta, num_expt,
     gamma
     delta
     eta
-    sstep_pars
     num_expt
 
     Returns
