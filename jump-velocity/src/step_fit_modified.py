@@ -56,7 +56,22 @@ def dwell_obj(fit_pars, dwells):
     return -np.sum(np.log(g_fun))
 
 
-def fit_parameters(L, nd_steps, nd_dwells, small_step_thresh):
+def load_data(filename):
+    sim_dir = 'dat-files/simulations/'
+    L = 100
+    steps = np.loadtxt(sim_dir + filename + '-step.dat')
+    nd_steps = steps / L
+    small_step_thresh = 2. / L
+    dwells = np.loadtxt(sim_dir + filename + '-dwell.dat')
+    avg_vels = np.loadtxt(sim_dir + filename + '-vel.dat')
+    V = np.amax(avg_vels)
+    dwells = np.sort(dwells)
+    nd_dwells = dwells * V / L
+    return L, V, nd_dwells, nd_steps, small_step_thresh
+
+
+def fit_parameters(L, nd_steps, nd_dwells, small_step_thresh,
+                   print_results=False):
     # The function is fitting the exponential to the short steps and the
     # gamma to the long ones. I could fit the small steps first, get
     # gamma parameters, and then fit the whole thing? Yes, this is now
@@ -76,8 +91,9 @@ def fit_parameters(L, nd_steps, nd_dwells, small_step_thresh):
     res = minimize(objective, args=(k, theta), x0=initial_guess,
                    bounds=[(0, 1), (0.01, None)])
     conv, beta = res.x
-    print('chi = {}, beta = {}, k = {}, theta = {}'
-          .format(conv, beta, k, theta))
+    if print_results:
+        print('chi = {}, beta = {}, k = {}, theta = {}'
+              .format(conv, beta, k, theta))
 
     def const_fun(fit_pars):
         a, g, d, et = np.exp(fit_pars)
@@ -102,28 +118,15 @@ def fit_parameters(L, nd_steps, nd_dwells, small_step_thresh):
     )
     p0[3] = p0[0]
     dwell_res = minimize(lambda p: dwell_obj(p, nd_dwells), p0,
-                         constraints=[const1, const2])
+                         constraints=[const1, const2], bounds=[(None, 5)] * 4)
     a, g, d, et = np.exp(dwell_res.x)
     return a, conv, beta, d, dwell_res, et, g, k, theta
 
 
 def main(filename):
-    # np.seterr(all='raise')
-    sim_dir = 'dat-files/simulations/'
-    L = 100
-    steps = np.loadtxt(sim_dir + filename + '-step.dat')
-    nd_steps = steps / L
-    small_step_thresh = 2. / L
+    L, V, nd_dwells, nd_steps, small_step_thresh = load_data(filename)
 
-    dwells = np.loadtxt(sim_dir + filename + '-dwell.dat')
-    avg_vels = np.loadtxt(sim_dir + filename + '-vel.dat')
-    V = np.amax(avg_vels)
-
-    dwells = np.sort(dwells)
-    nd_dwells = dwells * V / L
-
-    a, conv, beta, d, dwell_res, et, g, k, theta = fit_parameters(
-        L, nd_steps, nd_dwells, small_step_thresh)
+    a, conv, beta, d, dwell_res, et, g, k, theta = fit_parameters(L, nd_steps, nd_dwells, small_step_thresh)
 
     def step_pdf(x):
         return step_pdf_fun(x, k, theta, np.array([conv, beta]))
