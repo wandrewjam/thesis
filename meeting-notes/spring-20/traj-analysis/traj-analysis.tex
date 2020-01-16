@@ -1,0 +1,462 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+% \setchemfig{scheme debug=true}
+
+\usepgfplotslibrary{colorbrewer, statistics}
+\pgfplotsset{
+  exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+    legend entries={PDF, CDF},},
+  every axis plot post/.append style={thick},
+  table/search
+  path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+  colormap/YlGnBu,
+  cycle list/Set1-5,
+  legend style={legend cell align=left,},
+}
+\usepgfplotslibrary{external}
+\tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Notes on Platelet Trajectories and Average Velocities in the
+    Jump-Velocity Model (\today)}
+\end{center}
+
+\section{A discrepancy between observed average velocities and
+  simulated average velocities}
+\label{sec:discr-betw-observ}
+
+\tikzexternaldisable
+\begin{figure}
+  \centering
+  \schemestart
+  U \arrow{<=>[$\alpha$][$\beta$]}[-135]
+  B \arrow{<=>[*{0}$\delta$][*{0}$\gamma$]}[-45]
+  BF \arrow{->[*{0}$\eta$]}[45] T \arrow{->[$\Gamma(k, \theta)$]}[-180]
+  \schemestop  
+  \caption{State diagram of the modified jump-velocity model.}
+  \label{fig:modified-jv-model}
+\end{figure}
+\tikzexternalenable
+
+In my previous notes, I fit the models of step size and dwell time
+distributions to the experimental data from each of the 4 set ups. I
+did a sequential fit, where first I fit the model of step sizes, then
+used the resulting parameters to do a constrained optimization fitting
+the dwell times. This specifies all parameters in the jump-velocity
+model, except for the free-flowing velocity $V^*$. For now, I take
+this to be the maximum observed average velocity, either for each
+experiment separately (i.e. there is a different $V^*$ for each data
+set) or for all experiments together (i.e. the same $V^*$ for every
+data set).
+
+As shown in Figure \ref{fig:CC-whole-model-fit}, the predicted average
+velocity distribution is not a good fit for the observed average
+velocity distribution, in particular the model predicts average
+velocities much lower than those observed. (I have only shown plots
+for the collagen-collagen PRP experiment, but the results for the
+other experiments are qualitatively similar). We were concerned this
+discrepancy was due to some scaling error in transforming between
+nondimensional and dimensional parameter space, so I ran two different
+parameter estimation processes with different orders of scaling and
+estimating:
+\begin{enumerate}
+\item In the first procedure, I estimated dimensional parameters from
+  dimensional data, and then nondimensionalized those parameters to
+  simulate the average velocities. Here the order of scaling and
+  fitting goes:
+  \begin{enumerate}
+  \item Fit parameters $\hat{\beta}$, $\chi$ (the probability of
+    taking an unbound step), $k$, and $\hat{\theta}$ (parameters of
+    the bound step distribution) to dimensional step size data. The
+    relation between the dimensional (hatted) parameters and the
+    nondimensional (unhatted) parameters are
+    $\hat{\beta} = \beta / L$, and $\hat{\theta} = \theta / L$. $\chi$
+    and $k$ are already nondimensional.
+  \item Fit the other parameters $\hat{\alpha}$, $\hat{\gamma}$,
+    $\hat{\delta}$, and $\hat{\eta}$ to the dimensional dwell time
+    data. $\hat{\alpha} = V \alpha / L$ and similar for the other
+    parameters.
+  \item Use the nondimensional parameters to generate nondimensional
+    average velocities $\{v_i\}_{i=1}^{N}$, and then multiply each
+    $v_i$ by $V^*$ to get dimensional average velocities.
+  \end{enumerate}
+\item In the second procedure, I nondimensionalized the data first,
+  and then estimated nondimensional parameters:
+  \begin{enumerate}
+  \item Nondimensionalize step size data by dividing by $L$, and
+    nondimensionalize dwell time data by dividing by $T = L/V$.
+  \item Fit nondimensional parameters $\beta$, $\chi$, $k$, and
+    $\theta$ to the step size data, and $\alpha$, $\gamma$, $\delta$,
+    and $\eta$ to the dwell time data. 
+  \item Generate nondimensional average velocities, and multiply by
+    $V^*$ to get dimensional average velocities.
+  \end{enumerate}
+\end{enumerate}
+
+Both of these procedures generated the same distribution of average
+velocities, decreasing the likelihood that the difference between the
+simulations and data is due to a coding error in scaling the
+data/parameters. However, I still wasn't convinced that my simulated
+velocities were correct (within the model), so I tried to think about
+what kind of average velocities we would expect given the
+distributions of steps and dwells below.
+
+Here is one (very) crude estimate of the population average of the
+average velocities:
+\begin{align*}
+  \tn{time to cross} &= \frac{L}{V^*} + \mathtt{num\_dwells} \cdot
+                       \mathtt{avg\_dwells} \\
+  \mathtt{num\_dwells} &\approx \frac{L}{\mathtt{avg\_step}} \\
+  \implies \tn{time to cross} &\approx \frac{L}{V^*} + \frac{L
+                                \mathtt{avg\_dwell}}{\mathtt{avg\_step}}
+  \\
+  \implies \tn{velocity} &= \frac{L}{\tn{time to cross}} =
+                           \frac{1}{\frac{1}{V^*} +
+                           \frac{\mathtt{avg\_dwell}}{\mathtt{avg\_step}}}.
+\end{align*}
+
+In Figure \ref{fig:CC-whole-model-fit}, the average step size seems to
+be roughly $3 \,\mu\tn{m}$ and the average dwell time is roughly
+$3 \,\tn{s}$. Taking $V^* \approx 50 \, \mu\tn{m}/\tn{s}$ gives us
+approximately $1.02 \, \mu\tn{m}/\tn{s}$ as a rough estimate for the
+expected population average of average velocities.
+
+This is obviously only a rough estimate, but we could also estimate
+average velocities by ``bootstrapping'' the step size and dwell time
+data. Therefore I wrote a program to alternate picking from the
+observed step sizes and dwell times to bootstrap a distribution of
+expected average velocities. Specifically, I run the following
+algorithm for each simulated platelet:
+\begin{enumerate}
+\item Specify a domain length $L = 100 \, \mu\tn{m}$, and initialize
+  the starting position and starting time of the platelet to $0$.
+\item While the position of the platelet is less than $L$, do the
+  following
+  \begin{enumerate}
+  \item Pick a step size $dy$ from the observed step sizes (with
+    replacement), and increase the position by $dy$ and the time by
+    $dy / V$
+  \item Then pick a dwell time $dt$ from the observed dwell times
+    (with replacement) and increase the time by $dt$. The position
+    does not change in a dwell.
+  \end{enumerate}
+\item Find the time $T_i$ at which the platelet's position $= L$, and
+  set the average velocity to be $v_i = L/T_i$.
+\end{enumerate}
+
+The result of this bootstrap process is compared to the average
+velocity distribution generated by the jump-velocity model and the
+observed average velocity distribution in Figure
+\ref{fig:ccp-vel-bootstrap}. The bootstrap process generates an
+average velocity distribution very similar to the simulated average
+velocity distribution for the collagen-collagen PRP data, with similar
+results for the other data sets. All of this evidence together I think
+makes a strong case that the difference between the simulated and
+observed average velocities in Figure \ref{fig:CC-whole-model-fit} is
+not due to a coding error.
+
+From looking at Figure \ref{fig:CC-whole-model-fit}, an obvious
+question to ask is: how can the step size and dwell time distributions
+match so well with the data, yet result in average velocities which
+are totally different than those observed? 
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/40]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/54]
+        {simulations/CC-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*53]
+        {simulations/CCsamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/49] {simulations/CC-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*53, y
+        expr=(\coordindex+1)/1024]
+        {simulations/CCsamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to CC PRP
+    data $\chi = 0.27$, $\beta = 0.16$, $k = 2.13$, $\theta = 0.54$,
+    $\alpha = 0.37$, $\gamma = 0.08$, $\delta = 1.25$, $\eta =
+    0.37$. $V^* = 53$}
+  \label{fig:CC-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{ccp-vel-bootstrap.png}
+  \caption{Comparison of observed average velocities with simulated
+    average velocities from the model, and bootstrapped average
+    velocities from step and dwell data. $N = 1024$ for both the
+    number of simulations, and the number of bootstrap trials.}
+  \label{fig:ccp-vel-bootstrap}
+\end{figure}
+
+\section{An examination of the trajectory data}
+\label{sec:an-exam-traj}
+
+To try to find the source (or sources) of the difference in average
+velocity data, I loaded the raw trajectory data into Python. The first
+thing I looked at was comparing intermediate steps (i.e. those that
+occur between two dwells) with the first and last steps (neither of
+which are not included in the step size data, but are included in the
+average velocity).
+
+Boxplots of each of these populations of step sizes are shown in
+Figure \ref{fig:ccp-step-cmp}. The steps that occur in between dwells
+are much smaller than those at the beginning and end, therefore our
+assumption in the jump-velocity model that the beginning and ending
+steps are the same is violated. Similarly, the velocity of the
+platelet within a step is different depending on whether the step is
+in between dwells, or at the beginning or end of a trajectory (Figure
+\ref{fig:ccp-vel-cmp}).
+
+To eliminate this source of error, I recalculated average velocities
+from the observed trajectories by only taking the average velocity
+between the start of the first dwell and the end of the last
+dwell. Similarly, I ran simulations of the jump-velocity model (using
+parameters fit to step and dwell data), and calculated average
+velocities in the same way. The results of this are shown in Figure
+\ref{fig:ccp-vel-interdwell}. There is much better agreement between
+the model and average velocities under the new definition, however
+there is still a noticeable difference between the simulations and
+data. In particular, the simulated distribution of average velocity
+has a much smaller spread than the velocity data.
+
+Another note from their data is that the velocity within steps (even
+between dwells) is not constant, or even particularly close to
+constant. Figure \ref{fig:step_vs_avg_vels} shows the distribution of
+velocities during steps in between dwells compared to the distribution
+of average velocities between the first and last dwells.
+
+The temporal resolution of their data is only about 100 ms, so we
+wanted to know the effect of this error on our parameter estimates. I
+perturbed the dwell data with a random error of $N(0, 0.1 V / L)$ (the
+standard deviation $0.1V/L$ is 100 ms in nondimensional units) and
+then ran the fitting process on the perturbed data. Figure
+\ref{fig:dwell_perturb} shows the distribution of resulting estimates
+of $\alpha$ (the single-bond off rate) and $\gamma$ (the second bond
+off rate). The perturbations of the dwell data seem to carry through
+to the parameter estimates in a fairly linear way, as this
+distribution of estimates looks pretty normal.
+
+I ran the same process on the step data, using perturbations with a
+standard deviation of $0.1 \mu m$. The resulting distribution of
+parameter estimates was far less normal than with the dwell
+perturbations. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{ccp-step-cmp.png}
+  \caption{Comparison of intermediate step sizes with the first and
+    last steps of the experiment. Data shown is from the
+    collagen-collagen PRP experiment, but other experiments have
+    qualitatively similar results.}
+  \label{fig:ccp-step-cmp}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{ccp-vel-cmp.png}
+  \caption{Comparison of intermediate free velocities with the first
+    and last steps of the experiment. Again, the data shown is from
+    the collagen-collagen PRP experiment, but the others are similar.}
+  \label{fig:ccp-vel-cmp}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{ccp-vel-interdwell.png}
+  \caption{Comparison of simulated velocities with observed average
+    velocities measured from the start of the first dwell to the end
+    of the last dwell. Data shown is for the collagen-collagen PRP
+    experiment.}
+  \label{fig:ccp-vel-interdwell}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{step_vs_avg_vels.png}
+  \caption{Comparison of the velocity during steps in between dwells
+    and the average velocity of rolling between the (start of the) first dwell and
+    the (end of the) last dwell. Data shown is for the
+    collagen-collagen PRP experiment.}
+  \label{fig:step_vs_avg_vels}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{dwell_perturb_alpha.png}
+    % \label{fig:dwell_perturb_alpha}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{dwell_perturb_gamma.png}
+    % \label{fig:dwell_perturb_gamma}
+  \end{subfigure}  
+  \caption{Results of fitting the dwell distribution to 1024 different
+    perturbations of the dwell data. The vertical black lines indicate
+    the parameter estimate from the original data set. Data is taken
+    from the CC PRP experiment, but other experiments are similar.}
+  \label{fig:dwell_perturb}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{step_perturb_chi.png}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{step_perturb_beta.png}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{step_perturb_k.png}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{step_perturb_theta.png}
+  \end{subfigure}
+  \caption{Results of fitting the step distribution to 1024 different
+    perturbations of the step data. Data is taken from the CC PRP
+    experiment.}
+  \label{fig:step_perturb}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
