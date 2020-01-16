@@ -88,10 +88,10 @@ def main(filename):
     fig, ax = plt.subplots(ncols=2, figsize=[10., 4.], sharex='all')
     ax[0].hist(avg_vels, density=True, alpha=opacity)
 
-    vels2 = np.loadtxt(os.path.expanduser('~/thesis/vlado-data/ccp-vels.dat'))
+    vels2 = np.loadtxt(os.path.expanduser('~/thesis/vlado-data/hcw-vels.dat'))
     ax[0].hist(vels2, density=True, alpha=opacity)
     ax[0].hist(vels, density=True, alpha=opacity)
-    ax[0].legend(['Observed velocities', 'Velocities between dwells',
+    ax[0].legend(['Original avg. vels.', 'Modified avg. vels.',
                   'Simulated velocities'])
     ax[0].set_xlim(0, 10)
     ax[0].set_xlabel('Average velocity $(\\mu m / s)$')
@@ -101,20 +101,20 @@ def main(filename):
                np.append(0, (np.arange(0, avg_vels.size) + 1.)/avg_vels.size),
                where='post')
     ax[1].step(np.append(0, np.sort(vels2)),
-               np.append(0, (np.arange(0, vels2.size) + 1.)/vels2.size), 'o',
+               np.append(0, (np.arange(0, vels2.size) + 1.)/vels2.size),
                where='post')
     ax[1].step(np.append(0, np.sort(vels)),
                np.append(0, (np.arange(0, vels.size)
                              + 1.)/vels.size),
                where='post')
-    ax[1].legend(['Observed velocities', 'Velocities between dwells',
+    ax[1].legend(['Original avg. vels.', 'Modified avg. vels.',
                   'Simulated velocities'])
     ax[1].set_xlabel('Average velocity $(\\mu m / s)$')
     ax[1].set_ylabel('Cumulative probability')
     plt.tight_layout()
     plt.show()
 
-    print(np.mean(vels), np.mean(avg_vels), np.mean(vels2))
+    print(np.mean(avg_vels), np.mean(vels2), np.mean(vels))
 
 
 if __name__ == '__main__':

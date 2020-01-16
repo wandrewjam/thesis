@@ -13,37 +13,44 @@ def main(filename):
           .format(a_orig, g_orig, d_orig, et_orig))
     print(dwell_res.fun)
 
-    # # Perturb dwells first (by 0.1 s)
-    n_trials = 128
-    # perturbed_dwell_estimates = [
-    #     perturbation_dwell_trial(L, V, np.copy(nd_dwells), np.copy(nd_steps),
-    #                              small_step_thresh, count, n_trials)
-    #     for count in range(n_trials)
-    # ]
-    #
-    # a_est, g_est = zip(*perturbed_dwell_estimates)
-    # plt.hist(a_est)
-    # plt.axvline(a_orig, c='k')
-    # plt.show()
-    #
-    # plt.hist(g_est)
-    # plt.axvline(g_orig, c='k')
-    # plt.show()
-    #
-    # # Next try perturbing steps (by 0.1 microns) (best to stick with the step
-    # #                                             size estimates)
-    # perturbed_step_estimates = [
-    #     perturbation_step_trial(L, V, np.copy(nd_dwells), np.copy(nd_steps),
-    #                             small_step_thresh, count, n_trials)
-    #     for count in range(n_trials)
-    # ]
-    #
-    # estimates_step = zip(*perturbed_step_estimates)
+    # Perturb dwells first (by 0.1 s)
+    n_trials = 1024
+    perturbed_dwell_estimates = [
+        perturbation_dwell_trial(L, V, np.copy(nd_dwells), np.copy(nd_steps),
+                                 small_step_thresh, count, n_trials)
+        for count in range(n_trials)
+    ]
+
+    a_est, g_est = zip(*perturbed_dwell_estimates)
+    plt.hist(a_est, density=True)
+    plt.axvline(a_orig, c='k')
+    plt.title('$\\alpha$ estimates')
+    plt.show()
+
+    plt.hist(g_est, density=True)
+    plt.axvline(g_orig, c='k')
+    plt.title('$\\gamma$ estimates')
+    plt.show()
+
+    # Next try perturbing steps (by 0.1 microns) (best to stick with the step
+    #                                             size estimates)
+    perturbed_step_estimates = [
+        perturbation_step_trial(L, V, np.copy(nd_dwells), np.copy(nd_steps),
+                                small_step_thresh, count, n_trials)
+        for count in range(n_trials)
+    ]
+
+    estimates_step = zip(*perturbed_step_estimates)
     originals = [conv_orig, beta_orig, k_orig, theta_orig, a_orig, g_orig]
-    # for est, orig in zip(estimates_step, originals[:4]):
-    #     plt.hist(est)
-    #     plt.axvline(orig, c='k')
-    #     plt.show()
+    titles = [
+        '$\\chi$ estimates', '$\\beta$ estimates', '$k$ estimates',
+        '$\\theta$ estimates', '$\\alpha$ estimates', '$\\gamma$ estimates'
+    ]
+    for i, est in enumerate(estimates_step):
+        plt.hist(est, density=True)
+        plt.axvline(originals[i], c='k')
+        plt.title(titles[i])
+        plt.show()
 
     # Finally try both
     perturbed_both_estimates = [
@@ -53,10 +60,11 @@ def main(filename):
     ]
 
     estimates_both = zip(*perturbed_both_estimates)
-    for est, orig in zip(estimates_both, originals):
+    for i, est in enumerate(estimates_both):
         est = np.array(est)
-        plt.hist(est[np.isfinite(est)])
-        plt.axvline(orig, c='k')
+        plt.hist(est[np.isfinite(est)], density=True)
+        plt.axvline(originals[i], c='k')
+        plt.title(titles[i])
         plt.show()
 
 
