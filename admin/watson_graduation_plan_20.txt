@@ -1,0 +1,31 @@
+Andrew Watson
+
+Planned Graduation Date: Fall 2020
+
+Research Summary: Platelet interactions with the blood vessel wall are an 
+important first step in the formation of a blood clot. These contacts are 
+responsible for activating platelets to release chemical signals to other blood 
+cells and proteins to begin to clot. In collaboration with an experimental 
+group on campus, I am modeling the physical and chemical dynamics involved in 
+these contacts. The goal is to estimate the distribution of platelet velocities 
+as they contact the surface, and verify model results with the experimental 
+results from our collaborators. 
+
+Research Schedule:
+
+   Spring 2020
+      - Teaching
+		- Finish analyzing the 4 state jump-velocity model, fitting model parameters to experimental data
+		- Develop 3D ellipsoidal rolling model w/ fast and slow receptors
+		- Continue writing dissertation (Intro/Lit Review, Chapter 2, begin Chapter 3)
+   
+	Summer 2020
+      - Teaching
+      - Analyze the effect of priming (i.e. increase in slow receptor density) on observed rolling behavior in the 3D model
+      - Continue writing dissertation (Finish chapter 3, Begin chapter 4)
+   
+	Fall 2020
+		- Teaching
+      - Thesis defense (early in the semester)
+      - Apply for jobs
+		- Finish writing and submit dissertation (Finish chapter 5 and discussion)
