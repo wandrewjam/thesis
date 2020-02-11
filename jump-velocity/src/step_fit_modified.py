@@ -64,7 +64,8 @@ def load_data(filename):
     small_step_thresh = 2. / L
     dwells = np.loadtxt(sim_dir + filename + '-dwell.dat')
     avg_vels = np.loadtxt(sim_dir + filename + '-vel.dat')
-    V = np.amax(avg_vels)
+    # V = np.amax(avg_vels)
+    V = 10
     dwells = np.sort(dwells)
     nd_dwells = dwells * V / L
     return L, V, nd_dwells, nd_steps, small_step_thresh
@@ -148,17 +149,17 @@ def main(filename):
 
     t = np.linspace(0, np.amax(nd_steps), num=257)
 
-    # plt.hist(nd_steps, density=True)
-    # plt.plot(t, step_pdf(t))
-    # plt.show()
-    #
-    # plt.plot(t, 1 - icdf(t))
-    # plt.step(np.append(0, np.sort(nd_steps)),
-    #          np.append(0, (np.arange(0, nd_steps.size) + 1.)/nd_steps.size),
-    #          where='post')
-    # # for s in si[:-1]:
-    # #     plt.axvline(s, color='k')
-    # plt.show()
+    plt.hist(nd_steps, density=True)
+    plt.plot(t, step_pdf(t))
+    plt.show()
+
+    plt.plot(t, 1 - icdf(t))
+    plt.step(np.append(0, np.sort(nd_steps)),
+             np.append(0, (np.arange(0, nd_steps.size) + 1.)/nd_steps.size),
+             where='post')
+    # for s in si[:-1]:
+    #     plt.axvline(s, color='k')
+    plt.show()
 
     est_dir = 'dat-files/ml-estimates/'
     step_save_array = np.zeros(shape=(t.size, 3))
@@ -174,15 +175,15 @@ def main(filename):
     print(dwell_res.fun)
 
     t_plot = np.linspace(0, nd_dwells[-1], num=257)
-    # plt.hist(nd_dwells, density=True)
-    # plt.plot(t_plot, dwell_pdf(t_plot))
-    # plt.show()
-    #
-    # plt.plot(t_plot, cumtrapz(dwell_pdf(t_plot), t_plot, initial=0))
-    # plt.step(np.append(0, np.sort(nd_dwells)),
-    #          np.append(0, (np.arange(0, nd_dwells.size) + 1.)/nd_dwells.size),
-    #          where='post')
-    # plt.show()
+    plt.hist(nd_dwells, density=True)
+    plt.plot(t_plot, dwell_pdf(t_plot))
+    plt.show()
+
+    plt.plot(t_plot, cumtrapz(dwell_pdf(t_plot), t_plot, initial=0))
+    plt.step(np.append(0, np.sort(nd_dwells)),
+             np.append(0, (np.arange(0, nd_dwells.size) + 1.)/nd_dwells.size),
+             where='post')
+    plt.show()
 
     dwell_save_array = np.zeros(shape=(t_plot.size, 3))
     dwell_save_array[:, 0] = t_plot * L / V
@@ -190,7 +191,7 @@ def main(filename):
     dwell_save_array[:, 2] = cumtrapz(dwell_save_array[:, 1], t_plot * L / V,
                                       initial=0)
 
-    np.savetxt(est_dir + filename + '-dwell-dst.dat', dwell_save_array)
+    # np.savetxt(est_dir + filename + '-dwell-dst.dat', dwell_save_array)
 
     # np.savetxt(sim_dir + filename + '-dwell.dat', np.sort(dwells))
 

@@ -33,8 +33,10 @@ def main(filename):
     dwells = np.loadtxt(sim_dir + filename + '-dwell.dat')
     avg_vels = np.loadtxt(sim_dir + filename + '-vel.dat')
 
+    # v_max = np.amax(avg_vels)
+    v_max = 10.
     experiments = [
-        bootstrap_experiment(steps, dwells, avg_vels, np.amax(avg_vels))
+        bootstrap_experiment(steps, dwells, avg_vels, v_max)
         for _ in range(1024)
     ]
 
@@ -46,7 +48,7 @@ def main(filename):
     fig, ax = plt.subplots(ncols=2, figsize=[10., 4.], sharex='all')
     ax[0].hist(avg_vels, density=True, alpha=opacity)
     ax[0].hist(expt_vels, density=True, alpha=opacity)
-    ax[0].hist(vel_sims * np.amax(avg_vels), density=True, alpha=opacity)
+    ax[0].hist(vel_sims * v_max, density=True, alpha=opacity)
     ax[0].legend(['Observed velocities', 'Bootstrapped velocities',
                   'Simulated velocities'])
     ax[0].set_xlim(0, 10)
@@ -59,9 +61,9 @@ def main(filename):
     ax[1].step(np.append(0, np.sort(expt_vels)),
                np.append(0, (np.arange(0, expt_vels.size) + 1.)/expt_vels.size),
                where='post')
-    ax[1].step(np.append(0, np.sort(vel_sims * np.amax(avg_vels))),
-               np.append(0, (np.arange(0, (vel_sims * np.amax(avg_vels)).size)
-                             + 1.)/(vel_sims * np.amax(avg_vels)).size),
+    ax[1].step(np.append(0, np.sort(vel_sims * v_max)),
+               np.append(0, (np.arange(0, (vel_sims * v_max).size)
+                             + 1.) / (vel_sims * v_max).size),
                where='post')
     ax[1].legend(['Observed velocities', 'Bootstrapped velocities',
                   'Simulated velocities'])

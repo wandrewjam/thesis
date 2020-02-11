@@ -44,14 +44,14 @@ def main(filename):
     # c_fit, eps2_fit = change_vars(fit[2:], forward=False)[:, 0]
 
     # Fit to step size first
-    # def objective(eps1):
+    # def objective_simple(eps1):
     #     # What if I fix eps1 and only fit a?
     #     a = .5
     #     test_steps = multiple_experiments(a, .5, eps1, np.inf, 2**10)[1]
     #     print(np.mean(test_steps) - np.mean(nd_steps))
     #     return np.mean(test_steps) - np.mean(nd_steps)
     #
-    # res = brentq(objective, 0.01, 10)
+    # res = brentq(objective_simple, 0.01, 10)
     # print('The result is')
     # print(res)
     # fit = fit_models(nd_vels, two_par=True, N_obj=128)[1]

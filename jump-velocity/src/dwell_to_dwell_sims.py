@@ -37,7 +37,7 @@ def main(filename):
 
     # Now fit dwells subject to the constraints that we already fitted step parameters
     # V = np.amax(avg_vels)
-    V = 10.
+    V = 60.
     dwells = np.sort(dwells)
     nd_dwells = dwells * V / L
 
@@ -88,7 +88,7 @@ def main(filename):
     fig, ax = plt.subplots(ncols=2, figsize=[10., 4.], sharex='all')
     ax[0].hist(avg_vels, density=True, alpha=opacity)
 
-    vels2 = np.loadtxt(os.path.expanduser('~/thesis/vlado-data/hcw-vels.dat'))
+    vels2 = np.loadtxt(os.path.expanduser('~/thesis/vlado-data/ccp-vels.dat'))
     ax[0].hist(vels2, density=True, alpha=opacity)
     ax[0].hist(vels, density=True, alpha=opacity)
     ax[0].legend(['Original avg. vels.', 'Modified avg. vels.',
