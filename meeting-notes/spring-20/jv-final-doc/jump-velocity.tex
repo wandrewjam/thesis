@@ -1,0 +1,1961 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+\usepgfplotslibrary{colorbrewer, statistics}
+\pgfplotsset{
+  exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+    legend entries={PDF, CDF},},
+  every axis plot post/.append style={thick},
+  table/search
+  path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+  colormap/YlGnBu,
+  cycle list/Set1-5,
+  legend style={legend cell align=left,},
+}
+\usepgfplotslibrary{external}
+\tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Notes on a Jump-Velocity Model of Platelet Rolling (\today)}
+\end{center}
+
+\section{Description of the Jump-Velocity Model}
+\label{sec:jump-vel}
+
+Suppose we model platelets as particles in a moving fluid. Assume that
+unprimed platelets can exist in two states: unbound (U), and bound to
+vWF (V) (Figure \ref{fig:unprimed-states}). Platelets in the unbound
+state advect at velocity $v$ in the fluid, and platelets in the
+vWF-bound state are stationary. Platelets in the fluid can bind to vWF
+at a constant rate $k_\tn{on}$, and platelets bound to vWF can come
+unbound at constant rate $k_\tn{off}$.
+
+\emph{Modification}: We can split the U state into platelets that have
+not bound to the surface (call these U\textsuperscript{0} platelets)
+and those that have bound to a surface and then unbound
+(U\textsuperscript{1} platelets).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.3\textwidth]{unprimed-states.png}
+  \caption[Possible states of unprimed platelets]{An unprimed platelet
+    can exist in three distinct states: (U\textsuperscript{0})
+    platelets which haven't interacted with the surface,
+    (U\textsuperscript{0}) platelets which have interacted with the
+    surface and are advecting in the fluid, or (V) bound to vWF on the
+    surface and unmoving. Transitions between these states occur at
+    constant rates $k_\tn{on}$ and $k_\tn{off}$. Platelets can only
+    transition out of the U\textsuperscript{0} state.}
+  \label{fig:unprimed-states}
+\end{figure}
+
+For primed platelets, assume that they can exist in 4 possible states:
+unbound (U), vWF-bound (V), fibrinogen-bound (F), and vWF- and
+fibrinogen-bound (VF) (Figure \ref{fig:primed-states}). The U and V
+states are the same as for the unprimed platelets, however in addition
+both the U and V states can bind with fibrinogen to transition to the
+F and VF states. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.3\textwidth]{primed-states.png}
+  \caption[Possible states of primed platelets]{A primed platelet can
+    exist in five states: (U) unbound from the surface and advecting
+    in the fluid (further split into the two categories defined
+    above), (V) bound to vWF on the surface, (F) bound to fibrinogen
+    on the surface, or (VF) bound to both vWF and fibrinogen. In all
+    three bound states, the platelet is immobilized on the surface.}
+  \label{fig:primed-states}
+\end{figure}
+
+These models describe a jump-velocity process, where a particle is
+transitioning randomly between discrete states, which each move with a
+different deterministic motion. The Fokker-Planck equation for these
+processes are given by the following system of linear advection
+equations:
+\begin{equation}
+  \label{eq:fp-system}
+  \Pder{}{t}
+  \underbrace{
+    \begin{pmatrix}
+      p_{\tn{U}^0} \\ p_{\tn{U}^1} \\ p_\tn{V} \\ p_\tn{F} \\ p_\tn{VF}
+    \end{pmatrix}}_{\equiv \mathbf{p}}
+  =
+  -\Pder{}{x}
+  \begin{pmatrix}
+    v p_{\tn{U}^0} \\ v p_{\tn{U}^0} \\ 0 \\ 0 \\ 0
+  \end{pmatrix}
+  +
+  \underbrace{
+    \begin{pmatrix}
+      -(k_\tn{on} + k_\tn{on}^F) & 0 & 0 & 0 & 0 \\
+      0 & -(k_\tn{on} + k_\tn{on}^F) & k_\tn{off} & k_\tn{off}^F & 0 \\
+      k_\tn{on} & k_\tn{on} & -(k_\tn{off} + k_\tn{on}^F) & 0 & k_\tn{off}^F \\
+      k_\tn{on}^F & k_\tn{on}^F & 0 & -(k_\tn{on} + k_\tn{off}^F) & k_\tn{off} \\
+      0 & 0 & k_\tn{on}^F & k_\tn{on} & -(k_\tn{off} + k_\tn{off}^F)
+  \end{pmatrix}}_{\equiv A}
+  \begin{pmatrix}
+    p_{\tn{U}^0} \\ p_{\tn{U}^1} \\ p_\tn{V} \\ p_\tn{F} \\ p_\tn{VF}
+  \end{pmatrix}
+\end{equation}
+where $p_i = p_i(x, t \mid x_0, j, 0)$ is the probability the platelet
+is in state $i$ and position $x$ at time $t$ given it was previously
+in position $z$ and state $j$ at time $0$. If the platelets are
+unprimed, then the only difference is $k_\tn{on}^F = k_\tn{off}^F =
+0$.
+
+The goal is to find the probability density function of the average
+velocity across a segment of length $L$, so take the initial condition
+of the PDE system (\ref{eq:fp-system}) to be
+$\mathbf{p}(x, 0) = (\delta(x), 0, 0, 0, 0)^T$. That is, all platelets
+enter in never-bound state U\textsuperscript{0}. The probability
+density of the time it takes a platelet to cross the interval $[0, L]$
+is $v(p_{\tn{U}^0}(L, t) + p_{\tn{U}^1}(L,t))$. The average velocity
+associated with a crossing time $t^*$ is just $v^* = L/t^*$, and the
+probability density function of $v^*$ is given by
+$f(v^*) = (L/v^*)^2 p_U(L, L/v^*)$
+
+\subsection{Nondimensionalization}
+\label{sec:nondim}
+
+Define the nondimensional variables $s$ and $y$ so that $t = Ts$ and
+$x = Xy$. Let's scale $x$ by the domain length, so $X = L$, and scale
+$t$ by the velocity, so that $X/T = v \implies T = L/v$. That is, $T$
+is the shortest possible crossing time of a
+platelet. Finally---motivated by the adiabatic reduction in example
+3.6.1 in Dr. Keener's notes---define the nondimensional parameter
+$\epsilon_1 = 1/(T(k_\tn{on} + k_\tn{off}))$ and
+$\epsilon_2 = 1/(T(k_\tn{on}^F + k_\tn{off}^F))$. If the sum of the
+(relevant) reaction rates is much larger than $1/T$, then $\epsilon$
+is a small parameter. After the nondimensionalization, equation
+(\ref{eq:fp-system}) becomes
+\begin{equation}
+  \label{eq:nd-system}
+  \Pder{\mathbf{q}}{s} = -\Pder{}{y}
+  \begin{pmatrix}
+    q_{\tn{U}^0} \\ q_{\tn{U}^1} \\ 0 \\ 0 \\ 0
+  \end{pmatrix}
+  + \left(\frac{1}{\epsilon_1} + \frac{1}{\epsilon_2}\right)
+  \begin{pmatrix}
+    - kb - kd & 0 & 0 & 0 & 0 \\
+    0 & - kb - kd & ka & kc & 0 \\
+    kb & kb & - ka - kd & 0 & kc \\
+    kd & kd & 0 & - kb - kc & ka \\
+    0 & 0 & kd & kb & - ka - kc
+  \end{pmatrix}
+  \mathbf{q},
+\end{equation}
+where $a = k_\tn{off}/(k_\tn{off} + k_\tn{on})$,
+$b = k_\tn{on}/(k_\tn{off} + k_\tn{on})$,
+$c = k_\tn{off}^F/(k_\tn{off}^F + k_\tn{on}^F)$, and
+$d = k_\tn{on}^F/(k_\tn{off}^F + k_\tn{on}^F)$. Then
+$ka = a/(1 + \epsilon_1/\epsilon_2)$,
+$kb = b/(1 + \epsilon_1/\epsilon_2)$,
+$kc = c/(1 + \epsilon_2/\epsilon_1)$, and
+$kd = d/(1 + \epsilon_2/\epsilon_1)$. When
+$k_\tn{on}^F = k_\tn{off}^F = 0$, this reduces to the example in
+Dr. Keener's notes.
+
+\section{Numerics and results for unprimed platelets (the two-state model)}
+\label{sec:res-unpr}
+
+The system of equations for unprimed platelets reduces to
+\begin{align}
+  \label{eq:unprimed-1}
+  \Pder{q_\tn{U}}{s} &= -\Pder{q_\tn{U}}{y} - \frac{1}{\epsilon}
+                       \left(b q_\tn{U} + a q_\tn{V}\right) \\
+  \label{eq:unprimed-2}
+  \Pder{q_\tn{V}}{s} &= \frac{1}{\epsilon} \left(b q_\tn{U} - a
+                       q_\tn{V}\right).
+\end{align}
+
+I use a first order upwind scheme to solve this system. The nodes of
+the mesh are given by $y_i = ih$ for $i = 0, \hdots, N$ where
+$h = 1/N$ and $s_j = jk$ for $j = 0, \hdots, M$ where $k =
+s_\tn{max}/M$. In practice, I take $h = k$ so that the upwind scheme
+can solve the advection part exactly.
+% This results in the
+% semi-discretized system
+% \begin{align}
+%   \Der{q_\tn{U}^i}{s} &= \frac{1}{h} \left(q_\tn{U}^{i-1} - q_\tn{U}^i
+%                         \right) + \frac{1}{\epsilon} \left(-b
+%                         q_\tn{U}^i + a q_\tn{V}^i \right) \quad
+%                         \tn{for} \quad i = 1, \hdots, N
+%   \\
+%   \Der{q_\tn{V}^i}{s} &= \frac{1}{\epsilon} \left(b q_\tn{U}^i - a
+%                         q_\tn{V}^i \right) \quad \tn{for} \quad i = 1,
+%                         \hdots, N
+% \end{align}
+% which I solve with SciPy's implementation of the RK45 scheme.
+
+The initial condition $q_{\tn{U}^0}(y, 0) = \delta(y)$ must be
+approximated, so I use Peskin's approximate $\delta$-function:
+%\cite{Peskin2002}:
+\begin{equation}
+  \label{eq:delta-h}
+  \delta_h(y) =
+  \begin{cases}
+    \frac{1}{4h} \left( 1 + \cos\left(\frac{\pi y}{2h}\right) \right)
+    & \tn{if} \quad \left|\frac{y}{2h}\right| \le 1 \\
+    0 & \tn{otherwise.}
+  \end{cases}
+\end{equation}
+Therefore $q_\tn{U}^i(0) = \delta_h(y_i)$ and $q_\tn{V}^i(0) =
+0$. Half of $\delta_h$ is outside of the domain, so the other half
+must be advected into the domain as an inflow boundary condition:
+$q_\tn{U}^0(s) = \delta_h(-s)$.
+
+Because $a + b = 1$, there are only 2 nondimensional parameters to
+choose: $\epsilon$ and $a$. The parameter $\epsilon$ gives the ratio
+of the minimum crossing time to a characteristic reaction time, and
+$a$ gives the ratio of $k_\tn{off}$ to the sum of reaction
+rates. Below are some sample results for average velocity
+distributions $f(v^*) = 1/{v^*}^2 q_U^N(1/v^*)$.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-smalla}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-smalleps-smalla-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-smalleps-smalla-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon = 0.1$, $a = 0.2$: Reactions are fast, and
+      $k_\tn{on} > k_\tn{off}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-largeeps-smalla}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-largeeps-smalla-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-largeeps-smalla-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon = 1$, $a = 0.2$: Reactions and advection are
+      the same order, and $k_\tn{on} > k_\tn{off}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-meda}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-smalleps-meda-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-smalleps-meda-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon = 0.1$, $a = 0.5$: Reactions are fast, and
+      $k_\tn{on} = k_\tn{off}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-largeeps-meda}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-largeeps-meda-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-largeeps-meda-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
+    \caption{$\epsilon = 1$, $a = 0.5$: Reactions and advection are
+      the same order, and $k_\tn{on} = k_\tn{off}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-largea}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-smalleps-largea-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-smalleps-largea-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
+    \caption{$\epsilon = 0.1$, $a = 0.8$: Reactions are fast, and
+      $k_\tn{on} < k_\tn{off}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-largeeps-largea}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/twostate-largeeps-largea-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/twostate-largeeps-largea-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
+    \caption{$\epsilon = 1$, $a = 0.8$: Reactions and advection are
+      the same order, and $k_\tn{on} < k_\tn{off}$.}
+  \end{subfigure}
+  \caption[Probability density functions]{Probability density
+    functions for 6 different $(\epsilon, a)$ pairs in the two-state
+    jump-velocity model.}
+  \label{fig:prob-dens}
+\end{figure}
+
+Observations:
+\begin{itemize}
+\item There is some nonzero probability mass that a platelet crosses
+  the domain without ever binding. Specifically, this probability is
+  $\exp(-b/\epsilon)$. Therefore the exact probability density
+  function will have a $\delta$-function like spike at $v^* = 1$ that
+  integrates to $\exp(-b/\epsilon)$.
+\item As the off rate $a$ increases, the distribution of average
+  velocities shifts to the right, as expected.
+\end{itemize}
+
+\subsection{Adiabiatic reduction}
+\label{sec:adiabiatic-reduction}
+
+The adiabatic reduction for the two-state model is solved in example
+3.6.1 of Dr. Keener's stochastics notes. Starting with equations
+(\ref{eq:unprimed-1}) and (\ref{eq:unprimed-2}), assume that
+$\epsilon \ll 1$ and define $v = q_\tn{U} + q_\tn{V}$ to be the slow
+variable and $w = b q_\tn{U} - a q_\tn{V}$ to be the fast
+variable. Then $v$ evolves as an advection-diffusion equation:
+\begin{equation}
+  \label{eq:v}
+  \Pder{v}{s} = -a \Pder{v}{y} + \epsilon a b \frac{\partial^2
+    v}{\partial y^2}
+\end{equation}
+and $w$ satisfies the equation
+\begin{equation}
+  \label{eq:w}
+  w = -\epsilon a b \Pder{v}{y}.
+\end{equation}
+
+With the initial condition $v(y, 0) = \delta(y)$, equation
+(\ref{eq:v}) can be solved analytically:
+\begin{equation}
+  \label{eq:v-soln}
+  v(y, t) = \frac{1}{\sqrt{4 \pi \epsilon a b t}} \exp \left[ \frac{-(y
+      - at)^2}{4 \epsilon a b t} \right],
+\end{equation}
+and then using equation (\ref{eq:w}) to find $w$,
+\begin{equation}
+  \label{eq:w-soln}
+  w(y, t) = \frac{y - at}{4t\sqrt{\pi \epsilon a b t}} \exp \left[ \frac{-(y
+      - at)^2}{4 \epsilon a b t} \right].
+\end{equation}
+
+Then reversing the change of variables, $q_\tn{U} = av + w$ and
+$q_\tn{V} = bv - w$, resulting in the following solutions for
+$q_\tn{U}$ and $q_\tn{V}$:
+\begin{align}
+  \label{eq:qu-soln}
+  q_\tn{U} &= \frac{1}{\sqrt{4 \pi \epsilon a b t}} \left(a + \frac{y
+             - at}{2t} \right) \exp \left[ \frac{-(y - at)^2}{4
+             \epsilon a b t} \right], \\
+  \label{eq:qv-soln}
+  q_\tn{V} &= \frac{1}{\sqrt{4 \pi \epsilon a b t}} \left(b - \frac{y
+             - at}{2t} \right) \exp \left[ \frac{-(y - at)^2}{4
+             \epsilon a b t} \right].
+\end{align}
+
+The probability density function of the average velocity is then
+\begin{equation}
+  \label{eq:vel-dens}
+  f(v^*) = (v^*)^{-2} q_\tn{U}(1, 1/v^*) = \sqrt{\frac{1}{4 \pi
+      \epsilon a b (v^*)^3}}
+  \left(a + \frac{v^* - a}{2} \right) \exp\left[ \frac{-(v^* -
+      a)^2}{4\epsilon a b v^*} \right].
+\end{equation}
+
+\subsection{Parameter Estimation}
+\label{sec:parameter-estimation}
+
+Chapter 15 from \textit{Numerical Recipes in Fortran} describes
+methods for fitting proposed models to data. In the situation they
+describe, data is collected at several values of some independent
+variable (say $x$) with some measurement error $\sigma$ that may vary
+with $x$, and the goal is to fit a deterministic model to that
+data. They develop a maximum-likelihood estimate for model parameters
+based on the data collected $(x_i, y_i)$ and measurement errors
+$\sigma_i$. 
+
+In our jump-velocity model, the situation is a little different. We
+have a stochastic model of a jump-velocity process, which is used to
+derive a Fokker-Planck equation for platelet position as a function of
+time. From the Fokker-Planck equation we derive a probability
+distribution for the average velocity of a platelet rolling across
+some domain. Basically the average velocity of a platelet (or
+equivalently, the time it takes a platelet to cross) is a random
+variable. The Fokker-Planck equation defines a probability
+distribution for this random variable as a function of model
+parameters, and the data Vlado's group are collecting on average
+velocity are realizations of this random variable. Then we want to fit
+the probability distribution defined by model parameters to the
+realizations collected by Vlado's group.
+
+One way to fit the model to average velocity data is to use a
+maximum-likelihood estimate. This is analogous to the procedure
+described in Chapter 15 of \textit{Numerical Recipes}. Let
+$\{v_i\}_{i=1}^N$ be a set of observations of average velocities, and
+define $f(v;a, \epsilon)$ to be the probability distribution of
+velocities given parameters $a$ and $\epsilon$ (for simplicity, assume
+we're working with the two-state model). Define the likelihood
+function
+\begin{equation}
+  \label{eq:likelihood}
+  L(a, \epsilon) = \prod_{i=1}^N f(v_i; a, \epsilon),
+\end{equation}
+and then the maximum likelihood estimates for $a$ and $\epsilon$ are
+``simply'' those that maximize $L$. As usual, define the
+log-likelihood function: $\tilde{\ell}(a, \epsilon) = \log(L(a, \epsilon))$,
+and then maximizing $\tilde{\ell}$ is equivalent to maximizing $L$.
+
+We found $f(v; a, \epsilon)$ above in terms of the solution of the
+Fokker-Planck equation: $f(v; a, \epsilon) = 1/v^2 q_{U^1}(1, 1/v; a,
+\epsilon)$ where $q_{U^1}(x, t; a, \epsilon)$ is part of the solution
+of the Fokker-Planck equation with parameters $a$ and $\epsilon$. Then
+we can write $\tilde{\ell}$ in terms of $q_{U^1}$:
+$\tilde{\ell} = \sum_{i=1}^N \log(f(v_i; a, \epsilon)) = \sum_{i=1}^N
+\log(q_{U^1}(1, 1/v_i; a, \epsilon)) - 2\sum_{i=1}^N \log(v_i)$. The
+second term is a constant factor with respect to $a$ and $\epsilon$,
+and so can be excluded from the optimization. Therefore we can
+maximize the modified log-likelihood function
+\begin{equation}
+  \label{eq:mod-log-like}
+  \ell(a, \epsilon) = \sum_{i=1}^N \log(q_{U^1}(1, 1/v_i; a, \epsilon)).
+\end{equation}
+
+\subsubsection{Numerical Optimization}
+\label{sec:numer-optim}
+
+Clearly $\ell(a, \epsilon)$ must be maximized iteratively. We haven't
+even found an analytical expression for $q_{U^1}$. Unless we do, the
+Fokker-Planck equation must be re-solved each time the parameters $a$
+and $\epsilon$ are changed. Fortunately the PDE only needs to be
+solved once for each evaluation of $\ell(a, \epsilon)$. We have to
+find $q_{U^1}(1, t)$ up to time $t = 1/\min(v_i)$, but then to
+evaluate the probability density at each time $1/v_i$, we only need to
+interpolate the solution.
+
+Another important consideration is that the model parameters $a$ and
+$\epsilon$ have bounds, in particular $a \in (0, 1)$ and
+$\epsilon > 0$. One option to deal with this is to choose a numerical
+method that optimizes within a bounded domain, however when I tried
+this the optimization function I was using ran into overflow errors
+when it got too close to the edge of the domain. Restricting the
+parameters to even tighter domains fixed this problem, but the bounds
+were chosen arbitrarily, and with prior knowledge of the true
+parameters of the ``data''. I have achieved good results in my
+experiments by transforming the model parameters $a$ and $\epsilon$ to
+``fitting'' parameters $a'$ and $\epsilon'$ which can vary over all
+$\R$. The transformations I have chosen are:
+\begin{align}
+  \label{eq:a-fwd-trns}
+  a' &= \frac{2a + 1}{2a(a + 1)} \\
+  \label{eq:e-fwd-trns}
+  \epsilon' &= \log \epsilon.
+\end{align}
+$a'$ is defined so that $a'=0$ at $a=1/2$, $a' \rightarrow -\infty$ as
+$a \rightarrow 0$, and $a' \rightarrow \infty$ as $a \rightarrow
+1$. With the fitting parameters, the optimization problem becomes an
+unconstrained optimization in $\R^2$. To actually carry out the
+optimization I use SciPy's \verb|minimize| function, which implements
+the BFGS algorithm.
+
+An iterative algorithm needs an intial guess, which at least in the
+two-state model, can be chosen as an estimate of $a$ and $\epsilon$
+from the adiabatic reduction. Equation (\ref{eq:vel-dens}) gives the
+pdf of velocities from the adiabatic reduction, and can be used to
+derive the mean $\mu(a, \epsilon)$ and variance $\sigma^2(a,
+\epsilon)$ as functions of $a$ and $\epsilon$. These moments actually
+have simple analytical expressions (according to Mathematica):
+\begin{align}
+  \label{eq:mean-ar}
+  \mu(a, \epsilon) &= a(1 + \epsilon - a \epsilon) \\
+  \label{eq:var-ar}
+  \sigma^2(a, \epsilon) &= a^2 \epsilon (1 - a) (2 + 5(1 - a) \epsilon).
+\end{align}
+
+Then we can equate $\mu$ and $\sigma^2$ to the first two sample
+moments ($\bar{v}$ and $s^2$) of the data to estimate $a$ and
+$\epsilon$ (this is called the method of moments). $a$ and $\epsilon$
+can be expressed in terms of $\mu$ and $\sigma^2$ analytically, but
+the formulas are messy. Note that $\sigma^2 = O(\epsilon)$ and
+$\epsilon << 1$, so we can use an asymptotic approximation instead of
+the full formulas. The estimate is only being used to initialize the
+optimization algorithm, so there is no need to be exact. Therefore up
+to $O(\sigma^2)$, the method of moments gives the following estimates
+for $a$ and $\epsilon$ based on a data set with sample mean $\bar{v}$
+and sample variance $s^2$:
+\begin{align}
+  \label{eq:mean-est}
+  a &= \bar{v} - \frac{s^2}{2\bar{v}} \\
+  \label{eq:var-est}
+  \epsilon &= \frac{s^2}{2(1 - \bar{v})(\bar{v})^2}.
+\end{align}
+
+In figure \ref{fig:model-fits}, a histogram of 1000 sample velocities
+is shown along with the PDEs generated by the reduced and full models
+with maximum likelihood parameter estimates. The CDFs of the models
+are also compared with the ECDF of the data. Visually these models fit
+well (as they should), and provide parameter estimates with less than
+10\% relative error.
+
+\subsubsection{Bootstrapping}
+\label{sec:bootstrapping}
+
+The maximum likelihood estimator only gives a point estimate of the
+parameters $a$ and $\epsilon$. In order to get confidence intervals,
+we can use a bootstrapping approach. The basic idea is that for a set
+of data $\{V_i\}_{i=1}^N$, a ``new'' data set can be generated by
+randomly picking $N$ samples from the $\{V_i\}$ with replacement. Then
+the MLE for the new data can be found, and in this way we get a bunch
+of $\hat{a}$ and $\hat{\epsilon}$ estimates. After generating many of
+these estimates, we can come up with an estimate of a 95\% confidence
+interval for each parameter. If we assume that the ML estimates are
+distributed sufficiently normally, then
+$\hat{\theta} \pm 1.96 \sigma_{\hat{\theta}}$ approximates a 95\%
+confidence interval well. But it seems like using the $2.5$th and
+$97.5$th percentiles also provides a good estimate for the confidence
+interval, and doesn't rely on assuming the parameter estimate is
+distributed normally.
+
+Figure \ref{fig:bootstraps} summarizes results from 64 bootstrap
+trials on the sample data. In each case, the distribution of estimated
+parameters looks symmetrical, and the two methods of estimating a 95\%
+confidence interval described above give similar results (Table
+\ref{tab:conf-int}).
+
+While the MLE of $a$ looks unbiased (i.e. it is near the center of the
+distribution of $a$s shown in figure \ref{fig:bootstraps}), the MLE of
+$\epsilon$ is clearly biased to the upper end of the distribution of
+$\epsilon$ estimates from the bootstrap procedure. Part of this may be
+because I haven't filtered out platelets that didn't pause on the
+surface, but it is still something to look out for. 
+
+\begin{table}
+  \centering
+  \begin{tabular}{cccc}
+    \hline
+    Parameter & Model & Normal method & Quantile method \\
+    \hline
+    $a$ & Reduced & $[0.5216, 0.5392]$ & $[0.5225, 0.5408]$ \\
+    $a$ & Full & $[0.4972, 0.5154]$ & $[0.4979, 0.5164]$ \\
+    $\epsilon$ & Reduced & $[0.0936, 0.1090]$ & $[0.0948, 0.1095]$ \\
+    $\epsilon$ & Full & $[0.0916, 0.1048]$ & $[0.0926, 0.1049]$\\
+    \hline
+  \end{tabular}
+  \caption[Summary of confidence intervals]{Summary of 95\% confidence
+    intervals of model parameters estimated by bootstrapping}
+  \label{tab:conf-int}
+\end{table}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Reduced model, Full model},
+        xlabel=$v^*$,
+        ylabel={Probability density},
+        ]
+        \addplot+[hist=density, fill]
+        table[y index=0] {simulations/test-sim.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/test-est.dat};
+        \addplot table[x index=0, y index=3]
+        {ml-estimates/test-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Reduced model, Full model},
+        legend pos=south east,
+        xlabel=$v^*$,
+        ylabel={$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y expr=\coordindex/1024]
+        {simulations/test-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/test-est.dat};
+        \addplot table[x index=0, y index=4]
+        {ml-estimates/test-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[Model fits]{Results of the ML estimates for the reduced
+    (i.e. adiabatic reduction) and full models. For this simulated
+    data, the maximum likelihood parameters are $a = 0.5300$ and
+    $\epsilon = 0.1014$ for the reduced model, and $a = 0.5059$ and
+    $\epsilon = 0.0982$ for the full model. Total number of simulated
+    data points: $N = 1024$}
+  \label{fig:model-fits}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}[baseline]
+      \begin{axis}[
+        ytick={1, 2},
+        yticklabels={Reduced model, Full model},
+        xticklabel style={/pgf/number format/precision=3,
+          /pgf/number format/fixed},
+        title={Distributions of $a$ estimates},
+        ]
+        \draw[thin, dashed] ({axis cs:.5, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:.5, 0}|-{rel axis cs:0, 1});
+        \addplot+ [boxplot] table[y index=0]
+        {bootstrap/test-boot.dat};
+        \addplot+ [boxplot] table[y index=2]
+        {bootstrap/test-boot.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}[baseline]
+      \begin{axis}[
+        ytick={1, 2},
+        yticklabels={},
+        xticklabel style={/pgf/number format/precision=3,
+          /pgf/number format/fixed},
+        title={Distributions of $\epsilon$ estimates},
+        ]
+        \draw[thin, dashed] ({axis cs:.1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:.1, 0}|-{rel axis cs:0, 1});
+        \addplot+ [boxplot] table[y index=1]
+        {bootstrap/test-boot.dat};
+        \addplot+ [boxplot] table[y index=3]
+        {bootstrap/test-boot.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[Boxplots of bootstap trials]{Boxplots of parameter
+    estimates from 64 bootstap trials. The left plot summarizes estimates
+    of $a$ and the right plot summarizes estimates of $\epsilon$. The
+    true parameter values are shown with a dashed vertical
+    line.} 
+  \label{fig:bootstraps}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      xticklabel style={/pgf/number format/precision=3,
+        /pgf/number format/fixed},
+      yticklabel style={/pgf/number format/precision=3,
+        /pgf/number format/fixed},
+      legend entries={Reduced model, Full model, ML estimates,
+        True value}, 
+      legend pos=outer north east,
+      xlabel=$a$ estimate,
+      ylabel=$\epsilon$ estimate,
+      ]
+      \addplot+ [only marks] table [x index=0, y index=1]
+      {bootstrap/test-boot.dat};
+      \addplot+ [only marks] table [x index=2, y index=3]
+      {bootstrap/test-boot.dat};
+      \addplot+ [only marks] coordinates {
+        (0.529979, 0.101435)
+        (0.505879, 0.0982116)
+      };
+      \addplot+ [only marks, black] coordinates {(0.5, 0.1)};
+    \end{axis}
+  \end{tikzpicture}
+  \caption[$(a, \epsilon)$ scatter plot]{Scatter plot of
+    $(a, \epsilon)$ estimates}
+  \label{fig:scatter-plot}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        % legend entries={Simulated data, Reduced model, Full model},
+        % legend pos=north west,
+        xlabel=$v^*$,
+        ylabel={Probability density},
+        ]
+        \addplot+[hist=density, fill]
+        table[y index=0] {simulations/large-a-sim.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/large-a-est.dat};
+        \addplot table[x index=0, y index=3]
+        {ml-estimates/large-a-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Reduced model, Full model},
+        legend pos=north west,
+        xlabel=$v^*$,
+        ylabel={$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y expr=\coordindex/1024]
+        {simulations/large-a-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/large-a-est.dat};
+        \addplot table[x index=0, y index=4]
+        {ml-estimates/large-a-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[Model fits]{Results of the ML estimates for the reduced
+    (i.e. adiabatic reduction) and full models. For this simulated
+    data, the maximum likelihood parameters are $a = 0.78$ and
+    $\epsilon = 0.075$ for the reduced model, and $a = 0.77$ and
+    $\epsilon = 0.066$ for the full model. Total number of simulated
+    data points: $N = 1024$}
+  \label{fig:model-fits-large-a}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Reduced model, Full model},
+        xlabel=$v^*$,
+        ylabel={Probability density},
+        ]
+        \addplot+[hist=density, fill]
+        table[y index=0] {simulations/small-a-sim.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/small-a-est.dat};
+        \addplot table[x index=0, y index=3]
+        {ml-estimates/small-a-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Reduced model, Full model},
+        legend pos=south east,
+        xlabel=$v^*$,
+        ylabel={$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y expr=\coordindex/1024]
+        {simulations/small-a-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/small-a-est.dat};
+        \addplot table[x index=0, y index=4]
+        {ml-estimates/small-a-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[Model fits]{Results of the ML estimates for the reduced
+    (i.e. adiabatic reduction) and full models. For this simulated
+    data, the maximum likelihood parameters are $a = 0.22$ and
+    $\epsilon = 0.12$ for the reduced model, and $a = 0.20$ and
+    $\epsilon = 0.10$ for the full model. Total number of simulated
+    data points: $N = 1024$}
+  \label{fig:model-fits-small-a}
+\end{figure}
+
+\subsubsection{Goodness-of-fit}
+\label{sec:goodness-fit}
+
+The final step in parameter estimation (at least according to
+\textit{Numerical Recipes}) is to find the goodness-of-fit of the
+model. In \textit{Numerical Recipes}, they use the $\chi^2$ statistic
+to estimate the fit of the model to the data. Briefly, this arises
+because they assume that their data $\{Y(x_i)\}$ are drawn from a
+normal distribution. We have to use a different approach to estimate
+the fit, because there isn't an obvious connection between the sample
+probability distribution and a normal distribution.
+
+Chapter 13 in \textit{Introduction to Probability and Mathematical
+  Statistics} by Bain and Engelhardt suggests two approaches. One
+approach is to group the data into bins, and then compare the observed
+observations in each bin to the expected number of observations in
+each bin. In particular,
+\begin{equation}
+  \label{eq:chi2}
+  \chi^2 = \sum_{j=1}^c \frac{(o_j - \hat{e}_j)^2}{\hat{e}_j} \sim
+  \chi^2(c - 1 - k)
+\end{equation}
+where $c$ is the number of bins, $k$ is the number of estimated
+parameters, $o_j$ is the number of data points in bin $j$, and
+$\hat{e}_j$ is the expected number of data points in bin $j$. Here
+$\hat{e}_j = N \hat{p}_j$ where $N$ is the total number of data
+points, and $\hat{p}_j$ is the model probability of picking a data
+point from bin $j$. A weakness of this approach is that information is
+lost by grouping the data, and there are other tests that depend
+directly on the individual observations.
+
+One of these tests is the Kolmogorov-Smirnov test, which essentially
+uses the maximum difference between the predicted CDF and the
+ECDF. The KS statistic is $D = \max(D^+, D^-)$ where
+$D^+ = \max_i(i/N - F(x_{i:N}))$ and
+$D^- = \max_i(F(x_{i:N}) - (i - 1)/N)$. A small value of $D$ indicates
+a good fit (though precisely what value of $D$ means the fit is
+``good'' depends on $N$). The weakness of this approach is that the
+distribution of the KS statistic is derived assuming no parameters
+have been estimated, which is obviously not true in our case. The
+Kolmogorov-Smirnov test returned a $p$-value of 0.46 for the reduced
+model, and 0.66 for the full model, indicating a good fit of these
+models to the data (obviously, because the data were derived from the
+jump-velocity model). Essentially the $p$-value is the probability
+that $D$ could be as large as it is (that is, the probability that the
+fit is as poor as it is) by chance alone.
+
+\section{Numerics and results for primed platelets}
+\label{sec:numer-results-prim}
+
+For primed platelets, $k_\tn{on}^F > 0$ and the Fokker-Planck equation
+for the platelets' positions is given in equation
+(\ref{eq:nd-system}). The numerics for solving these equations are
+similar to the two-state case, and so I won't go into detail on that
+here. The idea behind including these two extra states is to model the
+slow binding/unbinding dynamics of fibrinogen, and so in practice we
+take $\epsilon_1 \ll \epsilon_2$. Figure \ref{fig:prob-dens} shows
+velocity probability densities for a range of parameter values.
+
+The fitting prodecure to find the maximum likelihood estimates for the
+4 model parameters is exactly analogous to the 2-variable
+case. However, the optimization is a much slower process because we
+now have to optimize over a 4-dimensional space. Also, we don't yet
+have an adiabatic reduction of the 4-dimensional model, and so I am
+not sure how to find a good initial guess for the parameter
+values. Right now, I am cheating and using the true parameter values
+plus Gaussian white noise to mimic error in the initial guess.
+
+In the test example I tried, the maximum likelihood estimate for the
+parameters fit the data well. Figure \ref{fig:4-par-fit} shows the fit
+of the model to the data. The bootstrap trials found 95\% confidence
+intervals that included the true value of the parameters (Table
+\ref{tab:conf-int} and Figure \ref{fig:4-par-boxplots}). It is worth
+pointing out that there is a symmetry in the 4 parameter model,
+because if you interchange $a$ and $c$, and $\epsilon_1$ and
+$\epsilon_2$ then the model is identical. In a couple of the bootstrap
+trials, the optimization function converged to the ``mirror image'' of
+the parameter values instead of the true parameter values. I would
+guess this comes down to the accuracy of the initial guess. In any
+case, this problem is easy to spot and fix as long as the mirror
+parameters aren't too similar.
+
+\subsection{Adiabatic reduction in the 4-parameter model}
+\label{sec:adiab-reduct-4}
+
+
+If we only assume $\epsilon_1 \ll 1$, then the adiabatic reduction
+follows the two-parameter reduction closely. It will be more
+convenient to rewrite the Fokker-Planck equation of the system as:
+\begin{equation}
+  \label{eq:4-par-ad-fp}
+  \Pder{\mathbf{q}}{s} = - \Pder{q_{U}}{y} \mathbf{e}_1 +
+  \frac{1}{\epsilon_1} \underline{\underline{A}}\mathbf{q} +
+  \frac{1}{\epsilon_2} \underline{\underline{B}}\mathbf{q},
+\end{equation}
+where
+$\underline{\underline{A}} = \begin{pmatrix} -b & a & 0 & 0 \\ b & -a
+  & 0 & 0 \\ 0 & 0 & -b & a \\ 0 & 0 & b & -a \end{pmatrix}$ and
+$\underline{\underline{B}} = \begin{pmatrix} -d & 0 & c & 0 \\ 0 & -d
+  & 0 & c \\ d & 0 & -c & 0 \\ 0 & d & 0 & -c \end{pmatrix}$. The fast
+reactions are those captured in matrix $\underline{\underline{A}}$, so
+this matrix defines the separation of the system into fast and slow
+subsystems. In linear algebra terms, the left 0-eigenvectors of
+$\underline{\underline{A}}$ define the projection onto the slow
+manifold, and the orthogonal projection projects onto the fast
+manifold, but I think it makes more sense to refer to the reaction
+diagram to see the fast-slow separation.
+
+\tikzexternaldisable
+\begin{center}
+  \schemestart
+  U \arrow{<=>[$b/\epsilon_1$][$a/\epsilon_1$]}
+  V \arrow{<=>[*{0}$d/\epsilon_2$][*{0}$c/\epsilon_2$]}[270]
+  VF \arrow{<=>[$b/\epsilon_1$][$a/\epsilon_1$]}[180]
+  F \arrow{<=>[*{0}$d/\epsilon_2$][*{0}$c/\epsilon_2$]}[90]
+  \schemestop\par
+\end{center}
+\tikzexternalenable
+
+The fast reactions are represented by the two horizontal reaction
+lines in the diagram, and so the U and V states define one subsystem
+where the reactions within that system are fast, and transitions into
+or out of that system are slow, and F and VF define the other such
+subsystem. Thus we define two slow variables: $v_1 = q_{U} + q_{V}$
+and $v_2 = q_{F} + q_{VF}$.
+
+The two fast variables are harder to intuit, but they end up being
+$w_1 = b q_{U} - a q_{V}$ and $w_2 = b q_{F} - a q_{VF}$. These two
+fast variables basically represent the net formation of fast bonds (or
+the net transition rate of U to V and F to VF) within the two fast
+subsystems.
+
+Then after changing variables in equation (\ref{eq:4-par-ad-fp}), we
+get
+\begin{align}
+  \Pder{v_1}{t} &= -\Pder{}{y}(a v_1 + w_1) - \frac{d}{\epsilon_2} v_1
+                  + \frac{c}{\epsilon_2} v_2 \label{eq:v1} \\
+  \Pder{v_2}{t} &= \frac{d}{\epsilon_2} v_1 - \frac{c}{\epsilon_2} v_2
+  \label{eq:v2} \\
+  \Pder{w_1}{t} &= -\frac{w_1}{\epsilon_1} - b\Pder{}{y} (a v_1 + w_1)
+                  - \frac{d}{\epsilon_2} w_1 + \frac{c}{\epsilon_2}
+                  w_2 \label{eq:w1} \\
+  \Pder{w_2}{t} &= -\frac{w_2}{\epsilon_1} + \frac{d}{\epsilon_2} w_1
+                  - \frac{c}{\epsilon_2} w_2. \label{eq:w2}
+\end{align}
+
+Because we are assuming the system is in quasi-steady-state, $w_1 =
+\mathcal{O}(\epsilon_1)$ and $w_2 = \mathcal{O}(\epsilon_1)$. Then
+multiplying equation (\ref{eq:w1}) and equation (\ref{eq:w2}) by
+$\epsilon_1$ and excluding higher order terms, we get the following
+QSS equations for $w_1$ and $w_2$:
+\begin{align}
+  w_1 &= -\epsilon_1 a b \Pder{v_1}{y} + \mathcal{O}(\epsilon_1^2) \\
+  w_2 &= 0 + \mathcal{O}(\epsilon_1^2).
+\end{align}
+
+Thus at least to first order in $\epsilon_1$, the fast dynamics
+between F and VF don't affect the average velocity of platelets. Then
+substituting $w_1$ into equation (\ref{eq:v1}) gives us the following
+system defining the evolution of the slow dynamics:
+\begin{align}
+  \Pder{v_1}{t} &= -a \Pder{v_1}{y} + \epsilon_1 a b \frac{\partial^2
+                  v_1}{\partial y^2} - \frac{d}{\epsilon_2} v_1 +
+                  \frac{c}{\epsilon_2} v_2 \\
+  \Pder{v_2}{t} &= \frac{d}{\epsilon_2} v_1 - \frac{c}{\epsilon_2} v_2.
+\end{align}
+
+So the slow system evolves like its own jump-velocity process, except
+that now the advecting quantity also has a small diffusion
+component. In view of the adiabatic reduction for the two-parameter
+model, this solution makes perfect sense. In the two-parameter system,
+fast bond dynamics introduced a small diffusion component in the slow
+variable, and in the four-parameter system the fast bonds introduced
+exactly the same diffusion component, and the slow bond dynamics
+remain unchanged.
+
+Now this reduced model isn't particularly easier to solve numerically
+than the full model (it doesn't seem like we've reduced the asymptotic
+complexity at all, and we've traded stiff reaction terms for a
+diffusion term), so we may want to try reducing on $\epsilon_2$ as
+well. I'm not sure what the best way to proceed from here is. I tried
+doing another adiabatic reduction by assuming that $1 \gg \epsilon_2
+\gg \epsilon_1$, but then you run into the problem that only taking
+the first order in $\epsilon_2$ eliminates all terms containing
+$\epsilon_1$.
+
+I think we need to relate $\epsilon_2$ to $\epsilon_1$ somehow,
+possibly taking $\epsilon_2^\alpha = \epsilon_1$ and then re-doing the
+asymptotic analysis on $\epsilon_2$, and keeping some higher-order terms.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-smalla-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-smalla-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon_1 = 0.1$, $\epsilon_2 = 1$, $a = 0.2$,
+      $c = 0.5$: $k_\tn{on} > k_\tn{off}$ and
+      $k_\tn{on}^F = k_\tn{off}^F$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-meda-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-meda-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon_1 = .1$, $\epsilon_2 = 1$, $a = 0.5$,
+      $c = 0.5$: $k_\tn{on} = k_\tn{off}$ and
+      $k_\tn{on}^F = k_\tn{off}^F$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-meda}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-largea-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-largea-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+    \caption{$\epsilon_1 = 0.1$, $\epsilon_2 = 1$, $a = 0.8$,
+      $c = 0.5$: $k_\tn{on} < k_\tn{off}$ and
+      $k_\tn{on}^F = k_\tn{off}^F$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-largeeps-meda}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-smallc-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-smallc-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
+    \caption{$\epsilon_1 = .1$, $\epsilon_2 = 1$, $a = 0.5$,
+      $c = 0.2$: $k_\tn{on} = k_\tn{off}$ and
+      $k_\tn{on}^F > k_\tn{off}^F$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    % \includegraphics[width=\textwidth]{{twostate-smalleps-largea}.png}
+    \begin{tikzpicture}
+      \begin{axis}[
+        exact axis,
+        ]
+        \addplot table[x index=0, y index=1]
+        {distributions/fourstate-vsmalleps-smallc-dst.dat}; 
+        \addplot table[x index=0, y index=2]
+        {distributions/fourstate-vsmalleps-smallc-dst.dat}; 
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}    
+    \caption{$\epsilon_1 = 0.01$, $\epsilon_2 = 1$, $a = 0.5$,
+      $c = 0.2$: $k_\tn{on} = k_\tn{off}$ and
+      $k_\tn{on}^F > k_\tn{off}^F$.}
+  \end{subfigure}
+  \caption[Probability density functions]{Probability density
+    functions for selected $(\epsilon_1, \epsilon_2, a, c)$ quadruples
+    in the four-state jump-velocity model.}
+  \label{fig:prob-dens}
+\end{figure}
+
+\begin{table}
+  \centering
+  \begin{tabular}{ccc}
+    \hline
+    Parameter & Normal method & Quantile method \\
+    \hline
+    $a$ & $[0.469, 0.568]$ & $[0.471, 0.564]$ \\
+    $c$ & $[0.175, 0.219]$ & $[0.179, 0.225]$ \\
+    $\epsilon_1$ & $[0.068, 0.102]$ & $[0.070, 0.099]$ \\
+    $\epsilon_2$ & $[0.851, 1.150]$ & $[0.869, 1.164]$\\
+    \hline
+  \end{tabular}
+  \caption[Summary of confidence intervals]{Summary of 95\% confidence
+    intervals of model parameters estimated by bootstrapping}
+  \label{tab:conf-int}
+  % I'm not worried that the true value of eps_1 is outside the
+  % quantile confidence interval, it probably isn't a good method when
+  % the number of bootstrap trials is less than 100
+\end{table}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Full model},
+        xlabel=$v^*$,
+        ylabel={Probability density},
+        ]
+        \addplot+[hist=density, fill]
+        table[y index=0] {simulations/test4-sim.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/test4-est.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Simulated data, Full model},
+        legend pos=south east,
+        xlabel=$v^*$,
+        ylabel={$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y
+        expr=\coordindex/1024] {simulations/test4-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/test4-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[4-parameter ML estimates]{Results of the ML estimates for
+    the 4-parameter model. For this simulated data, the maximum
+    likelihood parameters are $a = 0.5107$, $\epsilon_1 = 0.0886$,
+    $c = 0.1995$, and $\epsilon_2 = 1.0142$. Total number of simulated
+    data points: $N = 1024$.}
+  \label{fig:4-par-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ytick={1, 2, 3, 4},
+      yticklabels={$a$, $\epsilon_1$, $c$, $\epsilon_2$},
+      xlabel=Relative error,
+      xmin=-.4, xmax=.3,
+      ]
+      \addplot+ [boxplot] table[y expr=(\thisrowno{0} - 0.5)/0.5]
+      {bootstrap/test4-boot.dat};
+      \addplot+ [boxplot] table[y expr=(\thisrowno{1} - 0.1)/0.1]
+      {bootstrap/test4-boot.dat};
+      \addplot+ [boxplot] table[y expr=(\thisrowno{2} - 0.2)/0.2]
+      {bootstrap/test4-boot.dat};
+      \addplot+ [boxplot] table[y expr=(\thisrowno{3} - 1)]
+      {bootstrap/test4-boot.dat}; 
+    \end{axis}
+  \end{tikzpicture}
+  \caption[Boxplots of 4-parameter bootstraps]{Boxplots of parameter
+    estimates in the 4-parameter model from 64 bootstrap trials.}
+  \label{fig:4-par-boxplots}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = $v^*$,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCC-vels-sim.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCC-vels-est.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel=$v^*$,
+        ylabel={$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y expr=\coordindex/42]
+        {simulations/CCC-vels-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CCC-vels-est.dat}; `
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Model fit to CCC platelets. Parameter estimates are $a =
+    0.16$, $\epsilon_1 = 0.13$, $c = 0.84$, $\epsilon_2 = 13.3$.}
+  \label{fig:ccc}
+\end{figure}
+
+\newpage
+
+\section{Step size in the jump-velocity model}
+\label{sec:step-size-jump}
+
+The jump-velocity model predicts that step sizes should be
+exponentially distributed in both the two-parameter and four-parameter
+models. In the two-parameter model, $\tn{step size} \sim
+\Exp\left(\lambda = k_\tn{on}/V\right)$ and in the four-parameter
+model $\tn{step size} \sim \Exp\left(\lambda = (k_\tn{on} +
+  k_\tn{on}^F)/V \right)$ where $\lambda$ is the rate parameter of the
+exponential distribution. The maximum likelihood estimate for the
+parameter $\lambda$ is easy, it is just the sample mean of the
+observations.
+
+In order to test the hypothesis that the step sizes are exponentially
+distributed, I fit exponential curves to the observed step sizes in
+four sets of experiments: unprimed platelets in PRP (albumin in
+priming region, collagen in rolling region), unprimed platlets in
+whole blood, primed platelets in PRP (collagen in both regions), and
+primed platelets in whole blood. Then I used the Anderson-Darling
+goodness-of-fit test for an exponential distribution.
+
+Plots of the step size distribution at the maximum-likelihood
+parameter value are shown in Figures \ref{fig:hc-step-fit} and
+\ref{fig:cc-step-fit}. The Anderson-Darling test rejects the
+hypothesis that the step sizes are exponentially distributed for both
+experiments with $p < 0.01$ for the HC experiment and $p < 0.025$ for
+the CC experiment. That is, the test is more than 95\% sure the step
+sizes are \emph{not} distributed exponentially in either experiment.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HC-exp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/21]
+        {simulations/HC-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/HC-exp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC step size fit]{Data and fit of the step size
+    distribution model to HC step size data. ($N = 21$) The vertical
+    black line is located at 1 $\mu$m, or approximately one platelet
+    radius. $\hat{\mu} = 2.38 \mu\tn{m}$}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-exp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/40]
+        {simulations/CC-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CC-exp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC step size fit]{Data and fit of the step size
+    distribution model to CC step size data. ($N = 40$) The vertical
+    black line is located at 1 $\mu$m, or approximately one platelet
+    radius. $\hat{\mu} = 2.48 \mu\tn{m}$}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HCwhole-exp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/11]
+        {simulations/HCwhole-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/HCwhole-exp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC whole blood step size]{Data and fit of the step size
+    distribution model to HC whole blood step size data. ($N = 11$)
+    The vertical black line is located at 1 $\mu$m, or approximately
+    one platelet radius. $\hat{\mu} = 1.98 \mu\tn{m}$}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCwhole-exp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/76]
+        {simulations/CCwhole-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CCwhole-exp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC whole blood step size]{Data and fit of the step size
+    distribution model to CC whole blood step size data. ($N = 76$)
+    The vertical black line is located at 1 $\mu$m, or approximately
+    one platelet radius. $\hat{\mu} = 2.37 \mu\tn{m}$.}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/21] {simulations/HC-step.dat};
+        \addplot table[x index=0, y expr=exp(-1/2.385*\thisrowno{0})]
+        {simulations/HC-step.dat}; 
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{HC PRP experiment}
+    \label{fig:log-cdf-hc}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/40] {simulations/CC-step.dat};
+        \addplot table[x index=0, y expr=exp(-1/2.476*\thisrowno{0}]
+        {simulations/CC-step.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{CC PRP experiment}
+    \label{fig:log-cdf-cc}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/11] {simulations/HCwhole-step.dat};
+        \addplot table[x index=0, y expr=exp(-1/1.981*\thisrowno{0})]
+        {simulations/HCwhole-step.dat}; 
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{HC whole blood experiment}
+    \label{fig:log-cdf-hcwhole}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/76] {simulations/CCwhole-step.dat};
+        \addplot table[x index=0, y expr=exp(-1/2.375*\thisrowno{0})]
+        {simulations/CCwhole-step.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{CC whole blood experiment}
+    \label{fig:log-cdf-ccwhole}
+  \end{subfigure}
+  \caption{Log plots of $1 - \tn{CDF}$ for each of the 4 experiments,
+    with a simple exponential fit.}
+  \label{fig:semilogy-cdf}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HC-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/21]
+        {simulations/HC-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/HC-dexp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC step size fit]{Data and fit of the step size
+    distribution model to HC step size data. ($N = 21$) The vertical
+    black line is located at 1 $\mu$m, or approximately one platelet
+    radius. $\alpha = 0.764$,
+    $\hat{\lambda_1} = 1.462 \mu\tn{m}^{-1}$,
+    $\hat{\lambda_2} = 0.127 \mu\tn{m}^{-1}$. $\chi^2 = 11.95$, $p = \tn{nan}$.}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/40]
+        {simulations/CC-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CC-dexp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC step size fit]{Data and fit of the step size
+    distribution model to CC step size data. ($N = 40$) The vertical
+    black line is located at 1 $\mu$m, or approximately one platelet
+    radius. $\alpha = 0.781$,
+    $\hat{\lambda_1} = 0.756 \mu\tn{m}^{-1}$,
+    $\hat{\lambda_2} = 0.152 \mu\tn{m}^{-1}$. $\chi^2 = 8.0$, $p = 0.09$}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HCwhole-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/11]
+        {simulations/HCwhole-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/HCwhole-dexp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC whole blood step size]{Data and fit of the step size
+    distribution model to HC whole blood step size data. ($N = 11$)
+    The vertical black line is located at 1 $\mu$m, or approximately
+    one platelet radius. $\alpha = 0.865$,
+    $\hat{\lambda_1} = 1.849 \mu\tn{m}^{-1}$,
+    $\hat{\lambda_2} = 0.0676 \mu\tn{m}^{-1}$. $\chi^2 = 0.82$, $p = \tn{nan}$}
+  \label{fig:hc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCwhole-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model fit},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/76]
+        {simulations/CCwhole-step.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/CCwhole-dexp.dat};
+        \draw[thick] ({axis cs:1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:1, 0}|-{rel axis cs:0, 1});
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC whole blood step size]{Data and fit of the step size
+    distribution model to CC whole blood step size data. ($N = 76$)
+    The vertical black line is located at 1 $\mu$m, or approximately
+    one platelet radius. $\alpha = 0.620$,
+    $\hat{\lambda_1} = 1.049 \mu\tn{m}^{-1}$,
+    $\hat{\lambda_2} = 0.213 \mu\tn{m}^{-1}$. $\chi^2 = 20.3$, $p = 0.04$}
+  \label{fig:cc-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/21] {simulations/HC-step.dat};
+        \addplot table[x index=0, y
+        expr=.764*exp(-1.462*\thisrowno{0}) +
+        .236*exp(-.127*\thisrowno{0})] {ml-estimates/HC-dexp.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{HC PRP experiment}
+    \label{fig:log-cdf-hc}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/40] {simulations/CC-step.dat};
+        \addplot table[x index=0, y
+        expr=.781*exp(-0.756*\thisrowno{0}) +
+        .219*exp(-.152*\thisrowno{0})]
+        {ml-estimates/CC-dexp.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{CC PRP experiment}
+    \label{fig:log-cdf-cc}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/11] {simulations/HCwhole-step.dat};
+        \addplot table[x index=0, y
+        expr=.865*exp(-1.849*\thisrowno{0}) +
+        .135*exp(-.0676*\thisrowno{0}]
+        {ml-estimates/HCwhole-dexp.dat}; 
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{HC whole blood experiment}
+    \label{fig:log-cdf-hcwhole}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+        legend entries={Data, Model fit},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = 1 - CDF,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=1 -
+        (\coordindex+1)/76] {simulations/CCwhole-step.dat};
+        \addplot table[x index=0, y
+        expr=.62*exp(-1.049*\thisrowno{0}) +
+        .38*exp(-.213*\thisrowno{0}]
+        {ml-estimates/CCwhole-dexp.dat};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{CC whole blood experiment}
+    \label{fig:log-cdf-ccwhole}
+  \end{subfigure}
+  \caption{Log plots of $1 - \tn{CDF}$ for each of the 4 experiments,
+    with a double exponential fit.}
+  \label{fig:semilogy-cdf}
+\end{figure}
+
+What are potential reasons for this discrepancy?
+\begin{enumerate}
+\item The velocity of free-flowing platelets is not constant. In
+  reality, the velocity of a platelet can vary depending on its
+  distance from the vessel wall, collisions with other cells, and
+  probably other factors I'm not thinking of right now.
+\item In reality, multiple bonds can form between the platelet and the
+  wall, and small steps can occur even when a platelet doesn't fully
+  detach from the wall. Based on this, we would expect to find a
+  higher proportion of small steps ($< 1 \mu\tn{m}$) than predicted by
+  an exponential distribution.
+\item If the platelets can be in either a primed or an unprimed state,
+  the step size distribution will no longer be an exponential
+  distribution. Instead it will be something like a sum of
+  exponentials.
+\end{enumerate}
+
+Figure \ref{fig:semilogy-cdf} suggests the step sizes \emph{may} be
+distributed as a convex combination of exponentials, that is a
+distribution where the PDF is given by the function $f(x) = \alpha
+\lambda_1 \exp(-\lambda_1 x) + (1 - \alpha) \lambda_2 \exp(-\lambda_2
+x).$ Therefore, I fit this double exponential model to the 4 sets of
+data, the results of which are displayed in Figures
+\ref{fig:hc-step-fit}---\ref{fig:semilogy-cdf}.
+
+I tested the goodness of fit in each case using the $\chi^2$ test. The
+way this works is the data gets binned, and then the actual number of
+observations ($o_j$) in each bin is compared to the expected number of
+observations in each bin
+($e_j \equiv N_\tn{obs} \left[ F(x_{j+1}) - F(x_{j}) \right]$). Here
+$F(x)$ is the CDF for the double exponential distribution, and
+$x_{j+1}$ and $x_{j}$ are the upper and lower bounds of bin $j$. Then
+the $\chi^2$ statistic is calculated using $\sum_{j=1}^{N_\tn{bins}}
+\frac{(o_j - e_j)^2}{e_j^2}$.
+
+I chose this test because it is agnostic of the underlying probability
+distribution, and it is relatively quick to implement. However, there
+are significant drawbacks as well.
+\begin{enumerate}
+\item Resolution is lost by binning the data
+\item The result of the test seems to be sensitive to the choice of
+  bins. Bain \& Engelhardt say that $e_j \ge 5$ should be maintained
+  ``to ensure that the chi-squared approximation is fairly accurate.''
+  However the $p$-value varied by an order of magnitude when I varied
+  the bin width between $e_j \approx 5$ and $e_j \approx 15$.
+\item Probably because of the loss of resolution, this test can only
+  be applied in situations where there is a lot of data. The degrees
+  of freedom of the $\chi^2$ statistic is $N_\tn{bins} - 1 -
+  N_\tn{pars}$, and this quantity must be positive, meaning there must
+  be at least 5 bins. If we are enforcing $e_j \approx 5$, that means
+  we must have at least 25 data points, otherwise we end up with 0 or
+  negative d.o.f.
+\end{enumerate}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{CCwhole-velfit.png}
+    \caption{Velocity data}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{CCwhole-stepfit.png}
+    \caption{Step data}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{CCwhole-dwellfit.png}
+    \caption{Pause data}
+  \end{subfigure}
+  \caption{Fit of velocity model to CC whole blood data and compared
+    with step size and dwell time distribution. Fit parameters:
+    $\hat{a} = 0.126$, $\hat{\epsilon_1} = 0.11$, $\hat{c} = 0.635$,
+    $\hat{\epsilon_2} = 37.5$.}
+  \label{fig:ccwhole-velfit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{HC-velfit.png}
+    \caption{Velocity data}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{HC-dwellfit.png}
+    \caption{Pause data}
+  \end{subfigure}
+  \caption{Fit of velocity model to HC PRP data and compared
+    with step size and dwell time distribution}
+  \label{fig:hc-velfit}
+\end{figure}
+
+\section{Dwell time in the jump-velocity model}
+\label{sec:dwell-time-jump}
+
+I haven't fit any of the dwell time data yet, but I think I have
+figured out the theoretical dwell time distribution for the
+four-parameter model. Obviously in the two-parameter model, $\tn{dwell
+  time} \sim \Exp\left(\lambda = k_\tn{off}\right)$.
+
+For the four-parameter model, finding the dwell time distribution
+requires solving an ODE that models transitions between the three
+bound states. That is, the dwell time distribution is found by solving
+the system:
+\begin{align}
+  \Der{p_V}{t} &= -(k_\tn{off} + k_\tn{on}^F)p_V + k_\tn{off}^F p_{VF}
+  \\
+  \Der{p_F}{t} &= -(k_\tn{on} + k_\tn{off}^F)p_F + k_\tn{off} p_{VF}
+  \\
+  \Der{p_{VF}}{t} &= k_\tn{on}^F p_V + k_\tn{on} p_F - (k_\tn{off} +
+                    k_\tn{off}^F) p_{VF},
+\end{align}
+and the dwell time distribution is given by
+$k_\tn{off} p_V(t) + k_\tn{off}^F p_F(t)$. This ODE is solved with the
+initial condition $p_V(0) = P[\tn{the V bond forms first}]$,
+$p_F(0) = P[\tn{the F bond forms first}]$, and $p_{VF}(0) = 0$.
+
+\section{Step size revisited}
+\label{sec:step-size-revisited}
+
+In trying to fit the step-size data along with the velocity data, I
+noticed that the step size is \emph{not} distributed according to the
+exponential distribution $\Exp(\lambda = (k_\tn{on} +
+k_\tn{on}^F)/V)$. Figure \ref{fig:test-stepsize-cmp} shows the
+discrepancy between the simulated data and the model prediction. The
+simulated data is still exponentially distributed, but at a different
+rate than I originally predicted. I think this is due to the fact
+there is a finite domain, and the distance traveled before the first
+binding event is not counted as a step.
+
+First, it is clear that a (nondimensional) step size of greater than 1
+cannot be observed, because the domain is only length 1. This suggests
+the step size is distributed as a truncated exponential
+distribution. The second part is more difficult to capture, and I'm
+not sure what to do with that yet. I tried coming up with an analytic
+function describing the distribution of step sizes, but was
+unsuccessful.
+
+In lieu of an analytic distribution, I tried fitting the parameters by
+generating sample step size distributions, and then matching the mean
+of the sample step size distribution with the observed step size
+mean. So far, this has been unsuccessful, it seems like the minimizer
+just generates step size distributions until it stumbles upon a sample
+that matches the ``observed'' step size distribution.
+
+I've tried increasing the number of samples taken in the objective
+function, but so far no luck. I've gone up to $2^{14} = 16\,384$
+samples so far, with a tolerance of $10^{-3}$. That is, the minimizer
+terminates when it takes a step resulting in an improvement of less
+than $10^{-3}$ in the solution.
+
+\emph{A thought on fitting the on-rates}\\
+Instead of fitting the step size data, we could fit the number of
+dwells to a Poisson distribution. In the jump-velocity process, the
+number of binding events is Poisson distributed (because the waiting
+times for binding are exponentially distributed). This would also
+provide an estimate for the binding rate $k_\tn{on}$ without having to
+worry about this issue of not counting the first step as a step size.
+
+I implemented an algorithm to find the on rate $k_\tn{on}$ using the
+average number of dwells per tracked platelet, and then tries to
+estimate $a$ and $\epsilon$ separately by fitting to the velocity
+distribution. This works for a test case with $a=0.5$ and $\epsilon_1
+= 0.1$, but it isn't working for test cases with $(a, \epsilon_1) =
+(0.2, 0.1), \, (0.8, 0.1)\, (0.5, 0.8)$. It also isn't working for the
+experimental data.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\textwidth]{test-stepsize-cmp.png}
+  \caption{Comparison of the ECDF of simulated step size data to the
+    CDF of the assumed step size distribution. $a = 0.5$, $\epsilon_1
+    = .1$}
+  \label{fig:test-stepsize-cmp}
+\end{figure}
+
+% \bibliographystyle{plain}
+% \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+

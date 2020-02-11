@@ -1,0 +1,2437 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+\usepgfplotslibrary{colorbrewer, statistics}
+\pgfplotsset{
+  exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+    legend entries={PDF, CDF},},
+  every axis plot post/.append style={thick},
+  table/search
+  path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+  colormap/YlGnBu,
+  cycle list/Set1-5,
+  legend style={legend cell align=left,},
+}
+\usepgfplotslibrary{external}
+\tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Notes on a Modification to the Jump-Velocity Rolling Model
+    (\today)}
+\end{center}
+
+\section{A modification to the single bond model of rolling}
+\label{sec:modif-single-bond}
+
+Experimental step size data does not fit a simple one-step model of
+binding and unbinding. We want to test the hypothesis that the
+distribution of step sizes can be explained by a mixture of two types
+of steps: (1) steps where the platelet comes completely unbound from
+the surface, and (2) steps where a platelet is multiply bound to the
+vessel wall, and the rearmost load-bearing bond breaks, causing the
+platelet to lurch forward.
+
+We want to test this with a model that approximates this behavior,
+without the expense of tracking an arbitrary number of bonds that can
+bind in arbitrary locations along the wall. Therefore, we will use a
+model that allows bonds to form in two positions: on the front of the
+platelet and on the back of the platelet (see Figure
+\ref{fig:four-states}).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\textwidth]{double-binding-model.png}
+  \caption{Four states in the modified jump-velocity model}
+  \label{fig:four-states}
+\end{figure}
+
+In the unbound state $S_U$, the platelet translates forward at the
+free-flowing velocity $V^*$. A bond can form on the back of the
+platelet at a constant binding rate $k_\tn{on}$ (or rather, a bond
+forms \emph{somewhere} between the platelet and wall, but the platelet
+keeps translating forward until the force applied by the bond balances
+the drag force on the platelet). Let's call this state $S_b$. This
+bond can then break at a rate $k_\tn{off}$, returning the platelet to
+the unbound state.
+
+An $S_b$ platelet can form a second bond with the surface on the front
+(downstream) end of the platelet at rate $k_\tn{on, f}$, and we'll
+call this the $S_{bf}$ state. Then, either the back or the front bonds
+of a $S_{bf}$ platelet can break. The back bond breaks at a rate
+$k_\tn{off, b}$ and the front bond breaks at a rate $k_\tn{off,
+  f}$. If the front bond breaks, the platelet returns to the $S_b$
+state, and if the back bond breaks, the platelet is temporarily left
+with a single front bond. However, because of the flow, the platelet
+is pushed downstream until the front bond becomes a back bond, and the
+bond force balances with the drag force on the platelet. We'll call
+this state the transition state---$S_T$.
+
+Now we have to make a choice to model how long platelets remain in the
+$S_T$ state. One possible choice is to say that every platelet stays
+in the $S_T$ state for the exact same length of time and travels the
+same distance. While one could argue this agrees geometrically with
+the series of pictures drawn in Figure \ref{fig:four-states}, this
+isn't a realistic representation of small step sizes in the more
+complicated case that bonds can form continuously along the vessel
+wall. If we instead say that platelets transition out of state $S_T$
+with some rate $\kappa$, that is equivalent (I think) to assuming
+that the small step sizes are distributed exponentially with mean step
+length $V^*/\kappa$.
+
+How can we choose a reasonable transition rate $\kappa$ out of the
+$S_T$ state? One possibility is to define a characteristic step length
+$\ell$, and then assert that some fraction $q$ of the small steps must
+be smaller than the characteristic step length. To choose a $\kappa$
+based on some given $\ell$ and $q$, we can use the CDF of small step
+times. For a constant transition rate $\kappa$, the small step times
+are distributed as an exponential distribution with mean
+$1/\kappa$. Therefore, the CDF of step times is
+$F(t) = 1 - \exp(-\kappa t)$. Then $q = 1 - \exp(-\kappa \ell/V^*)$
+enforces the condition that the fraction of steps which are less than
+the characteristic step size is $q$. Solving this condition for
+$\kappa$ gives us
+\begin{equation}
+  \label{eq:kappa-defn}
+  \kappa = -\frac{\ln(1 - q)}{\ell/V^*}.
+\end{equation}
+
+\subsection{Fokker-Planck equation}
+\label{sec:fokk-planck-equat}
+
+The resulting Fokker-Planck equation of this process is an
+advection-reaction system similar to that of the ordinary jump
+velocity process. One major difference is that there are 2 states
+which translate in the flow, not just one.
+
+Clearly the Fokker-Planck equation will depend on the assumption made
+about the distribution of transition times (or small step sizes), but
+for the case where transition times are distributed exponentially, the
+Fokker-Planck equation is a simple linear advection-reaction PDE:
+\begin{align}
+  \Pder{p_U}{t} &= -V^* \Pder{p_U}{x} - k_\tn{on} p_U + k_\tn{off} p_b
+  \\
+  \Pder{p_b}{t} &= k_\tn{on} p_U - (k_\tn{off} + k_\tn{on, f}) p_b +
+                  k_\tn{off, f} p_{bf} + \kappa p_T \\
+  \Pder{p_{bf}}{t} &= k_\tn{on, f} p_b - (k_\tn{off, f} + k_\tn{off,
+                     b}) p_{bf} \\
+  \Pder{p_T}{t} &= -V^* \Pder{p_T}{x} + k_\tn{off, b} p_{bf} - \kappa
+                  p_T.
+\end{align}
+
+If we choose the same nondimensionalization as the first jump-velocity
+model, i.e. scaling space by the chamber length $L$ and time by the
+time it takes to cross the chamber $T \equiv L/V$, then we end up with the
+following nondimensional set of equations:
+\begin{align}
+  \Pder{p_U}{t} &= - \Pder{p_U}{x} - \beta p_U + \alpha
+                  p_b \label{eq:nd-U} \\
+  \Pder{p_b}{t} &= \beta p_U - (\alpha + \delta) p_b +
+                  \gamma p_{bf} + \lambda p_T \label{eq:nd-B} \\
+  \Pder{p_{bf}}{t} &= \delta p_b - (\gamma + \eta)
+                     p_{bf} \label{eq:nd-BF} \\
+  \Pder{p_T}{t} &= -\Pder{p_T}{x} + \eta p_{bf} - \lambda
+                  p_T. \label{eq:nd-T}
+\end{align}
+
+There are 6 nondimensional rate constants in this system of equations:
+$\alpha = k_\tn{off}T$, $\beta = k_\tn{on}T$, $\gamma = k_\tn{off,
+  f}T$, $\delta = k_\tn{on, f}T$, $\eta = k_\tn{off, b} T$, $\lambda =
+\kappa T$. We can make further simplifying assumptions to reduce the
+number of rate constants if that is required, but this is the general
+form.
+
+\subsubsection{Other distributions of small steps}
+\label{sec:other-distr-small}
+
+What if we don't make the assumption that the small step sizes are
+distributed exponentially? How can we implement other distributions of
+small step sizes? One possibility is to use a distributed
+delay. Briefly, distributed delay differential equations extend the
+concept of delay differential equations by allowing for a probability
+distribution of delays, instead of specifying a single (or multiple)
+discrete, deterministic delay(s). In the following section, I develop
+the system of equations that I think should describe the rolling model
+with a general probability distribution $f(x)$ of small step sizes.
+
+First, let's consider the case where every platelet spends the exact
+same time $\tau$  in the transition state, that is the small steps are
+deterministic and length $\tau$ (in the nondimensional model). The
+Fokker-Planck equation remains the same, except for the $\lambda p_T$
+terms in equations (\ref{eq:nd-B}) and (\ref{eq:nd-T}) which give the
+transition of platelets out of the $S_T$ state. This term is replaced
+by $\eta p_{bf}(x - \tau, t - \tau)$ in each of these equations, giving
+us a delay partial differential equation.
+
+Now we can think of this single discrete delay as a delay that is
+distributed as a $\delta$-function centered at $\tau$. We can also
+rewrite the delay term to emphasize this point:
+$\eta p_{bf}(x - \tau, t - \tau) = \eta \Integral{p_{bf}(x - t', t - t')
+  \delta(t' - \tau)}{t'}{0}{\infty}$. Written in this form, we can see
+that we can generalize the delays to a distribution of possible delays
+$f(t)$ by replacing $\delta(t' - \tau)$ with $f(t')$ in the integral,
+resulting in a delay term $\eta \Integral{p_{bf}(x - t', t - t')
+  f(t')}{t'}{0}{\infty}$. Therefore with an arbitrary distribution of
+small steps, where $f(x)$ is the distribution of small step sizes, the
+Fokker-Planck equation is a system of partial integro-differential
+equations:
+\begin{align}
+  \Pder{p_U}{t} &= - \Pder{p_U}{x} - \beta p_U + \alpha
+                  p_b \label{eq:nd-U-dst} \\
+  \Pder{p_b}{t} &= \beta p_U - (\alpha + \delta) p_b +
+                  \gamma p_{bf} + \eta \Integral{p_{bf}(x - t', t -
+                  t') f(t')} {t'} {0} {\infty} \label{eq:nd-B-dst} \\
+  \Pder{p_{bf}}{t} &= \delta p_b - (\gamma + \eta)
+                     p_{bf} \label{eq:nd-BF-dst} \\
+  \Pder{p_T}{t} &= -\Pder{p_T}{x} + \eta p_{bf} - \eta
+                  \Integral{p_{bf}(x - t', t - t') f(t')} {t'} {0}
+                  {\infty}. \label{eq:nd-T-dst}
+\end{align}
+
+\section{Simulations of the modified jump velocity model}
+\label{sec:simul-modif-jump}
+
+I wrote code to run stochastic trials of the modified jump-velocity
+process (with exponentially distributed small steps), and compared the
+results to the distribution of average velocities predicted by the
+Fokker-Planck equation for a couple different choices of
+parameters. Figure \ref{fig:exact-cmp-equal-rates} shows the case
+where all off and on rates are equal, figure
+\ref{fig:exact-cmp-small-a} shows the case where the on rates are
+larger than the off rates, and figure \ref{fig:exact-cmp-large-a}
+shows the case where the on rates are smaller than the off rates.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        xlabel = $v^*$,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-sim.dat};
+        \addplot table[x index=0, y expr=\thisrowno{1}/(1 - exp(-10))]
+        {distributions/testmod-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Model fit},
+        legend pos = south east,
+        xlabel = $v^*$,
+        ylabel = {$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y
+        expr=\coordindex/1024] {simulations/testmod-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {distributions/testmod-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of average velocities with $\alpha = \beta =
+    \gamma = \delta = \eta = 10$, $\lambda = 100$, and
+    $N_\tn{simulations} = 1024$}
+  \label{fig:exact-cmp-equal-rates}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        xlabel = $v^*$,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod1-sim.dat};
+        \addplot table[x index=0, y expr=\thisrowno{1}/(1 - exp(-10))]
+        {distributions/testmod1-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Model fit},
+        legend pos = south east,
+        xlabel = $v^*$,
+        ylabel = {$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y
+        expr=\coordindex/1024] {simulations/testmod1-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {distributions/testmod1-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of average velocities with $\alpha = \gamma =
+    5$, $\beta = \delta = \eta = 15$, $\lambda = 100$, and
+    $N_\tn{simulations} = 1024$}
+  \label{fig:exact-cmp-small-a}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        xlabel = $v^*$,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod2-sim.dat};
+        \addplot table[x index=0, y expr=\thisrowno{1}/(1 - exp(-10))]
+        {distributions/testmod2-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Model fit},
+        legend pos = south east,
+        xlabel = $v^*$,
+        ylabel = {$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y
+        expr=\coordindex/1024] {simulations/testmod2-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {distributions/testmod2-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of average velocities with $\alpha = \gamma =
+    15$, $\beta = \delta = \eta = 5$, $\lambda = 100$, and
+    $N_\tn{simulations} = 1024$}
+  \label{fig:exact-cmp-large-a}  
+\end{figure}
+
+\section{Step sizes}
+\label{sec:step-sizes}
+
+The distribution of step sizes in this model should be a mixture of
+exponential distributions. There are two separate random variables
+representing the two different types of steps: $S_1 \sim \Exp(\beta)$
+is the random variable representing a complete unbinding and
+reattachment of the platelet, and $S_2 \sim \Exp(\lambda)$ is the
+random variable representing a step without complete unbinding (which
+I am calling ``small'' steps).
+
+Then the PDF of the mixture of these two random variables should be
+\begin{equation}
+  g(x) = \beta \exp(-\beta t) \cdot P[\tn{step is }S_1] + \lambda
+  \exp(-\lambda t) \cdot P[\tn{step is }
+  S_2]. \label{eq:partially-specified-pdf}
+\end{equation}
+To fully specify $g(x)$, we need to figure out the probability that a
+particular step is a step of type 1.
+
+In order to find the probability of each type of step, and to find the
+distribution of dwell times later, we need to consider a subsystem of
+the platelet state transition diagram. In particular, we want to model
+the evolution of platelet states during a single pause. The reaction
+diagram for this subsystem is given in Figure
+\ref{fig:pause-subsystem}. Clearly all 4 platelet states are still
+present, but not all the reactions from the full system are
+present. In this subsystem, state U and state T are absorbing states
+because there are no transitions out of these states. In the model
+this corresponds to the platelet transitioning from a paused state to
+a moving state.
+
+\tikzexternaldisable
+\begin{figure}
+  \centering
+  \schemestart
+  U \arrow{<-[$\alpha$]}[-135]
+  B \arrow{<=>[*{0}$\delta$][*{0}$\gamma$]}[-45]
+  BF \arrow{->[*{0}$\eta$]}[45] T
+  \schemestop  
+  \caption[Pause subsystem]{Subsystem describing transitions within a
+    single pause}
+  \label{fig:pause-subsystem}
+\end{figure}
+\tikzexternalenable
+
+Then the splitting probability of this system gives the probability of
+a platelet taking a ``large'' step versus a ``small'' step. Also, the
+distribution of first exit times gives the distribution of dwell times
+in the modified model.
+
+If we define $q_i(t)$ to be the probability that a platelet is in
+state $i$ at time $t$ after a binding event, then the evolution of the
+$q_i$s is given by the ODE system:
+\begin{align}
+  \Der{q_U}{t} &= \alpha q_b \label{eq:qu-nd} \\
+  \Der{q_T}{t} &= \eta q_{bf} \label{eq:qt-nd} \\
+  \Der{q_b}{t} &= -(\alpha + \delta) q_b + \gamma
+                 q_{bf} \label{eq:qb-nd} \\
+  \Der{q_{bf}}{t} &= \delta q_b - (\gamma + \eta)
+                    q_{bf}. \label{eq:qbf-nd}
+\end{align}
+
+Following Dr. Keener's stochastics notes, we can group the absorbing
+and non-absorbing states separately by defining
+$Q(t) \equiv (q_U(t), q_T(t))^T$ to be the absorbing states and
+$P(t) \equiv (q_b(t), q_{bf}(t))^T$ to be the non-absorbing
+states. Then we can write the system of equations
+(\ref{eq:qu-nd})---(\ref{eq:qbf-nd}) as
+\begin{equation}
+  \label{eq:abs-nabs-sys}
+  \Der{}{t}
+  \begin{pmatrix}
+    Q \\ P
+  \end{pmatrix}
+  =
+  \begin{pmatrix}
+    0 & B \\
+    0 & A
+  \end{pmatrix}
+  \begin{pmatrix}
+    Q \\ P
+  \end{pmatrix},
+\end{equation}
+where $B = \begin{pmatrix} \alpha & 0 \\ 0 & \eta \end{pmatrix}$, and
+$A = \begin{pmatrix} -(\alpha + \delta) & \gamma \\ \delta & -(\gamma
+  + \eta) \end{pmatrix}$.
+
+The splitting probability $Q^\infty$ is the vector of probabilities
+that the platelet is in one of the absorbing states as $t \rightarrow
+\infty$. This can be found by integrating $\Der{Q}{t}$ from $0$ to
+$\infty$, which gives us:
+\begin{equation*}
+  Q^\infty = \Integral{\Der{Q}{t}}{t}{0}{\infty} = \Integral{B
+    P}{t}{0}{\infty} = \Integral{B A^{-1} P}{t}{0}{\infty} = B A^{-1}
+  \left(P(\infty) - P(0) \right) = - B A^{-1} P(0).
+\end{equation*}
+
+The splitting probability (and the first exit time) depends on the
+initial state $P(0)$. I think the appropriate initial state is
+$q_b(0) = 1$ and $q_{bf}(0) = 0$, because every pause begins in the
+$B$ state, with a single bond between the platelet and the
+surface. Therefore, the splitting probability is
+$Q^\infty = (q_U^\infty, q_T^\infty)^T = \frac{1}{\delta \eta +
+  \alpha(\gamma + \eta)} \left( \alpha (\gamma + \eta), \delta \eta
+\right)^T$. In the context of equation
+(\ref{eq:partially-specified-pdf}),
+$P[\tn{step is } S_1] = q_U^\infty$ and
+$P[\tn{step is } S_2] = q_T^\infty$. Therefore, the fully-specified
+PDF of step sizes is the mixture model:
+\begin{equation}
+  \label{eq:fully-specified-pdf}
+  g(x) = \beta \frac{\alpha (\gamma + \eta)}{\alpha (\gamma + \eta) +
+    \delta\eta} \exp(-\beta x) + \lambda \frac{\delta \eta}{\alpha
+    (\gamma + \eta) + \delta \eta} \exp(-\lambda x).
+\end{equation}
+
+There are really three identifiable(?) parameters in this PDF:
+$\beta$, $\lambda$, and the convexity parameter. If we call the
+convexity parameter $\chi$ (because we're running out of letters),
+then
+$\chi = \frac{\alpha (\gamma + \eta)}{\alpha (\gamma + \eta) +
+  \delta\eta}$ and we can rewrite equation
+(\ref{eq:fully-specified-pdf}) as
+\begin{equation}
+  \label{eq:pdf-three-par}
+  g(x; \chi, \beta, \lambda) = \chi \beta \exp(-\beta x) + (1 - \chi)
+  \lambda \exp(-\lambda x).
+\end{equation}
+
+Figures \ref{fig:exact-step-cmp-equal-rates},
+\ref{fig:exact-step-cmp-small-a}, and \ref{fig:exact-step-cmp-large-a}
+compare equation (\ref{eq:fully-specified-pdf}) with data from
+stochastic simulation. The step data is extracted from a single long
+experiment ($L = 1024$) in order eliminate the filtering effect that
+occurs when an experiment is terminated at length $L = 1$ (that is,
+steps greater than length $L$ cannot be observed). For the parameters
+chosen, the PDF (\ref{eq:fully-specified-pdf}) and its CDF agree well
+with the simulated data, and this was confirmed by running
+Kolmogorov-Smirnov tests for each case.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exact PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-step.dat};
+        \addplot table[x index=0, y index=1]
+        {distributions/testmod-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Exact CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod-step-cdf.dat};
+        \addplot+[dashed] table[x index=0, y index=2]
+        {distributions/testmod-step-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with $\alpha = \beta = \gamma =
+    \delta = \eta = 10$, $\lambda = 100$, and $N_\tn{steps} =
+    14\,556$}
+  \label{fig:exact-step-cmp-equal-rates}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exact PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod1-step.dat};
+        \addplot table[x index=0, y index=1]
+        {distributions/testmod1-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Exact CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod1-step-cdf.dat}; 
+        \addplot+[dashed] table[x index=0, y index=2]
+        {distributions/testmod1-step-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with $\alpha = \gamma =
+    5$, $\beta = \delta = \eta = 15$, $\lambda = 100$, and
+    $N_\tn{steps} = 37\,782$}
+  \label{fig:exact-step-cmp-small-a}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exact PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod2-step.dat};
+        \addplot table[x index=0, y index=1]
+        {distributions/testmod2-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Exact CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod2-step-cdf.dat};
+        \addplot+[dashed] table[x index=0, y index=2]
+        {distributions/testmod2-step-dst.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with $\alpha = \gamma = 15$,
+    $\beta = \delta = \eta = 5$, $\lambda = 100$, and $N_\tn{steps} =
+    5604$}
+  \label{fig:exact-step-cmp-large-a}  
+\end{figure}
+
+Next, I estimated the three parameters in equation
+(\ref{eq:pdf-three-par}) from the simulated data sets by numerically
+maximizing the log-likelihood function
+\begin{equation*}
+  \ell(\chi, \beta, \lambda) = \sum_{i=1}^{N_\tn{steps}} \ln(g(x_i;
+  \chi, \beta, \lambda)).
+\end{equation*}
+The optimization process terminated quickly ($< 1\,\tn{s}$), but the
+estimation could be made faster if necessary. In particular, we can at
+least write down a set of algebraic equations that we can solve to
+find the values of parameters that maximize $\ell$. However, for these
+test cases, the optimization algorithm converged quickly and gave
+accurate estimates to the true parameter values (results shown in
+Figures \ref{fig:fit-step-cmp-equal-rates},
+\ref{fig:fit-step-cmp-small-a}, and \ref{fig:fit-cmp-large-a}).
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Fit PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod-step.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/testmod-dexp.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Fit CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod-step-cdf.dat};
+        \addplot+[dashed] table[x index=0, y index=2]
+        {ml-estimates/testmod-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with ML parameter
+    estimates. $\alpha = \beta = \gamma = \delta = \eta = 10$,
+    $\lambda = 100$, and $N_\tn{steps} = 14\,556$. For these parameter
+    values, $\chi = 2/3$. Estimated parameters are
+    $\hat{\chi} = 0.6683$, $\hat{\beta} = 9.972$,
+    $\hat{\lambda} = 99.96$, and the $\chi^2$ goodness-of-fit test
+    gave $p = 0.86$.}
+  \label{fig:fit-step-cmp-equal-rates}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Fit PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod1-step.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/testmod1-dexp.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Fit CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod1-step-cdf.dat}; 
+        \addplot+[dashed] table[x index=0, y index=2]
+        {ml-estimates/testmod1-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with ML parameter
+    estimates. $\alpha = \gamma = 5$, $\beta = \delta = \eta = 15$,
+    $\lambda = 100$, and $N_\tn{steps} = 37\,782$. For these parameter
+    values, $\chi = 4/13 \approx 0.3077$. Estimated parameters are
+    $\hat{\chi} = 0.3078$, $\hat{\beta} = 15.23$,
+    $\hat{\lambda} = 100.2$, and the $\chi^2$ goodness-of-fit test
+    gave $p = 0.26$.}
+  \label{fig:fit-step-cmp-small-a}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Fit PDF},
+        xlabel = Step size,
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table[y index=0]
+        {simulations/testmod2-step.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/testmod2-dexp.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries = {Data, Fit CDF},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = {$P[S < s^*]$},
+        ]
+        \addplot table[x index=0, y index=1]
+        {simulations/testmod2-step-cdf.dat};
+        \addplot+[dashed] table[x index=0, y index=2]
+        {ml-estimates/testmod2-dexp.dat}; 
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{PDF and CDF of step sizes with ML parameter
+    estimates. $\alpha = \gamma = 15$, $\beta = \delta = \eta = 5$,
+    $\lambda = 100$, and $N_\tn{steps} = 5604$. For these parameter
+    values, $\chi = 12/13 \approx 0.9231$. Estimated parameters are
+    $\hat{\chi} = 0.9225$, $\hat{\beta} = 5.073$,
+    $\hat{\lambda} = 97.65$, and the $\chi^2$ goodness-of-fit test
+    gave $p = 0.68$.}
+  \label{fig:fit-cmp-large-a}  
+\end{figure}
+
+\subsection{Experimental step size distributions}
+\label{sec:exper-step-size}
+
+Figures \ref{fig:hc-prp-step-fit}---\ref{fig:cc-whole-step-fit} show
+the distribution of small steps (steps less than $2 \mu\tn{m}$ in
+length) in four experiments: HC PRP, CC PRP, HC whole blood, and CC
+whole blood. I also fit 4 different models to these small steps:
+exponential, uniform, normal, and gamma distributions. The uniform
+distribution wasn't \emph{fit} to the data, rather the upper and lower
+bounds were chosen to be 2 and 0, respectively, because that is how we
+defined the small steps.
+
+After fitting each of these models, I calculated the Akaike
+Information Criterion (AIC) which assesses \emph{relative} model
+quality among a set of models. The AIC is defined as:
+\begin{equation}
+  \tn{AIC} = 2k - 2\ln(\hat{L}),
+\end{equation}
+where $\hat{L}$ is the maximum of the likelihood function and $k$ is
+the number of estimated parameters in the model \cite{Akaike1974}. For
+each of our models, $k_\tn{exp} = 1$,
+$k_\tn{norm} = k_\tn{gamma} = 2$, and $k_\tn{unif} = 0$.
+
+% I also ran simulations of the stochastic model with these three
+% distributions, as well as a deterministic step and plotted histograms
+% of small steps in Figure \ref{fig:exact-unif-step-cmp-equal-rates}.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=7]
+        {distributions/HC-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        legend pos = south east,
+        xmin=0, xmax=2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/17]
+        {simulations/HC-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/HC-small-step.dat};
+        \addplot table [x index=0, y index=8]
+        {distributions/HC-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC step size fit]{Data and fit of several distributions to
+    small step size data in the HC PRP experiment ($N =
+    17$). Parameters of the distributions are: $\lambda = 0.66$,
+    $(\mu, \sigma) = (0.66, 0.30)$, and $(\theta, k) = (0.15,
+    4.36)$. $\tn{AIC}_\tn{exp} = 66.1$, $\tn{AIC}_\tn{unif} = 23.6$,
+    $\tn{AIC}_\tn{norm} = 11.8$, $\tn{AIC}_\tn{gamma} = 10.3$.}
+  \label{fig:hc-prp-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=7]
+        {distributions/CC-small-step.dat};        
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/28]
+        {simulations/CC-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/CC-small-step.dat};
+        \addplot table [x index=0, y index=8]
+        {distributions/CC-small-step.dat};        
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC step size fit]{Data and fit of several distributions to
+    small step size data in the CC PRP experiment ($N =
+    28$). Parameters of the distributions are: $\lambda = 0.91$,
+    $(\mu, \sigma) = (0.91, 0.53)$, and $(\theta, k) = (0.33,
+    2.78)$. $\tn{AIC}_\tn{exp} = 64.2$, $\tn{AIC}_\tn{unif} = 38.8$,
+    $\tn{AIC}_\tn{norm} = 47.3$, $\tn{AIC}_\tn{gamma} = 42.3$.}
+  \label{fig:cc-prp-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=7]
+        {distributions/HCwhole-small-step.dat};        
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/10]
+        {simulations/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/HCwhole-small-step.dat};
+        \addplot table [x index=0, y index=8]
+        {distributions/HCwhole-small-step.dat};        
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[HC whole blood step size]{Data and fit of several
+    distributions to small step size data in the HC whole blood
+    experiment ($N = 10$). Parameters of the distributions are:
+    $\lambda = 0.64$, $(\mu, \sigma) = (0.64, 0.41)$, and
+    $(\theta, k) = (0.31, 2.04)$. $\tn{AIC}_\tn{exp} = 42.1$,
+    $\tn{AIC}_\tn{unif} = 13.9$, $\tn{AIC}_\tn{norm} = 14.7$,
+    $\tn{AIC}_\tn{gamma} = 12.6$.}
+  \label{fig:hc-whole-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=7]
+        {distributions/CCwhole-small-step.dat};        
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/54]
+        {simulations/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/CCwhole-small-step.dat};
+        \addplot table [x index=0, y index=8]
+        {distributions/CCwhole-small-step.dat};        
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[CC whole blood step size]{Data and fit of several
+    distributions to small step size data in the CC whole blood
+    experiment ($N = 54$). Parameters of the distributions are:
+    $\lambda = 0.78$, $(\mu, \sigma) = (0.78, 0.43)$, and
+    $(\theta, k) = (0.33, 2.37)$. $\tn{AIC}_\tn{exp} = 154.0$,
+    $\tn{AIC}_\tn{unif} = 74.9$, $\tn{AIC}_\tn{norm} = 66.9$,
+    $\tn{AIC}_\tn{gamma} = 66.3$.}
+  \label{fig:cc-whole-step-fit}
+\end{figure}
+
+The gamma distribution had the best (i.e. the lowest) AIC value in
+three of the four sets of experimental data. The uniform distribution
+had the lowest AIC value in the CC PRP experiment. In all of the data,
+the exponential model had the worst AIC value, and therefore it seems
+reasonable to exclude it in favor of one of the other models. However,
+with the data we have, it is still inconclusive which model of the
+uniform, normal, or gamma distributions is the best choice for the
+small steps. In order to get more data, I ran simulations of the full
+rolling model and extracted small steps from the model output.
+
+\subsubsection{Simulations of the full rolling model}
+\label{sec:simul-full-roll}
+
+To recap, the full rolling model allows for multiple bonds to form
+between the platelet and surface, and tracks the position and
+orientation of each bond individually. To model the motion of the
+platelet, it balances the total bond force and torque with drag force
+and torque from a Stokes fluid.
+
+This model outputs the translational and angular velocity of the
+platelet at regular time steps throughout the experiment. Therefore to
+generate trajectories, we can simply integrate the translational
+velocity to get the position of the platelet as a function of
+time. Once we have trajectories, we can extract step sizes, dwell
+times, and the time-averaged velocity of each platelet.
+
+In order to define steps and dwells, I defined a threshold velocity
+$V_\tn{thresh}$ to partition a trajectory into a stepping state or a
+paused state. After some experimentation, I chose a $V_\tn{thresh}$
+about 50\% of the free-flowing velocity. For $V > V_\tn{thresh}$, the
+platelet is stepping, and for $V < V_\tn{thresh}$ the platelet is
+paused. When I applied this rule to the raw data, I ended up with a
+huge number of steps and dwells: $\sim 10\,000$ of each per
+trajectory. In the raw trajectories, there are large and rapid
+switches in velocity between free-flowing and stationary
+velocities. In order to smooth out these rapid switches, I filtered
+the raw trajectories by sampling the platelet's position every
+$N_\tn{skip}$ raw data points. Even choosing $N_\tn{skip} = 5$ greatly
+reduced the number of steps and dwells observed: from $\sim 10\,000$
+to $\sim 50$.
+
+To start with, I chose processing parameters
+($V_\tn{thresh} = 0.5 V_\tn{fluid}$, $N_\tn{skip} = 5$) by eye. But
+these can be chosen to match up with the spatial and temporal
+resolution of the rolling data. For example, if we assume that the
+spatial resolution of the microscope is $\sim 0.15 \mu\tn{m}$ and the
+temporal resolution is $\Delta t = 0.08 \tn{s}$ then the minimum
+velocity that can be observed over a single time step is
+$\sim 2 \frac{\mu\tn{m}}{\tn{s}}$.
+
+However, when I tried using these processing parameters on the
+existing simulation data, there were only a few dwells per trajectory,
+mostly lasting over only a single time interval of the filtered data. 
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=7]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot table[x index=0, y expr=(\coordindex+1)/18298]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=8]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa50_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[$\kappa=50$ step size]{Data and fit of several
+    distributions to small step size data from simulations of the full
+    model with $\kappa=50$ ($N = 18\,298$). Parameters of the distributions are:
+    $\lambda = 0.61$, $(\mu, \sigma) = (0.61, 0.40)$, and
+    $(\theta, k) = (0.22, 2.81)$. $\tn{AIC}_\tn{exp} = 80\,377$,
+    $\tn{AIC}_\tn{unif} = 25\,366$, $\tn{AIC}_\tn{norm} = 18\,542$,
+    $\tn{AIC}_\tn{gamma} = 10\,171$.}
+  \label{fig:k50-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=7]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot table[x index=0, y expr=(\coordindex+1)/1187]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=8]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[$\kappa=10$ step size]{Data and fit of several
+    distributions to small step size data from simulations of the full
+    model with $\kappa=10$ ($N = 1\,187$). Parameters of the distributions are:
+    $\lambda = 0.72$, $(\mu, \sigma) = (0.72, 0.43)$, and
+    $(\theta, k) = (0.23, 3.17)$. $\tn{AIC}_\tn{exp} = 3\,801$,
+    $\tn{AIC}_\tn{unif} = 1\,646$, $\tn{AIC}_\tn{norm} = 1\,381$,
+    $\tn{AIC}_\tn{gamma} = 953$.}
+  \label{fig:k10-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=7]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot table[x index=0, y expr=(\coordindex+1)/307]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=8]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa5_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[$\kappa=5$ step size]{Data and fit of several distributions
+    to small step size data from simulations of the full model with
+    $\kappa=5$ ($N = 307$). Parameters of the distributions are:
+    $\lambda = 0.82$, $(\mu, \sigma) = (0.82, 0.45)$, and
+    $(\theta, k) = (0.22, 3.69)$. $\tn{AIC}_\tn{exp} = 789$,
+    $\tn{AIC}_\tn{unif} = 426$, $\tn{AIC}_\tn{norm} = 388$,
+    $\tn{AIC}_\tn{gamma} = 296$.}
+  \label{fig:k5-step-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=1]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=3]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=5]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=7]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Exponential, Uniform, Normal, Gamma},
+        legend pos = south east,
+        xmin = 0, xmax = 2,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/16]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=2]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=4]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=6]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+        \addplot table [x index=0, y index=8]
+        {distributions/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa1_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-small-step.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[$\kappa=1$ step size]{Data and fit of several distributions
+    to small step size data from simulations of the full model with
+    $\kappa = 1$ ($N = 16$). Parameters of the distributions are:
+    $\lambda = 0.72$, $(\mu, \sigma) = (0.72, 0.40)$, and
+    $(\theta, k) = (0.17, 4.29)$. $\tn{AIC}_\tn{exp} = 53$,
+    $\tn{AIC}_\tn{unif} = 22$, $\tn{AIC}_\tn{norm} = 20$,
+    $\tn{AIC}_\tn{gamma} = 13$.}
+  \label{fig:k1-step-fit}
+\end{figure}
+
+% \tikzexternaldisable
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.48\textwidth}
+%     \begin{tikzpicture}
+%       \begin{axis}[
+%         legend entries={Uniform step},
+%         ymin=0,
+%         xlabel = Step size,
+%         ylabel = Probability density,
+%         ]
+%         \addplot+[hist=density, fill] table[y index=0]
+%         {simulations/testmod-unif-step.dat};
+%       \end{axis}
+%     \end{tikzpicture}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \begin{tikzpicture}
+%       \begin{axis}[
+%         legend entries = {Normal step},
+%         ymin=0,
+%         xlabel = Step size,
+%         ylabel = Probability density,
+%         ]
+%         \addplot+[hist=density, fill] table[y index=0]
+%         {simulations/testmod-norm-step.dat};
+%       \end{axis}
+%     \end{tikzpicture}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.48\textwidth}
+%     \begin{tikzpicture}
+%       \begin{axis}[
+%         legend entries = {Gamma step},
+%         ymin=0,
+%         xlabel = Step size,
+%         ylabel = Probability density,
+%         ]
+%         \addplot+[hist=density, fill] table[y index=0]
+%         {simulations/testmod-gamma-step.dat};
+%       \end{axis}
+%     \end{tikzpicture}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \begin{tikzpicture}
+%       \begin{axis}[
+%         legend entries = {Deterministic step},
+%         ymin=0,
+%         xlabel = Step size,
+%         ylabel = Probability density,
+%         ]
+%         \addplot+[hist=density, fill] table[y index=0]
+%         {simulations/testmod-delta-step.dat};
+%       \end{axis}
+%     \end{tikzpicture}
+%   \end{subfigure}
+%   \caption{Distribution of ``small'' step sizes for 4 different models
+%   of transition. All distributions chosen so that $\mu = 1/\lambda$.}
+%   \label{fig:exact-unif-step-cmp-equal-rates}
+% \end{figure}
+% \tikzexternalenable
+
+\section{Pause times}
+\label{sec:pause-times}
+
+As mentioned above, the distribution of pause times is given by the
+distribution of exit times from the pause subsystem shown in Figure
+\ref{fig:pause-subsystem}. The system of ODEs that describe the
+probabilities of a paused platelet being in a certain state is given
+in equations (\ref{eq:qu-nd})---(\ref{eq:qbf-nd}). For convenience, I
+reproduce them here:
+\begin{align*}
+  \Der{q_U}{t} &= \alpha q_b \\
+  \Der{q_T}{t} &= \eta q_{bf} \\
+  \Der{q_b}{t} &= -(\alpha + \delta) q_b + \gamma q_{bf} \\
+  \Der{q_{bf}}{t} &= \delta q_b - (\gamma + \eta) q_{bf}.
+\end{align*}
+Here $t$ is the time elapsed since the beginning of a pause event, and
+$q_i(t)$ is the probability that a platelet is in state $i$ at time
+$t$. Because all pause events start with the platelet in state $B$,
+$q_b(0) = 1$ and $q_i(0) = 0$ for $i \neq b$. The probability that a
+platelet is bound at time $t$ is given by $1 - q_b(t) - q_{bf}(t)$.
+
+\newpage
+
+\section{Fitting the model to experimental data}
+\label{sec:fitt-model-exper}
+
+To fit the whole model (i.e. the models of step size and dwell time
+distribution) to the data available, I performed a sequence of 3 fits:
+\begin{enumerate}
+\item Filter out the small step sizes using a pre-defined threshold
+  $\ell_\tn{thresh}$, then fit the parameters of a (truncated) gamma
+  distribution to the small steps. Specifically, I assume the small
+  steps have a distribution:
+  \begin{equation}
+    f_\tn{small}(x; k, \theta) = \frac{x^{k-1}
+      \exp\left(-\frac{x}{\theta}\right)}{\theta^k
+      \Gamma(k)} \bigg/ \frac{\gamma\left(k,
+        \frac{\ell_\tn{thresh}}{\theta}\right)}{\Gamma(k)}, \quad
+    \tn{for} \quad 0 \le x \le \ell_\tn{thresh},
+    \label{eq:small-step-pdf-gamma}
+  \end{equation}
+  and then estimate the parameters $k$ and $\theta$ by maximum
+  likelihood estimation. Here $\gamma(k, y)$ is the lower incomplete
+  gamma function:
+  \begin{equation*}
+    \int_{0}^{y} t^{k-1} \exp(-t) dt.
+  \end{equation*}
+  Truncating the domain and renormalizing
+  properly is important because we've processed the data by excluding
+  any steps above $\ell_\tn{thresh}$.
+\item Next, I look at all the step data and fit parameters in the
+  model distribution of all step sizes:
+  \begin{equation}
+    \label{eq:step-pdf-gamma}
+    f(x; \chi, \beta, k, \theta) = \chi \frac{x^{k-1}
+      \exp\left(-\frac{x}{\theta}\right)}{\theta^k \Gamma(k)} + (1 -
+    \chi) \beta \exp(-\beta x).
+  \end{equation}
+  Two of the parameters---$k$ and $\theta$---were estimated in step 1,
+  so I find MLE of the parameters $\chi$ and $\beta$ next.
+\item Finally, I use the distribution of dwell times specified in the
+  previous section to estimate the other parameters in the model
+  ($\alpha$, $\gamma$, $\delta$, and $\eta$). The PDF of the dwell
+  times is given by:
+  \begin{equation}
+    \label{eq:dwell-pdf}
+    g(t) = \alpha q_b(t) + \eta q_{bf}(t),
+  \end{equation}
+  where $q_b$ and $q_{bf}$ are solutions to the ODE system
+  (\ref{eq:qu-nd})---(\ref{eq:qbf-nd}). Again, I use MLE to estimate
+  the remaining 4 parameters, subject to the constraint
+  $\frac{\alpha (\gamma + \eta)}{\alpha (\gamma + \eta) + \delta \eta}
+  = \chi$, which was derived in Section \ref{sec:exper-step-size}.
+\end{enumerate}
+
+There are a couple of things to point out about the process of
+fitting:
+\begin{itemize}
+\item Step 1 was necessary, because when I tried to estimate the 4
+  parameters in equation (\ref{eq:step-pdf-gamma}) without fixing $k$
+  and $\theta$, the optimizer always returned sets of parameter values
+  where the exponential distribution was used to fit the small steps,
+  and the gamma distribution was used to fit the large
+  steps. Mathematically, this means that $\beta$ was large relative to
+  $k \theta$ (the mean of the gamma distribution).
+\item The fitting process of the dwell time distribution is sensitive
+  to the initial guess. I originally settled on using an initial guess
+  of $\gamma = \delta = \eta = 1$ and
+  $\alpha = \frac{\chi}{2 - 2\chi}$ because that guess results in
+  parameter values that are mostly between 0.1--10. However, starting
+  with a slightly larger guess for the values of $\gamma$, $\delta$,
+  and $\eta$ ($\gamma = \delta = \eta = e^1$) resulted in a slightly
+  higher maximum ($\sim 1\%$) of the likelihood function in all each
+  of the 4 datasets. I could try using a global optimization routine,
+  or try a bunch of different initial guesses to find a global optimum
+  for the likelihood function.
+\item In the simulations, $V^*$ is the final parameter that hasn't yet
+  been fit. I chose this parameter in two different ways. For the
+  first, I set $V^*$ for each experiment to be equal to the maximum
+  observed velocity of that particular experiment, that is the $V^*$
+  differed across each experiment. This gave the best agreement
+  between the actual and simulated velocities, but contradicts one of
+  our assumptions of the model: that the unbound and transitioning
+  platelets all move at the same speed.
+
+  The other choice is to set the $V^*$ values to be the same across
+  all the experiments, so I chose $V^*$ to be the maximum observed
+  velocity across all of the experiments: $68 \,\mu
+  \tn{m}/\tn{s}$. This resulted in much poorer agreement between the
+  actual and simulated velocities.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/21]
+        {simulations/HC-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/HC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/38]
+        {simulations/HC-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/HC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*52]
+        {simulations/HCsamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/38] {simulations/HC-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*52, y
+        expr=(\coordindex+1)/1024]
+        {simulations/HCsamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to HC PRP
+    data $\chi = 0.22$, $\beta = 0.12$, $k = 4.31$, $\theta = 0.15$,
+    $\alpha = 0.41$, $\gamma = 0.04$, $\delta = 1.58$, $\eta =
+    0.41$. $V^* = 52$}
+  \label{fig:HC-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/40]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/54]
+        {simulations/CC-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*53]
+        {simulations/CCsamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/49] {simulations/CC-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*53, y
+        expr=(\coordindex+1)/1024]
+        {simulations/CCsamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to CC PRP
+    data $\chi = 0.27$, $\beta = 0.16$, $k = 2.13$, $\theta = 0.54$,
+    $\alpha = 0.37$, $\gamma = 0.08$, $\delta = 1.25$, $\eta =
+    0.37$. $V^* = 53$}
+  \label{fig:CC-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HCwhole-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/11]
+        {simulations/HCwhole-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/HCwhole-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HCwhole-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/43]
+        {simulations/HCwhole-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/HCwhole-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
+        {simulations/HCwholesamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/30] {simulations/HCwhole-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
+        expr=(\coordindex+1)/1024]
+        {simulations/HCwholesamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to HC whole
+    blood data $\chi = 0.10$, $\beta = 0.07$, $k = 1.89$, $\theta =
+    0.36$, $\alpha = 0.34$, $\gamma = 0.002$, $\delta = 2.96$, $\eta =
+    0.34$. $V^* = 68$}
+  \label{fig:HCwhole-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCwhole-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/76]
+        {simulations/CCwhole-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CCwhole-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCwhole-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/122]
+        {simulations/CCwhole-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CCwhole-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*25]
+        {simulations/CCwholesamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/43] {simulations/CCwhole-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*25, y
+        expr=(\coordindex+1)/1024]
+        {simulations/CCwholesamp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to CC whole
+    blood data $\chi = 0.40$, $\beta = 0.21$, $k = 2.033$, $\theta =
+    0.43$, $\alpha = 0.62$, $\gamma = 0.09$, $\delta = 1.05$, $\eta =
+    0.62$. $V^* = 25$}
+  \label{fig:CCwhole-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/21]
+        {simulations/HC-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/HC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/38]
+        {simulations/HC-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/HC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HC-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
+        {simulations/HCsamp2-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/38] {simulations/HC-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
+        expr=(\coordindex+1)/1024]
+        {simulations/HCsamp2-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to HC PRP
+    data $\chi = 0.22$, $\beta = 0.12$, $k = 4.31$, $\theta = 0.15$,
+    $\alpha = 0.41$, $\gamma = 0.04$, $\delta = 1.58$, $\eta =
+    0.41$. $V^* = 68$}
+  \label{fig:HC-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/40]
+        {simulations/CC-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CC-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/54]
+        {simulations/CC-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CC-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CC-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
+        {simulations/CCsamp2-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/49] {simulations/CC-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
+        expr=(\coordindex+1)/1024]
+        {simulations/CCsamp2-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to CC PRP
+    data $\chi = 0.27$, $\beta = 0.16$, $k = 2.13$, $\theta = 0.54$,
+    $\alpha = 0.37$, $\gamma = 0.08$, $\delta = 1.25$, $\eta =
+    0.37$. $V^* = 68$}
+  \label{fig:CC-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HCwhole-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/11]
+        {simulations/HCwhole-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/HCwhole-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/HCwhole-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/43]
+        {simulations/HCwhole-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/HCwhole-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/HCwhole-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
+        {simulations/HCwholesamp2-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/30] {simulations/HCwhole-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
+        expr=(\coordindex+1)/1024]
+        {simulations/HCwholesamp2-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to HC whole
+    blood data $\chi = 0.10$, $\beta = 0.07$, $k = 1.89$, $\theta =
+    0.36$, $\alpha = 0.34$, $\gamma = 0.002$, $\delta = 2.96$, $\eta =
+    0.34$. $V^* = 68$}
+  \label{fig:HCwhole-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCwhole-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size ($\mu$m),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/76]
+        {simulations/CCwhole-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CCwhole-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time (s),
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/CCwhole-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time (s),
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/122]
+        {simulations/CCwhole-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/CCwhole-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/CCwhole-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*68]
+        {simulations/CCwholesamp3-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/43] {simulations/CCwhole-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*68, y
+        expr=(\coordindex+1)/1024]
+        {simulations/CCwholesamp2-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to CC whole
+    blood data $\chi = 0.40$, $\beta = 0.21$, $k = 2.033$, $\theta =
+    0.43$, $\alpha = 0.62$, $\gamma = 0.09$, $\delta = 1.05$, $\eta =
+    0.62$. $V^* = 68$}
+  \label{fig:CCwhole-whole-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Step size,
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-step.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Step size,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/6818]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-step.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-step-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Pause time,
+        ylabel = Probability Density,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-dwell.dat};
+        \addplot table [x index=0, y index=1]
+        {ml-estimates/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Pause time,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table[x index=0, y expr=(\coordindex+1)/7711]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-dwell.dat};
+        \addplot table [x index=0, y index=2]
+        {ml-estimates/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-dwell-dst.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48 \textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = north east,
+        xlabel = Average velocity,
+        ylabel = Probability Density,
+        fill opacity = 0.75,
+        ]
+        \addplot+[hist=density, fill] table [y index=0]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-vel.dat};
+        \addplot+[hist=density, fill] table [y expr=\thisrowno{0}*40.4]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0samp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        legend entries={Data, Model},
+        legend pos = south east,
+        xlabel = Average velocity,
+        ylabel = Cumulative Probability,
+        ]
+        \addplot+[const plot] table [x index=0, y
+        expr=(\coordindex+1)/1024] {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0-vel.dat};
+        \addplot+[const plot] table [x expr=\thisrowno{0}*40.4, y
+        expr=(\coordindex+1)/1024]
+        {simulations/expandedalgsto_M64_N64_tsteps51200_initfree_trials1024_bmax10_cflux0_vf40.4_omf20_kappa10_eta23000_d0.01_delta16_on1_off1_sat1_xiv7.36e-06_xiom9.82e-06_L2.5_T5_sbh0samp-gamma-sim.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Fit of step size and dwell time distributions to full model
+    simulations $\kappa = 10$. In this plot, all quantities are
+    nondimensional, with the scalings $L = 1 \mu\tn{m}$, $T = 5
+    \tn{s}$, and $V = L/T$. $\chi = 0.89$, $\beta = 0.05$, $k = 5.76$, $\theta =
+    0.10$, $\alpha = 14.9$, $\gamma = 46.5$, $\delta = 7.77$, $\eta =
+    14.9$. $V^* = 40.3$}
+  \label{fig:full-model-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{likelihood-plot.png}
+  \caption{Heatmap of $-\ln(L)$ in $\ln(\alpha)$ and $\ln(\gamma)$}
+  \label{fig:likelihood-plot}
+\end{figure}
+% To do:
+% \begin{itemize}
+% \item Finish deriving the PDF of dwell times, and verify with simulations
+% \item Fit the dwell time distribution to simulated dwell time data to
+%   estimate parameters
+% \item Write a script to fit both dwell time and step size models to
+%   data (simultaneously or sequentially?)
+% \end{itemize}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
