@@ -193,7 +193,7 @@ def main(proc=3, num_grids=5):
     grid_size = np.pi / (2 * n_nodes)
     save_array = np.array([grid_size, errs, n_nodes]).T
 
-    np.savetxt('convergence_test', save_array)
+    np.savetxt('convergence_test.dat', save_array)
     plt.plot(grid_size, errs)
     plt.show()
 
