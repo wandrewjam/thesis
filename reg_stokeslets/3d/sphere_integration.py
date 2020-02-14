@@ -138,6 +138,8 @@ def stokeslet_integrand(x_tuple, center, eps):
 
 def l2_error(x_tuple, n_nodes, proc=1):
     assert type(proc) is int
+    assert type(n_nodes) == np.int64
+    assert n_nodes % 2 == 0
     original_shape = x_tuple[0].shape
     x_array = np.array(x_tuple)
     x_array = x_array.reshape((3, -1)).T
@@ -178,7 +180,8 @@ def one_function(x_tuple):
 def main(proc=3, num_grids=5):
     # Test convergence of Regularized Stokeslets
     errs = list()
-    n_nodes = 2 ** np.arange(3, 4)
+    n_nodes = 12 + 36 * np.arange(6)
+
     for n in n_nodes:
         start = timer()
 
@@ -194,8 +197,8 @@ def main(proc=3, num_grids=5):
     save_array = np.array([grid_size, errs, n_nodes]).T
 
     np.savetxt('convergence_test.dat', save_array)
-    plt.plot(grid_size, errs)
-    plt.show()
+    # plt.plot(grid_size, errs)
+    # plt.show()
 
 
 def sphere_integrate(integrand, n_nodes=16, **kwargs):
@@ -228,4 +231,4 @@ def sphere_integrate(integrand, n_nodes=16, **kwargs):
 
 
 if __name__ == '__main__':
-    main()
+    main(proc=16)
