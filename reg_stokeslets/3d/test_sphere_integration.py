@@ -1,4 +1,4 @@
-from sphere_integration import phi, geom_weights, generate_grid, sphere_integrate
+from sphere_integration_utils import phi, geom_weights, generate_grid, sphere_integrate
 import numpy as np
 import pytest
 from scipy.special import sph_harm

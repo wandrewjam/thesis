@@ -1,8 +1,6 @@
 import numpy as np
 from itertools import product
-import matplotlib.pyplot as plt
 import multiprocessing as mp
-from timeit import default_timer as timer
 
 
 def phi(xi, eta, patch):
@@ -136,9 +134,9 @@ def stokeslet_integrand(x_tuple, center, eps):
     return -output / (8 * np.pi)
 
 
-def l2_error(x_tuple, n_nodes, proc=1):
+def l2_error(x_tuple, n_nodes, proc=1, eps=0.01):
     assert type(proc) is int
-    assert type(n_nodes) == np.int64
+    assert type(n_nodes) == np.int64 or type(n_nodes) is int
     assert n_nodes % 2 == 0
     original_shape = x_tuple[0].shape
     x_array = np.array(x_tuple)
@@ -150,7 +148,7 @@ def l2_error(x_tuple, n_nodes, proc=1):
     if proc == 1:
         surface_velocity = [
             sphere_integrate(stokeslet_integrand, n_nodes=n_nodes,
-                             center=point, eps=0.01) for point in x_array
+                             center=point, eps=eps) for point in x_array
         ]
 
     elif proc > 1:
@@ -158,7 +156,7 @@ def l2_error(x_tuple, n_nodes, proc=1):
         mp_result = [
             pool.apply_async(
                 sphere_integrate, args=(stokeslet_integrand, n_nodes),
-                kwds={'center': point, 'eps': 0.01}) for point in x_array
+                kwds={'center': point, 'eps': eps}) for point in x_array
         ]
         surface_velocity = [res.get() for res in mp_result]
 
@@ -175,30 +173,6 @@ def one_function(x_tuple):
     assert x_tuple[0].shape == x_tuple[1].shape
     assert x_tuple[1].shape == x_tuple[2].shape
     return np.ones(shape=x_tuple[0].shape)
-
-
-def main(proc=3, num_grids=5):
-    # Test convergence of Regularized Stokeslets
-    errs = list()
-    n_nodes = 12 + 36 * np.arange(6)
-
-    for n in n_nodes:
-        start = timer()
-
-        def error(x):
-            return l2_error(x, n, proc)
-
-        errs.append(sphere_integrate(error, n_nodes=n))
-        end = timer()
-
-        print('Total time for {} nodes: {} seconds'.format(n, end - start))
-
-    grid_size = np.pi / (2 * n_nodes)
-    save_array = np.array([grid_size, errs, n_nodes]).T
-
-    np.savetxt('convergence_test.dat', save_array)
-    # plt.plot(grid_size, errs)
-    # plt.show()
 
 
 def sphere_integrate(integrand, n_nodes=16, **kwargs):
@@ -228,7 +202,3 @@ def sphere_integrate(integrand, n_nodes=16, **kwargs):
         patch_integrals.append(np.sum(f_matrix * c_matrix * g_matrix,
                                       axis=(0, 1)) * del_xi * del_eta)
     return np.sum(patch_integrals, axis=0)
-
-
-if __name__ == '__main__':
-    main(proc=16)
