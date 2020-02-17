@@ -3,27 +3,41 @@ import pandas as pd
 
 
 def main():
-    filenames = ['CCC-Whole-Blood-Trajectories.xlsx',
-                 'HCC-Whole-Blood-Trajectories.xlsx',
-                 'PRP HH HC CC.xlsx']
+    # filenames = ['CCC-Whole-Blood-Trajectories.xlsx',
+    #              'HCC-Whole-Blood-Trajectories.xlsx',
+    #              'PRP HH HC CC.xlsx']
 
+    # filenames = ['Manuscript 1 FFF PRP Trajectories.xlsx', 'PRP HF.xlsx']
+
+    # filenames = ['Sasha FFF Data.xlsx', 'Sasha HFF Data.xlsx']
+
+    # filenames = ['PRP HV.xlsx']
+
+    filenames = ['Manuscript 1 VVV PRP Trajectories.xlsx']
     data_frames = list()
+    # data_frames.append(pd.read_excel(
+    #     filenames[0], sheet_name='Normalized Trajectories'
+    # ))
     data_frames.append(pd.read_excel(
-        filenames[0], sheet_name='Normalized Trajectories'
+        filenames[0], header=None
     ))
 
-    data_frames.append(pd.read_excel(
-        filenames[1], sheet_name='Normalized Trajectories'
-    ))
+    # data_frames.append(pd.read_excel(
+    #     filenames[1], sheet_name='Normalized Trajectories'
+    # ))
+    # data_frames.append(pd.read_excel(
+    #     filenames[1], sheet_name='Trajectories'
+    # ))
 
-    data_frames.append(pd.read_excel(filenames[2], sheet_name='CC'))
-    data_frames.append(pd.read_excel(filenames[2], sheet_name='HC'))
+    # data_frames.append(pd.read_excel(filenames[2], sheet_name='CC'))
+    # data_frames.append(pd.read_excel(filenames[2], sheet_name='HC'))
 
     data_frames = data_frames[::-1]
 
     for frame in data_frames:
-        cols = [c for c in frame.columns if c[:13] != 'Distance (um)'
-                and c[:17] != 'Elapsed Time (ms)']
+        # cols = [c for c in frame.columns if c[:13] != 'Distance (um)'
+        #         and c[:17] != 'Elapsed Time (ms)']
+        cols = [c for c in frame.columns if frame[c][0] != 0]
         frame.drop(labels=cols, axis='columns', inplace=True)
         frame.dropna(axis=0, how='all', inplace=True)
 
@@ -48,7 +62,11 @@ def main():
         for frame in frame_list:
             assert np.all(frame[1:] >= frame[:-1])
 
-    file_headers = ['hcp', 'ccp', 'hcw', 'ccw']
+    # file_headers = ['hcp', 'ccp', 'hcw', 'ccw']
+    # file_headers = ['hfp', 'ffp']
+    # file_headers = ['hfw', 'ffw']
+    # file_headers = ['hvp']
+    file_headers = ['vvp']
     for head, experiment in zip(file_headers, processed_frames):
         for j, trajectory in enumerate(experiment):
             np.savetxt(head + '-t{}.dat'.format(j), trajectory)
