@@ -6,7 +6,7 @@ from sphere_integration_utils import l2_error, sphere_integrate
 
 def main(proc=1, plot_result=False):
     # Test convergence in the blob parameter
-    epsilon = np.linspace(0.01, 0.15, num=11)
+    epsilon = np.linspace(0.01, 0.15, num=21)
     n_nodes = 24
 
     errs = list()
@@ -32,4 +32,4 @@ def main(proc=1, plot_result=False):
 
 
 if __name__ == '__main__':
-    main(plot_result=True)
+    main(proc=4)
