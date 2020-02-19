@@ -4,9 +4,29 @@ from scipy.stats import pearsonr, spearmanr, expon
 import glob
 
 
-def process_trajectory(trajectory):
-    """ Extract transition locations and times from trajectory """
-    is_bound = trajectory[1:, 1] == trajectory[:-1, 1]  # Size N - 1?
+def process_trajectory(trajectory, absolute_pause_threshold=0):
+    """Extract transition locations and times from trajectory
+
+    Parameters
+    ----------
+    trajectory
+    absolute_pause_threshold
+
+    Returns
+    -------
+
+    """
+    with np.errstate(divide='ignore', invalid='ignore'):
+        # Look for errors in trajectory data where there are multiple
+        # data points for a single time
+        velocity = ((trajectory[1:, 1] - trajectory[:-1, 1])
+                    / (trajectory[1:, 0] - trajectory[:-1, 0]))
+    indices = np.nonzero(~np.isfinite(velocity))[0]
+    if len(indices) > 0:
+        end = indices[0]
+        velocity = velocity[:end]
+        trajectory = trajectory[:end+1]
+    is_bound = velocity <= absolute_pause_threshold  # Size N - 1?
     is_bound = np.append([False], is_bound)  # Assume the initial state is a step
     # is_bound[i] stores the state in the interval (t[i-1]----t[i])
 
@@ -109,7 +129,7 @@ def extract_state_data(t_save, y_save):
 
 
 def main():
-    experiments = load_trajectories()
+    experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
 
     expt = 'hcw'
     steps_combined = list()
@@ -279,12 +299,11 @@ def main():
     plt.show()
 
 
-def load_trajectories():
+def load_trajectories(keys):
     import os
     os.chdir(os.path.expanduser('~/thesis/vlado-data/'))
 
     experiments = dict()
-    keys = ['hcp', 'ccp', 'hcw', 'ccw']
     for key in keys:
         trajectory_files = glob.glob(key + '-t*.dat')
         trajectory_list = [np.loadtxt(f) for f in trajectory_files]

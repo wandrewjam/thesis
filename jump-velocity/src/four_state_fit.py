@@ -1,0 +1,56 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+from free_velocity_processing import fit_fast_binding_params, get_free_velocities
+from extract_trajectory_data import load_trajectories, extract_state_data, process_trajectory
+from jv import solve_pde, delta_h
+from mle import change_vars
+
+
+if __name__ == '__main__':
+    collagen = ['hcp', 'ccp', 'hcw', 'ccw']
+    fibrinogen = ['hfp', 'ffp', 'hfw', 'ffw']
+    vWF = ['hvp', 'vvp']
+    experiments = load_trajectories(collagen)
+    avg_free_vels_dict, distances_dict, times_dict = get_free_velocities(experiments)
+
+    Vstar = 50
+    vels = np.concatenate(avg_free_vels_dict.values()) / Vstar
+    scaled_times = np.concatenate(times_dict.values()) / 8.5
+
+    a_fit, a_full, e_fit, e_full, reduced = fit_fast_binding_params(
+        scaled_times, vels)
+
+    def full_objective(p, v, vmin, N_obj):
+        c, eps2 = change_vars(p, forward=False)[:, 0]
+
+        h = 1. / N_obj
+        s_eval = (np.arange(0, np.ceil(1. / (vmin * h))) + 1) * h
+
+        y = np.linspace(0, 1, num=N_obj + 1)
+        u_init = delta_h(y[1:], h)
+        p0 = np.append(u_init, np.zeros(4 * N_obj))
+        u1_bdy = solve_pde(s_eval, p0, h, eps1=e_full, eps2=eps2, a=a_full,
+                           b=1 - a_full, c=c, d=1-c, scheme='up')[3]
+
+        pdf = np.interp(1. / v, s_eval,
+                        u1_bdy / (1 - np.exp((a_full - 1) / e_full + (c - 1) / eps2)))
+        return -np.sum(np.log(pdf))
+
+    N_obj = 32
+    sol_combined = dict()
+    for expt, trajectories in experiments.items():
+        v_combined = list()
+        for trajectory in experiments[expt]:
+            y_save, t_save = process_trajectory(trajectory)[1:]
+            v_combined.append(extract_state_data(t_save, y_save)[8])
+
+        v_combined = np.array(v_combined)
+        v_combined = v_combined[v_combined > 0] / Vstar
+
+        vmin = np.amin(v_combined)
+        initial_guess = change_vars(np.array([0.5, 1]), forward=True)
+        sol = minimize(full_objective, initial_guess, args=(v_combined, vmin, N_obj))
+        sol_combined.update([(expt, sol)])
+
+    print(change_vars(sol.x, forward=False))

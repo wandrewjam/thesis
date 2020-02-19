@@ -138,7 +138,7 @@ def fit_models(vels, two_par, initial_guess=None, N_obj=512, constraints=()):
                 return -np.sum(np.log(q(1, 1. / v, ap, epsp)))
 
     def full_objective(p, v, vmin, two_par, N_obj):
-        """ Log likelihood function of the full model
+        """Log likelihood function of the full model
 
         Parameters
         ----------
