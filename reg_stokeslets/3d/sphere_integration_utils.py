@@ -101,7 +101,7 @@ def generate_grid(n_nodes):
     return eta_mesh, xi_mesh, sphere_nodes
 
 
-def stokeslet_integrand(x_tuple, center, eps):
+def stokeslet_integrand(x_tuple, center, eps, force):
     """Evaluate the regularized Stokeslet located at center
 
     This function returns the ith component of the free-space
@@ -109,6 +109,7 @@ def stokeslet_integrand(x_tuple, center, eps):
 
     Parameters
     ----------
+    force
     eps
     center
     x_tuple
@@ -128,7 +129,7 @@ def stokeslet_integrand(x_tuple, center, eps):
                  * (r2[:, :, np.newaxis, np.newaxis] + 2*eps**2)
                  + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :])
                  / np.sqrt((r2[:, :, np.newaxis, np.newaxis] + eps**2)**3))
-    force = -3. / 2 * np.array([0, 0, 1])
+
     output = np.dot(stokeslet, force)
 
     return -output / (8 * np.pi)
@@ -145,10 +146,12 @@ def l2_error(x_tuple, n_nodes, proc=1, eps=0.01):
     assert (np.linalg.norm(np.linalg.norm(x_array, axis=1) - 1)
             < 100*np.finfo(float).eps)
 
+    point_force = -3. / 2 * np.array([0, 0, 1])
     if proc == 1:
         surface_velocity = [
             sphere_integrate(stokeslet_integrand, n_nodes=n_nodes,
-                             center=point, eps=eps) for point in x_array
+                             center=point, eps=eps, force=point_force)
+            for point in x_array
         ]
 
     elif proc > 1:
@@ -156,7 +159,8 @@ def l2_error(x_tuple, n_nodes, proc=1, eps=0.01):
         mp_result = [
             pool.apply_async(
                 sphere_integrate, args=(stokeslet_integrand, n_nodes),
-                kwds={'center': point, 'eps': eps}) for point in x_array
+                kwds={'center': point, 'eps': eps, 'force': point_force})
+            for point in x_array
         ]
         surface_velocity = [res.get() for res in mp_result]
 
