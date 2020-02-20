@@ -33,7 +33,7 @@ def main():
     scaled_times = np.concatenate(times_dict.values()) / 8.5
 
     a_fit, a_full, e_fit, e_full, reduced = fit_fast_binding_params(scaled_times, vels)
-    # print(sol_full.x)
+    print(a_full, e_full)
     plot_vels_and_fits(Vstar, a_fit, a_full, avg_free_vels_dict, e_fit, e_full, reduced, vels)
     # print(sol.x)
 
@@ -136,7 +136,7 @@ def get_free_velocities(experiments):
         distances_list = list()
         for trajectory in trajectories:
             y_save, t_save = process_trajectory(
-                trajectory, absolute_pause_threshold=0.1)[1:]
+                trajectory, absolute_pause_threshold=0.0)[1:]
             if y_save.size == 2:
                 continue
             result = extract_state_data(t_save, y_save)
