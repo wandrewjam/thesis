@@ -4,7 +4,13 @@ from timeit import default_timer as timer
 from sphere_integration_utils import l2_error, sphere_integrate
 
 
-def main(proc=1, plot_result=False):
+def main(filename, proc=1, plot_result=False):
+    # Test to see if a refinement file already exists
+    import os.path
+    filename = filename + '.dat'
+    if os.path.exists(filename):
+        raise ValueError('{} already exists!'.format(filename))
+
     # Test convergence in the blob parameter
     epsilon = np.linspace(0.01, 0.15, num=21)
     n_nodes = 24
@@ -24,7 +30,7 @@ def main(proc=1, plot_result=False):
 
     save_array = np.array([errs, epsilon]).T
 
-    np.savetxt('epsilon_refinement.dat', save_array)
+    np.savetxt(filename, save_array)
 
     if plot_result:
         plt.plot(epsilon, errs)
@@ -32,4 +38,4 @@ def main(proc=1, plot_result=False):
 
 
 if __name__ == '__main__':
-    main(proc=4)
+    main('epsilon_refinement', proc=4)

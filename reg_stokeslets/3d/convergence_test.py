@@ -4,10 +4,16 @@ from timeit import default_timer as timer
 from sphere_integration_utils import l2_error, sphere_integrate
 
 
-def main(proc=1, plot_result=False):
+def main(filename, proc=1, plot_result=False):
+    # Test to see if a convergence file already exists
+    import os.path
+    filename = filename + '.dat'
+    if os.path.exists(filename):
+        raise ValueError('{} already exists!'.format(filename))
+
     # Test convergence of Regularized Stokeslets
     errs = list()
-    n_nodes = 12 + 36 * np.arange(6)
+    n_nodes = 2 ** np.arange(1, 5)
 
     for n in n_nodes:
         start = timer()
@@ -23,7 +29,7 @@ def main(proc=1, plot_result=False):
     grid_size = np.pi / (2 * n_nodes)
     save_array = np.array([grid_size, errs, n_nodes]).T
 
-    np.savetxt('convergence_test.dat', save_array)
+    np.savetxt(filename, save_array)
 
     if plot_result:
         plt.plot(grid_size, errs)
@@ -31,4 +37,4 @@ def main(proc=1, plot_result=False):
 
 
 if __name__ == '__main__':
-    main()
+    main('small_convergence_test')
