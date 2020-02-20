@@ -129,8 +129,11 @@ def stokeslet_integrand(x_tuple, center, eps, force):
                  * (r2[:, :, np.newaxis, np.newaxis] + 2*eps**2)
                  + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :])
                  / np.sqrt((r2[:, :, np.newaxis, np.newaxis] + eps**2)**3))
-
-    output = np.dot(stokeslet, force)
+    output = np.zeros(shape=stokeslet.shape[:3])
+    for i in range(output.shape[0]):
+        for j in range(output.shape[1]):
+            output[i, j, :] = np.dot(stokeslet[i, j, :, :], force[i, j, :])
+    # output = np.dot(stokeslet, force)
 
     return -output / (8 * np.pi)
 
@@ -147,6 +150,8 @@ def l2_error(x_tuple, n_nodes, proc=1, eps=0.01):
             < 100*np.finfo(float).eps)
 
     point_force = -3. / 2 * np.array([0, 0, 1])
+    point_force = (np.ones(shape=(n_nodes+1, n_nodes+1, 1))
+                   * point_force[np.newaxis, np.newaxis, :])
     if proc == 1:
         surface_velocity = [
             sphere_integrate(stokeslet_integrand, n_nodes=n_nodes,
