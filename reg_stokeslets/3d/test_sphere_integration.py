@@ -89,5 +89,5 @@ class TestSphereQuadrature(object):
                 pphi = np.arccos(z)
                 return sph_harm(m, n, theta, pphi)
 
-        integral = sphere_integrate(f, n_nodes, )
-        assert np.abs(integral) < n_nodes * np.finfo(float).eps
+            integral = sphere_integrate(f, n_nodes, )
+            assert np.abs(integral) < n_nodes * np.finfo(float).eps

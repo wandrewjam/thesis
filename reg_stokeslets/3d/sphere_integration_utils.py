@@ -1,5 +1,4 @@
 import numpy as np
-from itertools import product
 import multiprocessing as mp
 
 
@@ -74,30 +73,47 @@ def geom_weights(xi, eta):
 
 
 def generate_grid(n_nodes):
+    """Generate a uniform mesh in patch coordinates xi and eta
+
+    This function only generates the mesh for a single patch. The patch
+    coordinate mesh is identical for each patch, the difference in
+    patches is only taken into account in the mapping back to Cartesian
+    coordinates.
+
+    Parameters
+    ----------
+    n_nodes
+
+    Returns
+    -------
+
+    """
     assert n_nodes % 2 == 0  # n_nodes should be even
     xi_mesh = np.linspace(-np.pi / 4, np.pi / 4, num=n_nodes + 1)
     eta_mesh = np.linspace(-np.pi / 4, np.pi / 4, num=n_nodes + 1)
-    cube_nodes = list()
+    sphere_nodes = list()
     for i in range(6):
         patch = i + 1
-        nodes = np.linspace(-1, 1, num=n_nodes + 1)
-        if patch == 1:
-            cube_nodes += product([1.], nodes, nodes)
-        elif patch == 2:
-            cube_nodes += product(nodes, [1.], nodes)
-        elif patch == 3:
-            cube_nodes += product([-1.], nodes, nodes)
-        elif patch == 4:
-            cube_nodes += product(nodes, [-1.], nodes)
-        elif patch == 5:
-            cube_nodes += product(nodes, nodes, [1.])
-        elif patch == 6:
-            cube_nodes += product(nodes, nodes, [-1.])
-    cube_nodes = np.array(list(set(cube_nodes)))
-    assert cube_nodes.shape[0] == 6 * n_nodes ** 2 + 2
 
-    sphere_nodes = cube_nodes / np.linalg.norm(cube_nodes,
-                                               axis=-1)[:, np.newaxis]
+        patch_nodes = phi(xi_mesh[:, np.newaxis], eta_mesh[np.newaxis, :],
+                          patch=patch)
+
+        patch_nodes = np.array(patch_nodes).transpose(
+            (1, 2, 0))
+
+        if patch == 1 or patch == 3:
+            patch_nodes = patch_nodes.reshape((-1, 3))
+            sphere_nodes.append(patch_nodes)
+        elif patch == 2 or patch == 4:
+            patch_nodes = patch_nodes[1:-1].reshape((-1, 3))
+            sphere_nodes.append(patch_nodes)
+        elif patch == 5 or patch == 6:
+            patch_nodes = patch_nodes[1:-1, 1:-1].reshape((-1, 3))
+            sphere_nodes.append(patch_nodes)
+
+    sphere_nodes = np.concatenate(sphere_nodes)
+    assert sphere_nodes.shape[0] == 6 * n_nodes ** 2 + 2
+
     return eta_mesh, xi_mesh, sphere_nodes
 
 
@@ -105,7 +121,8 @@ def stokeslet_integrand(x_tuple, center, eps, force):
     """Evaluate the regularized Stokeslet located at center
 
     This function returns the ith component of the free-space
-    regularized Stokeslet centered at center, evaluated at position x.
+    regularized Stokeslet centered at center, evaluated at position
+    x_tuple.
 
     Parameters
     ----------
@@ -130,10 +147,12 @@ def stokeslet_integrand(x_tuple, center, eps, force):
                  + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :])
                  / np.sqrt((r2[:, :, np.newaxis, np.newaxis] + eps**2)**3))
     output = np.zeros(shape=stokeslet.shape[:3])
+    f_array = force(x_array)
+
     for i in range(output.shape[0]):
         for j in range(output.shape[1]):
-            output[i, j, :] = np.dot(stokeslet[i, j, :, :], force[i, j, :])
-    # output = np.dot(stokeslet, force)
+            output[i, j, :] = np.dot(stokeslet[i, j, :, :],
+                                     f_array[i, j, :])
 
     return -output / (8 * np.pi)
 
@@ -149,9 +168,11 @@ def l2_error(x_tuple, n_nodes, proc=1, eps=0.01):
     assert (np.linalg.norm(np.linalg.norm(x_array, axis=1) - 1)
             < 100*np.finfo(float).eps)
 
-    point_force = -3. / 2 * np.array([0, 0, 1])
-    point_force = (np.ones(shape=(n_nodes+1, n_nodes+1, 1))
-                   * point_force[np.newaxis, np.newaxis, :])
+    def point_force(x_array):
+        output = np.zeros(shape=x_array.shape)
+        output[..., 2] = -3./2
+        return output
+
     if proc == 1:
         surface_velocity = [
             sphere_integrate(stokeslet_integrand, n_nodes=n_nodes,
