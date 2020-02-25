@@ -67,7 +67,7 @@ class TestWeightsClass(object):
 class TestGridClass(object):
     def test_generate_grid(self):
         for n_nodes in [2, 4, 8, 16, 32]:
-            xi_mesh, eta_mesh, sphere_nodes = generate_grid(n_nodes)
+            xi_mesh, eta_mesh, sphere_nodes = generate_grid(n_nodes)[:3]
             assert xi_mesh.shape == (n_nodes+1,)
             assert eta_mesh.shape == (n_nodes+1,)
             assert sphere_nodes.shape == (6 * n_nodes**2 + 2, 3)
@@ -91,3 +91,25 @@ class TestSphereQuadrature(object):
 
             integral = sphere_integrate(f, n_nodes, )
             assert np.abs(integral) < n_nodes * np.finfo(float).eps
+
+            # Also test the array version
+            xi_mesh, eta_mesh, sphere_nodes, ind_map = generate_grid(n_nodes)
+            integrand = f(sphere_nodes.T)
+            integral = sphere_integrate(integrand, n_nodes)
+            assert np.abs(integral) < n_nodes * np.finfo(float).eps
+
+
+class TestMeshGenerator(object):
+    def test_mesh_generator(self):
+        n_nodes = 8
+        xi_mesh, eta_mesh, sphere_nodes, ind_map = generate_grid(n_nodes)
+
+        for i in range(6):
+            mapped_nodes = np.array(
+                phi(xi_mesh[:, np.newaxis], eta_mesh[np.newaxis, :], patch=i+1)
+            ).transpose((1, 2, 0))
+
+            diff = mapped_nodes - sphere_nodes[ind_map[..., i]]
+            assert (np.linalg.norm(diff.flatten())
+                    < n_nodes**2 * np.finfo(float).eps)
+

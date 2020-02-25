@@ -91,8 +91,9 @@ def generate_grid(n_nodes):
     assert n_nodes % 2 == 0  # n_nodes should be even
     xi_mesh = np.linspace(-np.pi / 4, np.pi / 4, num=n_nodes + 1)
     eta_mesh = np.linspace(-np.pi / 4, np.pi / 4, num=n_nodes + 1)
-    sphere_nodes = list()
-    for i in range(6):
+    sphere_nodes = np.zeros(shape=(0, 3))
+    ind_map = -np.ones(shape=(n_nodes+1, n_nodes+1, 6), dtype=int)
+    for i in [0, 2, 1, 3, 4, 5]:  # Fill in opposite patches first
         patch = i + 1
 
         patch_nodes = phi(xi_mesh[:, np.newaxis], eta_mesh[np.newaxis, :],
@@ -103,18 +104,42 @@ def generate_grid(n_nodes):
 
         if patch == 1 or patch == 3:
             patch_nodes = patch_nodes.reshape((-1, 3))
-            sphere_nodes.append(patch_nodes)
+
+            ind_map[..., i] = np.arange(
+                sphere_nodes.shape[0], sphere_nodes.shape[0] + (n_nodes + 1)**2
+            ).reshape((n_nodes+1, n_nodes+1))
         elif patch == 2 or patch == 4:
             patch_nodes = patch_nodes[1:-1].reshape((-1, 3))
-            sphere_nodes.append(patch_nodes)
+
+            ind_map[1:-1, :, i] = np.arange(
+                sphere_nodes.shape[0], sphere_nodes.shape[0] + (n_nodes**2 - 1)
+            ).reshape((n_nodes-1, n_nodes+1))
+            ind_map[0, :, i] = ind_map[-1, :, i-1]
+            ind_map[-1, :, i] = ind_map[0, :, (i+1) % 4]
         elif patch == 5 or patch == 6:
             patch_nodes = patch_nodes[1:-1, 1:-1].reshape((-1, 3))
-            sphere_nodes.append(patch_nodes)
 
-    sphere_nodes = np.concatenate(sphere_nodes)
+            ind_map[1:-1, 1:-1, i] = np.arange(
+                sphere_nodes.shape[0], sphere_nodes.shape[0] + (n_nodes - 1)**2
+            ).reshape((n_nodes-1, n_nodes-1))
+
+            # A bunch of rules to ensure each edge matches up correctly
+            if patch == 5:
+                ind_map[0, :, i] = ind_map[::-1, -1, 3]
+                ind_map[-1, :, i] = ind_map[:, -1, 1]
+                ind_map[1:-1, 0, i] = ind_map[1:-1, -1, 0]
+                ind_map[1:-1, -1, i] = ind_map[-2:0:-1, -1, 2]
+            elif patch == 6:
+                ind_map[0, :, i] = ind_map[:, 0, 3]
+                ind_map[-1, :, i] = ind_map[::-1, 0, 1]
+                ind_map[1:-1, 0, i] = ind_map[-2:0:-1, 0, 2]
+                ind_map[1:-1, -1, i] = ind_map[1:-1, 0, 0]
+        sphere_nodes = np.concatenate([sphere_nodes, patch_nodes])
+
     assert sphere_nodes.shape[0] == 6 * n_nodes ** 2 + 2
+    assert np.count_nonzero(ind_map == -1) == 0
 
-    return eta_mesh, xi_mesh, sphere_nodes
+    return eta_mesh, xi_mesh, sphere_nodes, ind_map
 
 
 def stokeslet_integrand(x_tuple, center, eps, force):
@@ -206,7 +231,9 @@ def one_function(x_tuple):
 
 
 def sphere_integrate(integrand, n_nodes=16, **kwargs):
-    eta_mesh, xi_mesh = generate_grid(n_nodes)[:2]
+    if type(integrand) is np.ndarray:
+        assert integrand.shape[0] == 6*n_nodes**2 + 2
+    eta_mesh, xi_mesh, sphere_nodes, ind_map = generate_grid(n_nodes)
 
     del_xi = xi_mesh[1] - xi_mesh[0]
     del_eta = eta_mesh[1] - eta_mesh[0]
@@ -214,13 +241,16 @@ def sphere_integrate(integrand, n_nodes=16, **kwargs):
     patch_integrals = list()
     for i in range(6):
         patch = i + 1
+
         g_matrix = geom_weights(xi_mesh[:, np.newaxis],
                                 eta_mesh[np.newaxis, :])
 
-        cartesian_coordinates = phi(xi_mesh[:, np.newaxis],
-                                    eta_mesh[np.newaxis, :], patch)
-
-        f_matrix = integrand(cartesian_coordinates, **kwargs)
+        if type(integrand) is np.ndarray:
+            f_matrix = integrand[ind_map[..., i]]
+        else:
+            cartesian_coordinates = phi(xi_mesh[:, np.newaxis],
+                                        eta_mesh[np.newaxis, :], patch)
+            f_matrix = integrand(cartesian_coordinates, **kwargs)
 
         c_matrix = np.ones(shape=xi_mesh.shape + eta_mesh.shape)
         c_matrix[(0, n_nodes), 1:n_nodes] = 1. / 2
