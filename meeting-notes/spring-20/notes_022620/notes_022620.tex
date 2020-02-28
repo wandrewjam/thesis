@@ -1,0 +1,313 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+\usepgfplotslibrary{colorbrewer, statistics}
+\pgfplotsset{
+  exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+    legend entries={PDF, CDF},},
+  every axis plot post/.append style={thick},
+  table/search
+  path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+  colormap/YlGnBu,
+  cycle list/Set1-5,
+  legend style={legend cell align=left,},
+}
+
+\usepgfplotslibrary{external}
+\tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+% \begin{center}
+%   {\Large Notes on trajectory data and the jump-velocity model
+%     (\today)}
+% \end{center}
+
+% \section{Regularized Stokeslets on a sphere}
+% \label{sec:regul-stok-sphere}
+
+% The method of regularized stokeslets requires you to integrate:
+% \begin{equation}
+%   \label{eq:reg-stokeslets}
+%   u_j(\mathbf{x}_0) = \frac{1}{8\pi \mu} \int_{\partial D}
+%   S_{ij}^\epsilon (\mathbf{x}, \mathbf{x}_0) g_i(\mathbf{x}) ds(\mathbf{x}).
+% \end{equation}
+% where $\mu$ is the viscosity of the fluid, $\partial D$ is the surface
+% of the body (a sphere in the simplest case), $S_{ij}^\epsilon
+% (\mathbf{x}, \mathbf{x}_0)$ is the regularized stokeslet with blob
+% parameter $\epsilon$, and $g_i$ is the $i$th component of the traction
+% on the surface of the body.
+
+% Ultimately our goal is to use regularized stokeslets to find the
+% velocity field of the fluid around an ellipsoidal platelet near a
+% wall, but we want to test out the method on simpler problems
+% first. The simplest case is where $\partial D$ is the surface of a
+% sphere, and $S_{ij}^\epsilon$ is the free-space Stokeslet (i.e. the
+% flow is unbounded in all directions away from the sphere).
+
+% This case is handled in Cortez et. al., 2005 \cite{Cortez2005}. The
+% first test case they examine is to apply a point force of $\mathbf{f}
+% = -\frac{3\mu}{2} \mathbf{e_3}$ everywhere on the surface of the
+% sphere. Analytically, this generates a velocity of $\mathbf{u} =
+% -\mathbf{e}_3$. The error of the numerical integration of equation
+% (\ref{eq:reg-stokeslets}) depends both on the size of the mesh $N
+% \times N$, and the regularization parameter $\epsilon$. Cortez
+% et. al. provide plots of the L2 error while refining each of these
+% parameters in turn, which we can compare our integration scheme to.
+
+% As shown in Figures \ref{fig:cortez-conv} and \ref{fig:our-conv}, the
+% convergence results of our numerical scheme is similar to their
+% published results.
+
+% There are two next steps:
+% \begin{enumerate}
+% \item Write a function that is able to go ``the other way,'' i.e. to
+%   compute a distribution of point forces that generate a prescribed
+%   motion $\mathbf{u}(\mathbf{x})$. This requires building the linear
+%   system
+%   \begin{equation}
+%     \label{eq:linear-system}
+%     \tilde{\mathbf{u}} = \frac{1}{8\pi\mu} \mathcal{A} \tilde{\mathbf{f}}
+%   \end{equation}
+%   where $\tilde{\mathbf{u}}$ and $\tilde{\mathbf{f}}$ are vectors of
+%   length $3N_\tn{node}$.
+% \item The other next step is to write a routine that integrates over
+%   the surface of an ellipsoid. I am thinking this won't be too much
+%   extra work, we just need an additional coordinate transform to
+%   convert between coordinates on the ellipsoid and coordinates on the
+%   sphere. 
+% \end{enumerate}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=0.5\textwidth]{cubed_sphere}
+%   \caption{An example of the discretization scheme on the surface of
+%     the sphere (from \cite{Portelenelle2018})}
+%   \label{fig:discretization}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.6\textwidth}
+%     \includegraphics[width=\textwidth]{reg_refine_cortez}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.35\textwidth}
+%     \includegraphics[width=\textwidth]{grid_refine_cortez}
+%   \end{subfigure}
+%   \caption{Convergence in the $\Delta s$ and $\epsilon$ parameters
+%     published in \cite{Cortez2005}.}
+%   \label{fig:cortez-conv}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{reg_refine}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{grid_refine}
+%   \end{subfigure}
+%   \caption{Convergence in the $\Delta s$ and $\epsilon$ parameters in
+%     our numerical scheme.}
+%   \label{fig:our-conv}
+% \end{figure}
+
+% \newpage
+
+% \section{Trajectory Data}
+% \label{sec:trajectory-data}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{col_prp_traj}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{col_whl_traj}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{fbg_prp_traj}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{fbg_whl_traj}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{vwf_prp_traj}
+  \end{subfigure}
+  \caption{Trajectory data from the 10 different experiments. Unprimed
+    platelets are in blue, and primed platelets are in red}
+  \label{fig:traj-plots}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{col_step}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{fbg_step}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{vwf_step}
+  \end{subfigure}
+  \caption{Step time data from all experiments}
+  \label{fig:step-time}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{col_pause}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{fbg_pause}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{vwf_pause}
+  \end{subfigure}
+  \caption{Pause time data from all experiments}
+  \label{fig:pause-time}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{col_vel}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{fbg_vel}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{vwf_vel}
+  \end{subfigure}
+  \caption{Time-averaged velocity data from all experiments}
+  \label{fig:velocity}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{ccp_capture.png}
+    \caption{CC PRP: $k_\tn{capture} = 0.52 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hcp_capture.png}
+    \caption{HC PRP: $k_\tn{capture} = 0.63 / s$}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{ccw_capture.png}
+    \caption{CC whole blood: $k_\tn{capture} = 1.59 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hcw_capture.png}
+    \caption{HC whole blood: $k_\tn{capture} = 1.12 / s$}
+  \end{subfigure}
+  \caption{Histograms of the initial step time. The two experiments
+    with whole blood have faster ``capture'' rates than the two
+    experiments in PRP.}
+  \label{fig:col-capture}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{ffp_capture.png}
+    \caption{FF PRP: $k_\tn{capture} = 0.67 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hfp_capture.png}
+    \caption{HF PRP: $k_\tn{capture} = 1.42 / s$}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{ffw_capture.png}
+    \caption{FF whole blood: $k_\tn{capture} = 1.17 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hfw_capture.png}
+    \caption{HF whole blood: $k_\tn{capture} = 0.81 / s$}
+  \end{subfigure}
+  \caption{Histograms of the initial step time on fibrinogen.}
+  \label{fig:fbg-capture}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{vvp_capture.png}
+    \caption{VV PRP: $k_\tn{capture} = 1.89 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hvp_capture.png}
+    \caption{HV PRP: $k_\tn{capture} = 0.32 / s$}
+  \end{subfigure}
+  \caption{Histograms of the initial step time on vWF.}
+  \label{fig:vwf-capture}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
