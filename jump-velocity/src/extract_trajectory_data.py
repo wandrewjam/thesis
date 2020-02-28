@@ -4,7 +4,7 @@ from scipy.stats import pearsonr, spearmanr, expon
 import glob
 
 
-def process_trajectory(trajectory, absolute_pause_threshold=0):
+def process_trajectory(trajectory, absolute_pause_threshold=0.):
     """Extract transition locations and times from trajectory
 
     Parameters
@@ -102,8 +102,10 @@ def extract_state_data(t_save, y_save):
         post_free_vels = del_y[-1] / del_t[-1]
         vels = (y_save[-2] - y_save[1]) / (t_save[-2] - t_save[1])
 
-    assert dwells.size - steps.size == 1
-    assert dwells.size - free_vels.size == 1
+    assert dwells.size - steps.size == 1 or (dwells.size == 0
+                                             and steps.size == 0)
+    assert dwells.size - free_vels.size == 1 or (dwells.size == 0
+                                                 and steps.size == 0)
     if steps.size > 0:
         step_size_v_predwell = zip(steps, dwells[:-1])
         step_size_v_postdwell = zip(steps, dwells[1:])
@@ -129,9 +131,10 @@ def extract_state_data(t_save, y_save):
 
 
 def main():
-    experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
-
-    expt = 'hcw'
+    # experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
+    # experiments = load_trajectories(['hfp', 'ffp', 'hfw', 'ffw'])
+    experiments = load_trajectories(['hvp', 'vvp'])
+    expt = 'hvp'
     steps_combined = list()
     pre_dwell_steps_combined = list()
     post_dwell_steps_combined = list()
@@ -150,7 +153,7 @@ def main():
     step_autocorr_combined = list()
     vels_autocorr_combined = list()
     for trajectory in experiments[expt]:
-        y_save, t_save = process_trajectory(trajectory)[1:]
+        y_save, t_save = process_trajectory(trajectory, absolute_pause_threshold=1.)[1:]
 
         (dwells, free_vels, avg_free_vels, post_dwell_steps, post_free_vels,
          pre_dwell_steps, pre_free_vels, steps, vels, step_size_v_predwell,
@@ -268,13 +271,20 @@ def main():
     fig, axs = plt.subplots(nrows=4, ncols=2, figsize=(10, 10))
     for i, data in enumerate(processed_correlations):
         ax = axs[i // 2, i % 2]
-        ax.plot(data[:, 0], data[:, 1], 'o')
+        try:
+            ax.plot(data[:, 0], data[:, 1], 'o')
+        except IndexError:
+            pass
         ax.set_title(plot_labels[i]['title'])
         ax.set_xlabel(plot_labels[i]['x_label'])
         ax.set_ylabel(plot_labels[i]['y_label'])
         print(plot_labels[i]['title'])
-        print(pearsonr(data[:, 0], data[:, 1]))
-        print(spearmanr(data[:, 0], data[:, 1]))
+        try:
+            print(pearsonr(data[:, 0], data[:, 1]))
+            print(spearmanr(data[:, 0], data[:, 1]))
+        except IndexError:
+            pass
+
     plt.tight_layout()
     plt.show()
 
