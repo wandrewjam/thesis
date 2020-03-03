@@ -19,8 +19,8 @@ def assemble_vel_cases(sphere_nodes):
 
 
 def main(proc=1):
-    eps = [0.1, 0.05]
-    n_nodes = [8, 16]
+    eps = [0.1, 0.05, 0.01]
+    n_nodes = [12, 24, 36, 48]
 
     if proc == 1:
         matrices = [generate_resistance_matrices(e, n)
@@ -78,11 +78,13 @@ def generate_resistance_matrices(eps, n_nodes):
     tmp_matrix2 = np.stack([
         sphere_integrate(pt_torques[..., i], n_nodes=n_nodes) for i in range(7)
     ], axis=-1)
+
     print('Constructing resistance matrices for eps = {}, nodes = {}'.format(
         eps, n_nodes))
     t_matrix, p_matrix = tmp_matrix1[:, :3], tmp_matrix1[:, 3:6]
     pt_matrix, r_matrix = tmp_matrix2[:, :3], tmp_matrix2[:, 3:6]
     shear_forces, shear_torques = tmp_matrix1[:, 6], tmp_matrix2[:, 6]
+    print('Finished eps={}, n_nodes={}'.format(eps, n_nodes))
     return t_matrix, p_matrix, pt_matrix, r_matrix, shear_forces, shear_torques
 
 
