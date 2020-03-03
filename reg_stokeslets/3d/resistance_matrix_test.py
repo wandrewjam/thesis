@@ -10,8 +10,10 @@ def assemble_vel_cases(sphere_nodes):
     om_array = np.cross(np.eye(3)[np.newaxis, :, :],
                         sphere_nodes[:, np.newaxis, :],
                         axisc=1).reshape((-1, 3))
+    shear_vec = np.zeros(shape=sphere_nodes.size)
+    shear_vec[1::3] = sphere_nodes[:, -1]
 
-    return np.hstack([v_array, om_array])
+    return np.hstack([v_array, om_array, shear_vec[:, np.newaxis]])
 
 
 def main(proc=1):
@@ -29,20 +31,24 @@ def main(proc=1):
 
     T = np.zeros(shape=(len(eps), len(n_nodes) + 1))
     R = np.zeros(shape=(len(eps), len(n_nodes) + 1))
+    S = np.zeros(shape=(len(eps), len(n_nodes) + 1))
 
     T[:, 0] = eps
     R[:, 0] = eps
+    S[:, 0] = eps
 
     for i in range(len(eps)):
         for j in range(len(n_nodes)):
             T[i, j+1] = matrices[len(n_nodes) * i + j][0][0, 0]
             R[i, j+1] = matrices[len(n_nodes) * i + j][3][0, 0]
+            S[i, j+1] = matrices[len(n_nodes) * i + j][5][0]
 
     header = 'eps'
     for n in n_nodes:
         header += ' {}'.format(n)
     np.savetxt('t_matrix_data.dat', T, header=header)
     np.savetxt('r_matrix_data.dat', R, header=header)
+    np.savetxt('s_vector_data.dat', S, header=header)
 
 
 def generate_resistance_matrices(eps, n_nodes):
@@ -52,17 +58,18 @@ def generate_resistance_matrices(eps, n_nodes):
     pt_forces = -np.linalg.lstsq(a_matrix, rhs)[0]
     # For each velocity case, integrate velocities to get body force and
     #   body torque
-    pt_forces = pt_forces.reshape((-1, 3, 6))
+    pt_forces = pt_forces.reshape((-1, 3, 7))
     pt_torques = np.cross(sphere_nodes[:, :, np.newaxis], pt_forces, axis=1)
     tmp_matrix1 = np.stack([
-        sphere_integrate(pt_forces[..., i], n_nodes=n_nodes) for i in range(6)
+        sphere_integrate(pt_forces[..., i], n_nodes=n_nodes) for i in range(7)
     ], axis=-1)
     tmp_matrix2 = np.stack([
-        sphere_integrate(pt_torques[..., i], n_nodes=n_nodes) for i in range(6)
+        sphere_integrate(pt_torques[..., i], n_nodes=n_nodes) for i in range(7)
     ], axis=-1)
-    t_matrix, p_matrix = tmp_matrix1[:, :3], tmp_matrix1[:, 3:]
-    pt_matrix, r_matrix = tmp_matrix2[:, :3], tmp_matrix2[:, 3:]
-    return t_matrix, p_matrix, pt_matrix, r_matrix
+    t_matrix, p_matrix = tmp_matrix1[:, :3], tmp_matrix1[:, 3:6]
+    pt_matrix, r_matrix = tmp_matrix2[:, :3], tmp_matrix2[:, 3:6]
+    shear_forces, shear_torques = tmp_matrix1[:, 6], tmp_matrix2[:, 6]
+    return t_matrix, p_matrix, pt_matrix, r_matrix, shear_forces, shear_torques
 
 
 if __name__ == '__main__':
