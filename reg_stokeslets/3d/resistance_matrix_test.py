@@ -3,6 +3,8 @@ from force_test import assemble_quad_matrix
 from sphere_integration_utils import sphere_integrate
 import multiprocessing as mp
 from timeit import default_timer as timer
+from memory_profiler import profile
+import cProfile
 
 
 def assemble_vel_cases(sphere_nodes):
@@ -18,7 +20,7 @@ def assemble_vel_cases(sphere_nodes):
 
 def main(proc=1):
     eps = [0.1, 0.05]
-    n_nodes = [4, 12]
+    n_nodes = [8, 16]
 
     if proc == 1:
         matrices = [generate_resistance_matrices(e, n)
@@ -52,20 +54,32 @@ def main(proc=1):
 
 
 def generate_resistance_matrices(eps, n_nodes):
+    print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
+        eps, n_nodes))
     a_matrix, sphere_nodes = assemble_quad_matrix(eps=eps, n_nodes=n_nodes)
     # Solve for the forces given 6 different velocity cases
+    print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
     rhs = assemble_vel_cases(sphere_nodes)
-    pt_forces = -np.linalg.lstsq(a_matrix, rhs)[0]
+    print('Solving for forces for eps = {}, nodes = {}'.format(eps, n_nodes))
+    try:
+        pt_forces = -np.linalg.solve(a_matrix, rhs)
+    except np.linalg.LinAlgError:
+        print('Solve failed; using least squares instead')
+        pt_forces = -np.linalg.lstsq(a_matrix, rhs)[0]
     # For each velocity case, integrate velocities to get body force and
     #   body torque
     pt_forces = pt_forces.reshape((-1, 3, 7))
     pt_torques = np.cross(sphere_nodes[:, :, np.newaxis], pt_forces, axis=1)
+    print('Calculating body force and torque for eps = {}, nodes = {}'.format(
+        eps, n_nodes))
     tmp_matrix1 = np.stack([
         sphere_integrate(pt_forces[..., i], n_nodes=n_nodes) for i in range(7)
     ], axis=-1)
     tmp_matrix2 = np.stack([
         sphere_integrate(pt_torques[..., i], n_nodes=n_nodes) for i in range(7)
     ], axis=-1)
+    print('Constructing resistance matrices for eps = {}, nodes = {}'.format(
+        eps, n_nodes))
     t_matrix, p_matrix = tmp_matrix1[:, :3], tmp_matrix1[:, 3:6]
     pt_matrix, r_matrix = tmp_matrix2[:, :3], tmp_matrix2[:, 3:6]
     shear_forces, shear_torques = tmp_matrix1[:, 6], tmp_matrix2[:, 6]
@@ -73,4 +87,5 @@ def generate_resistance_matrices(eps, n_nodes):
 
 
 if __name__ == '__main__':
+    # cProfile.run('main()')
     main()
