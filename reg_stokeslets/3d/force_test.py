@@ -16,8 +16,7 @@ def find_column(n_nodes, center, force_center, k, eps):
         ) < 100 * np.finfo(float).eps
         return output
 
-    return sphere_integrate(stokeslet_integrand, n_nodes=n_nodes,
-                            center=center, force=force, eps=eps)
+    return sphere_integrate(stokeslet_integrand, n_nodes=n_nodes, center=center, force=force, eps=eps)
 
 
 def main(proc=1):
@@ -25,7 +24,7 @@ def main(proc=1):
     assert type(proc) is int, 'proc must be a positive integer'
 
     eps = 0.01
-    top = 4
+    top = 5
 
     l2_error = np.zeros(shape=(top, 2))
     for i in range(top):
@@ -56,8 +55,7 @@ def assemble_quad_matrix(eps, n_nodes):
     c_matrix[(0, n_nodes), 1:n_nodes] = 1. / 2
     c_matrix[1:n_nodes, (0, n_nodes)] = 1. / 2
     c_matrix[0:n_nodes + 1:n_nodes, 0:n_nodes + 1:n_nodes] = 1. / 3
-    weight_array = c_matrix * geom_weights(xi_mesh[:, np.newaxis],
-                                           eta_mesh[np.newaxis, :])
+    weight_array = c_matrix * geom_weights(xi_mesh[:, np.newaxis], eta_mesh[np.newaxis, :])
     weight_array = np.tile(weight_array[:, :, np.newaxis], (1, 1, 6))
     weights = np.array([sum(weight_array[ind_map == i])
                         for i in range(sphere_nodes.shape[0])])
@@ -80,4 +78,4 @@ def assemble_quad_matrix(eps, n_nodes):
 
 if __name__ == '__main__':
     # cProfile.run('main()')
-    main(3)
+    main(1)

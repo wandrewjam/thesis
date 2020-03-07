@@ -53,11 +53,70 @@ def phi(xi, eta, patch):
     return x, y, z
 
 
-def geom_weights(xi, eta):
+def phi_deriv(xi, eta, patch):
+    """Find the tangent vector at (xi, eta) in the xi direction
+
+    Parameters
+    ----------
+    xi
+    eta
+    patch
+
+    Returns
+    -------
+
+    """
+    xi = np.array(xi)
+    eta = np.array(eta)
+
+    xx = np.tan(xi) * np.ones(shape=eta.shape)
+    yy = np.tan(eta) * np.ones(shape=xi.shape)
+
+    cc = 1 + xx**2
+    dd = 1 + yy**2
+    dsq = np.sqrt(1 + xx**2 + yy**2)
+
+    coeff1 = (cc / dsq ** 3)[:, :, np.newaxis]
+    coeff2 = (dd / dsq ** 3)[:, :, np.newaxis]
+    xi_reference = coeff1 * np.stack([-xx, dd, -xx * yy], axis=-1)
+    eta_reference = coeff2 * np.stack([-yy, -xx*yy, cc], axis=-1)
+
+    if patch == 1:
+        # xi_deriv = cc / dsq**3 * np.stack([-xx, dd, -xx*yy], axis=-1)
+        # xi_deriv = np.array([1, 1, 1]) * xi_reference[..., (0, 1, 2)]
+        # eta_deriv = dd / dsq**3 * np.stack([-yy, -xx*yy, cc], axis=-1)
+        # eta_deriv = np.array([1, 1, 1]) * eta_reference[..., (0, 1, 2)]
+        sign = np.ones(3)
+        order = (0, 1, 2)
+    elif patch == 2:
+        sign = np.array([-1, 1, 1])
+        order = (1, 0, 2)
+    elif patch == 3:
+        sign = np.array([-1, -1, 1])
+        order = (0, 1, 2)
+    elif patch == 4:
+        sign = np.array([1, -1, 1])
+        order = (1, 0, 2)
+    elif patch == 5:
+        sign = np.array([-1, 1, 1])
+        order = (2, 1, 0)
+    elif patch == 6:
+        sign = np.array([1, 1, -1])
+        order = (2, 1, 0)
+    else:
+        raise ValueError('patch must be an integer between 1 and 6, inclusive')
+
+    return sign * xi_reference[..., order], sign * eta_reference[..., order]
+
+
+def geom_weights(xi, eta, a=1., b=1., patch=None):
     """Calculate geometric weight at local coordinates
 
     Parameters
     ----------
+    patch
+    a
+    b
     xi
     eta
 
@@ -68,11 +127,23 @@ def geom_weights(xi, eta):
     xi = np.array(xi)
     eta = np.array(eta)
 
-    return (((1 + np.tan(xi)**2) * (1 + np.tan(eta)**2))
-            / np.sqrt((1 + np.tan(xi)**2 + np.tan(eta)**2)**3))
+    if a == 1 and b == 1:
+        return (((1 + np.tan(xi)**2) * (1 + np.tan(eta)**2))
+                / np.sqrt((1 + np.tan(xi)**2 + np.tan(eta)**2)**3))
+    else:
+        assert patch is not None
+
+        xphi, ephi = phi_deriv(xi, eta, patch)
+
+        ellipse_correction = np.array([a ** 2, a ** 2, b ** 2])
+        E = np.sum(ellipse_correction * xphi ** 2, axis=-1)
+        F = np.sum(ellipse_correction * xphi * ephi, axis=-1)
+        G = np.sum(ellipse_correction * ephi ** 2, axis=-1)
+
+        return np.sqrt(E * G - F ** 2)
 
 
-def generate_grid(n_nodes):
+def generate_grid(n_nodes, a=1., b=1.):
     """Generate a uniform mesh in patch coordinates xi and eta
 
     This function only generates the mesh for a single patch. The patch
@@ -82,6 +153,8 @@ def generate_grid(n_nodes):
 
     Parameters
     ----------
+    a
+    b
     n_nodes
 
     Returns
@@ -139,7 +212,8 @@ def generate_grid(n_nodes):
     assert sphere_nodes.shape[0] == 6 * n_nodes ** 2 + 2
     assert np.count_nonzero(ind_map == -1) == 0
 
-    return eta_mesh, xi_mesh, sphere_nodes, ind_map
+    nodes = np.array([a, a, b]) * sphere_nodes
+    return eta_mesh, xi_mesh, nodes, ind_map
 
 
 def stokeslet_integrand(x_tuple, center, eps, force):
@@ -200,8 +274,7 @@ def l2_error(x_tuple, n_nodes, proc=1, eps=0.01):
 
     if proc == 1:
         surface_velocity = [
-            sphere_integrate(stokeslet_integrand, n_nodes=n_nodes,
-                             center=point, eps=eps, force=point_force)
+            sphere_integrate(stokeslet_integrand, n_nodes=n_nodes, center=point, eps=eps, force=point_force)
             for point in x_array
         ]
 
@@ -230,10 +303,10 @@ def one_function(x_tuple):
     return np.ones(shape=x_tuple[0].shape)
 
 
-def sphere_integrate(integrand, n_nodes=16, **kwargs):
+def sphere_integrate(integrand, n_nodes=16, a=1., b=1., **kwargs):
     if type(integrand) is np.ndarray:
         assert integrand.shape[0] == 6*n_nodes**2 + 2
-    eta_mesh, xi_mesh, sphere_nodes, ind_map = generate_grid(n_nodes)
+    eta_mesh, xi_mesh, cart_nodes, ind_map = generate_grid(n_nodes, a=a, b=b)
 
     del_xi = xi_mesh[1] - xi_mesh[0]
     del_eta = eta_mesh[1] - eta_mesh[0]
@@ -243,7 +316,7 @@ def sphere_integrate(integrand, n_nodes=16, **kwargs):
         patch = i + 1
 
         g_matrix = geom_weights(xi_mesh[:, np.newaxis],
-                                eta_mesh[np.newaxis, :])
+                                eta_mesh[np.newaxis, :], a=a, b=b, patch=patch)
 
         if type(integrand) is np.ndarray:
             f_matrix = integrand[ind_map[..., i]]

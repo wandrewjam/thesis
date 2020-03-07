@@ -59,22 +59,26 @@ class TestWeightsClass(object):
         expected_result[(0, 2, 1, 1), (1, 1, 0, 2)] = 1 / np.sqrt(2)
         expected_result[::2, ::2] = 4 / np.sqrt(3**3)
         print()
-        assert np.linalg.norm(
-            geom_weights(xi[:, np.newaxis], eta[np.newaxis, :])
-            - expected_result) < 10*np.finfo(float).eps
+        for i in range(6):
+            assert np.linalg.norm(
+                geom_weights(xi[:, np.newaxis], eta[np.newaxis, :], patch=i + 1)
+                - expected_result) < 10*np.finfo(float).eps
 
 
 class TestGridClass(object):
     def test_generate_grid(self):
         for n_nodes in [2, 4, 8, 16, 32]:
-            xi_mesh, eta_mesh, sphere_nodes = generate_grid(n_nodes)[:3]
+            xi_mesh, eta_mesh, cart_nodes = generate_grid(n_nodes)[:3]
             assert xi_mesh.shape == (n_nodes+1,)
             assert eta_mesh.shape == (n_nodes+1,)
-            assert sphere_nodes.shape == (6 * n_nodes**2 + 2, 3)
-            assert np.linalg.norm(
-                np.linalg.norm(sphere_nodes, axis=-1)
-                - np.ones(shape=6*n_nodes**2 + 2)
-            ) < n_nodes * np.finfo(float).eps
+            assert cart_nodes.shape == (6 * n_nodes**2 + 2, 3)
+
+            for (a, b) in [(1.5, .5), (1., 1.), (.5, 1.5)]:
+                xi_mesh, eta_mesh, cart_nodes = generate_grid(n_nodes, a=a, b=b)[:3]
+                assert np.linalg.norm(
+                    np.sum(np.array([a, a, b]) ** (-2) * cart_nodes ** 2,
+                           axis=-1) - np.ones(shape=6*n_nodes**2 + 2)
+                ) < 1000 * n_nodes * np.finfo(float).eps
 
 
 class TestSphereQuadrature(object):
@@ -89,7 +93,7 @@ class TestSphereQuadrature(object):
                 pphi = np.arccos(z)
                 return sph_harm(m, n, theta, pphi)
 
-            integral = sphere_integrate(f, n_nodes, )
+            integral = sphere_integrate(f, n_nodes)
             assert np.abs(integral) < n_nodes * np.finfo(float).eps
 
             # Also test the array version
@@ -97,6 +101,21 @@ class TestSphereQuadrature(object):
             integrand = f(sphere_nodes.T)
             integral = sphere_integrate(integrand, n_nodes)
             assert np.abs(integral) < n_nodes * np.finfo(float).eps
+
+    def test_const_fun(self):
+        def f(x_tuple):
+            return np.ones(shape=x_tuple[0].shape)
+
+        for (a, b) in [(1.5, .5), (1.25, 0.75), (1., 1.)]:
+            for n_nodes in [2, 4, 8, 16]:
+                integral = sphere_integrate(f, n_nodes, a=a, b=b)
+                e = np.sqrt(np.abs(1 - b**2 / a**2))
+                if e == 0:
+                    exact = 4 * np.pi * a**2
+                else:
+                    exact = 2 * np.pi * a**2 * (1 + b**2 / a**2
+                                                * np.arctanh(e) / e)
+                assert np.abs(integral - exact) < 10. / (n_nodes ** 4)
 
 
 class TestMeshGenerator(object):
