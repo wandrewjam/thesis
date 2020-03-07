@@ -1,0 +1,358 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+\usepgfplotslibrary{colorbrewer, statistics}
+\pgfplotsset{
+  exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+    legend entries={PDF, CDF},},
+  every axis plot post/.append style={thick},
+  table/search
+  path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+  colormap/YlGnBu,
+  cycle list/Set1-5,
+  legend style={legend cell align=left,},
+}
+
+\usepgfplotslibrary{external}
+\tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\F}{\mathbf{F}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Notes on the 3D Adhesion Dynamics Model with Regularized
+    Stokeslets}
+\end{center}
+
+\section{Adhesion Dynamics Model}
+\label{sec:adhes-dynam-model}
+
+The adhesion dynamics models describe the motion of a cell in a Stokes
+flow due to binding and unbinding with a ligand-coated wall. In
+the simplest case, three generalized forces are considered:
+$\F_H$---the hydrodynamic force on the cell, $\F_R$---the force due to
+binding with ligands on the wall, and $\F_\tn{body}$---various
+body forces acting on the cell (e.g. electrostatic and steric
+forces). Because of Stokes flow, we assume that all of these forces
+balance: $\F_H + \F_R + \F_\tn{body} = \boldsymbol{0}$.
+
+$\F_R$ depends on the location and orientation of bonds between the
+cell and wall at time $t$, and $\F_\tn{body}$ depends on the location
+and orientation of the cell. The hydrodynamic force depends both on
+the location and orientation of the cell $\mathbf{x}$, and also the
+translational and angular velocities $\mathbf{x}'$. Therefore we can
+use this relation to find $\mathbf{x}'(t)$ at each time step, and
+update the position and orientation of the cell accordingly.
+
+Right now, I am working on using regularized Stokeslets to find $\F_H$
+given a position and velocity $\mathbf{x}$ and $\mathbf{x}'$.
+
+\section{Solving Stokes flow around a rigid body using regularized
+  Stokeslets}
+\label{sec:solving-stokes-flow}
+
+We want to solve Stokes equations (with a background linear shear
+rate) near a plane wall, and around a rigid body $S \subset \R^3$:
+\begin{align}
+  &\mu \Delta \mathbf{u} - \nabla p =
+    \boldsymbol{0} \label{eq:laplace} \\
+  &\nabla \cdot \mathbf{u} = 0 \label{eq:cons-of-mass} \\
+  &\mathbf{u}: \{\mathbf{x} \in
+    \R^3 | x_3 \geq 0\} \rightarrow \R^3 \nonumber
+\end{align}
+with the boundary conditions
+$\mathbf{u}(\mathbf{x}) = \mathbf{U} + \mathbf{x} \times
+\mathbf{\Omega}$ for $\mathbf{x} \in \partial S$, and the far-field
+conditions $\mathbf{u} \rightarrow \gamma x_3$ as
+$\|\mathbf{x}\| \rightarrow \infty$. Here $\mathbf{U}$ and
+$\mathbf{\Omega}$ are the translational and angular velocities of the
+cell, respectively. Then because Stokes equations are linear, there is
+a linear relationship between the body force and torque exerted by the
+fluid, and $\mathbf{U}$ and $\mathbf{\Omega}$. If we define
+$\mathbf{V}$ to be the $6 \times 1$ vector of generalized velocities
+and $\mathbf{F}$ to be the vector of generalized forces, then
+\begin{equation}
+  \label{eq:resistance-eq}
+  \mathbf{F} = \underline{\underline{R}} \mathbf{V} 
+\end{equation}
+where $\underline{\underline{R}}$ is the resistance matrix. In
+practice, the resistance matrix can be found by solving equations
+(\ref{eq:laplace}) and (\ref{eq:cons-of-mass}), for
+$\mathbf{V} = \mathbf{e}_i$, $i = 1, \hdots, 6$.
+
+Our goal is to use the method of regularized Stokeslets to solve the
+fluid problem (\ref{eq:laplace}) and (\ref{eq:cons-of-mass}) and
+derive the resistance matrix for a given platelet configuration
+$\mathbf{x}$. The remaining subsections run through tests of
+increasing complexity to validate our regularized Stokeslets solver.
+
+\subsection{Prescribed force on a unit sphere, ignoring wall effects}
+\label{sec:prescr-force-unit}
+
+In the first (and simplest) test case, we want to apply a uniform
+force to the surface of a unit sphere in an infinite fluid domain. We
+know that in order to generate a translational velocity of
+$\mathbf{U}$, we must apply a uniform (pointwise) force to the surface
+of the sphere of $\frac{3\mu}{2}\mathbf{U}$.
+
+The method of regularized stokeslets requires integration of:
+\begin{equation}
+  \label{eq:reg-stokeslets}
+  u_j(\mathbf{x}_0) = \frac{1}{8\pi \mu} \int_{\partial D}
+  S_{ij}^\epsilon (\mathbf{x}, \mathbf{x}_0) g_i(\mathbf{x}) ds(\mathbf{x}).
+\end{equation}
+where $\mu$ is the viscosity of the fluid, $\partial D$ is the surface
+of the body (a sphere in the simplest case), $S_{ij}^\epsilon
+(\mathbf{x}, \mathbf{x}_0)$ is the regularized stokeslet with blob
+parameter $\epsilon$, and $g_i$ is the $i$th component of the traction
+on the surface of the body.
+
+In order to integrate this, I used the spherical quadrature rule
+derived in \cite{Portelenelle2018} (basically a 2D trapezoid rule
+adapted to the sphere), which is based on a 6-patch grid that divides
+the sphere into 6 equal-area patches (Figure
+\ref{fig:discretization}). Local coordinates are defined on each patch
+to avoid singularities in the transformation between Cartesian and
+surface coordinates. 
+
+This case is handled in Cortez et. al., 2005 \cite{Cortez2005}. The
+first test case they examine is to apply a point force of $\mathbf{f}
+= -\frac{3\mu}{2} \mathbf{e_3}$ everywhere on the surface of the
+sphere. Analytically, this generates a velocity of $\mathbf{u} =
+-\mathbf{e}_3$. The error of the numerical integration of equation
+(\ref{eq:reg-stokeslets}) depends both on the size of the mesh $N
+\times N$, and the regularization parameter $\epsilon$. Cortez
+et. al. provide plots of the L2 error while refining each of these
+parameters in turn, which we can compare our integration scheme to.
+
+As shown in Figures \ref{fig:cortez-conv} and \ref{fig:our-conv}, the
+convergence results of our numerical scheme is similar to their
+published results.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{cubed_sphere}
+  \caption{An example of the discretization scheme on the surface of
+    the sphere (from \cite{Portelenelle2018})}
+  \label{fig:discretization}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.6\textwidth}
+    \includegraphics[width=\textwidth]{reg_refine_cortez}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.35\textwidth}
+    \includegraphics[width=\textwidth]{grid_refine_cortez}
+  \end{subfigure}
+  \caption{Convergence in the $\Delta s$ and $\epsilon$ parameters
+    published in \cite{Cortez2005}.}
+  \label{fig:cortez-conv}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{reg_refine}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{grid_refine}
+  \end{subfigure}
+  \caption{Convergence in the $\Delta s$ and $\epsilon$ parameters in
+    our numerical scheme.}
+  \label{fig:our-conv}
+\end{figure}
+
+\subsection{Solving for the force generated by a prescribed velocity}
+\label{sec:solv-force-gener}
+
+The next test is to verify that the method of regularized Stokeslets
+can find the fluid force generated by prescribed translational
+$\mathbf{U}$ and angular $\mathbf{\Omega}$ velocities. Note that this
+is ultimately the problem we need to solve in the adhesion dynamics
+models, where we want to solve for the body force given boundary
+conditions on $\mathbf{u}$ on $\partial S$.
+
+With the quadrature rule defined in the previous section, equation
+(\ref{eq:reg-stokeslets}) is approximated with
+\begin{equation}
+  \label{eq:approx-stokeslets}
+  u_{m, j} = \frac{1}{8\pi \mu} \sum_{n=1}^{N_\tn{nodes}} \sum_{i=1}^3
+  S_{ij}^\epsilon(\mathbf{x}_n, \mathbf{x}_m) g_{n,i} w_n,
+\end{equation}
+where $j = 1, 2, 3$ and $m = 1, \hdots, N_\tn{nodes}$. This can be
+written as the product of a matrix and vector:
+\begin{equation}
+  \label{eq:quadrature-matrix}
+  \hat{\mathbf{u}} = \mathcal{A} \hat{\mathbf{g}}
+\end{equation}
+where $\hat{\mathbf{u}}$ and $\hat{\mathbf{g}}$ are
+$3N_\tn{nodes} \times 1$ vectors of the 3 components of the velocity
+and traction at each node. Then $\hat{\mathbf{g}}$ for some prescribed
+$\hat{\mathbf{u}}$ is given by inverting $\mathcal{A}$. Then the body
+force and torque can be found by integrating the following functions
+over the sphere:
+\begin{align}
+  \mathbf{f} &= \int_{\partial S} \mathbf{g}(\mathbf{x}) d\mathbf{x}
+  \\
+  \mathbf{l} &= \int_{\partial S} \mathbf{x} \times
+               \mathbf{g}(\mathbf{x}) d\mathbf{x}
+\end{align}
+
+As a first check that we are assembling the matrix $\mathcal{A}$
+correctly, we can set the velocity at each node equal to $(0, 0,
+1)^T$, and we should get a body force of $6\pi \mu \mathbf{e}_3$. The
+convergence in the estimate of the body force is shown in Figure
+\ref{fig:force_error}. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{force_error}
+  \caption{Absolute error in the body force $\mathbf{f}$ with a
+    prescribed velocity of $(0, 0, 1)^T$}
+  \label{fig:force_error}
+\end{figure}
+
+\subsubsection{Estimation of resistance matrix of a sphere}
+\label{sec:estim-resist-matr}
+
+The next test problem performed in \cite{Cortez2005} is estimating the
+resistance matrix for a sphere with a 0 background flow. To do this,
+we really just have to repeat the process outlined above for pointwise
+velocities $\mathbf{e}_i$ for $i = 1, 2, 3$ and $\mathbf{x} \times
+\mathbf{e}_i$ for $i = 1, 2, 3$.
+
+That is, we are solving Stokes equations with boundary conditions
+$\mathbf{u}(\mathbf{x}) = \mathbf{U} + \mathbf{x} \times
+\mathbf{\Omega}$, $\mathbf{x} \in \partial S$ for $\mathbf{U} =
+\mathbf{e}_i$ and $\mathbf{\Omega} = \mathbf{e}_i$, and with far-field
+conditions $\mathbf{u} \rightarrow \boldsymbol{0}$ as $\|\mathbf{x}\|
+\rightarrow \infty$. Then we can integrate the pointwise forces to get
+the body force and torques, which gives successive columns of
+$\underline{\underline{R}}$.
+
+Because of the superposition principle, the flow around a sphere with
+a background linear shear flow can be decomposed into the flow around
+a moving sphere with a background stationary flow (say $\mathbf{u}_0$)
+and the flow around a stationary sphere with a background shear flow
+(say $\mathbf{u}_\gamma$). Therefore to find the forces on a sphere
+due to a background shear flow, we only need to solve one additional
+Stokes problem.
+
+First, we want to verify the resistance matrix generated by motion of
+a sphere through a stationary background flow. Analytically,
+\begin{equation}
+  \underline{\underline{R}} =
+  \begin{pmatrix}
+    \mathcal{T} & 0 \\
+    0 & \mathcal{R}
+  \end{pmatrix} \quad \tn{where} \quad \mathcal{T} = 6\pi \mu
+  \underline{\underline{I}}, \, \mathcal{R} = 8 \pi \mu
+  \underline{\underline{I}}.
+\end{equation}
+
+Tables \ref{tab:t-matrix} and \ref{tab:r-matrix} show the computed
+diagonal entries for $\mathcal{T}$ and $\mathcal{R}$. The values I
+computed are within 0.1 of the computed values published in
+\cite{Cortez2005} in all cases.
+
+\begin{table}
+  \centering
+  \begin{tabular}{ccc}
+    $\epsilon$ & $N = 12$ & $N = 24$ \\ \hline
+    $0.1$ & 19.37 & 19.39 \\
+    $0.05$ & 18.92 & 19.09 \\
+    $0.01$ & 16.59 & 18.39 \\
+    Exact & 18.85 & 18.85 \\ \hline
+  \end{tabular}
+  \caption{Computed diagonal entries of the matrix $\mathcal{T}$ for
+    different regularization and discretization parameters}
+  \label{tab:t-matrix}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{ccc}
+    $\epsilon$ & $N = 12$ & $N = 24$ \\ \hline
+    $0.1$ & 27.12 & 27.16 \\
+    $0.05$ & 25.65 & 26.09 \\
+    $0.01$ & 19.89 & 24.06 \\
+    Exact & 25.13 & 25.13 \\ \hline
+  \end{tabular}
+  \caption{Computed diagonal entries of the matrix $\mathcal{R}$ for
+    different regularization and discretization parameters}
+  \label{tab:r-matrix}
+\end{table}
+
+In addition to the resistance matrix, I estimated the vector of body
+forces and torques exerted by a shear flow with $\gamma =
+1$. With $\mathbf{u}^\infty = \gamma x_3$, all forces and torques on the
+sphere are 0, except $\Omega_1 = -4 \pi \mu \gamma$. The estimated
+nonzero component of the shear force vector for different
+regularization and discretization parameters are given in Table
+
+\begin{table}
+  \centering
+  \begin{tabular}{ccc}
+    $\epsilon$ & $N = 12$ & $N = 24$ \\ \hline
+    $0.1$ & -13.56 & -13.58 \\
+    $0.05$ & -12.83 & -13.05 \\
+    $0.01$ & -9.95 & -12.03 \\
+    Exact & -12.57 & -12.57 \\ \hline
+  \end{tabular}
+  \caption{Computed diagonal entries of the shear force vector
+    $\mathbf{F}_\gamma$ for different regularization and
+    discretization parameters}
+  \label{tab:s-vector}
+\end{table}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
