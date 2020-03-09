@@ -1,9 +1,11 @@
+import os
+os.environ["OPENBLAS_NUM_THREADS"] = "8"
+
 import numpy as np
 from force_test import assemble_quad_matrix
 from sphere_integration_utils import sphere_integrate
 import multiprocessing as mp
 from timeit import default_timer as timer
-from memory_profiler import profile
 import cProfile
 
 
