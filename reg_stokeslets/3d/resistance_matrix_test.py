@@ -5,8 +5,6 @@ import numpy as np
 from force_test import assemble_quad_matrix
 from sphere_integration_utils import sphere_integrate
 import multiprocessing as mp
-from timeit import default_timer as timer
-import cProfile
 
 
 def assemble_vel_cases(sphere_nodes):
