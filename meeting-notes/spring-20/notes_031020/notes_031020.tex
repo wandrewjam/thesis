@@ -1,0 +1,377 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Write-up of the Jump-Velocity Model, and Analysis of
+    Trajectory Data (\today)}
+\end{center}
+
+\section{Brief Description of the Jump-Velocity Model}
+\label{sec:jump-vel}
+
+Suppose we model platelets as particles in a moving fluid, with two
+sets of ``effective'' binding and unbinding rates: one for fast
+receptors (e.g. GP1b) and one for slow receptors
+(e.g. $\alpha_\tn{IIb}\beta_3$). Assume then that platelets can exist
+in 4 possible states: unbound (U), bound through fast receptors (V),
+bound through slow receptors (F), and bound through both fast and slow
+receptors (VF) (Figure \ref{fig:primed-states}). The effective binding
+and unbinding rates are not individual receptor binding and unbinding
+rates, but an overall binding and unbinding rate for the platelet as a
+whole, which may have several of each type of bond to the surface.
+
+\begin{figure}[h]
+  \centering
+  \schemestart
+  $U$ \arrow(u1--vv){<=>[$k_\tn{on}$][$k_\tn{off}$]} $V$
+  \arrow(@u1--ff){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}[-90] $F$
+  \arrow(--vf){<=>[$k_\tn{on}$][$k_\tn{off}$]} $VF$
+  \arrow(@vv--@vf){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}
+  \schemestop
+  \caption[Possible states of primed platelets]{A primed platelet can
+    exist in four states: (U) unbound from the surface and advecting
+    in the fluid, (V) bound through fast bonds to the surface, (F)
+    bound through slow bonds to the surface, or (VF) bound through
+    both fast bonds and slow bonds. In all three bound states, the
+    platelet is immobilized on the surface.}
+  \label{fig:primed-states}
+\end{figure}
+
+This is a stochastic model, where the platelet moves at a constant
+velocity when it is in state $U$, and then can randomly bind and
+unbind to the surface at constant rates $k_\tn{on}, k_\tn{off},
+k_\tn{on}^F, k_\tn{off}^F$.
+
+\subsection{Comparison of velocities within different steps}
+\label{sec:comp-veloc-with}
+
+One of the key assumptions in this model is that all unbound platelets
+advect at a constant velocity, so we wanted to check this assumption
+against the trajectory data. I extracted ``step velocities''---the
+average velocity a platelet travels within a step---and compared step
+velocities among (1) initial steps, where a platelet enters the field
+of view, (2) intermediate steps occuring between two dwells, and (3)
+final steps where a platelet leaves the field of view. Figure
+\ref{fig:ccp-vel-cmp} compares velocities within each of these three
+types of steps. One observation is that platelets are moving
+much faster on average when they are entering and leaving the
+domain. Another observation is that the velocities are nowhere near
+constant, and platelets in intermediate steps are moving much slower
+than we'd expect if they were totally unbound from the surface. At a
+wall shear rate of 100 / s, a platelet whose center is 1 $\mu$m off
+the wall should be moving roughly at 100 $\mu$m / s, but the
+intermediate step velocities are in the 0---30 $\mu$m / s range. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{ccp-vel-cmp.png}
+  \caption{Comparison of intermediate free velocities with the first
+    and last steps of the experiment. The data shown is from
+    the collagen-collagen PRP experiment, but the others are similar.}
+  \label{fig:ccp-vel-cmp}
+\end{figure}
+
+I also compared intermediate step sizes with initial and final step
+sizes, and this data shows the same trend as the velocity data, but
+this of course is at least partly due to the differences in velocity.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{ccp-step-cmp.png}
+  \caption{Comparison of intermediate step sizes with the first and
+    last steps of the experiment. Again, the data shown is from the
+    collagen-collagen PRP experiment, but other experiments have
+    qualitatively similar results.}
+  \label{fig:ccp-step-cmp}
+\end{figure}
+
+Our hypothesis is that the discrepancy between the intermediate step
+velocities, and the initial and final step velocities (as well as the
+rough estimate for the velocity of an unbound platelet) is due to fast
+binding/unbinding dynamics between the platelet and wall occurring on
+a faster time scale than can be observed. Therefore in the 4 state
+model, we assume that the binding dynamics of the fast bonds are
+causing this slow-down in the intermediate steps, and the observed
+dwells are only the dwells due to the formation of slow bonds between the
+platelet and surface.
+
+We tested this hypothesis by fitting the fast binding/unbinding
+parameters to processed platelet trajectories, where we cut out the
+dwells from each trajectory and ``stacked'' the steps on top of each
+other. The probability distributions of the average velocities of
+these processed trajectories on collagen and fibrinogen are shown in
+Figure \ref{fig:avg-free-vel-col} and Figure
+\ref{fig:avg-free-vel-fib}. The fast effective binding parameters
+predicted by each model fit are given in the captions below each figure.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{avg_free_vel_col.png}
+  \caption{Comparison of the average free velocity in the four
+    collagen experimental conditions. The effective binding parameters
+    found by fitting the model to velocity data are
+    $k_\tn{on} = 34.6 / s$ and $k_\tn{off} = 5.18 / s$. An ANOVA test
+    didn't find any significant difference in the average velocities
+    among the 4 experiments, and so I fit the model to all the data
+    simultaneously.}
+  \label{fig:avg-free-vel-col}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{avg_free_vel_fib.png}
+  \caption{Comparison of the average free velocity in the four
+    fibrinogen experimental conditions. The effective binding
+    parameters found by fitting the model to velocity data are
+    $k_\tn{on} = 70.3 / s$ and $k_\tn{off} = 11.8 / s$. An ANOVA test
+    didn't find any significant difference in the average velocities
+    among the 3 experiments with data, and so I fit the model to all
+    the data simultaneously.}
+  \label{fig:avg-free-vel-fib}
+\end{figure}
+
+\subsection{Fitting slow binding and unbinding parameters}
+\label{sec:fitting-slow-binding}
+
+Under the assumption that the fast reactions are asymptotically fast,
+the slow effective binding and unbinding rates can then just be found
+by taking the mean dwell time and mean step time. Figures
+\ref{fig:step-time} and \ref{fig:pause-time} show the step time
+distributions, means, and exponential fits ($\pm$ 95\% CI) for each
+experiment.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{col_step}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{fbg_step}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{vwf_step}
+  \end{subfigure}
+  \caption{Step time data from all experiments}
+  \label{fig:step-time}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{col_pause}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{fbg_pause}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.75\textwidth}
+    \includegraphics[width=\textwidth]{vwf_pause}
+  \end{subfigure}
+  \caption{Pause time data from all experiments}
+  \label{fig:pause-time}
+\end{figure}
+
+Then I ran 250 stochastic simulations of the model for the 8
+experimental cases with collagen and fibrinogen, and compared the
+distribution of average velocities with the observed average
+velocities (computed from the start of the first dwell to the end of
+the last dwell/end of experiment). In all the collagen experiments,
+the simulated distribution visually matches up reasonably well with
+the data, and the simulation means are within the 95\% CI for each of
+the 4 experiments. The simulations do not match up as well against the
+fibrinogen data; in fibrinogen-fibrinogen whole blood, the first 80\%
+of the distribution of simulated average velocities matches up well
+with the data, but then has a long tail which is not present in the
+data. The simulations for the hfw and ffp data don't match up well
+against the data at all, and I'm not really sure what the source of this
+discrepancy is yet.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{avg_vel_col.png}
+  \caption{Comparison of the overall average velocity in the four
+    collagen experimental conditions, along with distributions of
+    average velocities from simulations with the parameters found
+    above.}
+  \label{fig:avg-vel-col}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{avg_vel_fib.png}
+  \caption{Comparison of the overall average velocity in the four
+    fibrinogen experimental conditions, along with distributions of
+    average velocities from simulations with the parameters found
+    above.}
+  \label{fig:avg-vel-fib}
+\end{figure}
+
+Finally, in an attempt to (crudely) describe the initial steps in the platelet
+trajectories, we again computed a ``capture rate'' from the time
+between the start of a trajectory and the time to first binding. In
+the collagen experiments, where there is the most data, there is a
+clear increase in the capture rate in the whole blood experiments
+relative to PRP, but not a clear relationship between primed and
+unprimed platelets.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{ccp_capture.png}
+    \caption{CC PRP: $k_\tn{capture} = 0.52 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hcp_capture.png}
+    \caption{HC PRP: $k_\tn{capture} = 0.63 / s$}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{ccw_capture.png}
+    \caption{CC whole blood: $k_\tn{capture} = 1.59 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hcw_capture.png}
+    \caption{HC whole blood: $k_\tn{capture} = 1.12 / s$}
+  \end{subfigure}
+  \caption{Histograms of the initial step time. The two experiments
+    with whole blood have faster ``capture'' rates than the two
+    experiments in PRP.}
+  \label{fig:col-capture}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{ffp_capture.png}
+    \caption{FF PRP: $k_\tn{capture} = 0.67 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hfp_capture.png}
+    \caption{HF PRP: $k_\tn{capture} = 1.42 / s$}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{ffw_capture.png}
+    \caption{FF whole blood: $k_\tn{capture} = 1.17 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hfw_capture.png}
+    \caption{HF whole blood: $k_\tn{capture} = 0.81 / s$}
+  \end{subfigure}
+  \caption{Histograms of the initial step time on fibrinogen.}
+  \label{fig:fbg-capture}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{vvp_capture.png}
+    \caption{VV PRP: $k_\tn{capture} = 1.89 / s$}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{hvp_capture.png}
+    \caption{HV PRP: $k_\tn{capture} = 0.32 / s$}
+  \end{subfigure}
+  \caption{Histograms of the initial step time on vWF.}
+  \label{fig:vwf-capture}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{col_prp_traj}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{col_whl_traj}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{fbg_prp_traj}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{fbg_whl_traj}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{vwf_prp_traj}
+  \end{subfigure}
+  \caption{Trajectory data from the 10 different experiments. Unprimed
+    platelets are in blue, and primed platelets are in red}
+  \label{fig:traj-plots}
+\end{figure}
+
+% \bibliographystyle{plain}
+% \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
