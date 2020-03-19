@@ -1,5 +1,5 @@
 import os
-os.environ["OPENBLAS_NUM_THREADS"] = "8"
+os.environ["OPENBLAS_NUM_THREADS"] = "16"
 
 import numpy as np
 from force_test import assemble_quad_matrix
@@ -19,8 +19,8 @@ def assemble_vel_cases(sphere_nodes):
 
 
 def main(proc=1, a=1., b=1.):
-    eps = [0.1, 0.05]
-    n_nodes = [4, 8]
+    eps = [0.1, 0.05, 0.01]
+    n_nodes = [12, 24, 36, 48]
 
     if proc == 1:
         matrices = [generate_resistance_matrices(e, n, a, b)
