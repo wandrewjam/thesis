@@ -59,7 +59,7 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1.):
     # Need to modify this for the ellipse
     weight_array = [
         c_matrix * geom_weights(xi_mesh[:, np.newaxis],
-                                eta_mesh[np.newaxis, :], patch=patch)
+                                eta_mesh[np.newaxis, :], a=a, b=b, patch=patch)
         for patch in range(1, 7)
     ]
     # weight_array = c_matrix * geom_weights(xi_mesh[:, np.newaxis], eta_mesh[np.newaxis, :])
