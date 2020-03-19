@@ -41,6 +41,29 @@ def process_trajectory(trajectory, absolute_pause_threshold=0.):
     return is_bound, y_save, t_save
 
 
+def truncate_trajectory(trajectory, absolute_pause_threshold=0.):
+    trajectory[:, 0] -= trajectory[0, 0]
+    processed = process_trajectory(trajectory, absolute_pause_threshold)
+    y_save, t_save = processed[1:]
+
+    del_y = y_save[1:] - y_save[:-1]
+
+    if del_y[0] == 0 and del_y[-1] == 0:  # Dwell at begin and end of traj.
+        truncated_trajectory = trajectory
+
+    elif del_y[0] == 0:  # Dwell at begin of traj.
+        truncated_trajectory = trajectory[trajectory[:, 0] <= t_save[-2]]
+
+    elif del_y[-1] == 0:  # Dwell at end of traj.
+        truncated_trajectory = trajectory[trajectory[:, 0] >= t_save[1]]
+
+    else:  # Steps at begin and end of traj.
+        truncated_trajectory = trajectory[(t_save[1] <= trajectory[:, 0])
+                                          * (trajectory[:, 0] <= t_save[-2])]
+
+    return truncated_trajectory
+
+
 def extract_state_data(t_save, y_save):
     pre_dwell_steps = None
     post_dwell_steps = None
@@ -131,10 +154,10 @@ def extract_state_data(t_save, y_save):
 
 
 def main():
-    # experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
+    experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
     # experiments = load_trajectories(['hfp', 'ffp', 'hfw', 'ffw'])
-    experiments = load_trajectories(['hvp', 'vvp'])
-    expt = 'hvp'
+    # experiments = load_trajectories(['hvp', 'vvp'])
+    expt = 'ccp'
     steps_combined = list()
     pre_dwell_steps_combined = list()
     post_dwell_steps_combined = list()

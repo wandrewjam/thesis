@@ -1,9 +1,33 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from extract_trajectory_data import load_trajectories
+from extract_trajectory_data import load_trajectories, truncate_trajectory
 
 
 if __name__ == '__main__':
+    # Plot full trajectories
+    # expts = {'Collagen PRP': ['hcp', 'ccp'],
+    #          'Collagen Whole': ['hcw', 'ccw'],
+    #          'Fibrinogen PRP': ['hfp', 'ffp'],
+    #          'Fibrinogen Whole': ['hfw', 'ffw'],
+    #          'vWF PRP': ['hvp', 'vvp']}
+    #
+    # for group, exp in expts.items():
+    #     trajectories = load_trajectories(exp)
+    #     for key, traj_list in trajectories.items():
+    #         if key[0] == 'h':
+    #             color = 'b'
+    #         else:
+    #             color = 'r'
+    #         for traj in traj_list:
+    #             plt.plot(traj[:, 0] - traj[0, 0], traj[:, 1], color,
+    #                      linewidth=0.4)
+    #     plt.title(group)
+    #     plt.xlabel('Time Elapsed (s)')
+    #     plt.ylabel('Distance Traveled ($\\mu m$)')
+    #     plt.tight_layout()
+    #     plt.show()
+
+    # Plot truncated trajectories
     expts = {'Collagen PRP': ['hcp', 'ccp'],
              'Collagen Whole': ['hcw', 'ccw'],
              'Fibrinogen PRP': ['hfp', 'ffp'],
@@ -18,10 +42,18 @@ if __name__ == '__main__':
             else:
                 color = 'r'
             for traj in traj_list:
-                plt.plot(traj[:, 0] - traj[0, 0], traj[:, 1], color,
-                         linewidth=0.4)
+                trunc_traj = truncate_trajectory(
+                    traj, absolute_pause_threshold=0.)
+                if trunc_traj.shape[0] > 0 and np.all(
+                        trunc_traj[1:, 0] - trunc_traj[:-1, 0] > 0):
+                    trunc_traj -= trunc_traj[0]
+                    plt.plot(trunc_traj[:, 0], trunc_traj[:, 1], color,
+                             linewidth=0.4)
+
         plt.title(group)
         plt.xlabel('Time Elapsed (s)')
         plt.ylabel('Distance Traveled ($\\mu m$)')
         plt.tight_layout()
         plt.show()
+
+    # Plot some simulated trajectories
