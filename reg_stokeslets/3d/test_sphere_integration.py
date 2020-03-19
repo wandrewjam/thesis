@@ -61,8 +61,9 @@ class TestWeightsClass(object):
         print()
         for i in range(6):
             assert np.linalg.norm(
-                geom_weights(xi[:, np.newaxis], eta[np.newaxis, :], patch=i + 1)
-                - expected_result) < 10*np.finfo(float).eps
+                geom_weights(xi[:, np.newaxis], eta[np.newaxis, :],
+                             patch=i + 1) - expected_result
+            ) < 10*np.finfo(float).eps
 
 
 class TestGridClass(object):
@@ -74,7 +75,8 @@ class TestGridClass(object):
             assert cart_nodes.shape == (6 * n_nodes**2 + 2, 3)
 
             for (a, b) in [(1.5, .5), (1., 1.), (.5, 1.5)]:
-                xi_mesh, eta_mesh, cart_nodes = generate_grid(n_nodes, a=a, b=b)[:3]
+                xi_mesh, eta_mesh, cart_nodes = generate_grid(n_nodes, a=a,
+                                                              b=b)[:3]
                 assert np.linalg.norm(
                     np.sum(np.array([a, a, b]) ** (-2) * cart_nodes ** 2,
                            axis=-1) - np.ones(shape=6*n_nodes**2 + 2)

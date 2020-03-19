@@ -60,8 +60,7 @@ def main(proc=1, a=1., b=1.):
 def generate_resistance_matrices(eps, n_nodes, a=1., b=1.):
     print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
         eps, n_nodes))
-    a_matrix, nodes = assemble_quad_matrix(eps=eps, n_nodes=n_nodes,
-                                                  a=a, b=b)
+    a_matrix, nodes = assemble_quad_matrix(eps=eps, n_nodes=n_nodes, a=a, b=b)
     # Solve for the forces given 6 different velocity cases
     print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
     rhs = assemble_vel_cases(nodes)
