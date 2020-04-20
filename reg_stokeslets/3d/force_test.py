@@ -39,7 +39,7 @@ def find_solve_error(eps, n_nodes):
     a_matrix, sphere_nodes = assemble_quad_matrix(eps, n_nodes)
 
     unit_vel = np.tile([0, 0, -1], sphere_nodes.shape[0])
-    est_force2 = np.linalg.lstsq(a_matrix, unit_vel)[0]
+    est_force2 = np.linalg.solve(a_matrix, unit_vel)
     est_force2 = est_force2.reshape((-1, 3))
 
     total_force = sphere_integrate(est_force2, n_nodes=n_nodes)
@@ -48,7 +48,7 @@ def find_solve_error(eps, n_nodes):
     return error
 
 
-def assemble_quad_matrix(eps, n_nodes, a=1., b=1., type='free'):
+def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free'):
     xi_mesh, eta_mesh, nodes, ind_map = generate_grid(n_nodes, a=a, b=b)
 
     c_matrix = np.ones(shape=ind_map.shape[:2])
@@ -68,8 +68,8 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1., type='free'):
 
     del_xi = xi_mesh[1] - xi_mesh[0]
     del_eta = eta_mesh[1] - eta_mesh[0]
-    stokeslet = generate_stokeslet(eps, nodes, type)
-    a_matrix = -stokeslet * weights[:, np.newaxis, np.newaxis] / (8 * np.pi)
+    stokeslet = generate_stokeslet(eps, nodes, domain)
+    a_matrix = -stokeslet * weights[:, np.newaxis, np.newaxis]
     a_matrix = a_matrix.transpose((0, 2, 1, 3)).reshape(
         (nodes.size, nodes.size)) * del_xi * del_eta
     return a_matrix, nodes
@@ -129,6 +129,9 @@ def rt(eps, xe, x0):
 
     ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
     xk = del_x[:, :, np.newaxis, :]
+    ejk1 = np.zeros(shape=(3, 3))
+    ejk1[1, 2] = 1.
+    ejk1[2, 1] = -1.
     rotlet = (h1p(r, eps) / r + h2(r, eps)) * np.cross(ii, xk)
     return rotlet
 
@@ -140,6 +143,7 @@ def generate_stokeslet(eps, nodes, type):
     if type == 'free':
         return stokeslet
     elif type == 'wall':
+        h = xe[0]
         x_im = np.array([-1, 1, 1]) * xe
         im_stokeslet = -ss(eps, xe, x_im)
 
@@ -147,6 +151,15 @@ def generate_stokeslet(eps, nodes, type):
         dipole = np.dot(pd(eps, xe, x0), mod_matrix)
 
         # Still need to write Stokeslet doublet and rotlet
+        doublet = np.dot(sd(eps, xe, x0), mod_matrix)
+        rotlet = rt(eps, xe, x0)
+
+        ejk1 = np.zeros(shape=(3, 3))
+        ejk1[1, 2] = 1
+        ejk1[2, 1] = -1
+
+        return (stokeslet + im_stokeslet - h**2 * dipole + 2 * h * doublet
+                + 2 * h * np.dot(rotlet, ejk1))
 
 
 if __name__ == '__main__':
