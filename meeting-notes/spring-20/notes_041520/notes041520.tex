@@ -1,0 +1,379 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\large{\textbf{Regularized Stokeslets}}
+
+Two ways to handle FSI with Regularized Stokeslets:
+\begin{enumerate}
+\item \textbf{Elastic Body and IB} Treat nodes on the surface of the
+  platelet as IB points connected with stiff springs (or define some
+  function that gives the local force at each point on the platelet
+  surface for a given configuration
+  $\underline{F}(\underline{q},t) =
+  \mathcal{F}(\underline{X}(\underline{q}, t), t)$). Then introduce
+  this as a forcing term in the equations of Stokes flow:
+  $$0 = -\nabla p + \Delta \underline{u} + \underline{f} \quad
+  \tn{where} \quad \underline{f} = \int_\Gamma
+  \underline{F}(\underline{q}, t) \delta(\underline{x} -
+  \underline{X}(q, t)) dq.$$
+
+  Finally, points on the platelet surface move at the local fluid
+  velocity:
+  $$\frac{d\underline{X}}{dt}(q, t) =
+  \underline{u}(\underline{X}(q,t), t).$$
+
+  This is the approach used by Cortez et. al. in \cite{Cortez2005} to
+  model the motion of a flagellum. The flagellum is defined with two
+  helices---one enclosed within the other---and on each helix adjacent
+  points are joined with springs to maintain the structure's
+  shape. Then motion is driven by connecting placing springs between
+  the inner and outer helices as shown in Figure
+  \ref{fig:flagellum}. When the tension on the springs drops below
+  some threshold, the springs detach and reattach to the next point on
+  the outer ring to maintain motion.
+
+  To determine the motion of a bound platelet in flow, any bond forces
+  would be defined locally at their point of attachment, and this
+  force would be communicated to the rest of the body through the
+  force function $\mathcal{F}$.
+
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=.4\textwidth]{flagellum}
+    \caption{Cross section of the flagellum with springs connecting
+      the inner and outer helices (from \cite{Cortez2005})}
+    \label{fig:flagellum}
+  \end{figure}
+  
+\item \textbf{Rigid Body} With a rigid body in Stokes flow, we write
+  Stokes equations with the boundary condition
+  $\underline{u}(\underline{x}, t) = \underline{V} +
+  \underline{\Omega} \times \underline{x}$, which ensures no-slip and
+  no-penetration of the fluid at the boundary of the
+  platelet. However, in an adhesive dynamics simulation, the
+  translation and angular velocities $\underline{V}$ and
+  $\underline{\Omega}$ are unknown; they are determined from force and
+  torque balance on the entire body of the platelet. The hydrodynamic
+  force $F_h$ and $T_h$ can be found respectively by the integrals
+  $\int_\Gamma \underline{\underline{\sigma}} \cdot
+  \underline{n}(\underline{x}) ds(\underline{x})$ and $\int_\Gamma
+  (\underline{x} \times (\underline{\underline{\sigma}} \cdot
+  \underline{n}) ds(\underline{x})$.
+
+  Because of the linearity of Stokes flow, $F_h$ and $T_h$ are
+  linearly related to the velocities $\underline{V}$ and
+  $\underline{\Omega}$:
+  \begin{align*}
+    F_h &= -(\mathcal{T} \underline{V} + \mathcal{P}
+    \underline{\Omega}) \\
+    T_h &= -(\mathcal{P}^T \underline{V} + \mathcal{R}
+          \underline{\Omega}).
+  \end{align*}
+
+  The resistance matrices $\mathcal{T}$, $\mathcal{P}$, and
+  $\mathcal{R}$ depend only on the shape of the body, and its position
+  and orientation, and they can be found by solving Stokes equations
+  for the following 6 boundary conditions: $\underline{V} =
+  \underline{e}_i$ for $i = 1, 2, 3$ and $\underline{\Omega} =
+  \underline{e}_i$ for $i = 1, 2, 3$.
+\end{enumerate}
+
+\large{\textbf{Jump-Velocity Model}}
+
+\begin{itemize}
+\item Reviewed Qi et. al. \cite{Qi2019} and Chesla
+  et. al. \cite{Chesla1998} to try and understand how Qi et. al. are
+  relating their effective platelet unbinding rate $\kappa_\tn{off}$
+  to individual receptor on/off rates. They quote a result from
+  \cite{Chesla1998}:
+  \begin{equation*}
+    p_n(t) = \frac{\langle n \rangle^n}{n!} \exp(-\langle n \rangle)
+    \quad \tn{with} \quad \langle n \rangle = \alpha A_\alpha
+    \frac{k_\tn{on}}{k_\tn{off}} [1 - \exp(-k_\tn{off}t)],
+  \end{equation*}
+  but they don't really say how they use this, and I'm not sure how
+  this result applies. The initial condition here is $p_0(0) = 1$, so
+  there are no bonds at the start. It seems like we would want an
+  initial condition with $p_1(0) = 1$ instead.
+\item Also, I started looking at the jump-velocity model with escape (Figure
+  \ref{fig:escape-diagram}), but my estimate for the escape rate was
+  wrong, so I need to fix this first.
+  
+  \begin{figure}[h]
+    \centering
+    \schemestart
+    $U$ \arrow(u1--vv){<=>[$k_\tn{on}$][$k_\tn{off}$]} $V$
+    \arrow(@u1--ff){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}[-90] $F$
+    \arrow(--vf){<=>[$k_\tn{on}$][$k_\tn{off}$]} $VF$
+    \arrow(@vv--@vf){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}
+    \arrow(@u1--ww){->[*{0}$k_\tn{escape}$]}[90]
+    \arrow(@vv--vw){->[*{0}$k_\tn{escape}$]}[90]
+    \schemestop
+    \caption{Jump velocity model with escape}
+    \label{fig:escape-diagram}
+  \end{figure}
+\item One prediction from the jump-velocity model with escape is that
+  the number of dwells in a trajectory should be geometrically
+  distributed. Basically, the probability that a platelet re-binds
+  after unbinding is $a = \frac{k_\tn{on}}{k_\tn{on} + k_\tn{escape}}$,
+  and so the number of binding events that occur before the platelet
+  escapes is a geometric distribution ($p(n) = (1 - a) a^{n-1}$).
+
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{num_dwells}
+    \caption{Number of dwells per trajectory in experiments and
+      predicted by a geometric distribution.}
+    \label{fig:ndwells}
+  \end{figure}
+
+\end{itemize}
+
+% \begin{figure}[h]
+%   \centering
+%   \schemestart
+%   $U$ \arrow(u1--vv){<=>[$k_\tn{on}$][$k_\tn{off}$]} $V$
+%   \arrow(@u1--ff){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}[-90] $F$
+%   \arrow(--vf){<=>[$k_\tn{on}$][$k_\tn{off}$]} $VF$
+%   \arrow(@vv--@vf){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}
+%   \schemestop
+%   \label{fig:primed-states}
+% \end{figure}
+
+% \begin{itemize}
+% \item Last time: step times in simulations only converge to the
+%   fit distribution of step times when the length $L$ of the simulation
+%   domain is long. Running simulations through a shorter domain biases
+%   the simulated distribution of step times to be smaller than expected.
+% \item Figure \ref{fig:step-time}---Figure \ref{fig:traj-plots-200} show step
+%   time distributions and trajectories from simulations run through
+%   domains of various lengths, as well as simulated step time
+%   distributions when only looking at trajectories in a $2.5 \, \mu m$
+%   window. Restricting the ``viewing window'' in the longer
+%   stochastic experiments seems equivalent (and I suspect is) to
+%   running the simulations through a short domain.
+% \item I think that estimating the effective platelet on rate as the
+%   inverse of the mean step time \emph{overestimates} the effective on
+%   rate. In our experiments, longer steps are more likely to get cut
+%   off (and therefore not counted) because platelets are more likely to
+%   leave the domain on a long step. Are longer steps more likely to get
+%   cut off in observed trajectories? If they are, then our estimate of
+%   effective on-rate is an over-estimate of the true effective on rate.
+% \item I also imported Emma's data, and it is plotted in Figure
+%   \ref{fig:emma-data}. Platelets are moving much faster in these
+%   experiments than in their previous experiments. I plotted the new
+%   trajectories alongside the whole blood trajectories, but they didn't
+%   mention whether these experiments were done with whole blood or
+%   PRP. In either case, the new trajectories have higher velocities
+%   than the old trajectories. I've asked them whether these are whole
+%   blood or PRP trajectories, and what the shear rate on these
+%   experiments are (the old ones are at 100/s wall shear rate.)
+% \item We may be able to draw a stronger connection back to
+%   mechanism. Qi et. al., 2019, quote a result connecting effective
+%   platelet on and off rates back to receptor on/off rates, although
+%   they don't give any details on how they use that relation.
+% \end{itemize}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{fbg_step_sim}
+%   \caption{Step time distributions with $L = 2.5 \, \mu m$}
+%   \label{fig:step-time}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{fbg_step_sim_window}
+%   \caption{Step time distributions in a $L = 2.5 \, \mu m$ window}
+%   \label{fig:step-time-window}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{fbg_step_long}
+%   \caption{Step time distributions with $L = 50 \, \mu m$.}
+%   \label{fig:step-time-long}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{fbg_step_sim_100}
+%   \caption{Step time distributions with $L = 100 \, \mu m$}
+%   \label{fig:step-time-100}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{fbg_step_sim_200}
+%   \caption{Step time distributions with $L = 200 \, \mu m$.}
+%   \label{fig:step-time-200}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_prp_traj_sim}
+%     \caption{Observed (left) and simulated (right) (with $L=2.5 \, \mu m$)
+%       trajectories in PRP.}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_whl_traj_sim}
+%     \caption{Observed (left) and simulated (right) (with $L=2.5 \, \mu m$)
+%       trajectories in whole blood.}
+%   \end{subfigure}
+%   \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+%     in experiments and simulations.}
+%   \label{fig:traj-plots}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_prp_traj_sim_window}
+%     \caption{Observed (left) and simulated (right) (in a
+%       $L=2.5 \, \mu m$ window) trajectories in PRP.}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_whl_traj_sim_window}
+%     \caption{Observed (left) and simulated (right) (in a
+%       $L=2.5 \, \mu m$ window) trajectories in whole blood.}
+%   \end{subfigure}
+%   \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+%     in experiments and simulations.}
+%   \label{fig:traj-plots-window}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_prp_traj_sim_long}
+%     \caption{Observed (left) and simulated (right) (with $L=50 \, \mu m$)
+%       trajectories in PRP.}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_whl_traj_sim_long}
+%     \caption{Observed (left) and simulated (right) (with $L=50 \, \mu m$)
+%       trajectories in whole blood.}
+%   \end{subfigure}
+%   \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+%     in experiments and simulations.}
+%   \label{fig:traj-plots-long}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_prp_traj_sim_100}
+%     \caption{Observed (left) and simulated (right) (with $L=100 \, \mu m$)
+%       trajectories in PRP.}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_whl_traj_sim_100}
+%     \caption{Observed (left) and simulated (right) (with $L=100 \, \mu m$)
+%       trajectories in whole blood.}
+%   \end{subfigure}
+%   \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+%     in experiments and simulations.}
+%   \label{fig:traj-plots-100}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_prp_traj_sim_200}
+%     \caption{Observed (left) and simulated (right) (with $L=200 \, \mu m$)
+%       trajectories in PRP.}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{\textwidth}
+%     \includegraphics[width=\textwidth]{fbg_whl_traj_sim_200}
+%     \caption{Observed (left) and simulated (right) (with $L=200 \, \mu m$)
+%       trajectories in whole blood.}
+%   \end{subfigure}
+%   \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+%     in experiments and simulations.}
+%   \label{fig:traj-plots-200}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{emma_data_traj}
+%   \caption{Trajectory plots of Emma's data (plotted in magenta
+%     (primed) and cyan (unprimed)), along with the previous
+%     fibrinogen whole blood trajectories}
+%   \label{fig:emma-data}
+% \end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+

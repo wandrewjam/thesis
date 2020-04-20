@@ -1,0 +1,260 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\large{\textbf{Regularized Stokeslets}}
+\begin{itemize}
+\item Function evaluating wall-bounded regularized Stokeslets vanishes
+  on the wall.
+\item Still working on the problem of deriving the Stokeslet strengths
+  by imposing a constant velocity on the surface of the platelet.
+\end{itemize}
+
+\large{\textbf{Jump-Velocity Model}}
+
+\begin{figure}[h]
+  \centering
+  \schemestart
+  $U$ \arrow(u1--vv){<=>[$k_\tn{on}$][$k_\tn{off}$]} $V$
+  \arrow(@u1--ff){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}[-90] $F$
+  \arrow(--vf){<=>[$k_\tn{on}$][$k_\tn{off}$]} $VF$
+  \arrow(@vv--@vf){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}
+  \schemestop
+  \label{fig:primed-states}
+\end{figure}
+
+\begin{itemize}
+\item Last time: step times in simulations only converge to the
+  fit distribution of step times when the length $L$ of the simulation
+  domain is long. Running simulations through a shorter domain biases
+  the simulated distribution of step times to be smaller than expected.
+\item Figure \ref{fig:step-time}---Figure \ref{fig:traj-plots-200} show step
+  time distributions and trajectories from simulations run through
+  domains of various lengths, as well as simulated step time
+  distributions when only looking at trajectories in a $2.5 \, \mu m$
+  window. Restricting the ``viewing window'' in the longer
+  stochastic experiments seems equivalent (and I suspect is) to
+  running the simulations through a short domain.
+\item I think that estimating the effective platelet on rate as the
+  inverse of the mean step time \emph{overestimates} the effective on
+  rate. In our experiments, longer steps are more likely to get cut
+  off (and therefore not counted) because platelets are more likely to
+  leave the domain on a long step. Are longer steps more likely to get
+  cut off in observed trajectories? If they are, then our estimate of
+  effective on-rate is an over-estimate of the true effective on rate.
+\item I also imported Emma's data, and it is plotted in Figure
+  \ref{fig:emma-data}. Platelets are moving much faster in these
+  experiments than in their previous experiments. I plotted the new
+  trajectories alongside the whole blood trajectories, but they didn't
+  mention whether these experiments were done with whole blood or
+  PRP. In either case, the new trajectories have higher velocities
+  than the old trajectories. I've asked them whether these are whole
+  blood or PRP trajectories, and what the shear rate on these
+  experiments are (the old ones are at 100/s wall shear rate.)
+\item We may be able to draw a stronger connection back to
+  mechanism. Qi et. al., 2019, quote a result connecting effective
+  platelet on and off rates back to receptor on/off rates, although
+  they don't give any details on how they use that relation.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_step_sim}
+  \caption{Step time distributions with $L = 2.5 \, \mu m$}
+  \label{fig:step-time}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_step_sim_window}
+  \caption{Step time distributions in a $L = 2.5 \, \mu m$ window}
+  \label{fig:step-time-window}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_step_long}
+  \caption{Step time distributions with $L = 50 \, \mu m$.}
+  \label{fig:step-time-long}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_step_sim_100}
+  \caption{Step time distributions with $L = 100 \, \mu m$}
+  \label{fig:step-time-100}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_step_sim_200}
+  \caption{Step time distributions with $L = 200 \, \mu m$.}
+  \label{fig:step-time-200}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_prp_traj_sim}
+    \caption{Observed (left) and simulated (right) (with $L=2.5 \, \mu m$)
+      trajectories in PRP.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_whl_traj_sim}
+    \caption{Observed (left) and simulated (right) (with $L=2.5 \, \mu m$)
+      trajectories in whole blood.}
+  \end{subfigure}
+  \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+    in experiments and simulations.}
+  \label{fig:traj-plots}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_prp_traj_sim_window}
+    \caption{Observed (left) and simulated (right) (in a
+      $L=2.5 \, \mu m$ window) trajectories in PRP.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_whl_traj_sim_window}
+    \caption{Observed (left) and simulated (right) (in a
+      $L=2.5 \, \mu m$ window) trajectories in whole blood.}
+  \end{subfigure}
+  \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+    in experiments and simulations.}
+  \label{fig:traj-plots-window}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_prp_traj_sim_long}
+    \caption{Observed (left) and simulated (right) (with $L=50 \, \mu m$)
+      trajectories in PRP.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_whl_traj_sim_long}
+    \caption{Observed (left) and simulated (right) (with $L=50 \, \mu m$)
+      trajectories in whole blood.}
+  \end{subfigure}
+  \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+    in experiments and simulations.}
+  \label{fig:traj-plots-long}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_prp_traj_sim_100}
+    \caption{Observed (left) and simulated (right) (with $L=100 \, \mu m$)
+      trajectories in PRP.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_whl_traj_sim_100}
+    \caption{Observed (left) and simulated (right) (with $L=100 \, \mu m$)
+      trajectories in whole blood.}
+  \end{subfigure}
+  \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+    in experiments and simulations.}
+  \label{fig:traj-plots-100}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_prp_traj_sim_200}
+    \caption{Observed (left) and simulated (right) (with $L=200 \, \mu m$)
+      trajectories in PRP.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_whl_traj_sim_200}
+    \caption{Observed (left) and simulated (right) (with $L=200 \, \mu m$)
+      trajectories in whole blood.}
+  \end{subfigure}
+  \caption{Trajectories of primed (red) vs unprimed (blue) platelets
+    in experiments and simulations.}
+  \label{fig:traj-plots-200}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{emma_data_traj}
+  \caption{Trajectory plots of Emma's data (plotted in magenta
+    (primed) and cyan (unprimed)), along with the previous
+    fibrinogen whole blood trajectories}
+  \label{fig:emma-data}
+\end{figure}
+% \bibliographystyle{plain}
+% \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+

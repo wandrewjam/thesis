@@ -1,0 +1,335 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, algorithmic}
+\graphicspath{{/Users/andrewwork/thesis/jump-velocity/plots/}}
+
+\usepackage{tikz, pgfplots, chemfig}
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\large{\textbf{Regularized Stokeslets}}
+\begin{itemize}
+\item Regularized Stokeslets on an ellipsoid in free space---working
+  for the $\mathcal{T}$ and $\mathcal{P}$ matrices, probably working
+  for the $\mathcal{R}$ matrix and the $\mathbf{S_F}$ and
+  $\mathbf{S_G}$ vectors.
+
+  Definitions:
+  \begin{equation}
+    \begin{pmatrix}
+      \mathbf{F} \\
+      \mathbf{G}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+      \mathcal{T} & \mathcal{P} \\
+      \mathcal{P}^T & \mathcal{R}
+    \end{pmatrix}
+    \begin{pmatrix}
+      \mathbf{U} \\
+      \mathbf{\Omega}
+    \end{pmatrix}
+    +
+    \begin{pmatrix}
+      \mathbf{S_F} \\
+      \mathbf{S_G}
+    \end{pmatrix}
+  \end{equation}
+\item Working on finding analytical solutions for $\mathcal{R}$,
+  $\mathbf{S_F}$, and $\mathbf{S_G}$.
+\item Working on implementing wall-bounded regularized stokeslets
+\end{itemize}
+
+\large{\textbf{Jump-Velocity Model}}
+
+\begin{figure}[h]
+  \centering
+  \schemestart
+  $U$ \arrow(u1--vv){<=>[$k_\tn{on}$][$k_\tn{off}$]} $V$
+  \arrow(@u1--ff){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}[-90] $F$
+  \arrow(--vf){<=>[$k_\tn{on}$][$k_\tn{off}$]} $VF$
+  \arrow(@vv--@vf){<=>[*{0}$k_\tn{on}^F$][*{0}$k_\tn{off}^F$]}
+  \schemestop
+  \caption[Possible states of primed platelets]{A primed platelet can
+    exist in four states: (U) unbound from the surface and advecting
+    in the fluid, (V) bound through fast bonds to the surface, (F)
+    bound through slow bonds to the surface, or (VF) bound through
+    both fast bonds and slow bonds. In all three bound states, the
+    platelet is immobilized on the surface.}
+  \label{fig:primed-states}
+\end{figure}
+
+\begin{itemize}
+\item Comparing experimental and simulated trajectories on fibrinogen
+  (moving velocity, step sizes, dwell times, average velocity,
+  distance traveled between 1st and last dwells)
+\item I ``fixed'' the velocity comparison between experimental and
+  simulated trajectories by only computing the velocity of an
+  experimental trajectory between the first slow-binding event and the
+  last (before I had just been taking the velocity between the first
+  and last binding events, fast or slow). Now the simulated velocities
+  are slower than the observed velocities.
+\item What is a pause in the simulations, exactly? We want a
+  definition consistent with the assumption that we can only observe
+  pauses from the slow bond kinetics.
+\item There is a big difference between the observed step times and
+  simulated step times (bug?)
+\item The simulated trajectories have a much narrower distribution of
+  travel distances, and can only travel a maximum of 2.5 microns (have
+  probabilistic escape?)
+\end{itemize}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{avg_free_vel_col.png}
+%   \caption{Comparison of the average free velocity in the four
+%     collagen experimental conditions. The effective binding parameters
+%     found by fitting the model to velocity data are
+%     $k_\tn{on} = 34.6 / s$ and $k_\tn{off} = 5.18 / s$. An ANOVA test
+%     didn't find any significant difference in the average velocities
+%     among the 4 experiments, and so I fit the model to all the data
+%     simultaneously.}
+%   \label{fig:avg-free-vel-col}
+% \end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{avg_free_vel_fib.png}
+  \caption{Comparison of the average free velocity in the four
+    fibrinogen experimental conditions. The effective binding
+    parameters found by fitting the model to velocity data are
+    $k_\tn{on} = 70.3 / s$ and $k_\tn{off} = 11.8 / s$. An ANOVA test
+    didn't find any significant difference in the average velocities
+    among the 3 experiments with data, and so I fit the model to all
+    the data simultaneously.}
+  \label{fig:avg-free-vel-fib}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{dist_fib}
+  \caption{Distribution of distances between the 1st and the last
+    dwell}
+  \label{fig:fbg-dist}
+\end{figure}
+
+\begin{figure}
+  \centering
+  % \begin{subfigure}{0.75\textwidth}
+  %   \includegraphics[width=\textwidth]{col_step}
+  % \end{subfigure}
+  % \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_step_sim}
+  \end{subfigure}
+  % \\
+  % \begin{subfigure}{0.75\textwidth}
+  %   \includegraphics[width=\textwidth]{vwf_step}
+  % \end{subfigure}
+  \caption{Step time data from all experiments}
+  \label{fig:step-time}
+\end{figure}
+
+\begin{figure}
+  \centering
+  % \begin{subfigure}{0.75\textwidth}
+  %   \includegraphics[width=\textwidth]{col_pause}
+  % \end{subfigure}
+  % \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_pause_sim}
+  \end{subfigure}
+  % \\
+  % \begin{subfigure}{0.75\textwidth}
+  %   \includegraphics[width=\textwidth]{vwf_pause}
+  % \end{subfigure}
+  \caption{Pause time data from all experiments}
+  \label{fig:pause-time}
+\end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{avg_vel_col.png}
+%   \caption{Comparison of the overall average velocity in the four
+%     collagen experimental conditions, along with distributions of
+%     average velocities from simulations with the parameters found
+%     above.}
+%   \label{fig:avg-vel-col}
+% \end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_vel_sim.png}
+  \caption{Comparison of the overall average velocity in the four
+    fibrinogen experimental conditions, along with distributions of
+    average velocities from simulations with the parameters found
+    above.}
+  \label{fig:avg-vel-fib}
+\end{figure}
+
+\begin{figure}
+  \centering
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{col_prp_traj}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{col_whl_traj}
+%   \end{subfigure}
+%   \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_prp_traj_sim}
+    \caption{Trajectories in PRP}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\textwidth]{fbg_whl_traj_sim}
+    \caption{Trajectories in whole blood}
+  \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{vwf_prp_traj}
+%   \end{subfigure}
+  % \caption{Trajectory data from the 10 different experiments. Unprimed
+  %   platelets are in blue, and primed platelets are in red}
+  \label{fig:traj-plots}
+\end{figure}
+
+% Finally, in an attempt to (crudely) describe the initial steps in the platelet
+% trajectories, we again computed a ``capture rate'' from the time
+% between the start of a trajectory and the time to first binding. In
+% the collagen experiments, where there is the most data, there is a
+% clear increase in the capture rate in the whole blood experiments
+% relative to PRP, but not a clear relationship between primed and
+% unprimed platelets.
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{ccp_capture.png}
+%     \caption{CC PRP: $k_\tn{capture} = 0.52 / s$}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{hcp_capture.png}
+%     \caption{HC PRP: $k_\tn{capture} = 0.63 / s$}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{ccw_capture.png}
+%     \caption{CC whole blood: $k_\tn{capture} = 1.59 / s$}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{hcw_capture.png}
+%     \caption{HC whole blood: $k_\tn{capture} = 1.12 / s$}
+%   \end{subfigure}
+%   \caption{Histograms of the initial step time. The two experiments
+%     with whole blood have faster ``capture'' rates than the two
+%     experiments in PRP.}
+%   \label{fig:col-capture}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{ffp_capture.png}
+%     \caption{FF PRP: $k_\tn{capture} = 0.67 / s$}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{hfp_capture.png}
+%     \caption{HF PRP: $k_\tn{capture} = 1.42 / s$}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{ffw_capture.png}
+%     \caption{FF whole blood: $k_\tn{capture} = 1.17 / s$}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{hfw_capture.png}
+%     \caption{HF whole blood: $k_\tn{capture} = 0.81 / s$}
+%   \end{subfigure}
+%   \caption{Histograms of the initial step time on fibrinogen.}
+%   \label{fig:fbg-capture}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{vvp_capture.png}
+%     \caption{VV PRP: $k_\tn{capture} = 1.89 / s$}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \includegraphics[width=\textwidth]{hvp_capture.png}
+%     \caption{HV PRP: $k_\tn{capture} = 0.32 / s$}
+%   \end{subfigure}
+%   \caption{Histograms of the initial step time on vWF.}
+%   \label{fig:vwf-capture}
+% \end{figure}
+
+% \bibliographystyle{plain}
+% \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
