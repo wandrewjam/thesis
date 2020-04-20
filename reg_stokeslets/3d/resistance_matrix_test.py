@@ -12,15 +12,23 @@ def assemble_vel_cases(sphere_nodes):
     om_array = np.cross(np.eye(3)[np.newaxis, :, :],
                         sphere_nodes[:, np.newaxis, :],
                         axisc=1).reshape((-1, 3))
-    shear_vec = np.zeros(shape=sphere_nodes.size)
-    shear_vec[1::3] = sphere_nodes[:, -1]
+    strain = np.zeros(shape=(3, 3, 3))
+    strain[(1, 2), (2, 1), 0] = 1
+    strain[(0, 2), (2, 0), 1] = 1
+    strain[(0, 1), (1, 0), 2] = 1
 
-    return np.hstack([v_array, om_array, shear_vec[:, np.newaxis]])
+    e_array = np.dot(strain, sphere_nodes.T).transpose((2, 0, 1))
+    e_array = e_array.reshape((-1, 3))
+
+    return np.hstack([v_array, om_array, e_array])
 
 
 def main(proc=1, a=1., b=1.):
-    eps = [0.1, 0.05, 0.01]
-    n_nodes = [12, 24, 36, 48]
+    # eps = [0.1, 0.05, 0.01]
+    # n_nodes = [12, 24, 36, 48]
+
+    eps = [0.1, 0.05]
+    n_nodes = [4, 8]
 
     if proc == 1:
         matrices = [generate_resistance_matrices(e, n, a, b)
@@ -34,7 +42,7 @@ def main(proc=1, a=1., b=1.):
 
     T = np.zeros(shape=(len(eps) * 3, len(n_nodes) * 3 + 1))
     R = np.zeros(shape=(len(eps) * 3, len(n_nodes) * 3 + 1))
-    S = np.zeros(shape=(len(eps) * 3, len(n_nodes) * 2 + 1))
+    S = np.zeros(shape=(len(eps) * 3, len(n_nodes) * 3 + 1))
 
     T[::3, 0] = eps
     R[::3, 0] = eps
@@ -44,8 +52,7 @@ def main(proc=1, a=1., b=1.):
         for j in range(len(n_nodes)):
             T[3*i:3*(i+1), 3*j+1:3*(j+1)+1] = matrices[len(n_nodes) * i + j][0]
             R[3*i:3*(i+1), 3*j+1:3*(j+1)+1] = matrices[len(n_nodes) * i + j][3]
-            S[3*i:3*(i+1), 2*j+1] = matrices[len(n_nodes) * i + j][4]
-            S[3*i:3*(i+1), 2*j+2] = matrices[len(n_nodes) * i + j][5]
+            S[3*i:3*(i+1), 3*j+1:3*(j+1)+1] = matrices[len(n_nodes) * i + j][5]
 
     header = 'eps'
     for n in n_nodes:
@@ -54,7 +61,7 @@ def main(proc=1, a=1., b=1.):
     # Need to save more info on the matrices
     np.savetxt('t_matrix_data_{}_{}.dat'.format(a, b), T, header=header)
     np.savetxt('r_matrix_data_{}_{}.dat'.format(a, b), R, header=header)
-    np.savetxt('s_vector_data_{}_{}.dat'.format(a, b), S, header=header)
+    np.savetxt('e_matrix_data_{}_{}.dat'.format(a, b), S, header=header)
 
 
 def generate_resistance_matrices(eps, n_nodes, a=1., b=1.):
@@ -72,7 +79,7 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1.):
         pt_forces = -np.linalg.lstsq(a_matrix, rhs)[0]
     # For each velocity case, integrate velocities to get body force and
     #   body torque
-    pt_forces = pt_forces.reshape((-1, 3, 7))
+    pt_forces = pt_forces.reshape((-1, 3, 9))
     pt_torques = np.cross(nodes[:, :, np.newaxis], pt_forces, axis=1)
     print('Calculating body force and torque for eps = {}, nodes = {}'.format(
         eps, n_nodes))
@@ -87,13 +94,13 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1.):
 
     print('Constructing resistance matrices for eps = {}, nodes = {}'.format(
         eps, n_nodes))
-    t_matrix, p_matrix = tmp_matrix1[:, :3], tmp_matrix1[:, 3:6]
-    pt_matrix, r_matrix = tmp_matrix2[:, :3], tmp_matrix2[:, 3:6]
-    shear_forces, shear_torques = tmp_matrix1[:, 6], tmp_matrix2[:, 6]
+    t_matrix, p_matrix, e1_matrix = (tmp_matrix1[:, :3], tmp_matrix1[:, 3:6],
+                                     tmp_matrix1[:, 6:])
+    pt_matrix, r_matrix, e2_matrix = (tmp_matrix2[:, :3], tmp_matrix2[:, 3:6],
+                                      tmp_matrix2[:, 6:])
     print('Finished eps={}, n_nodes={}'.format(eps, n_nodes))
-    return t_matrix, p_matrix, pt_matrix, r_matrix, shear_forces, shear_torques
+    return t_matrix, p_matrix, pt_matrix, r_matrix, e1_matrix, e2_matrix
 
 
 if __name__ == '__main__':
-    # cProfile.run('main()')
     main(a=1.5, b=0.5)
