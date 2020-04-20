@@ -62,11 +62,11 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1.):
 
 
 def main(proc=1, a=1., b=1.):
-    # eps = [0.1, 0.05, 0.01]
-    # n_nodes = [12, 24, 36, 48]
+    eps = [0.1, 0.05, 0.01]
+    n_nodes = [12, 24, 36, 48]
 
-    eps = [0.1, 0.05]
-    n_nodes = [4, 8]
+    ## eps = [0.1, 0.05]
+    ## n_nodes = [4, 8]
 
     if proc == 1:
         matrices = [generate_resistance_matrices(e, n, a, b)
