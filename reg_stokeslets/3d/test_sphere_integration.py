@@ -1,4 +1,4 @@
-from sphere_integration_utils import phi, geom_weights, generate_grid, sphere_integrate
+from sphere_integration_utils import phi, geom_weights, generate_grid, sphere_integrate, wall_stokeslet_integrand
 import numpy as np
 import pytest
 from scipy.special import sph_harm
@@ -134,3 +134,20 @@ class TestMeshGenerator(object):
             assert (np.linalg.norm(diff.flatten())
                     < n_nodes**2 * np.finfo(float).eps)
 
+
+class TestRegularizedStokeslets(object):
+    def test_wall_bounded_stokeslets(self):
+        """Test that the wall-bounded stokeslet vanishes on the wall"""
+        eps = 0.1
+        num_cases = 5
+        test_x_cases = np.concatenate([np.zeros(shape=(num_cases, 1)),
+                                       10*np.random.rand(num_cases, 2) - 5],
+                                      axis=1)
+        center_cases = 10*np.random.rand(num_cases, 3) - 5
+        force_cases = 10*np.random.rand(num_cases, 3) - 5
+        for test_x in test_x_cases:
+            for center in center_cases:
+                for force in force_cases:
+                    result = wall_stokeslet_integrand(test_x, center, eps,
+                                                      force)
+                    assert np.linalg.norm(result) < np.finfo(float).eps

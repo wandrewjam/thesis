@@ -225,10 +225,14 @@ def stokeslet_integrand(x_tuple, center, eps, force):
 
     Parameters
     ----------
-    force
-    eps
+    force : callable
+        Force function of the regularized Stokeslet
+    eps : float
+        Blob parameter of the regularized Stokeslet
     center
-    x_tuple
+    x_tuple : tuple of ndarray
+        Tuple containing ndarrays of each dimension of the set of
+        evaluation points
 
     Returns
     -------
@@ -254,6 +258,80 @@ def stokeslet_integrand(x_tuple, center, eps, force):
                                      f_array[i, j, :])
 
     return -output / (8 * np.pi)
+
+
+def h1(r, eps=0.01):
+    sre = np.sqrt(r**2 + eps**2)
+    return (8 * np.pi * sre) ** (-1) + eps**2 / (8 * np.pi * sre ** 3)
+
+
+def h2(r, eps=0.01):
+    return (8 * np.pi * np.sqrt(r**2 + eps**2) ** 3) ** (-1)
+
+
+def d1(r, eps=0.01):
+    sre = np.sqrt(r**2 + eps**2)
+    return (4 * np.pi * sre ** 3) ** (-1) - 3 * eps**2 / (4 * np.pi * sre ** 5)
+
+
+def d2(r, eps=0.01):
+    sre = np.sqrt(r**2 + eps**2)
+    return - 3 / (4 * np.pi * sre ** 5)
+
+
+def h1p(r, eps=0.01):
+    sre = np.sqrt(r**2 + eps**2)
+    return -r / (8 * np.pi * sre**3) - 3 * r * eps**2 / (8 * np.pi * sre**5)
+
+
+def h2p(r, eps=0.01):
+    sre = np.sqrt(r**2 + eps**2)
+    return -3 * r / (8 * np.pi * sre**5)
+
+
+def wall_stokeslet_integrand(x_tuple, center, eps, force):
+    """Evaluate the regularized Stokeslet located at center
+
+    This function returns the ith component of the wall-bounded
+    regularized Stokeslet centered at center, evaluated at position
+    x_tuple.
+
+    Parameters
+    ----------
+    x_tuple
+    center
+    eps
+    force
+
+    Returns
+    -------
+
+    """
+    images = np.array([-1, 1, 1]) * center
+    del_x = x_tuple - center
+    im_x = x_tuple - images
+    h = center.T[0]
+
+    r = np.linalg.norm(del_x, axis=-1)
+    r_im = np.linalg.norm(im_x, axis=-1)
+
+    e_1 = np.array([1, 0, 0])
+    dipole = 2 * np.dot(force, e_1) * e_1 - force
+    rotlet = np.cross(force, e_1)
+
+    term1 = force * h1(r, eps) + np.dot(force, del_x) * del_x * h2(r, eps)
+    term2 = force * h1(r_im, eps) + np.dot(force, im_x) * im_x * h2(r_im, eps)
+    term3 = dipole * d1(r_im, eps) + np.dot(dipole, im_x) * im_x * d2(r_im, eps)
+    term4 = h1p(r_im, eps) / r_im + h2(r_im, eps)
+    term5 = (np.dot(dipole, e_1) * im_x * h2(r_im, eps)
+             + np.dot(im_x, e_1) * dipole * h2(r_im, eps)
+             + np.dot(dipole, im_x) * e_1 * h1p(r_im, eps) / r_im
+             + np.dot(im_x, e_1) * np.dot(dipole, im_x) * im_x
+             * h2p(r_im, eps) / r_im)
+
+    u = (term1 - term2 - h**2 * term3 + 2 * h * term4 * np.cross(rotlet, im_x)
+         + 2 * h * term5)
+    return u
 
 
 def l2_error(x_tuple, n_nodes, proc=1, eps=0.01):
