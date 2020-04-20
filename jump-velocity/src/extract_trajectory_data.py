@@ -70,27 +70,38 @@ def extract_state_data(t_save, y_save):
     pre_free_vels = None
     post_free_vels = None
 
+    # Find spots where y_save has 4 of the same position in a row
+    pos_list = list()
+    for pos in range(1, y_save.shape[0] - 1):
+        if y_save[pos] == y_save[pos-1] == y_save[pos+1]:
+            pos_list.append(pos)
+
+    y_save = np.delete(y_save, pos_list)
+    t_save = np.delete(t_save, pos_list)
+
     del_y = y_save[1:] - y_save[:-1]
     del_t = t_save[1:] - t_save[:-1]
 
     if del_y[0] == 0 and del_y[-1] == 0:  # Dwell at begin and end of traj.
-        steps = del_y[1::2]
+        step_lengths = del_y[1::2]
+        step_times = del_t[1::2]
         dwells = del_t[::2]
-        free_vels = del_y[1::2] / del_t[1::2]
+        free_vels = step_lengths / step_times
         if free_vels.size > 0:
             avg_free_vels = np.array(np.average(
-                free_vels, weights=del_t[1::2]), ndmin=1)
+                free_vels, weights=step_times), ndmin=1)
         else:
             avg_free_vels = np.copy(free_vels)
         vels = (y_save[-1] - y_save[0]) / (t_save[-1] - t_save[0])
 
     elif del_y[0] == 0:  # Dwell at begin of traj.
-        steps = del_y[1:-1:2]
+        step_lengths = del_y[1:-1:2]
         dwells = del_t[::2]
-        free_vels = del_y[1:-1:2] / del_t[1:-1:2]
+        step_times = del_t[1:-1:2]
+        free_vels = step_lengths / step_times
         if free_vels.size > 0:
             avg_free_vels = np.array(np.average(
-                free_vels, weights=del_t[1:-1:2]), ndmin=1)
+                free_vels, weights=step_times), ndmin=1)
         else:
             avg_free_vels = np.copy(free_vels)
         post_free_vels = del_y[-1] / del_t[-1]
@@ -98,45 +109,47 @@ def extract_state_data(t_save, y_save):
         vels = (y_save[-2] - y_save[0]) / (t_save[-2] - t_save[0])
 
     elif del_y[-1] == 0:  # Dwell at end of traj.
-        steps = del_y[2::2]
+        step_lengths = del_y[2::2]
         dwells = del_t[1::2]
         pre_dwell_steps = del_y[0]
-        free_vels = del_y[2::2] / del_t[2::2]
+        step_times = del_t[2::2]
+        free_vels = step_lengths / step_times
         if free_vels.size > 0:
             avg_free_vels = np.array(np.average(
-                free_vels, weights=del_t[2::2]), ndmin=1)
+                free_vels, weights=step_times), ndmin=1)
         else:
             avg_free_vels = np.copy(free_vels)
         pre_free_vels = del_y[0] / del_t[0]
         vels = (y_save[-1] - y_save[1]) / (t_save[-1] - t_save[1])
 
     else:  # Steps at begin and end of traj.
-        steps = del_y[2:-1:2]
+        step_lengths = del_y[2:-1:2]
         dwells = del_t[1::2]
         pre_dwell_steps = del_y[0]
         post_dwell_steps = del_y[-1]
-        free_vels = del_y[2:-1:2] / del_t[2:-1:2]
+        step_times = del_t[2:-1:2]
+        free_vels = step_lengths / step_times
         if free_vels.size > 0:
             avg_free_vels = np.array(np.average(
-                free_vels, weights=del_t[2:-1:2]), ndmin=1)
+                free_vels, weights=step_times), ndmin=1)
         else:
             avg_free_vels = np.copy(free_vels)
         pre_free_vels = del_y[0] / del_t[0]
         post_free_vels = del_y[-1] / del_t[-1]
         vels = (y_save[-2] - y_save[1]) / (t_save[-2] - t_save[1])
 
-    assert dwells.size - steps.size == 1 or (dwells.size == 0
-                                             and steps.size == 0)
+    assert dwells.size - step_lengths.size == 1 or (dwells.size == 0
+                                             and step_lengths.size == 0)
     assert dwells.size - free_vels.size == 1 or (dwells.size == 0
-                                                 and steps.size == 0)
-    if steps.size > 0:
-        step_size_v_predwell = zip(steps, dwells[:-1])
-        step_size_v_postdwell = zip(steps, dwells[1:])
+                                                 and step_lengths.size == 0)
+    if step_lengths.size > 0:
+        step_size_v_predwell = zip(step_lengths, dwells[:-1])
+        step_size_v_postdwell = zip(step_lengths, dwells[1:])
         step_vel_v_predwell = zip(free_vels, dwells[:-1])
         step_vel_v_postdwell = zip(free_vels, dwells[1:])
-        step_time_v_vel = zip(steps / free_vels, free_vels)
+        step_time_v_vel = zip(step_lengths / free_vels, free_vels)
         dwell_autocorr = zip(dwells[:-1], dwells[1:])
-        step_autocorr = zip(steps[:-1], steps[1:])
+        step_autocorr = zip(step_lengths[:-1], step_lengths[1:])
         vels_autocorr = zip(free_vels[:-1], free_vels[1:])
     else:
         step_size_v_predwell = None
@@ -148,16 +161,16 @@ def extract_state_data(t_save, y_save):
         step_autocorr = None
         vels_autocorr = None
     return (dwells, free_vels, avg_free_vels, post_dwell_steps, post_free_vels,
-            pre_dwell_steps, pre_free_vels, steps, vels, step_size_v_predwell,
+            pre_dwell_steps, pre_free_vels, step_lengths, vels, step_size_v_predwell,
             step_size_v_postdwell, step_vel_v_predwell, step_vel_v_postdwell,
-            step_time_v_vel, dwell_autocorr, step_autocorr, vels_autocorr)
+            step_time_v_vel, dwell_autocorr, step_autocorr, vels_autocorr, step_times)
 
 
 def main():
-    experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
-    # experiments = load_trajectories(['hfp', 'ffp', 'hfw', 'ffw'])
+    # experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
+    experiments = load_trajectories(['hfp', 'ffp', 'hfw', 'ffw', 'hfe', 'ffe'])
     # experiments = load_trajectories(['hvp', 'vvp'])
-    expt = 'ccp'
+    expt = 'ffe'
     steps_combined = list()
     pre_dwell_steps_combined = list()
     post_dwell_steps_combined = list()
@@ -176,12 +189,13 @@ def main():
     step_autocorr_combined = list()
     vels_autocorr_combined = list()
     for trajectory in experiments[expt]:
-        y_save, t_save = process_trajectory(trajectory, absolute_pause_threshold=1.)[1:]
+        y_save, t_save = process_trajectory(trajectory, absolute_pause_threshold=0.)[1:]
 
         (dwells, free_vels, avg_free_vels, post_dwell_steps, post_free_vels,
          pre_dwell_steps, pre_free_vels, steps, vels, step_size_v_predwell,
          step_size_v_postdwell, step_vel_v_predwell, step_vel_v_postdwell,
-         step_time_v_vel, dwell_autocorr, step_autocorr, vels_autocorr) = (
+         step_time_v_vel, dwell_autocorr, step_autocorr, vels_autocorr,
+         step_times) = (
             extract_state_data(t_save, y_save))
 
         steps_combined.append(steps)

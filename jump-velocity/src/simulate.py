@@ -21,7 +21,7 @@ def read_parameter_file(filename):
     return dict(parlist)
 
 
-def experiment(rate_a, rate_b, rate_c, rate_d, filter=True):
+def experiment(rate_a, rate_b, rate_c, rate_d, rate_escape=0, filter=True):
     """Runs a single jump-velocity experiment based on the given rates
 
     Note that this experiment excludes platelets that pass through the
@@ -29,6 +29,7 @@ def experiment(rate_a, rate_b, rate_c, rate_d, filter=True):
 
     Parameters
     ----------
+    rate_escape
     filter : bool
     rate_a : float
         Value of rate a
@@ -54,7 +55,7 @@ def experiment(rate_a, rate_b, rate_c, rate_d, filter=True):
         state = np.zeros(shape=1, dtype='int')
         if rate_c == 0:
             assert rate_d == 0
-            while y[-1] < 1:
+            while y[-1] < 1 and rate_escape == 0:
                 if state[-1] == 0:
                     dt = np.random.exponential(scale=1 / rate_b)
                     t = np.append(t, t[-1] + dt)
@@ -67,27 +68,105 @@ def experiment(rate_a, rate_b, rate_c, rate_d, filter=True):
                     state = np.append(state, 0)
                 else:
                     raise ValueError('State must be 0 or 1')
-        else:
-            assert rate_d > 0
-            while y[-1] < 1:
+            while rate_escape > 0:
                 if state[-1] == 0:
-                    dt = np.random.exponential(scale=1 / (rate_b + rate_d))
-                    t = np.append(t, t[-1] + dt)
-                    y = np.append(y, y[-1] + dt)
-                    r = np.random.rand(1)
-                    if r < rate_b / (rate_b + rate_d):
+                    tot_rate = rate_b + rate_escape
+                    dt = np.random.exponential(scale=1 / tot_rate)
+                    r = np.random.rand()
+                    if r < rate_b / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1] + dt)
                         state = np.append(state, 1)
                     else:
-                        state = np.append(state, 2)
+                        break
                 elif state[-1] == 1:
-                    dt = np.random.exponential(scale=1 / (rate_a + rate_d))
+                    dt = np.random.exponential(scale=1 / rate_a)
+                    t = np.append(t, t[-1] + dt)
+                    y = np.append(y, y[-1])
+                    state = np.append(state, 0)
+                else:
+                    raise ValueError('State must be 0 or 1')
+
+        else:
+            assert rate_d > 0
+            while y[-1] < 1 and rate_escape == 0:
+                if state[-1] == 0:
+                    tot_rate = rate_b + rate_d + rate_escape
+                    dt = np.random.exponential(scale=1. / tot_rate)
+                    r = np.random.rand(1)
+                    if r < rate_b / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1] + dt)
+                        state = np.append(state, 1)
+                    elif rate_b / tot_rate <= r < (rate_b + rate_d) / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1] + dt)
+                        state = np.append(state, 2)
+                    else:
+                        break
+                elif state[-1] == 1:
+                    tot_rate = rate_a + rate_d + rate_escape
+                    dt = np.random.exponential(scale=1 / tot_rate)
+                    r = np.random.rand(1)
+                    if r < rate_a / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1])
+                        state = np.append(state, 0)
+                    elif rate_a / tot_rate <= r < (rate_a + rate_d) / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1])
+                        state = np.append(state, 3)
+                    else:
+                        break
+                elif state[-1] == 2:
+                    dt = np.random.exponential(scale=1 / (rate_b + rate_c))
                     t = np.append(t, t[-1] + dt)
                     y = np.append(y, y[-1])
                     r = np.random.rand(1)
-                    if r < rate_a / (rate_a + rate_d):
+                    if r < rate_c / (rate_b + rate_c):
                         state = np.append(state, 0)
                     else:
                         state = np.append(state, 3)
+                elif state[-1] == 3:
+                    dt = np.random.exponential(scale=1 / (rate_a + rate_c))
+                    t = np.append(t, t[-1] + dt)
+                    y = np.append(y, y[-1])
+                    r = np.random.rand(1)
+                    if r < rate_a / (rate_a + rate_c):
+                        state = np.append(state, 2)
+                    else:
+                        state = np.append(state, 1)
+                else:
+                    raise ValueError('State must be one of 0, 1, 2, or 3')
+            while rate_escape > 0:
+                if state[-1] == 0:
+                    tot_rate = rate_b + rate_d + rate_escape
+                    dt = np.random.exponential(scale=1. / tot_rate)
+                    r = np.random.rand(1)
+                    if r < rate_b / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1] + dt)
+                        state = np.append(state, 1)
+                    elif rate_b / tot_rate <= r < (rate_b + rate_d) / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1] + dt)
+                        state = np.append(state, 2)
+                    else:
+                        break
+                elif state[-1] == 1:
+                    tot_rate = rate_a + rate_d + rate_escape
+                    dt = np.random.exponential(scale=1 / tot_rate)
+                    r = np.random.rand(1)
+                    if r < rate_a / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1])
+                        state = np.append(state, 0)
+                    elif rate_a / tot_rate <= r < (rate_a + rate_d) / tot_rate:
+                        t = np.append(t, t[-1] + dt)
+                        y = np.append(y, y[-1])
+                        state = np.append(state, 3)
+                    else:
+                        break
                 elif state[-1] == 2:
                     dt = np.random.exponential(scale=1 / (rate_b + rate_c))
                     t = np.append(t, t[-1] + dt)
@@ -113,10 +192,12 @@ def experiment(rate_a, rate_b, rate_c, rate_d, filter=True):
         if y.shape[0] > 2:  # Filter out plts that don't bind
             break
 
-    excess = y[-1] - 1
-    y[-1] -= excess
-    t[-1] -= excess
-    return y, t
+    if rate_escape == 0:
+        excess = y[-1] - 1
+        y[-1] -= excess
+        t[-1] -= excess
+        state[-1] = 0
+    return y, t, state
 
 
 def multiple_experiments(a, c, eps1, eps2, num_expt):
