@@ -1,4 +1,7 @@
 from __future__ import division
+import os
+os.environ["OPENBLAS_NUM_THREADS"] = "8"
+
 import numpy as np
 from force_test import assemble_quad_matrix
 from resistance_matrix_test import generate_resistance_matrices
