@@ -36,7 +36,7 @@ def main(a=1., b=1., server='mac'):
     else:
         raise ValueError('server is not valid')
 
-    distances = dist_ratios / a
+    distances = dist_ratios * a
 
     result = [[
         generate_resistance_matrices(e, n, a=a, b=b, domain='wall',
@@ -57,8 +57,8 @@ def main(a=1., b=1., server='mac'):
     for (i, dist) in enumerate(distances):
         for (j, n) in enumerate(n_nodes):
             t_matrix = result[j][i][0]
-            par_table[i, j + 2] = t_matrix[1, 1] / (6 * np.pi)
-            prp_table[i, j + 2] = t_matrix[0, 0] / (6 * np.pi)
+            par_table[i, j + 2] = t_matrix[1, 1] / (6 * np.pi * a)
+            prp_table[i, j + 2] = t_matrix[0, 0] / (6 * np.pi * a)
 
     header = 'd/a, Gap size, '
     header += '{}, ' * len(n_nodes)
