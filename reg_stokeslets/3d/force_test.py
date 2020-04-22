@@ -48,8 +48,10 @@ def find_solve_error(eps, n_nodes):
     return error
 
 
-def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free'):
+def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0):
     xi_mesh, eta_mesh, nodes, ind_map = generate_grid(n_nodes, a=a, b=b)
+    nodes[:, 0] += distance
+    assert domain == 'free' or np.all(nodes[:, 0] > 0)
 
     c_matrix = np.ones(shape=ind_map.shape[:2])
     c_matrix[(0, n_nodes), 1:n_nodes] = 1. / 2
@@ -84,7 +86,7 @@ def ss(eps, xe, x0):
     stokeslet = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * h1(r, eps)
                   + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :]
                   * h2(r, eps)))
-    assert np.all(stokeslet == stokeslet.transpose((1, 0, 3, 2)))
+    assert np.all(stokeslet == stokeslet.transpose((0, 1, 3, 2)))
     return stokeslet
 
 
@@ -97,7 +99,7 @@ def pd(eps, xe, x0):
     dipole = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * d1(r, eps)
                + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :]
                * d2(r, eps)))
-    assert np.all(dipole == dipole.transpose((1, 0, 3, 2)))
+    assert np.all(dipole == dipole.transpose((0, 1, 3, 2)))
     return dipole
 
 
@@ -111,8 +113,9 @@ def sd(eps, xe, x0):
     e1i = e1[np.newaxis, np.newaxis, :, np.newaxis]
     e1k = e1[np.newaxis, np.newaxis, np.newaxis, :]
 
-    x1 = del_x[:, :, 0, np.newaxis]
-    xi = del_x[:, :, :, np.newaxis]
+    x1 = del_x[..., 0]
+    x1 = x1[..., np.newaxis, np.newaxis]
+    xi = del_x[..., np.newaxis]
     xk = del_x[:, :, np.newaxis, :]
 
     ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
@@ -148,11 +151,10 @@ def generate_stokeslet(eps, nodes, type):
         im_stokeslet = -ss(eps, xe, x_im)
 
         mod_matrix = np.diag([1, -1, -1])
-        dipole = np.dot(pd(eps, xe, x0), mod_matrix)
+        dipole = np.dot(pd(eps, xe, x_im), mod_matrix)
 
-        # Still need to write Stokeslet doublet and rotlet
-        doublet = np.dot(sd(eps, xe, x0), mod_matrix)
-        rotlet = rt(eps, xe, x0)
+        doublet = np.dot(sd(eps, xe, x_im), mod_matrix)
+        rotlet = rt(eps, xe, x_im)
 
         ejk1 = np.zeros(shape=(3, 3))
         ejk1[1, 2] = 1

@@ -23,10 +23,12 @@ def assemble_vel_cases(sphere_nodes):
     return np.hstack([v_array, om_array, e_array])
 
 
-def generate_resistance_matrices(eps, n_nodes, a=1., b=1.):
+def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
+                                 distance=0):
     print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
         eps, n_nodes))
-    a_matrix, nodes = assemble_quad_matrix(eps=eps, n_nodes=n_nodes, a=a, b=b)
+    a_matrix, nodes = assemble_quad_matrix(eps=eps, n_nodes=n_nodes, a=a, b=b,
+                                           domain=domain, distance=distance)
     # Solve for the forces given 6 different velocity cases
     print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
     rhs = assemble_vel_cases(nodes)
@@ -61,20 +63,26 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1.):
     return t_matrix, p_matrix, pt_matrix, r_matrix, e1_matrix, e2_matrix
 
 
-def main(proc=1, a=1., b=1.):
-    eps = [0.1, 0.05, 0.01]
-    n_nodes = [12, 24, 36, 48]
-
-    ## eps = [0.1, 0.05]
-    ## n_nodes = [4, 8]
+def main(proc=1, a=1., b=1., domain='free', distance=0, server='mac'):
+    if server == 'linux':
+        eps = [0.1, 0.05, 0.01]
+        n_nodes = [12, 24, 36, 48]
+    elif server == 'mac':
+        eps = [0.1, 0.05]
+        n_nodes = [4, 8]
+    else:
+        raise ValueError('\'server\' variable is not valid')
 
     if proc == 1:
-        matrices = [generate_resistance_matrices(e, n, a, b)
+        matrices = [generate_resistance_matrices(e, n, a, b, domain=domain,
+                                                 distance=distance)
                     for e in eps for n in n_nodes]
     else:
         pool = mp.Pool(processes=proc)
-        result = [pool.apply_async(generate_resistance_matrices, args=(e, n),
-                                   kwds={'a': a, 'b': b})
+        result = [pool.apply_async(generate_resistance_matrices,
+                                   args=(e, n),
+                                   kwds={'a': a, 'b': b, 'domain': domain,
+                                         'distance': distance})
                   for e in eps for n in n_nodes]
         matrices = [res.get() for res in result]
 
@@ -96,11 +104,20 @@ def main(proc=1, a=1., b=1.):
     for n in n_nodes:
         header += ' {}'.format(n)
 
-    # Save full matrices in a text file
+    # Save full matrices in major_axis text file
     np.savetxt('t_matrix_data_{}_{}.dat'.format(a, b), T, header=header)
     np.savetxt('r_matrix_data_{}_{}.dat'.format(a, b), R, header=header)
     np.savetxt('e_matrix_data_{}_{}.dat'.format(a, b), E, header=header)
 
 
 if __name__ == '__main__':
-    main(a=1.5, b=0.5)
+    import sys
+    kwargs = {
+        'a': float(sys.argv[1]),
+        'b': float(sys.argv[2]),
+        'domain': sys.argv[3],
+        'distance': float(sys.argv[4]),
+        'server': sys.argv[5]
+    }
+
+    main(**kwargs)

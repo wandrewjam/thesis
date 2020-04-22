@@ -382,6 +382,20 @@ def one_function(x_tuple):
 
 
 def sphere_integrate(integrand, n_nodes=16, a=1., b=1., **kwargs):
+    """Integrates a function over the surface of a spheroid
+
+    Parameters
+    ----------
+    integrand
+    n_nodes
+    a
+    b
+    kwargs
+
+    Returns
+    -------
+
+    """
     if type(integrand) is np.ndarray:
         assert integrand.shape[0] == 6*n_nodes**2 + 2
     eta_mesh, xi_mesh, cart_nodes, ind_map = generate_grid(n_nodes, a=a, b=b)
