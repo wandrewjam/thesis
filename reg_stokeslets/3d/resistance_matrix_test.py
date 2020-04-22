@@ -1,5 +1,5 @@
 import os
-os.environ["OPENBLAS_NUM_THREADS"] = "16"
+os.environ["OPENBLAS_NUM_THREADS"] = "4"
 
 import numpy as np
 from force_test import assemble_quad_matrix
