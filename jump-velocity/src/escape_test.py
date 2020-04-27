@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import expon
+from scipy.stats import expon, geom
 
 
 def escape_experiment(rate_a, rate_b, rate_c, rate_d, escape):
@@ -87,25 +87,66 @@ def simple_experiment(rate_b, escape, num_expts):
 
 
 if __name__ == '__main__':
-    num_expts = 2**14
-    # expts = [escape_experiment(1., 2., 0, 0, 10.) for _ in range(num_expts)]
-    # steps = list()
-    # for ex in expts:
-    #     t = ex[1]
-    #     steps.extend(t[1:] - t[:-1])
-    # x_cdf = np.append([0], np.sort(steps))
-    # y_cdf = np.linspace(0, 1, num=len(steps)+1)
+    num_expts = 2**16
+    kon = 10.
+    koff = 20.
+    kes = 10.
+    expts = [escape_experiment(koff, kon, 0, 0, kes) for _ in range(num_expts)]
+    init_steps = list()
+    steps = list()
+    nsteps = list()
+    mov_time = list()
+
+    for ex in expts:
+        t = ex[1]
+        init_steps.append(t[1] - t[0])
+        steps.extend(t[1::2] - t[:-1:2])
+        mov_time.append(np.sum(t[1::2] - t[:-1:2]))
+        nsteps.append((len(t) - 1) / 2)
+
+    # Compare the distribution of initial steps. Expect exponential w/ rate kon
+    xi_cdf = np.append([0], np.sort(init_steps))
+    yi_cdf = np.linspace(0, 1, num=len(init_steps)+1)
+
+    xj_cdf = np.append([0], np.sort(steps))
+    yj_cdf = np.linspace(0, 1, num=len(steps)+1)
+
+    xi_plot = np.linspace(0, xi_cdf[-1], num=512)
+    yi_plot = expon.cdf(xi_plot, scale=1/(kon + kes))
+
+    plt.plot(xi_cdf, yi_cdf)
+    plt.plot(xj_cdf, yj_cdf)
+    plt.plot(xi_plot, yi_plot)
+    plt.title('Initial steps vs exponential distribution')
+    plt.show()
+
+    # Compare moving time with product of geometric and exponential rvs
+    x_cdf = np.append([0], np.sort(mov_time))
+    y_cdf = np.linspace(0, 1, num=len(mov_time)+1)
+
+    n = geom.rvs(p=kes / (kes + kon), size=num_expts)
+    m = [el * np.sum(expon.rvs(scale=1/(kon + kes), size=el)) for el in n]
+    xplot = np.append([0], np.sort(m))
+    yplot = np.linspace(0, 1, num=len(m) + 1)
+
+    plt.plot(x_cdf, y_cdf)
+    plt.plot(xplot, yplot)
+    plt.title('Moving time vs product distribution')
+    plt.show()
+
+    # Compare no. of steps with geometric distribution
+    a = kon / (kon + kes)
+    x2plot = np.arange(1, np.amax(nsteps) + 1)
+    plt.bar(x2plot, np.bincount(nsteps)[1:] / float(num_expts))
+    plt.plot(x2plot, geom.pmf(x2plot, p=1 - a), 'r*')
+    plt.title('No. of steps vs geometric distribution')
+    plt.show()
+
+    # dt = simple_experiment(2., 1., num_expts)
+    # x_cdf = np.append([0], np.sort(dt))
+    # y_cdf = np.linspace(0, 1, num=len(dt)+1)
     # xplot = np.linspace(0, x_cdf[-1], num=512)
-    # yplot = expon.cdf(xplot, scale=0.5)
+    # yplot = expon.cdf(xplot, scale=1./3.)
     # plt.plot(x_cdf, y_cdf)
     # plt.plot(xplot, yplot)
     # plt.show()
-
-    dt = simple_experiment(2., 1., num_expts)
-    x_cdf = np.append([0], np.sort(dt))
-    y_cdf = np.linspace(0, 1, num=len(dt)+1)
-    xplot = np.linspace(0, x_cdf[-1], num=512)
-    yplot = expon.cdf(xplot, scale=1./3.)
-    plt.plot(x_cdf, y_cdf)
-    plt.plot(xplot, yplot)
-    plt.show()
