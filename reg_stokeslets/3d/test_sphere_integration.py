@@ -1,4 +1,6 @@
-from sphere_integration_utils import phi, geom_weights, generate_grid, sphere_integrate, wall_stokeslet_integrand
+from sphere_integration_utils import (geom_weights, wall_stokeslet_integrand,
+                                      generate_grid, sphere_integrate, phi)
+from force_test import generate_stokeslet
 import numpy as np
 import pytest
 from scipy.special import sph_harm
@@ -137,7 +139,7 @@ class TestMeshGenerator(object):
 
 class TestRegularizedStokeslets(object):
     def test_wall_bounded_stokeslets(self):
-        """Test that the wall-bounded stokeslet vanishes on the wall"""
+        """Test that the wall-bounded Stokeslet vanishes on the wall"""
         eps = 0.1
         num_cases = 5
         test_x_cases = np.concatenate([np.zeros(shape=(num_cases, 1)),
@@ -151,3 +153,19 @@ class TestRegularizedStokeslets(object):
                     result = wall_stokeslet_integrand(test_x, center, eps,
                                                       force)
                     assert np.linalg.norm(result) < np.finfo(float).eps
+
+    def test_vectorized_stokeslet(self):
+        """Test that the vectorized wall-bounded Stokeslet vanishes"""
+        eps = 0.1
+        x, y, z = [0, 1, 2], [-1, 0, 1], [-1, 0, 1]
+        nodes = np.stack(np.meshgrid(x, y, z), axis=-1).reshape(-1, 3)
+        stokeslet = generate_stokeslet(eps, nodes, type='wall', vectorized=True)
+        assert np.all(np.abs(
+            stokeslet[np.ix_(nodes[:, 0] == 0, nodes[:, 0] != 0)]
+        ) < np.finfo(float).eps)
+        assert np.all(np.abs(
+            stokeslet[np.ix_(nodes[:, 0] != 0, nodes[:, 0] == 0)]
+        ) < np.finfo(float).eps)
+        # A stokeslet located on the wall and evaluated at the same
+        # point is nan
+        assert np.all(np.isnan(stokeslet[nodes[:, 0] == 0, nodes[:, 0] == 0]))

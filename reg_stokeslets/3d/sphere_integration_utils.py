@@ -225,8 +225,8 @@ def stokeslet_integrand(x_tuple, center, eps, force):
 
     Parameters
     ----------
-    force : callable
-        Force function of the regularized Stokeslet
+    force : callable or ndarray
+        Strength of the regularized Stokeslet
     eps : float
         Blob parameter of the regularized Stokeslet
     center
@@ -250,7 +250,10 @@ def stokeslet_integrand(x_tuple, center, eps, force):
                  + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :])
                  / np.sqrt((r2[:, :, np.newaxis, np.newaxis] + eps**2)**3))
     output = np.zeros(shape=stokeslet.shape[:3])
-    f_array = force(x_array)
+    try:
+        f_array = force(x_array)
+    except TypeError:
+        f_array = force
 
     for i in range(output.shape[0]):
         for j in range(output.shape[1]):

@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 from sphere_integration_utils import (generate_grid, geom_weights,
                                       sphere_integrate, stokeslet_integrand,
-                                      h1, h2, d1, d2, h1p, h2p)
+                                      h1, h2, d1, d2, h1p, h2p,
+                                      wall_stokeslet_integrand)
 import cProfile
 
 
@@ -70,7 +71,7 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0):
 
     del_xi = xi_mesh[1] - xi_mesh[0]
     del_eta = eta_mesh[1] - eta_mesh[0]
-    stokeslet = generate_stokeslet(eps, nodes, domain)
+    stokeslet = generate_stokeslet(eps, nodes, domain, True)
     a_matrix = -stokeslet * weights[:, np.newaxis, np.newaxis]
     a_matrix = a_matrix.transpose((0, 2, 1, 3)).reshape(
         (nodes.size, nodes.size)) * del_xi * del_eta
@@ -139,29 +140,65 @@ def rt(eps, xe, x0):
     return rotlet
 
 
-def generate_stokeslet(eps, nodes, type):
+def generate_stokeslet(eps, nodes, type, vectorized):
+    """Generate a S x S x 3 x 3 array of Stokeslet strengths at 'nodes'
+    S_{ijkl} is the (k,l) component of the Stokeslet centered at x_j
+    and evaluated at x_i
+
+    Parameters
+    ----------
+    vectorized
+    eps
+    nodes
+    type
+
+    Returns
+    -------
+
+    """
     xe = nodes
     x0 = nodes
-    stokeslet = ss(eps, xe, x0)
-    if type == 'free':
+    if vectorized:
+        stokeslet = ss(eps, xe, x0)
+        if type == 'free':
+            return stokeslet
+        elif type == 'wall':
+            h = x0[:, 0]
+            h = h[np.newaxis, :, np.newaxis, np.newaxis]
+            x_im = np.array([-1, 1, 1]) * x0
+            im_stokeslet = -ss(eps, xe, x_im)
+
+            mod_matrix = np.diag([1, -1, -1])
+            dipole = np.dot(pd(eps, xe, x_im), mod_matrix)
+
+            doublet = np.dot(sd(eps, xe, x_im), mod_matrix)
+            rotlet = rt(eps, xe, x_im)
+
+            ejk1 = np.zeros(shape=(3, 3))
+            ejk1[1, 2] = 1
+            ejk1[2, 1] = -1
+
+            return (stokeslet + im_stokeslet - h**2 * dipole + 2 * h * doublet
+                    - 2 * h * np.dot(rotlet, ejk1))
+    else:
+        n_nodes = nodes.shape[0]
+        stokeslet = np.zeros(shape=(n_nodes, n_nodes, 3, 3))
+        for i in range(n_nodes):
+            for j in range(n_nodes):
+                for k in range(3):
+                    if type == 'free':
+                        force = np.zeros(shape=3)
+                        force[k] = 1
+
+                        stokeslet[i, j, :, k] = stokeslet_integrand(
+                                xe[i], x0[i], eps, force)
+                    elif type == 'wall':
+                        force = np.zeros(shape=3)
+                        force[k] = 1
+
+                        stokeslet[i, j, :, k] = wall_stokeslet_integrand(
+                            xe[i], x0[j], eps, force)
         return stokeslet
-    elif type == 'wall':
-        h = xe[0]
-        x_im = np.array([-1, 1, 1]) * xe
-        im_stokeslet = -ss(eps, xe, x_im)
-
-        mod_matrix = np.diag([1, -1, -1])
-        dipole = np.dot(pd(eps, xe, x_im), mod_matrix)
-
-        doublet = np.dot(sd(eps, xe, x_im), mod_matrix)
-        rotlet = rt(eps, xe, x_im)
-
-        ejk1 = np.zeros(shape=(3, 3))
-        ejk1[1, 2] = 1
-        ejk1[2, 1] = -1
-
-        return (stokeslet + im_stokeslet - h**2 * dipole + 2 * h * doublet
-                + 2 * h * np.dot(rotlet, ejk1))
 
 
 if __name__ == '__main__':
