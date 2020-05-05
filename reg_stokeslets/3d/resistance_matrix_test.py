@@ -24,11 +24,12 @@ def assemble_vel_cases(sphere_nodes):
 
 
 def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
-                                 distance=0):
+                                 distance=0, theta=0., phi=0.):
     print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
         eps, n_nodes))
     a_matrix, nodes = assemble_quad_matrix(eps=eps, n_nodes=n_nodes, a=a, b=b,
-                                           domain=domain, distance=distance)
+                                           theta=theta, phi=phi, domain=domain,
+                                           distance=distance)
     # Solve for the forces given 6 different velocity cases
     print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
     rhs = assemble_vel_cases(nodes)

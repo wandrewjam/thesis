@@ -49,8 +49,14 @@ def find_solve_error(eps, n_nodes):
     return error
 
 
-def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0):
+def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0.,
+                         theta=0., phi=0.):
     xi_mesh, eta_mesh, nodes, ind_map = generate_grid(n_nodes, a=a, b=b)
+    ct, st, cp, sp = np.cos(theta), np.sin(theta), np.cos(phi), np.sin(phi)
+    rot_matrix = np.array([[cp, -sp, 0],
+                           [ct * sp, ct * cp, -st],
+                           [st * sp, st * cp, ct]])
+    nodes = np.dot(rot_matrix, nodes.T).T
     nodes[:, 0] += distance
     assert domain == 'free' or np.all(nodes[:, 0] > 0)
 

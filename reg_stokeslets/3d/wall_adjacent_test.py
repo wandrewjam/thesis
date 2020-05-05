@@ -3,15 +3,16 @@ import os
 os.environ["OPENBLAS_NUM_THREADS"] = "8"
 
 import numpy as np
-from force_test import assemble_quad_matrix
 from resistance_matrix_test import generate_resistance_matrices
 
 
-def main(a=1., b=1., server='mac'):
+def main(a=1., b=1., theta=0., phi=0., server='mac'):
     """Replicate convergence tests of Ainley et. al., 2008
 
     Parameters
     ----------
+    theta
+    phi
     a
     b
     server
@@ -42,8 +43,7 @@ def main(a=1., b=1., server='mac'):
     distances = dist_ratios * a
 
     result = [[
-        generate_resistance_matrices(e, n, a=a, b=b, domain='wall',
-                                     distance=distance)
+        generate_resistance_matrices(e, n, a=a, b=b, domain='wall', distance=distance)
         for distance in distances] for (e, n) in zip(eps, n_nodes)
     ]
 
@@ -77,7 +77,9 @@ if __name__ == '__main__':
     kwargs = {
         'a': float(sys.argv[1]),
         'b': float(sys.argv[2]),
-        'server': sys.argv[3]
+        'theta': float(sys.argv[3]),
+        'phi': float(sys.argv[4]),
+        'server': sys.argv[5],
     }
 
     main(**kwargs)
