@@ -36,7 +36,7 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free', distan
                                            theta=theta, phi=phi, domain=domain,
                                            distance=distance)
     # Solve for the forces given 6 different velocity cases
-    print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
+    # print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
     rhs = assemble_vel_cases(nodes, shear_vec=shear_vec)
     rhs_cases = rhs.shape[1]
     print('Solving for forces for eps = {}, nodes = {}'.format(eps, n_nodes))
@@ -51,8 +51,8 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free', distan
     # Need to use the displacement from the center of mass for torques
     centered_nodes = nodes - distance * np.array([1, 0, 0])
     pt_torques = np.cross(centered_nodes[:, :, np.newaxis], pt_forces, axis=1)
-    print('Calculating body force and torque for eps = {}, nodes = {}'.format(
-        eps, n_nodes))
+    # print('Calculating body force and torque for eps = {}, nodes = {}'.format(
+    #     eps, n_nodes))
     tmp_matrix1 = np.stack([
         sphere_integrate(pt_forces[..., i], n_nodes=n_nodes, a=a, b=b)
         for i in range(rhs_cases)
@@ -62,8 +62,8 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free', distan
         for i in range(rhs_cases)
     ], axis=-1)
 
-    print('Constructing resistance matrices for eps = {}, nodes = {}'.format(
-        eps, n_nodes))
+    # print('Constructing resistance matrices for eps = {}, nodes = {}'.format(
+    #     eps, n_nodes))
     t_matrix, p_matrix, shear_f = (tmp_matrix1[:, :3], tmp_matrix1[:, 3:6],
                                    tmp_matrix1[:, 6:])
     pt_matrix, r_matrix, shear_t = (tmp_matrix2[:, :3], tmp_matrix2[:, 3:6],
