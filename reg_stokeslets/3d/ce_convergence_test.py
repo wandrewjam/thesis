@@ -93,4 +93,5 @@ def main(server='mac'):
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    main(server=sys.argv[1])
