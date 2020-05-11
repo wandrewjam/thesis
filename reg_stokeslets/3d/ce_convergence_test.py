@@ -16,14 +16,14 @@ def spheroid_surface_area(a, b):
 def main(server='mac'):
     a, b = 1.5, 0.5
     surf_area = spheroid_surface_area(a, b)
-    c_list = [0.1, 0.2, 0.4, 0.6, 0.8, 1.]
-    n_list = [0.7, 0.8, 0.9, 1.]
+    c_list = [0.1, 0.2, 0.4, 0.6]
+    n_list = [0.8, 0.9, 1.]
 
     # # For testing
     # c_list = [0.8, 1.]
     # n_list = [0.9, 1.]
     if server == 'linux':
-        n_nodes = (1 + np.arange(12)) * 4
+        n_nodes = (1 + np.arange(9)) * 4
     elif server == 'mac':
         n_nodes = (1 + np.arange(4)) * 4
     else:
