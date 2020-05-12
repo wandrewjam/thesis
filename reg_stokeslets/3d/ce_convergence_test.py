@@ -21,13 +21,7 @@ def main(server='mac'):
 
     distance_ratios = np.array([11013.2, 10.0677, 3.7622, 1.5431,
                                 1.1276, 1.0453, 1.005])
-    phi_list = np.linspace(0, np.pi / 2, num=9)
-    theta_list = np.linspace(0, np.pi, num=9)
-    h_list = distance_ratios * a
 
-    # # For testing
-    # c_list = [0.8, 1.]
-    # n_list = [0.9, 1.]
     if server == 'linux':
         n_nodes = (1 + np.arange(9)) * 4
     elif server == 'mac':
