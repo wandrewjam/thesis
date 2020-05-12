@@ -17,7 +17,7 @@ def main(server='mac'):
     a, b = 1.5, 0.5
     surf_area = spheroid_surface_area(a, b)
 
-    c, n = .4, .9
+    c, n = .6, 1.0
 
     distance_ratios = np.array([10.0677, 3.7622, 1.5431,
                                 1.1276, 1.0453])
