@@ -212,7 +212,7 @@ def generate_grid(n_nodes, a=1., b=1.):
     assert sphere_nodes.shape[0] == 6 * n_nodes ** 2 + 2
     assert np.count_nonzero(ind_map == -1) == 0
 
-    nodes = np.array([a, a, b]) * sphere_nodes
+    nodes = np.array([b, a, a]) * sphere_nodes
     return eta_mesh, xi_mesh, nodes, ind_map
 
 
