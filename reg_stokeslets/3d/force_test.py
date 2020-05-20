@@ -83,41 +83,50 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0., t
     return a_matrix, nodes
 
 # @profile
-def ss(eps, xe, x0):
+def ss(eps, xe, x0, h_arr=None):
     del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r2 = np.sum(del_x**2, axis=-1)
-    # assert np.all(r2 == r2.T)
-    r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
-    tmp_arr1 = h1(r, eps)
-    tmp_arr2 = h2(r, eps)
-    stokeslet = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * tmp_arr1
+    if h_arr is None:
+        r2 = np.sum(del_x**2, axis=-1)
+        # assert np.all(r2 == r2.T)
+        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+
+        h1_arr = h1(r, eps)
+        h2_arr = h2(r, eps)
+    else:
+        h1_arr = h_arr[0]
+        h2_arr = h_arr[1]
+
+    stokeslet = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * h1_arr
                   + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :]
-                  * tmp_arr2))
+                  * h2_arr))
     assert np.all(stokeslet == stokeslet.transpose((0, 1, 3, 2)))
     return stokeslet
 
 # @profile
-def pd(eps, xe, x0):
+def pd(eps, xe, x0, d_arr=None):
     del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r2 = np.sum(del_x**2, axis=-1)
-    # assert np.all(r2 == r2.T)
-    r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
-    tmp_arr1 = d1(r, eps)
-    tmp_arr2 = d2(r, eps)
-    dipole = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * tmp_arr1
+    if d_arr is None:
+        r2 = np.sum(del_x**2, axis=-1)
+        # assert np.all(r2 == r2.T)
+        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+
+        d1_arr = d1(r, eps)
+        d2_arr = d2(r, eps)
+    else:
+        d1_arr = d_arr[0]
+        d2_arr = d_arr[1]
+
+    dipole = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * d1_arr
                + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :]
-               * tmp_arr2))
+               * d2_arr))
     assert np.all(dipole == dipole.transpose((0, 1, 3, 2)))
     return dipole
 
 # @profile
-def sd(eps, xe, x0):
+def sd(eps, xe, x0, h_arr=None):
     del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r2 = np.sum(del_x**2, axis=-1)
-    # assert np.all(r2 == r2.T)
-    r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
     e1 = np.array([1, 0, 0])
     e1i = e1[np.newaxis, np.newaxis, :, np.newaxis]
@@ -129,31 +138,46 @@ def sd(eps, xe, x0):
     xk = del_x[:, :, np.newaxis, :]
 
     ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
-    tmp_arr1 = h2(r, eps)
-    tmp_arr2 = h1p(r, eps)
-    tmp_arr3 = h2p(r, eps)
-    doublet = ((xi * e1k + ii * x1) * tmp_arr1 + e1i * xk * tmp_arr2 / r
-               + x1 * xi * xk * tmp_arr3 / r)
+    if h_arr is None:
+        r2 = np.sum(del_x**2, axis=-1)
+        # assert np.all(r2 == r2.T)
+        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+
+        h2_arr = h2(r, eps)
+        h1p_arr = h1p(r, eps)
+        h2p_arr = h2p(r, eps)
+    else:
+        h2_arr = h_arr[0]
+        h1p_arr = h_arr[1]
+        h2p_arr = h_arr[2]
+    doublet = ((xi * e1k + ii * x1) * h2_arr + e1i * xk * h1p_arr / r
+               + x1 * xi * xk * h2p_arr / r)
     return doublet
 
 # @profile
-def rt(eps, xe, x0):
+def rt(eps, xe, x0, h_arr=None):
     del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r2 = np.sum(del_x**2, axis=-1)
-    # assert np.all(r2 == r2.T)
-    r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
     ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
     xk = del_x[:, :, np.newaxis, :]
     ejk1 = np.zeros(shape=(3, 3))
     ejk1[1, 2] = 1.
     ejk1[2, 1] = -1.
-    tmp_arr1 = h1p(r, eps)
-    tmp_arr2 = h2(r, eps)
+
+    if h_arr is None:
+        r2 = np.sum(del_x**2, axis=-1)
+        # assert np.all(r2 == r2.T)
+        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+        
+        h1p_arr = h1p(r, eps)
+        h2p_arr = h2(r, eps)
+    else:
+        h1p_arr = h_arr[0]
+        h2p_arr = h_arr[1]
 
     cross_arr = np.cross(ii, xk)
 
-    rotlet = (tmp_arr1 / r + tmp_arr2) * cross_arr
+    rotlet = (h1p_arr / r + h2p_arr) * cross_arr
     return rotlet
 
 # @profile
@@ -191,6 +215,8 @@ def generate_stokeslet(eps, nodes, type, chunks=1):
 
 
 def stokeslet_helper(eps, xe, x0, type):
+    if type == 'free':
+        h1_arr = h1()
     stokeslet = ss(eps, xe, x0)
     if type == 'free':
         return stokeslet
