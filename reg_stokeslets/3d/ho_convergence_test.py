@@ -110,4 +110,5 @@ if __name__ == '__main__':
         os.environ["MKL_NUM_THREADS"] = num_threads
     import numpy as np
 
-    cProfile.run('main(server=sys.argv[1], proc=int(num_threads))')
+    cProfile.run('main(server=sys.argv[1], proc=int(num_threads))',
+                 filename='ho_conv_profile.stats')
