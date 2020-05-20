@@ -1,10 +1,8 @@
-import os
-os.environ["OPENBLAS_NUM_THREADS"] = "8"
-
-import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 from resistance_matrix_test import generate_resistance_matrices
+import cProfile
+import line_profiler
 
 
 def spheroid_surface_area(a, b):
@@ -13,7 +11,7 @@ def spheroid_surface_area(a, b):
     return 2 * np.pi * a ** 2 * (1 + b ** 2 * np.arctanh(e) / (e * a ** 2))
 
 
-def main(server='mac'):
+def main(server='mac', proc=1):
     a, b = 1.5, 0.5
     surf_area = spheroid_surface_area(a, b)
 
@@ -25,9 +23,6 @@ def main(server='mac'):
     theta_list = np.linspace(0, np.pi, num=3)
     d_list = distance_ratios * a
 
-    # # For testing
-    # c_list = [0.8, 1.]
-    # n_list = [0.9, 1.]
     if server == 'linux':
         n_nodes = (1 + np.arange(9)) * 4
     elif server == 'mac':
@@ -47,8 +42,8 @@ def main(server='mac'):
                 result = [
                     (node,
                      generate_resistance_matrices(
-                         e, node, a=a, b=b, domain='wall', shear_vec=True,
-                         distance=d, theta=theta, phi=phi)
+                         e, node, a=a, b=b, domain='wall', distance=d,
+                         theta=theta, phi=phi, shear_vec=True, proc=proc)
                      )
                     for (e, node) in zip(epsilon, n_nodes)
                 ]
@@ -85,23 +80,31 @@ def main(server='mac'):
     with open('ho_errors.pkl', 'w') as f:
         pickle.dump(errors, f)
 
-    if server == 'mac':
-        fig, ax = plt.subplots()
-        for key, err in errors.items():
-            sorter = np.argsort(err.keys())
-            jonathan, vals = np.array(err.keys()), np.array(err.values())
-            jonathan_h = np.sqrt(surf_area / (6 * jonathan ** 2 + 2))
-            label_str = 'd = {}, $\\theta$ = {}, $\\phi$ = {}'.format(
-                key[2], key[1], key[0])
-            ax.plot(jonathan_h[sorter], vals[sorter], label=label_str)
-        ax.legend()
-        ax.set_xlabel('Discretization size ($h$)')
-        ax.set_ylabel('Relative Error')
-        plt.show()
+    # if server == 'mac':
+    #     fig, ax = plt.subplots()
+    #     for key, err in errors.items():
+    #         sorter = np.argsort(err.keys())
+    #         jonathan, vals = np.array(err.keys()), np.array(err.values())
+    #         jonathan_h = np.sqrt(surf_area / (6 * jonathan ** 2 + 2))
+    #         label_str = 'd = {}, $\\theta$ = {}, $\\phi$ = {}'.format(
+    #             key[2], key[1], key[0])
+    #         ax.plot(jonathan_h[sorter], vals[sorter], label=label_str)
+    #     ax.legend()
+    #     ax.set_xlabel('Discretization size ($h$)')
+    #     ax.set_ylabel('Relative Error')
+    #     plt.show()
 
     print()
 
 
 if __name__ == '__main__':
+    import os
     import sys
-    main(server=sys.argv[1])
+
+    server = sys.argv[1]
+    num_threads = sys.argv[2]
+
+    os.environ["OPENBLAS_NUM_THREADS"] = num_threads
+    import numpy as np
+
+    cProfile.run('main(server=sys.argv[1], threads=int(num_threads))')

@@ -17,7 +17,7 @@ def main(server='mac'):
     a, b = 1.5, 0.5
     surf_area = spheroid_surface_area(a, b)
 
-    c, n = 1.0, 1.0
+    c, n = 0.6, 1.0
 
     d_list = np.array([1.5, 1.0, .75, .6, .51, .501])
 
@@ -38,8 +38,7 @@ def main(server='mac'):
         result = [
             (node,
              generate_resistance_matrices(
-                 e, node, a=a, b=b, domain='wall', shear_vec=True,
-                 distance=d)
+                 e, node, a=a, b=b, domain='wall', distance=d, shear_vec=True)
              )
             for (e, node) in zip(epsilon, n_nodes)
         ]
