@@ -28,13 +28,14 @@ def assemble_vel_cases(sphere_nodes, shear_rate=1., shear_vec=True):
         return np.hstack([v_array, om_array, e_array])
 
 
-def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free', distance=0., theta=0., phi=0.,
-                                 shear_vec=True):
+def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
+                                 distance=0., theta=0., phi=0., shear_vec=True,
+                                 proc=1):
     print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
         eps, n_nodes))
     a_matrix, nodes = assemble_quad_matrix(eps=eps, n_nodes=n_nodes, a=a, b=b,
-                                           theta=theta, phi=phi, domain=domain,
-                                           distance=distance)
+                                           domain=domain, distance=distance,
+                                           theta=theta, phi=phi, proc=proc)
     # Solve for the forces given 6 different velocity cases
     # print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
     rhs = assemble_vel_cases(nodes, shear_vec=shear_vec)
@@ -84,8 +85,7 @@ def main(proc=1, a=1., b=1., domain='free', distance=0, server='mac'):
 
     if proc == 1:
         matrices = [
-            generate_resistance_matrices(e, n, a, b, domain=domain,
-                                         distance=distance, shear_vec=False)
+            generate_resistance_matrices(e, n, a, b, domain=domain, distance=distance, shear_vec=False)
             for e in eps for n in n_nodes
         ]
     else:

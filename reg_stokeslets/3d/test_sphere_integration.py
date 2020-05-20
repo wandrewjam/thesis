@@ -159,7 +159,7 @@ class TestRegularizedStokeslets(object):
         eps = 0.1
         x, y, z = [0, 1, 2], [-1, 0, 1], [-1, 0, 1]
         nodes = np.stack(np.meshgrid(x, y, z), axis=-1).reshape(-1, 3)
-        stokeslet = generate_stokeslet(eps, nodes, type='wall', vectorized=True)
+        stokeslet = generate_stokeslet(eps, nodes, type='wall')
         assert np.all(np.abs(
             stokeslet[np.ix_(nodes[:, 0] == 0, nodes[:, 0] != 0)]
         ) < np.finfo(float).eps)
