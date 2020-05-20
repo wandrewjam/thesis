@@ -104,7 +104,10 @@ if __name__ == '__main__':
     server = sys.argv[1]
     num_threads = sys.argv[2]
 
-    os.environ["OPENBLAS_NUM_THREADS"] = num_threads
+    if server == 'linux':
+        os.environ["OPENBLAS_NUM_THREADS"] = num_threads
+    elif server == 'mac':
+        os.environ["MKL_NUM_THREADS"] = num_threads
     import numpy as np
 
-    cProfile.run('main(server=sys.argv[1], threads=int(num_threads))')
+    cProfile.run('main(server=sys.argv[1], proc=int(num_threads))')
