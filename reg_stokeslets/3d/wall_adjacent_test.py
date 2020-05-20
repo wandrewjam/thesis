@@ -1,6 +1,6 @@
 from __future__ import division
 import os
-os.environ["OPENBLAS_NUM_THREADS"] = "8"
+os.environ["OPENBLAS_NUM_THREADS"] = "16"
 
 import numpy as np
 from resistance_matrix_test import generate_resistance_matrices
@@ -60,7 +60,7 @@ def main(a=1., b=1., theta=0., phi=0., server='mac', expt='par'):
     distances = dist_ratios * a
 
     result = [[
-        generate_resistance_matrices(e, n, a=a, b=b, domain='wall', distance=distance)
+        generate_resistance_matrices(e, n, a=a, b=b, domain='wall', distance=distance, proc=16)
         for distance in distances] for (e, n) in zip(eps, n_nodes)
     ]
 
