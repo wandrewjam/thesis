@@ -83,41 +83,52 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0., t
     return a_matrix, nodes
 
 # @profile
-def ss(eps, xe, x0):
+def ss(eps, xe, x0, h_arr=None, r=None):
     del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r2 = np.sum(del_x**2, axis=-1)
-    # assert np.all(r2 == r2.T)
-    r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
-    tmp_arr1 = h1(r, eps)
-    tmp_arr2 = h2(r, eps)
-    stokeslet = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * tmp_arr1
+    if r is None:
+        r2 = np.sum(del_x**2, axis=-1)
+        # assert np.all(r2 == r2.T)
+        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+
+    if h_arr is None:
+        h1_arr = h1(r, eps)
+        h2_arr = h2(r, eps)
+    else:
+        h1_arr = h_arr[0]
+        h2_arr = h_arr[1]
+
+    stokeslet = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * h1_arr
                   + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :]
-                  * tmp_arr2))
+                  * h2_arr))
     assert np.all(stokeslet == stokeslet.transpose((0, 1, 3, 2)))
     return stokeslet
 
 # @profile
-def pd(eps, xe, x0):
+def pd(eps, xe, x0, d_arr=None, r=None):
     del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r2 = np.sum(del_x**2, axis=-1)
-    # assert np.all(r2 == r2.T)
-    r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
-    tmp_arr1 = d1(r, eps)
-    tmp_arr2 = d2(r, eps)
-    dipole = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * tmp_arr1
+    if r is None:
+        r2 = np.sum(del_x**2, axis=-1)
+        # assert np.all(r2 == r2.T)
+        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+
+    if d_arr is None:
+        d1_arr = d1(r, eps)
+        d2_arr = d2(r, eps)
+    else:
+        d1_arr = d_arr[0]
+        d2_arr = d_arr[1]
+
+    dipole = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * d1_arr
                + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :]
-               * tmp_arr2))
+               * d2_arr))
     assert np.all(dipole == dipole.transpose((0, 1, 3, 2)))
     return dipole
 
 # @profile
-def sd(eps, xe, x0):
+def sd(eps, xe, x0, h_arr=None, r=None):
     del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r2 = np.sum(del_x**2, axis=-1)
-    # assert np.all(r2 == r2.T)
-    r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
     e1 = np.array([1, 0, 0])
     e1i = e1[np.newaxis, np.newaxis, :, np.newaxis]
@@ -129,31 +140,49 @@ def sd(eps, xe, x0):
     xk = del_x[:, :, np.newaxis, :]
 
     ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
-    tmp_arr1 = h2(r, eps)
-    tmp_arr2 = h1p(r, eps)
-    tmp_arr3 = h2p(r, eps)
-    doublet = ((xi * e1k + ii * x1) * tmp_arr1 + e1i * xk * tmp_arr2 / r
-               + x1 * xi * xk * tmp_arr3 / r)
+
+    if r is None:
+        r2 = np.sum(del_x**2, axis=-1)
+        # assert np.all(r2 == r2.T)
+        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+
+    if h_arr is None:
+        h2_arr = h2(r, eps)
+        h1p_arr = h1p(r, eps)
+        h2p_arr = h2p(r, eps)
+    else:
+        h2_arr = h_arr[0]
+        h1p_arr = h_arr[1]
+        h2p_arr = h_arr[2]
+    doublet = ((xi * e1k + ii * x1) * h2_arr + e1i * xk * h1p_arr / r
+               + x1 * xi * xk * h2p_arr / r)
     return doublet
 
 # @profile
-def rt(eps, xe, x0):
+def rt(eps, xe, x0, h_arr=None, r=None):
     del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r2 = np.sum(del_x**2, axis=-1)
-    # assert np.all(r2 == r2.T)
-    r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
     ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
     xk = del_x[:, :, np.newaxis, :]
     ejk1 = np.zeros(shape=(3, 3))
     ejk1[1, 2] = 1.
     ejk1[2, 1] = -1.
-    tmp_arr1 = h1p(r, eps)
-    tmp_arr2 = h2(r, eps)
+
+    if r is None:
+        r2 = np.sum(del_x**2, axis=-1)
+        # assert np.all(r2 == r2.T)
+        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+
+    if h_arr is None:
+        h1p_arr = h1p(r, eps)
+        h2_arr = h2(r, eps)
+    else:
+        h1p_arr = h_arr[0]
+        h2_arr = h_arr[1]
 
     cross_arr = np.cross(ii, xk)
 
-    rotlet = (tmp_arr1 / r + tmp_arr2) * cross_arr
+    rotlet = (h1p_arr / r + h2_arr) * cross_arr
     return rotlet
 
 # @profile
@@ -191,23 +220,35 @@ def generate_stokeslet(eps, nodes, type, chunks=1):
 
 
 def stokeslet_helper(eps, xe, x0, type):
-    stokeslet = ss(eps, xe, x0)
+    del_x0 = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
+    r0 = np.linalg.norm(del_x0, axis=-1)[:, :, np.newaxis, np.newaxis]
+
+    h1_arr0 = h1(r0, eps)
+    h2_arr0 = h2(r0, eps)
+    stokeslet = ss(eps, xe, x0, h_arr=(h1_arr0, h2_arr0), r=r0)
     if type == 'free':
         return stokeslet
     elif type == 'wall':
         h = x0[:, 0]
         h = h[np.newaxis, :, np.newaxis, np.newaxis]
         x_im = np.array([-1, 1, 1]) * x0
-        im_stokeslet = -ss(eps, xe, x_im)
+        del_x = xe[:, np.newaxis, :] - x_im[np.newaxis, :, :]
+        r = np.linalg.norm(del_x, axis=-1)[:, :, np.newaxis, np.newaxis]
+
+        h1_arr, h2_arr = h1(r, eps), h2(r, eps)
+        h1p_arr, h2p_arr = h1p(r0, eps), h2p(r0, eps)
+        d1_arr, d2_arr = d1(r0, eps), d2(r0, eps)
+
+        im_stokeslet = -ss(eps, xe, x_im, h_arr=(h1_arr, h2_arr), r=r)
 
         mod_matrix = np.diag([1, -1, -1])
-        tmp_dip = pd(eps, xe, x_im)
+        tmp_dip = pd(eps, xe, x_im, d_arr=(d1_arr, d2_arr), r=r)
         dipole = np.dot(tmp_dip, mod_matrix)
 
-        tmp_doub = sd(eps, xe, x_im)
+        tmp_doub = sd(eps, xe, x_im, h_arr=(h2_arr, h1p_arr, h2p_arr), r=r)
         doublet = np.dot(tmp_doub, mod_matrix)
 
-        tmp_rot = rt(eps, xe, x_im)
+        tmp_rot = rt(eps, xe, x_im, h_arr=(h1p_arr, h2_arr), r=r)
 
         ejk1 = np.zeros(shape=(3, 3))
         ejk1[1, 2] = 1

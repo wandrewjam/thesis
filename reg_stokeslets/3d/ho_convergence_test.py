@@ -111,4 +111,4 @@ if __name__ == '__main__':
     import numpy as np
 
     cProfile.run('main(server=sys.argv[1], proc=int(num_threads))',
-                 filename='ho_conv_profile.stats')
+                 filename='ho_fast_conv_profile.stats')
