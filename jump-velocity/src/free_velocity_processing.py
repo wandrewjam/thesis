@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import f_oneway, kruskal, expon, sem
+from scipy.stats import f_oneway, kruskal, expon, sem, gaussian_kde
 from scipy.optimize import minimize
 from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
@@ -26,10 +26,14 @@ def main():
 
     k_off_dict = dict([(expt, 1./np.mean(dwell)) for expt, dwell
                        in dwells_dict.items()])
-    k_escape_dict = dict([(expt, 1./np.mean(escape)) for expt, escape in
-                          escape_dict.items()])
-    k_on_dict = dict([(expt, k_escape_dict[expt] * (np.mean(ndwell) - 1))
-                      for expt, ndwell in ndwells_dict.items()])
+    k_tot_dict = dict([(expt, 1./np.mean(step)) for expt, step
+                       in steps_dict.items()])
+    a_dict = dict([(expt, 1 - 1./np.mean(ndwell)) for expt, ndwell
+                   in ndwells_dict.items()])
+    k_on_dict = dict([(expt, a_dict[expt] * k_tot) for expt, k_tot
+                      in k_tot_dict.items()])
+    k_escape_dict = dict([(expt, (1 - a_dict[expt]) * k_tot) for expt, k_tot
+                          in k_tot_dict.items()])
 
     print(avg_free_vels_dict.values())
     print(f_oneway(*avg_free_vels_dict.values()))
@@ -42,6 +46,19 @@ def main():
     print(np.nanmedian(np.concatenate(distances_dict.values())))
     for expt, times in times_dict.items():
         print('{}: {}'.format(expt, np.mean(times)))
+
+    print('k_on pm 95 CI')
+    print('-------------')
+    for expt, k_on in k_on_dict.items():
+        print('{}: {} pm {}'.format(expt, k_on, 1.96 * k_on
+                                    / np.sqrt(len(steps_dict[expt]))))
+
+    print()
+    print('k_es pm 95 CI')
+    print('-------------')
+    for expt, k_es in k_escape_dict.items():
+        print('{}: {} pm {}'.format(expt, k_es, 1.96 * k_es
+                                    / np.sqrt(len(steps_dict[expt]))))
 
     vels = np.concatenate(avg_free_vels_dict.values()) / Vstar
     scaled_times = np.concatenate(times_dict.values()) * Vstar / average_distance
@@ -56,19 +73,10 @@ def main():
     (avg_free_vels_sim, distances_sim, times_sim, steps_sim, dwells_sim,
      ndwells_sim, vels_sim, escape_sim) = sim_result
 
-    # time_slices = slice_simulations(sim_dict, Vstar)
-    # slice_result = get_free_velocities_sim(time_slices)
-    # (avg_free_vels_slice, distances_slice, times_slice, steps_slice, dwells_slice,
-    #  ndwells_slice, vels_slice) = slice_result
-
     plot_avg_free_vels(avg_free_vels_dict, avg_free_vels_sim, colors)
-    # plot_avg_free_vels(avg_free_vels_dict, avg_free_vels_slice, colors)
     plot_free_distances(distances_dict, distances_sim, colors)
-    # plot_free_distances(distances_dict, distances_slice, colors)
     plot_steps(steps_dict, steps_sim, k_on_dict, colors)
-    # plot_steps(steps_dict, steps_slice, k_on_dict, colors)
     plot_dwells(dwells_dict, dwells_sim, k_off_dict, colors)
-    # plot_dwells(dwells_dict, dwells_slice, k_off_dict, colors)
     plot_escapes(escape_dict, escape_sim, colors)
     plot_ndwells(ndwells_dict, ndwells_sim, k_escape_dict, k_on_dict, colors)
 
@@ -225,7 +233,8 @@ def plot_free_distances(distances_dict, distances_sim, colors):
             x_cdf_plot_sim = np.append(0, np.append(np.sort(dist_sim), 65))
             y_cdf_plot_sim = np.append(np.arange(
                 dist_sim.size + 1, dtype=float) / dist_sim.size, 1)
-            ax[1].step(x_cdf_plot_sim, y_cdf_plot_sim, linestyle='-.', where='post', color=colors[expt])
+            ax[1].step(x_cdf_plot_sim, y_cdf_plot_sim, linestyle='-.',
+                       where='post', color=colors[expt])
         except KeyError:
             pass
     for a in ax:
@@ -344,15 +353,6 @@ def plot_escapes(escape_dict, escape_sim, colors):
         x_cdf_plot = np.append(0, np.sort(escape))
         y_cdf_plot = np.arange(escape.size + 1, dtype=float) / escape.size
         ax[1].step(x_cdf_plot, y_cdf_plot, where='post', color=colors[expt])
-
-        k_es = 1. / np.mean(escape)
-        err = k_es * 1.96 / np.sqrt(escape.size)
-        s += '{} k_escape = {:.2f} $\\pm$ {:.2f} $1/s$\n'.format(expt, k_es, err)
-        x_plot = np.linspace(0, np.amax(escape), num=200)
-        y_plot = expon.pdf(x_plot, scale=1./k_es)
-        ax[0].plot(x_plot, y_plot, '--', color=colors[expt], linewidth=2.)
-        ax[1].plot(x_plot, expon.cdf(x_plot, scale=1./k_es), '--',
-                   color=colors[expt], linewidth=2.)
 
         try:
             sim_escape = escape_sim[expt]
@@ -554,6 +554,32 @@ def plot_vels_and_traj(experiments, simulations, vels_dict, vels_sim,
     fig2.tight_layout()
     # fig3.tight_layout()
     plt.show()
+
+
+# def ecdf_plot(expt_data, sim_data, colors):
+#     fig, ax = plt.subplots(ncols=2, sharex='all', figsize=(10, 5))
+#     big_dataset = max(expt_data.values(), key=len)
+#     bins = np.histogram(big_dataset, bins='auto')
+#     for key, data in expt_data:
+#         ax[0].hist(data, bins=bins, label=key, alpha=0.7, color=colors[key])
+#
+#         x_cdf_plot = np.append([0], np.sort(data))
+#         y_cdf_plot = np.arange(data.size + 1, dtype=float) / data.size
+#         ax[1].step(x_cdf_plot, y_cdf_plot, where='post', label=key,
+#                    color=colors[key])
+#
+#         try:
+#             sim = sim_data[key]
+#
+#
+#             x_cdf_plot_sim = np.append(0, np.sort(sim))
+#             y_cdf_plot_sim = np.arange(sim.size + 1, dtype=float) / sim.size
+#             ax[1].step(x_cdf_plot_sim, y_cdf_plot_sim, where='post', label=key,
+#                        linestyle='-.', color=colors[key])
+#         except KeyError:
+#             pass
+#
+#     return
 
 
 def get_free_velocities(experiments, absolute_pause_threshold=0.):
