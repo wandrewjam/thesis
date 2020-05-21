@@ -65,193 +65,46 @@
 
 \large{\textbf{Regularized Stokeslets}}
 
-\textbf{Definition of axes and ellipsoid orientation}
+\textbf{Trying to speed up computations of resistance matrices}
 \begin{itemize}
-\item The flow is bounded by a plane wall at $x = 0$, and the
-  ellipsoid exists in the domain where $x > 0$, $y, z \in \R$. The
-  background flow is a shear flow in the $z$ direction:
-  \begin{center}
-    \includegraphics[width=.5\textwidth]{axes}
-  \end{center}
-\item The mesh is generated on the ellipsoid in the reference
-  configuration, where the minor axis $\underline{e}_m$ is equal to
-  $\underline{e}_x$:
-  \begin{center}
-    \includegraphics[width=.3\textwidth]{reference}
-  \end{center}
-\item Any orientation of the ellipsoid can be described by the
-  direction of the minor axis $\underline{e}_m$. Because
-  $\underline{e}_m$ is a length 3 vector with a fixed length, there
-  are two degrees of freedom in the orientation. I decided to use
-  spherical coordinates to define the orientation of $\underline{e}_m$
-  ($\|\underline{e}_m\| = 1$, so you can think of $\underline{e}_m$ as
-  defining a point on the unit sphere). So $\phi$ is the polar angle
-  of $\underline{e}_m$ and $\theta$ is the azimuthal angle:
-  \begin{center}
-    \includegraphics[width=.4\textwidth]{orientation}
-  \end{center}
-\item Once I generate the mesh on the reference configuration, I
-  multiply each point by the rotation matrix:
-  \[
-    \mathcal{R} =
-    \begin{pmatrix}
-      \cos\phi & -\sin\phi & 0 \\
-      \cos\theta \sin\phi & \cos\theta \cos\phi & -\sin\theta \\
-      \sin\theta \sin\phi & \sin\theta \cos\phi & \cos\theta
-    \end{pmatrix}
-  \]
-  which can be decomposed into a simple rotation around the $z$-axis,
-  and then a simple rotation around the $x$-axis.
-
-  \[
-    \mathcal{R} = R_x(\theta) R_z(\phi) =
-    \begin{pmatrix}
-      1 & 0 & 0 \\
-      0 & \cos\theta & -\sin\theta \\
-      0 & \sin\theta & \cos\theta
-    \end{pmatrix}
-    \begin{pmatrix}
-      \cos\phi & -\sin\phi & 0 \\
-      \sin\phi & \cos\phi & 0 \\
-      0 & 0 & 1
-    \end{pmatrix}
-  \]
+\item The most expensive parts of finding the resistance matrices is
+  generating the quadrature matrix for the mesh on the ellipsoid and
+  then solving the unknown forces
+\item The quadrature matrix comes from discretizing the integral
+  equation $\mathbf{u}(\mathbf{x}) = \int
+  \underline{\underline{S}}(\mathbf{x}, \mathbf{x}_0)
+  \mathbf{f}(\mathbf{x}_0) d\mathbf{x}_0$
+\item When I profiled (a smaller version of) the convergence tests
+  from last week, generating the regularized Stokeslets was by far the
+  most expensive part of the code: 512 sec of the 668 sec of total
+  running time.
+\item In last week's code, I calculate the regularized Stokeslets by
+  operating on an enormous $N \times N \times 3 \times 3$ array, where
+  $N$ is the number of nodes in the mesh on the ellipsoid
+\item This takes advantage of Numpy's fast array operations, but Numpy
+  seems to only ever use one core to do this
+\item Modification: split the array into \texttt{num_threads}
+  sub-arrays and calculate the reg. Stokeslet on each one, then
+  recombine
+\item Using 16 processes on the department's compute server, this lead
+  to a $\sim5 \times$ speedup in generating the reg. Stokeslets on a
+  mesh with 7778 nodes (the finest mesh from last week's convergence
+  experiments).
+\item 
 \end{itemize}
 
-\textbf{Convergence experiments}
-
-\begin{itemize}
-\item Motivated by Ainley et. al., we want to define the blob
-  parameter based on the number of nodes in the mesh. They suggest a
-  form: $\epsilon = C h^m$, where $h$ is a characteristic distance
-  between adjacent nodes. On a sphere, $h$ is defined as $h =
-  \sqrt{4\pi a^2 / N}$ where $N$ is the number of nodes. It seems like
-  the natural extension of this to the ellipsoid is $h = \sqrt{S / N}$
-  where $S(a, b)$ is the surface area of the ellipsoid with a major
-  axis of length $a$ and minor axis of length $b$.
-\item In their experiments, they choose the parameters $C$ and $n$
-  based on ``reasonable computational results,'' but they don't
-  elaborate further.
-\item So I ran a series of computational experiments for a range of
-  $C$ and $n$ values, with $N$ from 98 to 7,778 nodes. 
-\item At each level, (i.e. for each $N$) I compute the resistance
-  matrix $A_N$ of the ellipsoid and the force and torque vector
-  $\underline{s}_N$ associated with a linear shear flow with shear
-  rate 1.
-\item Then I define the absolute error to be
-  $\hat{e}_\ell = \max(\max_{i,j} (a_{N_\ell} - a_{N_\tn{max}})_{ij},
-  \max_i (\underline{s}_{N_\ell} -
-  \underline{s}_{N_\tn{max}})_i)$.
-\item To find the relative error, I normalized the absolute error by
-  $\max(\max_{i,j} (a_{N_\tn{max}})_{ij}, \max_i
-  (\underline{s}_{N_\tn{max}})_i)$
-\item Error plots for $C = 0.6, 0.8, 1.0$ and $n = 0.8, 0.9, 1.0$ are
-  shown below:
-  \begin{center}
-    \includegraphics[width=.5\textwidth]{ce_convergence}    
-  \end{center}
-\item I tested smaller values of $C$, but the resistance matrices
-  didn't converge (all the absolute errors were $\sim 10^{-14}$).
-\item Apart from the small values of $C$ where there was \emph{no}
-  convergence, is isn't clear that any of these choices of $C$ and $n$
-  are converging faster than any others. (I also don't know what to
-  make of the fact that the estimate of the rate of convergence $p$ is
-  different at every level of the convergence test).
-
-  This table shows the results of the convergence test for $C = 0.6$,
-  $n = 1.0$, but the others have similar $p$ estimates (up to the 2nd
-  decimal place)
-
-  \begin{center}
-    \begin{tabular}{cccc}\toprule
-      $h$ & $N$ & error & $p \approx \frac{\log(e_{i+1} /
-                          e_i)}{\log(h_{i+1} / h_i)}$ \\ \midrule
-      0.417402642872 & 98 & 0.167935355611 & 1.34640112441 \\
-      0.21031709772 & 386 & 0.0667336108054 & 1.46936156291 \\
-      0.140413636287 & 866 & 0.0368572277313 & 1.69685978229 \\
-      0.105363469903 & 1538 & 0.0226407930285 & 2.04886389757 \\
-      0.0843105128131 & 2402 & 0.0143398475575 & 2.61787193704 \\
-      0.0702676999165 & 3458 & 0.00890026254931 & 3.66438428468 \\
-      0.0602340785528 & 4706 & 0.00506064836056 & 6.22112211895 \\
-      0.0527074438112 & 6146 & 0.00220579802183 &  \\ \bottomrule
-    \end{tabular}    
-  \end{center}
-
-\item Does this mean any of the $C$ and $n$ values in the tested range
-  is reasonable?
-\item Next, I ran convergence tests for different distances from the
-  wall, and different orientations:
-
-  \begin{center}
-    \includegraphics[width=0.5\textwidth]{ho_convergence}
-  \end{center}
-\item It looks like distance is the most important factor in the error of the
-  estimates of the resistance matrix and shear vector; the curves seem
-  to be separated into groups by distance, not orientation
-\item I generated convergence tables for each distance, in the
-  orientation $\theta = \phi = 0$; most of them looked similar to the
-  table above, but the shortest distance had higher rates of
-  convergence at the coarsest grid sizes:
-
-  \begin{center}
-    \begin{tabular}{cccc} \toprule
-      $h$ & $N$ & error & $p \approx \frac{\log(e_{i+1} /
-                          e_i)}{\log(h_{i+1} / h_i)}$ \\ \midrule
-      0.417402642872 & 98 & 1.34833689201 & 2.77134081757 \\
-      0.21031709772 & 386 & 0.201754848315 & 2.31607646384 \\
-      0.140413636287 & 866 & 0.079146723919 & 2.37078783949 \\
-      0.105363469903 & 1538 & 0.0400636145436 & 2.53348335535 \\
-      0.0843105128131 & 2402 & 0.02277654397 & 2.96828866318 \\
-      0.0702676999165 & 3458 & 0.0132623058337 & 3.94979443053 \\
-      0.0602340785528 & 4706 & 0.00721646649492 & 6.48655552995 \\
-      0.0527074438112 & 6146 & 0.00303596613079 &  \\ \bottomrule
-    \end{tabular}
-  \end{center}
-\item One choice I made in the above experiments was to only test
-  distances $> 1.5$, so that no matter what the orientation is, the
-  ellipsoid cannot intersect the wall
-\item So I ran another set of experiments with the orientation of the
-  ellipsoid fixed to the reference configuration, and varied the
-  distance of the wall between 1.5 and 0.501:
-
-  \begin{center}
-    \includegraphics[width=.5\textwidth]{dist_convergence}
-  \end{center}
-\item As expected, as the platelet gets closer to the wall the
-  estimates get worse more quickly as the mesh coarsens (except for
-  the $d = 0.6$ test. Why?).
-\item Like in the previous sets of experiments, the estimated
-  convergence rate was higher for experiments with a smaller distance.
-
-  For one example, here is the table for $d = 0.51$:
-  \begin{center}
-    \begin{tabular}{cccc} \toprule
-      $h$ & $N$ & error & $p \approx \frac{\log(e_{i+1} /
-                          e_i)}{\log(h_{i+1} / h_i)}$ \\ \midrule
-      0.417402642872 & 98 & 410.726776849 & 4.3784453677 \\
-      0.21031709772 & 386 & 20.425594675 & 3.26143273447 \\
-      0.140413636287 & 866 & 5.46898153398 & 3.0992129362 \\
-      0.105363469903 & 1538 & 2.24582044745 & 3.36699817335 \\
-      0.0843105128131 & 2402 & 1.06028239045 & 3.90587416521 \\
-      0.0702676999165 & 3458 & 0.52043365923 & 4.94563886231 \\
-      0.0602340785528 & 4706 & 0.242904485374 & 7.51685489364 \\
-      0.0527074438112 & 6146 & 0.0890596690237 &  \\ \bottomrule
-    \end{tabular}
-  \end{center}
-\end{itemize}
-
-\textbf{Next}
-\begin{itemize}
-\item I want to go to finer grid meshes for small distances in order
-  to better resolve the errors for those
-\item Parallelize the generation of the linear system to find
-  stokeslet strengths (accounts for a significant proportion of the
-  total computation time)
-\item Try a couple of different orientations for the small distances
-  and just exclude cases where a node is outside the domain
-\item Find the equations of motion for the ellipsoid ($d$ is easy,
-  $\theta$ and $\phi$ require a bit of thought)
-\end{itemize}
+% \textbf{Next}
+% \begin{itemize}
+% \item I want to go to finer grid meshes for small distances in order
+%   to better resolve the errors for those
+% \item Parallelize the generation of the linear system to find
+%   stokeslet strengths (accounts for a significant proportion of the
+%   total computation time)
+% \item Try a couple of different orientations for the small distances
+%   and just exclude cases where a node is outside the domain
+% \item Find the equations of motion for the ellipsoid ($d$ is easy,
+%   $\theta$ and $\phi$ require a bit of thought)
+% \end{itemize}
 
 
 % \large{\textbf{Jump-Velocity Model}}
