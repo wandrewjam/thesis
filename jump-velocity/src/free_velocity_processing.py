@@ -230,9 +230,9 @@ def plot_free_distances(distances_dict, distances_sim, colors):
 
         try:
             dist_sim = distances_sim[expt]
-            x_cdf_plot_sim = np.append(0, np.append(np.sort(dist_sim), 65))
-            y_cdf_plot_sim = np.append(np.arange(
-                dist_sim.size + 1, dtype=float) / dist_sim.size, 1)
+            x_cdf_plot_sim = np.append(0, np.sort(dist_sim))
+            y_cdf_plot_sim = (np.arange(dist_sim.size + 1, dtype=float)
+                              / dist_sim.size)
             ax[1].step(x_cdf_plot_sim, y_cdf_plot_sim, linestyle='-.',
                        where='post', color=colors[expt])
         except KeyError:
@@ -275,7 +275,7 @@ def plot_avg_free_vels(avg_free_vels_dict, avg_free_vels_sim, colors):
 
 def plot_steps(steps_dict, steps_sim, k_on_dict, colors):
     fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
-    s = ''
+    # s = ''
     for expt, steps in steps_dict.items():
         ax[0].hist(steps,  density=True, label=expt, alpha=0.7, color=colors[expt])
         x_cdf_plot = np.append(0, np.sort(steps))
@@ -283,9 +283,9 @@ def plot_steps(steps_dict, steps_sim, k_on_dict, colors):
         ax[1].step(x_cdf_plot, y_cdf_plot, where='post', color=colors[expt])
 
         # Fit steps
-        k_on = k_on_dict[expt]
-        err = k_on * 1.96 / np.sqrt(steps.size)
-        s += '{} k_on = {:.2f} $\\pm$ {:.2f} $1/s$\n'.format(expt, k_on, err)
+        # k_on = k_on_dict[expt]
+        # err = k_on * 1.96 / np.sqrt(steps.size)
+        # s += '{} k_on = {:.2f} $\\pm$ {:.2f} $1/s$\n'.format(expt, k_on, err)
         # try:
         #     x_plot = np.linspace(0, np.amax(steps), num=200)
         #     y_plot = expon.pdf(x_plot, scale=1./k_on)
@@ -306,27 +306,27 @@ def plot_steps(steps_dict, steps_sim, k_on_dict, colors):
     ax[0].set_ylabel('Probability Density')
     ax[1].set_ylabel('CDF')
     ax[0].legend()
-    ax[1].text(3, .4, s)
+    # ax[1].text(3, .4, s)
     plt.tight_layout()
     plt.show()
 
 
 def plot_dwells(dwells_dict, dwells_sim, k_off_dict, colors):
     fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
-    s = ''
+    # s = ''
     for expt, dwells in dwells_dict.items():
         ax[0].hist(dwells,  density=True, label=expt, alpha=0.7, color=colors[expt])
         x_cdf_plot = np.append(0, np.sort(dwells))
         y_cdf_plot = np.arange(dwells.size + 1, dtype=float) / dwells.size
         ax[1].step(x_cdf_plot, y_cdf_plot, where='post', color=colors[expt])
 
-        k_off = k_off_dict[expt]
-        err = k_off * 1.96 / np.sqrt(dwells.size)
-        s += '{} k_off = {:.2f} $\\pm$ {:.2f} $1/s$\n'.format(expt, k_off, err)
-        x_plot = np.linspace(0, np.amax(dwells), num=200)
-        y_plot = expon.pdf(x_plot, scale=1./k_off)
-        ax[0].plot(x_plot, y_plot, '--', color=colors[expt], linewidth=2.)
-        ax[1].plot(x_plot, expon.cdf(x_plot, scale=1./k_off), '--', color=colors[expt], linewidth=2.)
+        # k_off = k_off_dict[expt]
+        # err = k_off * 1.96 / np.sqrt(dwells.size)
+        # s += '{} k_off = {:.2f} $\\pm$ {:.2f} $1/s$\n'.format(expt, k_off, err)
+        # x_plot = np.linspace(0, np.amax(dwells), num=200)
+        # y_plot = expon.pdf(x_plot, scale=1./k_off)
+        # ax[0].plot(x_plot, y_plot, '--', color=colors[expt], linewidth=2.)
+        # ax[1].plot(x_plot, expon.cdf(x_plot, scale=1./k_off), '--', color=colors[expt], linewidth=2.)
 
         try:
             sim_dwell = dwells_sim[expt]
@@ -340,7 +340,7 @@ def plot_dwells(dwells_dict, dwells_sim, k_off_dict, colors):
     ax[0].set_ylabel('Probability Density')
     ax[1].set_ylabel('CDF')
     ax[0].legend()
-    ax[1].text(30, .4, s)
+    # ax[1].text(30, .4, s)
     plt.tight_layout()
     plt.show()
 
@@ -377,11 +377,13 @@ def plot_ndwells(ndwells_dict, ndwells_sim, k_escape_dict, k_on_dict, colors):
     ndwell_max = max(np.amax(n_dwell) for n_dwell in ndwells_dict.values())
     bins = np.arange(0, ndwell_max+1) + 0.5
     for expt, ndwells in ndwells_dict.items():
-        ax[0].hist(ndwells, density=True, bins=bins, label=expt, alpha=0.7, color=colors[expt])
+        ax[0].hist(ndwells, density=True, bins=bins, label=expt, alpha=0.7,
+                   color=colors[expt])
         # x_cdf_plot = np.append(0, np.sort(ndwells))
         # y_cdf_plot = np.arange(ndwells.size + 1, dtype=float) / ndwells.size
         # ax[1].step(x_cdf_plot, y_cdf_plot, where='post', color=colors[expt])
-        ax[1].hist(ndwells, density=True, bins=bins, label=expt, alpha=0.7, color=colors[expt], cumulative=True)
+        ax[1].hist(ndwells, density=True, bins=bins, label=expt, alpha=0.7,
+                   color=colors[expt], cumulative=True, histtype='step')
 
         mu = np.mean(ndwells)
         a = (mu - 1) / mu
