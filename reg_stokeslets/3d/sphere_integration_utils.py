@@ -263,33 +263,39 @@ def stokeslet_integrand(x_tuple, center, eps, force):
     return -output / (8 * np.pi)
 
 
-def h1(r, eps=0.01):
+def compute_helper_funs(r, eps=0.01, funs=('all',)):
     sre = np.sqrt(r**2 + eps**2)
-    return (8 * np.pi * sre) ** (-1) + eps**2 / (8 * np.pi * sre ** 3)
 
+    if 'all' in funs:
+        h1 = 1 / (8 * np.pi * sre) + eps**2 / (8 * np.pi * sre ** 3)
+        h2 = 1 / (8 * np.pi * sre ** 3)
+        d1 = (4 * np.pi * sre ** 3) ** (-1) - 3 * eps**2 / (4 * np.pi * sre ** 5)
+        d2 = - 3 / (4 * np.pi * sre ** 5)
+        h1p = -r / (8 * np.pi * sre**3) - 3 * r * eps**2 / (8 * np.pi * sre**5)
+        h2p = -3 * r / (8 * np.pi * sre**5)
 
-def h2(r, eps=0.01):
-    return (8 * np.pi * np.sqrt(r**2 + eps**2) ** 3) ** (-1)
-
-
-def d1(r, eps=0.01):
-    sre = np.sqrt(r**2 + eps**2)
-    return (4 * np.pi * sre ** 3) ** (-1) - 3 * eps**2 / (4 * np.pi * sre ** 5)
-
-
-def d2(r, eps=0.01):
-    sre = np.sqrt(r**2 + eps**2)
-    return - 3 / (4 * np.pi * sre ** 5)
-
-
-def h1p(r, eps=0.01):
-    sre = np.sqrt(r**2 + eps**2)
-    return -r / (8 * np.pi * sre**3) - 3 * r * eps**2 / (8 * np.pi * sre**5)
-
-
-def h2p(r, eps=0.01):
-    sre = np.sqrt(r**2 + eps**2)
-    return -3 * r / (8 * np.pi * sre**5)
+        evaluated_funs = [h1, h2, d1, d2, h1p, h2p]
+    else:
+        evaluated_funs = list()
+        if 'h1' in funs:
+            h1 = 1 / (8 * np.pi * sre) + eps**2 / (8 * np.pi * sre ** 3)
+            evaluated_funs.append(h1)
+        if 'h2' in funs:
+            h2 = 1 / (8 * np.pi * sre ** 3)
+            evaluated_funs.append(h2)
+        if 'd1' in funs:
+            d1 = (4 * np.pi * sre ** 3) ** (-1) - 3 * eps**2 / (4 * np.pi * sre ** 5)
+            evaluated_funs.append(d1)
+        if 'd2' in funs:
+            d2 = - 3 / (4 * np.pi * sre ** 5)
+            evaluated_funs.append(d2)
+        if 'h1p' in funs:
+            h1p = -r / (8 * np.pi * sre**3) - 3 * r * eps**2 / (8 * np.pi * sre**5)
+            evaluated_funs.append(h1p)
+        if 'h2p' in funs:
+            h2p = -3 * r / (8 * np.pi * sre**5)
+            evaluated_funs.append(h2p)
+    return evaluated_funs
 
 
 def wall_stokeslet_integrand(x_tuple, center, eps, force):
@@ -322,15 +328,15 @@ def wall_stokeslet_integrand(x_tuple, center, eps, force):
     dipole = 2 * np.dot(force, e_1) * e_1 - force
     rotlet = np.cross(force, e_1)
 
-    term1 = force * h1(r, eps) + np.dot(force, del_x) * del_x * h2(r, eps)
-    term2 = force * h1(r_im, eps) + np.dot(force, im_x) * im_x * h2(r_im, eps)
-    term3 = dipole * d1(r_im, eps) + np.dot(dipole, im_x) * im_x * d2(r_im, eps)
-    term4 = h1p(r_im, eps) / r_im + h2(r_im, eps)
-    term5 = (np.dot(dipole, e_1) * im_x * h2(r_im, eps)
-             + np.dot(im_x, e_1) * dipole * h2(r_im, eps)
-             + np.dot(dipole, im_x) * e_1 * h1p(r_im, eps) / r_im
-             + np.dot(im_x, e_1) * np.dot(dipole, im_x) * im_x
-             * h2p(r_im, eps) / r_im)
+    h1, h2, d1, d2, h1p, h2p = compute_helper_funs(r, eps)
+
+    term1 = force * h1 + np.dot(force, del_x) * del_x * h2
+    term2 = force * h1 + np.dot(force, im_x) * im_x * h2
+    term3 = dipole * d1 + np.dot(dipole, im_x) * im_x * d2
+    term4 = h1p / r_im + h2
+    term5 = (np.dot(dipole, e_1) * im_x * h2 + np.dot(im_x, e_1) * dipole * h2
+             + np.dot(dipole, im_x) * e_1 * h1p / r_im
+             + np.dot(im_x, e_1) * np.dot(dipole, im_x) * im_x * h2p / r_im)
 
     u = (term1 - term2 - h**2 * term3 + 2 * h * term4 * np.cross(rotlet, im_x)
          + 2 * h * term5)

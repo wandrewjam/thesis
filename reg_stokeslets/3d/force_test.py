@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 from sphere_integration_utils import (generate_grid, geom_weights,
                                       sphere_integrate, stokeslet_integrand,
-                                      h1, h2, d1, d2, h1p, h2p,
+                                      compute_helper_funs,
                                       wall_stokeslet_integrand)
 import cProfile
 
@@ -92,8 +92,7 @@ def ss(eps, xe, x0, h_arr=None, r=None):
         r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
     if h_arr is None:
-        h1_arr = h1(r, eps)
-        h2_arr = h2(r, eps)
+        h1_arr, h2_arr = compute_helper_funs(r, eps=eps, funs=('h1', 'h2'))
     else:
         h1_arr = h_arr[0]
         h2_arr = h_arr[1]
@@ -114,8 +113,7 @@ def pd(eps, xe, x0, d_arr=None, r=None):
         r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
     if d_arr is None:
-        d1_arr = d1(r, eps)
-        d2_arr = d2(r, eps)
+        d1_arr, d2_arr = compute_helper_funs(r, eps=eps, funs=('d1', 'd2'))
     else:
         d1_arr = d_arr[0]
         d2_arr = d_arr[1]
@@ -147,9 +145,8 @@ def sd(eps, xe, x0, h_arr=None, r=None):
         r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
     if h_arr is None:
-        h2_arr = h2(r, eps)
-        h1p_arr = h1p(r, eps)
-        h2p_arr = h2p(r, eps)
+        h2_arr, h1p_arr, h2p_arr = \
+            compute_helper_funs(r, eps=eps, funs=('h2', 'h1p', 'h2p'))
     else:
         h2_arr = h_arr[0]
         h1p_arr = h_arr[1]
@@ -174,8 +171,7 @@ def rt(eps, xe, x0, h_arr=None, r=None):
         r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
 
     if h_arr is None:
-        h1p_arr = h1p(r, eps)
-        h2_arr = h2(r, eps)
+        h2_arr, h1p_arr = compute_helper_funs(r, eps=eps, funs=('h2', 'h1p'))
     else:
         h1p_arr = h_arr[0]
         h2_arr = h_arr[1]
@@ -223,8 +219,7 @@ def stokeslet_helper(eps, xe, x0, type):
     del_x0 = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
     r0 = np.linalg.norm(del_x0, axis=-1)[:, :, np.newaxis, np.newaxis]
 
-    h1_arr0 = h1(r0, eps)
-    h2_arr0 = h2(r0, eps)
+    h1_arr0, h2_arr0 = compute_helper_funs(r0, eps=eps, funs=('h1', 'h2'))
     stokeslet = ss(eps, xe, x0, h_arr=(h1_arr0, h2_arr0), r=r0)
     if type == 'free':
         return stokeslet
@@ -235,9 +230,8 @@ def stokeslet_helper(eps, xe, x0, type):
         del_x = xe[:, np.newaxis, :] - x_im[np.newaxis, :, :]
         r = np.linalg.norm(del_x, axis=-1)[:, :, np.newaxis, np.newaxis]
 
-        h1_arr, h2_arr = h1(r, eps), h2(r, eps)
-        h1p_arr, h2p_arr = h1p(r0, eps), h2p(r0, eps)
-        d1_arr, d2_arr = d1(r0, eps), d2(r0, eps)
+        h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = \
+            compute_helper_funs(r, eps=eps)
 
         im_stokeslet = -ss(eps, xe, x_im, h_arr=(h1_arr, h2_arr), r=r)
 
