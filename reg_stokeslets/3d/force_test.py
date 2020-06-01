@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+from scipy.linalg import solve
 import multiprocessing as mp
 from sphere_integration_utils import (generate_grid, geom_weights,
                                       sphere_integrate, stokeslet_integrand,
@@ -37,10 +37,15 @@ def main(proc=1):
 
 
 def find_solve_error(eps, n_nodes):
-    a_matrix, sphere_nodes = assemble_quad_matrix(eps, n_nodes)
+    s_matrix, weights, sphere_nodes = assemble_quad_matrix(eps, n_nodes)
 
     unit_vel = np.tile([0, 0, -1], sphere_nodes.shape[0])
-    est_force2 = np.linalg.solve(a_matrix, unit_vel)
+    intermediate_solve = solve(
+        s_matrix, unit_vel, overwrite_a=True, overwrite_b=True,
+        check_finite=False, assume_a='pos'
+    )
+
+    est_force2 = intermediate_solve / np.repeat(weights, repeats=3)
     est_force2 = est_force2.reshape((-1, 3))
 
     total_force = sphere_integrate(est_force2, n_nodes=n_nodes)
@@ -77,15 +82,13 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0., t
     del_xi = xi_mesh[1] - xi_mesh[0]
     del_eta = eta_mesh[1] - eta_mesh[0]
     stokeslet = generate_stokeslet(eps, nodes, domain, chunks=proc)
-    a_matrix = -stokeslet * weights[:, np.newaxis, np.newaxis]
-    a_matrix = a_matrix.transpose((0, 2, 1, 3)).reshape(
-        (nodes.size, nodes.size)) * del_xi * del_eta
-    return a_matrix, nodes
+    s_matrix = stokeslet.transpose((0, 2, 1, 3)).reshape(
+        (nodes.size, nodes.size)) * del_eta * del_xi
+    return s_matrix, weights, nodes
+
 
 # @profile
-def ss(eps, xe, x0, h_arr=None, r=None):
-    del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-
+def ss(eps, del_x, h_arr=None, r=None):
     if r is None:
         r2 = np.sum(del_x**2, axis=-1)
         # assert np.all(r2 == r2.T)
@@ -103,10 +106,9 @@ def ss(eps, xe, x0, h_arr=None, r=None):
     assert np.all(stokeslet == stokeslet.transpose((0, 1, 3, 2)))
     return stokeslet
 
-# @profile
-def pd(eps, xe, x0, d_arr=None, r=None):
-    del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
 
+# @profile
+def pd(eps, del_x, d_arr=None, r=None):
     if r is None:
         r2 = np.sum(del_x**2, axis=-1)
         # assert np.all(r2 == r2.T)
@@ -125,9 +127,7 @@ def pd(eps, xe, x0, d_arr=None, r=None):
     return dipole
 
 # @profile
-def sd(eps, xe, x0, h_arr=None, r=None):
-    del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-
+def sd(eps, del_x, h_arr=None, r=None):
     e1 = np.array([1, 0, 0])
     e1i = e1[np.newaxis, np.newaxis, :, np.newaxis]
     e1k = e1[np.newaxis, np.newaxis, np.newaxis, :]
@@ -156,9 +156,7 @@ def sd(eps, xe, x0, h_arr=None, r=None):
     return doublet
 
 # @profile
-def rt(eps, xe, x0, h_arr=None, r=None):
-    del_x = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-
+def rt(eps, del_x, h_arr=None, r=None):
     ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
     xk = del_x[:, :, np.newaxis, :]
     ejk1 = np.zeros(shape=(3, 3))
@@ -180,6 +178,7 @@ def rt(eps, xe, x0, h_arr=None, r=None):
 
     rotlet = (h1p_arr / r + h2_arr) * cross_arr
     return rotlet
+
 
 # @profile
 def generate_stokeslet(eps, nodes, type, chunks=1):
@@ -220,7 +219,7 @@ def stokeslet_helper(eps, xe, x0, type):
     r0 = np.linalg.norm(del_x0, axis=-1)[:, :, np.newaxis, np.newaxis]
 
     h1_arr0, h2_arr0 = compute_helper_funs(r0, eps=eps, funs=('h1', 'h2'))
-    stokeslet = ss(eps, xe, x0, h_arr=(h1_arr0, h2_arr0), r=r0)
+    stokeslet = ss(eps, del_x0, h_arr=(h1_arr0, h2_arr0), r=r0)
     if type == 'free':
         return stokeslet
     elif type == 'wall':
@@ -233,16 +232,16 @@ def stokeslet_helper(eps, xe, x0, type):
         h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = \
             compute_helper_funs(r, eps=eps)
 
-        im_stokeslet = -ss(eps, xe, x_im, h_arr=(h1_arr, h2_arr), r=r)
+        im_stokeslet = -ss(eps, del_x, h_arr=(h1_arr, h2_arr), r=r)
 
         mod_matrix = np.diag([1, -1, -1])
-        tmp_dip = pd(eps, xe, x_im, d_arr=(d1_arr, d2_arr), r=r)
+        tmp_dip = pd(eps, del_x, d_arr=(d1_arr, d2_arr), r=r)
         dipole = np.dot(tmp_dip, mod_matrix)
 
-        tmp_doub = sd(eps, xe, x_im, h_arr=(h2_arr, h1p_arr, h2p_arr), r=r)
+        tmp_doub = sd(eps, del_x, h_arr=(h2_arr, h1p_arr, h2p_arr), r=r)
         doublet = np.dot(tmp_doub, mod_matrix)
 
-        tmp_rot = rt(eps, xe, x_im, h_arr=(h1p_arr, h2_arr), r=r)
+        tmp_rot = rt(eps, del_x, h_arr=(h1p_arr, h2_arr), r=r)
 
         ejk1 = np.zeros(shape=(3, 3))
         ejk1[1, 2] = 1

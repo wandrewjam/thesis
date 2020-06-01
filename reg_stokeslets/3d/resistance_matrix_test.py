@@ -2,6 +2,7 @@ import os
 os.environ["OPENBLAS_NUM_THREADS"] = "4"
 
 import numpy as np
+from scipy.linalg import solve
 from force_test import assemble_quad_matrix
 from sphere_integration_utils import sphere_integrate
 import multiprocessing as mp
@@ -33,19 +34,21 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
                                  proc=1):
     print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
         eps, n_nodes))
-    a_matrix, nodes = assemble_quad_matrix(eps=eps, n_nodes=n_nodes, a=a, b=b,
-                                           domain=domain, distance=distance,
-                                           theta=theta, phi=phi, proc=proc)
+    s_matrix, weights, nodes = assemble_quad_matrix(
+        eps=eps, n_nodes=n_nodes, a=a, b=b, domain=domain, distance=distance,
+        theta=theta, phi=phi, proc=proc
+    )
     # Solve for the forces given 6 different velocity cases
     # print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
     rhs = assemble_vel_cases(nodes, shear_vec=shear_vec)
     rhs_cases = rhs.shape[1]
     print('Solving for forces for eps = {}, nodes = {}'.format(eps, n_nodes))
-    try:
-        pt_forces = -np.linalg.solve(a_matrix, rhs)
-    except np.linalg.LinAlgError:
-        print('Solve failed; using least squares instead')
-        pt_forces = -np.linalg.lstsq(a_matrix, rhs)[0]
+    intermediate_solve = solve(
+        s_matrix, rhs, overwrite_a=True, overwrite_b=True,
+        check_finite=False, assume_a='pos'
+    )
+    pt_forces = intermediate_solve / np.repeat(weights, repeats=3)
+
     # For each velocity case, integrate velocities to get body force and
     #   body torque
     pt_forces = pt_forces.reshape((-1, 3, rhs_cases))
