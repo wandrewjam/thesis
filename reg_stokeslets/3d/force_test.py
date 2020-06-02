@@ -54,7 +54,8 @@ def find_solve_error(eps, n_nodes):
     return error
 
 
-def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0., theta=0., phi=0., proc=1):
+def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0.,
+                         theta=0., phi=0., proc=1, precompute_array=None):
     xi_mesh, eta_mesh, nodes, ind_map = generate_grid(n_nodes, a=a, b=b)
     ct, st, cp, sp = np.cos(theta), np.sin(theta), np.cos(phi), np.sin(phi)
     rot_matrix = np.array([[cp, -sp, 0],
@@ -81,7 +82,8 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0., t
 
     del_xi = xi_mesh[1] - xi_mesh[0]
     del_eta = eta_mesh[1] - eta_mesh[0]
-    stokeslet = generate_stokeslet(eps, nodes, domain, chunks=proc)
+    stokeslet = generate_stokeslet(eps, nodes, domain, chunks=proc,
+                                   precompute_array=precompute_array)
     s_matrix = stokeslet.transpose((0, 2, 1, 3)).reshape(
         (nodes.size, nodes.size)) * del_eta * del_xi
     return s_matrix, weights, nodes
@@ -181,7 +183,7 @@ def rt(eps, del_x, h_arr=None, r=None):
 
 
 # @profile
-def generate_stokeslet(eps, nodes, type, chunks=1):
+def generate_stokeslet(eps, nodes, type, chunks=1, precompute_array=None):
     """Generate a S x S x 3 x 3 array of Stokeslet strengths at 'nodes'
     S_{ijkl} is the (k,l) component of the Stokeslet centered at x_j
     and evaluated at x_i
@@ -200,12 +202,13 @@ def generate_stokeslet(eps, nodes, type, chunks=1):
     x0 = nodes
     if chunks == 1:
         xe = nodes
-        stokeslet = stokeslet_helper(eps, xe, x0, type)
+        stokeslet = stokeslet_helper(eps, xe, x0, type, precompute_array)
     else:
         xe_list = np.array_split(nodes, chunks)
 
         pool = mp.Pool(processes=chunks)
-        result = [pool.apply_async(stokeslet_helper, args=(eps, xe, x0, type))
+        result = [pool.apply_async(stokeslet_helper,
+                                   args=(eps, xe, x0, type, precompute_array))
                   for xe in xe_list]
 
         result = [res.get() for res in result]
@@ -214,11 +217,17 @@ def generate_stokeslet(eps, nodes, type, chunks=1):
     return stokeslet
 
 
-def stokeslet_helper(eps, xe, x0, type):
+def stokeslet_helper(eps, xe, x0, type, precompute_array):
     del_x0 = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
     r0 = np.linalg.norm(del_x0, axis=-1)[:, :, np.newaxis, np.newaxis]
 
-    h1_arr0, h2_arr0 = compute_helper_funs(r0, eps=eps, funs=('h1', 'h2'))
+    if precompute_array is not None:
+        r_save = precompute_array[0]
+        del_r = r_save[1] - r_save[0]  # Assumes uniform spacing
+        look_up0 = np.round(r0 / del_r).astype(dtype='int')
+        h1_arr0, h2_arr0 = [precompute_array[j][look_up0] for j in range(1, 3)]
+    else:
+        h1_arr0, h2_arr0 = compute_helper_funs(r0, eps=eps, funs=('h1', 'h2'))
     stokeslet = ss(eps, del_x0, h_arr=(h1_arr0, h2_arr0), r=r0)
     if type == 'free':
         return stokeslet
@@ -229,8 +238,14 @@ def stokeslet_helper(eps, xe, x0, type):
         del_x = xe[:, np.newaxis, :] - x_im[np.newaxis, :, :]
         r = np.linalg.norm(del_x, axis=-1)[:, :, np.newaxis, np.newaxis]
 
-        h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = \
-            compute_helper_funs(r, eps=eps)
+        if precompute_array is not None:
+            look_up = np.round(r / del_r).astype(dtype='int')
+            h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = [
+                precompute_array[j][look_up] for j in range(1, 7)
+            ]
+        else:
+            h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = \
+                compute_helper_funs(r, eps=eps)
 
         im_stokeslet = -ss(eps, del_x, h_arr=(h1_arr, h2_arr), r=r)
 
