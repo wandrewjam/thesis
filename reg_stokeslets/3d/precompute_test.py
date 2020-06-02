@@ -16,6 +16,7 @@ if __name__ == '__main__':
     x_im = np.array([-1, 1, 1]) * x0
     del_x = xe[:, np.newaxis, :] - x_im[np.newaxis, :, :]
     r = np.linalg.norm(del_x, axis=-1)[:, :, np.newaxis, np.newaxis]
+    ind_u = np.triu_indices_from(r[..., 0, 0])
 
     # Pre-compute square root
     r_pre = np.linspace(0, np.amax(r), num=10**4)
@@ -38,8 +39,55 @@ if __name__ == '__main__':
 
     print('Pre-compute square root time: {}'.format(end-start))
 
+    # Look-up square roots (symmetric)
+    start = timer()
+    r_sym = r[..., 0, 0][ind_u]
+    h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = [
+        np.zeros(shape=r.shape[:2]) for _ in range(6)]
+    sre_sym = np.interp(r_sym, r_pre, sq)
+    h1 = 1 / (8 * np.pi * sre_sym) + eps ** 2 / (8 * np.pi * sre_sym ** 3)
+    h2 = 1 / (8 * np.pi * sre_sym ** 3)
+    d1 = (4 * np.pi * sre_sym ** 3) ** (-1) - 3 * eps ** 2 / (4 * np.pi * sre_sym ** 5)
+    d2 = - 3 / (4 * np.pi * sre_sym ** 5)
+    h1p = -r_sym / (8 * np.pi * sre_sym ** 3) - 3 * r_sym * eps ** 2 / (8 * np.pi * sre_sym ** 5)
+    h2p = -3 * r_sym / (8 * np.pi * sre_sym ** 5)
+
+    h1_arr[ind_u], h1_arr[ind_u[::-1]] = h1, h1
+    h2_arr[ind_u], h2_arr[ind_u[::-1]] = h2, h2
+    d1_arr[ind_u], d1_arr[ind_u[::-1]] = d1, d1
+    d2_arr[ind_u], d2_arr[ind_u[::-1]] = d2, d2
+    h1p_arr[ind_u], h1p_arr[ind_u[::-1]] = h1p, h1p
+    h2p_arr[ind_u], h2p_arr[ind_u[::-1]] = h2p, h2p
+    end = timer()
+
+    print('Pre-compute symmetric square root time: {}'.format(end-start))
+
     # Look-up H and D values w/o sorting
     start = timer()
+    r_sym = r[..., 0, 0][ind_u]
+    h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = [
+        np.zeros(shape=r.shape[:2]) for _ in range(6)]
+    h1 = np.interp(r_sym, r_pre, h1_pre)
+    h2 = np.interp(r_sym, r_pre, h2_pre)
+    d1 = np.interp(r_sym, r_pre, d1_pre)
+    d2 = np.interp(r_sym, r_pre, d2_pre)
+    h1p = np.interp(r_sym, r_pre, h1p_pre)
+    h2p = np.interp(r_sym, r_pre, h2p_pre)
+
+    h1_arr[ind_u], h1_arr[ind_u[::-1]] = h1, h1
+    h2_arr[ind_u], h2_arr[ind_u[::-1]] = h2, h2
+    d1_arr[ind_u], d1_arr[ind_u[::-1]] = d1, d1
+    d2_arr[ind_u], d2_arr[ind_u[::-1]] = d2, d2
+    h1p_arr[ind_u], h1p_arr[ind_u[::-1]] = h1p, h1p
+    h2p_arr[ind_u], h2p_arr[ind_u[::-1]] = h2p, h2p
+    end = timer()
+    print('Pre-compute symmetric H and D time: {}'.format(end-start))
+
+    # Look-up H and D values w/ sorting (Someday)
+
+    # Look-up H and D values (symmetric) w/o sorting
+    start = timer()
+
     h1 = np.interp(r, r_pre, h1_pre)
     h2 = np.interp(r, r_pre, h2_pre)
     d1 = np.interp(r, r_pre, d1_pre)
@@ -48,8 +96,6 @@ if __name__ == '__main__':
     h2p = np.interp(r, r_pre, h2p_pre)
     end = timer()
     print('Pre-compute H and D time: {}'.format(end-start))
-
-    # Look-up H and D values w/ sorting (Someday)
 
     # Compute H and D on the fly
     start = timer()
