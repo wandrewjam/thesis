@@ -20,13 +20,14 @@ if __name__ == '__main__':
 
     # Pre-compute square root
     r_pre = np.linspace(0, np.amax(r), num=10**4)
+    del_r = r_pre[1] - r_pre[0]
     sq = np.sqrt(r_pre**2 + eps**2)
 
     # Pre-compute H and D functions
     h1_pre, h2_pre, d1_pre, d2_pre, h1p_pre, h2p_pre = \
         compute_helper_funs(r_pre, eps=eps)
 
-    # Look-up square roots
+    # Interpolate square roots
     start = timer()
     sre = np.interp(r, r_pre, sq)
     h1 = 1 / (8 * np.pi * sre) + eps**2 / (8 * np.pi * sre ** 3)
@@ -37,9 +38,23 @@ if __name__ == '__main__':
     h2p = -3 * r / (8 * np.pi * sre**5)
     end = timer()
 
-    print('Pre-compute square root time: {}'.format(end-start))
+    print('Interpolate square root time: {}'.format(end-start))
 
-    # Look-up square roots (symmetric)
+    # Look-up square roots
+    start = timer()
+    look_ups = np.round(r / del_r, 0).astype(dtype='int')
+    sre = sq[look_ups]
+    h1 = 1 / (8 * np.pi * sre) + eps**2 / (8 * np.pi * sre ** 3)
+    h2 = 1 / (8 * np.pi * sre ** 3)
+    d1 = (4 * np.pi * sre ** 3) ** (-1) - 3 * eps**2 / (4 * np.pi * sre ** 5)
+    d2 = - 3 / (4 * np.pi * sre ** 5)
+    h1p = -r / (8 * np.pi * sre**3) - 3 * r * eps**2 / (8 * np.pi * sre**5)
+    h2p = -3 * r / (8 * np.pi * sre**5)
+    end = timer()
+
+    print('Look-up square root time: {}'.format(end-start))
+
+    # Interpolate square roots (symmetric)
     start = timer()
     r_sym = r[..., 0, 0][ind_u]
     h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = [
@@ -60,9 +75,9 @@ if __name__ == '__main__':
     h2p_arr[ind_u], h2p_arr[ind_u[::-1]] = h2p, h2p
     end = timer()
 
-    print('Pre-compute symmetric square root time: {}'.format(end-start))
+    print('Interpolate symmetric square root time: {}'.format(end-start))
 
-    # Look-up H and D values w/o sorting
+    # Interpolate H and D values w/o sorting
     start = timer()
     r_sym = r[..., 0, 0][ind_u]
     h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = [
@@ -81,13 +96,10 @@ if __name__ == '__main__':
     h1p_arr[ind_u], h1p_arr[ind_u[::-1]] = h1p, h1p
     h2p_arr[ind_u], h2p_arr[ind_u[::-1]] = h2p, h2p
     end = timer()
-    print('Pre-compute symmetric H and D time: {}'.format(end-start))
+    print('Interpolate symmetric H and D time: {}'.format(end-start))
 
-    # Look-up H and D values w/ sorting (Someday)
-
-    # Look-up H and D values (symmetric) w/o sorting
+    # Interpolate H and D values (symmetric) w/o sorting
     start = timer()
-
     h1 = np.interp(r, r_pre, h1_pre)
     h2 = np.interp(r, r_pre, h2_pre)
     d1 = np.interp(r, r_pre, d1_pre)
@@ -95,7 +107,19 @@ if __name__ == '__main__':
     h1p = np.interp(r, r_pre, h1p_pre)
     h2p = np.interp(r, r_pre, h2p_pre)
     end = timer()
-    print('Pre-compute H and D time: {}'.format(end-start))
+    print('Interpolate H and D time: {}'.format(end-start))
+
+    # Look-up H and D values
+    start = timer()
+    look_ups = np.round(r / del_r, 0).astype(dtype='int')
+    h1 = h1_pre[look_ups]
+    h2 = h2_pre[look_ups]
+    d1 = d1_pre[look_ups]
+    d2 = d2_pre[look_ups]
+    h1p = h1p_pre[look_ups]
+    h2p = h2p_pre[look_ups]
+    end = timer()
+    print('Look-up H and D time: {}'.format(end-start))
 
     # Compute H and D on the fly
     start = timer()
