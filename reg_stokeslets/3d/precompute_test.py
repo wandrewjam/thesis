@@ -57,8 +57,7 @@ if __name__ == '__main__':
     # Interpolate square roots (symmetric)
     start = timer()
     r_sym = r[..., 0, 0][ind_u]
-    h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = [
-        np.zeros(shape=r.shape[:2]) for _ in range(6)]
+
     sre_sym = np.interp(r_sym, r_pre, sq)
     h1 = 1 / (8 * np.pi * sre_sym) + eps ** 2 / (8 * np.pi * sre_sym ** 3)
     h2 = 1 / (8 * np.pi * sre_sym ** 3)
@@ -66,13 +65,6 @@ if __name__ == '__main__':
     d2 = - 3 / (4 * np.pi * sre_sym ** 5)
     h1p = -r_sym / (8 * np.pi * sre_sym ** 3) - 3 * r_sym * eps ** 2 / (8 * np.pi * sre_sym ** 5)
     h2p = -3 * r_sym / (8 * np.pi * sre_sym ** 5)
-
-    h1_arr[ind_u], h1_arr[ind_u[::-1]] = h1, h1
-    h2_arr[ind_u], h2_arr[ind_u[::-1]] = h2, h2
-    d1_arr[ind_u], d1_arr[ind_u[::-1]] = d1, d1
-    d2_arr[ind_u], d2_arr[ind_u[::-1]] = d2, d2
-    h1p_arr[ind_u], h1p_arr[ind_u[::-1]] = h1p, h1p
-    h2p_arr[ind_u], h2p_arr[ind_u[::-1]] = h2p, h2p
     end = timer()
 
     print('Interpolate symmetric square root time: {}'.format(end-start))
@@ -80,21 +72,13 @@ if __name__ == '__main__':
     # Interpolate H and D values w/o sorting
     start = timer()
     r_sym = r[..., 0, 0][ind_u]
-    h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = [
-        np.zeros(shape=r.shape[:2]) for _ in range(6)]
+
     h1 = np.interp(r_sym, r_pre, h1_pre)
     h2 = np.interp(r_sym, r_pre, h2_pre)
     d1 = np.interp(r_sym, r_pre, d1_pre)
     d2 = np.interp(r_sym, r_pre, d2_pre)
     h1p = np.interp(r_sym, r_pre, h1p_pre)
     h2p = np.interp(r_sym, r_pre, h2p_pre)
-
-    h1_arr[ind_u], h1_arr[ind_u[::-1]] = h1, h1
-    h2_arr[ind_u], h2_arr[ind_u[::-1]] = h2, h2
-    d1_arr[ind_u], d1_arr[ind_u[::-1]] = d1, d1
-    d2_arr[ind_u], d2_arr[ind_u[::-1]] = d2, d2
-    h1p_arr[ind_u], h1p_arr[ind_u[::-1]] = h1p, h1p
-    h2p_arr[ind_u], h2p_arr[ind_u[::-1]] = h2p, h2p
     end = timer()
     print('Interpolate symmetric H and D time: {}'.format(end-start))
 

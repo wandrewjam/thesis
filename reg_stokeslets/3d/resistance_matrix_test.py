@@ -47,7 +47,7 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
         s_matrix, rhs, overwrite_a=True, overwrite_b=True,
         check_finite=False, assume_a='pos'
     )
-    pt_forces = intermediate_solve / np.repeat(weights, repeats=3)
+    pt_forces = (intermediate_solve.T / np.repeat(weights, repeats=3)).T
 
     # For each velocity case, integrate velocities to get body force and
     #   body torque

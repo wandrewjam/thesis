@@ -84,17 +84,24 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0.,
     del_eta = eta_mesh[1] - eta_mesh[0]
     stokeslet = generate_stokeslet(eps, nodes, domain, chunks=proc,
                                    precompute_array=precompute_array)
-    s_matrix = stokeslet.transpose((0, 2, 1, 3)).reshape(
+
+    ind_u = np.triu_indices(nodes.shape[0])
+    s_array = np.zeros(shape=(nodes.shape[0], nodes.shape[0], 3, 3))
+    s_array[ind_u] = stokeslet
+    s_matrix = s_array.transpose((0, 2, 1, 3)).reshape(
         (nodes.size, nodes.size)) * del_eta * del_xi
     return s_matrix, weights, nodes
 
 
 # @profile
-def ss(eps, del_x, h_arr=None, r=None):
+def ss(eps, del_x, h_arr=None, r=None, outer=None):
+    if outer is None:
+        outer = del_x[:, :, np.newaxis] * del_x[:, np.newaxis, :]
+
     if r is None:
         r2 = np.sum(del_x**2, axis=-1)
         # assert np.all(r2 == r2.T)
-        r = np.sqrt(r2)[:, :, np.newaxis, np.newaxis]
+        r = np.sqrt(r2)[:, np.newaxis, np.newaxis]
 
     if h_arr is None:
         h1_arr, h2_arr = compute_helper_funs(r, eps=eps, funs=('h1', 'h2'))
@@ -102,15 +109,17 @@ def ss(eps, del_x, h_arr=None, r=None):
         h1_arr = h_arr[0]
         h2_arr = h_arr[1]
 
-    stokeslet = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * h1_arr
-                  + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :]
-                  * h2_arr))
-    assert np.all(stokeslet == stokeslet.transpose((0, 1, 3, 2)))
+    stokeslet = ((np.eye(3)[np.newaxis, :, :] * h1_arr
+                  + outer * h2_arr))
+    # assert np.all(stokeslet == stokeslet.transpose((0, 1, 3, 2)))
     return stokeslet
 
 
 # @profile
-def pd(eps, del_x, d_arr=None, r=None):
+def pd(eps, del_x, d_arr=None, r=None, outer=None):
+    if outer is None:
+        outer = del_x[:, :, np.newaxis] * del_x[:, np.newaxis, :]
+
     if r is None:
         r2 = np.sum(del_x**2, axis=-1)
         # assert np.all(r2 == r2.T)
@@ -122,24 +131,23 @@ def pd(eps, del_x, d_arr=None, r=None):
         d1_arr = d_arr[0]
         d2_arr = d_arr[1]
 
-    dipole = ((np.eye(3)[np.newaxis, np.newaxis, :, :] * d1_arr
-               + del_x[:, :, :, np.newaxis] * del_x[:, :, np.newaxis, :]
-               * d2_arr))
-    assert np.all(dipole == dipole.transpose((0, 1, 3, 2)))
+    dipole = ((np.eye(3)[np.newaxis, :, :] * d1_arr
+               + outer * d2_arr))
+    # assert np.all(dipole == dipole.transpose((0, 1, 3, 2)))
     return dipole
 
 # @profile
 def sd(eps, del_x, h_arr=None, r=None):
     e1 = np.array([1, 0, 0])
-    e1i = e1[np.newaxis, np.newaxis, :, np.newaxis]
-    e1k = e1[np.newaxis, np.newaxis, np.newaxis, :]
+    e1i = e1[np.newaxis, :, np.newaxis]
+    e1k = e1[np.newaxis, np.newaxis, :]
 
     x1 = del_x[..., 0]
     x1 = x1[..., np.newaxis, np.newaxis]
     xi = del_x[..., np.newaxis]
-    xk = del_x[:, :, np.newaxis, :]
+    xk = del_x[:, np.newaxis, :]
 
-    ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
+    ii = np.eye(3)[np.newaxis, :, :]
 
     if r is None:
         r2 = np.sum(del_x**2, axis=-1)
@@ -153,17 +161,14 @@ def sd(eps, del_x, h_arr=None, r=None):
         h2_arr = h_arr[0]
         h1p_arr = h_arr[1]
         h2p_arr = h_arr[2]
-    doublet = ((xi * e1k + ii * x1) * h2_arr + e1i * xk * h1p_arr / r
-               + x1 * xi * xk * h2p_arr / r)
+    doublet = ((xi * e1k + ii * x1) * h2_arr + (e1i * h1p_arr
+               + x1 * xi * h2p_arr) * xk / r)
     return doublet
 
 # @profile
 def rt(eps, del_x, h_arr=None, r=None):
-    ii = np.eye(3)[np.newaxis, np.newaxis, :, :]
-    xk = del_x[:, :, np.newaxis, :]
-    ejk1 = np.zeros(shape=(3, 3))
-    ejk1[1, 2] = 1.
-    ejk1[2, 1] = -1.
+    ii = np.eye(3)[np.newaxis, :, :]
+    xk = del_x[:, np.newaxis, :]
 
     if r is None:
         r2 = np.sum(del_x**2, axis=-1)
@@ -199,27 +204,36 @@ def generate_stokeslet(eps, nodes, type, chunks=1, precompute_array=None):
     -------
 
     """
-    x0 = nodes
+    ind_u = np.triu_indices(nodes.shape[0])
+    del_x0 = nodes[ind_u[0]] - nodes[ind_u[1]]
+    del_x = nodes[ind_u[0]] - np.array([-1, 1, 1]) * nodes[ind_u[1]]
+    h = nodes[ind_u[1], 0]
+    h = h[:, np.newaxis, np.newaxis]
     if chunks == 1:
-        xe = nodes
-        stokeslet = stokeslet_helper(eps, xe, x0, type, precompute_array)
+        stokeslet = stokeslet_helper(eps, del_x0, del_x, h, type,
+                                     precompute_array)
     else:
-        xe_list = np.array_split(nodes, chunks)
+        del_x0_list = np.array_split(del_x0, chunks)
+        del_x_list = np.array_split(del_x, chunks)
+        h_list = np.array_split(h, chunks)
 
         pool = mp.Pool(processes=chunks)
-        result = [pool.apply_async(stokeslet_helper,
-                                   args=(eps, xe, x0, type, precompute_array))
-                  for xe in xe_list]
+        result = [
+            pool.apply_async(stokeslet_helper,
+                             args=(eps, del_x0, del_x, h, type,
+                                   precompute_array))
+            for (del_x0, del_x, h) in zip(del_x0_list, del_x_list, h_list)
+        ]
 
         result = [res.get() for res in result]
         stokeslet = np.concatenate(result)
 
     return stokeslet
 
-
-def stokeslet_helper(eps, xe, x0, type, precompute_array):
-    del_x0 = xe[:, np.newaxis, :] - x0[np.newaxis, :, :]
-    r0 = np.linalg.norm(del_x0, axis=-1)[:, :, np.newaxis, np.newaxis]
+# @profile
+def stokeslet_helper(eps, del_x0, del_x, h, type, precompute_array):
+    outer0 = del_x0[:, np.newaxis, :] * del_x0[:, :, np.newaxis]
+    r0 = np.linalg.norm(del_x0, axis=-1)[:, np.newaxis, np.newaxis]
 
     if precompute_array is not None:
         r_save = precompute_array[0]
@@ -228,15 +242,12 @@ def stokeslet_helper(eps, xe, x0, type, precompute_array):
         h1_arr0, h2_arr0 = [precompute_array[j][look_up0] for j in range(1, 3)]
     else:
         h1_arr0, h2_arr0 = compute_helper_funs(r0, eps=eps, funs=('h1', 'h2'))
-    stokeslet = ss(eps, del_x0, h_arr=(h1_arr0, h2_arr0), r=r0)
+    stokeslet = ss(eps, del_x0, h_arr=(h1_arr0, h2_arr0), r=r0, outer=outer0)
     if type == 'free':
         return stokeslet
     elif type == 'wall':
-        h = x0[:, 0]
-        h = h[np.newaxis, :, np.newaxis, np.newaxis]
-        x_im = np.array([-1, 1, 1]) * x0
-        del_x = xe[:, np.newaxis, :] - x_im[np.newaxis, :, :]
-        r = np.linalg.norm(del_x, axis=-1)[:, :, np.newaxis, np.newaxis]
+        outer = del_x[:, np.newaxis, :] * del_x[:, :, np.newaxis]
+        r = np.linalg.norm(del_x, axis=-1)[:, np.newaxis, np.newaxis]
 
         if precompute_array is not None:
             look_up = np.round(r / del_r).astype(dtype='int')
@@ -247,10 +258,11 @@ def stokeslet_helper(eps, xe, x0, type, precompute_array):
             h1_arr, h2_arr, d1_arr, d2_arr, h1p_arr, h2p_arr = \
                 compute_helper_funs(r, eps=eps)
 
-        im_stokeslet = -ss(eps, del_x, h_arr=(h1_arr, h2_arr), r=r)
+        im_stokeslet = -ss(eps, del_x, h_arr=(h1_arr, h2_arr), r=r,
+                           outer=outer)
 
         mod_matrix = np.diag([1, -1, -1])
-        tmp_dip = pd(eps, del_x, d_arr=(d1_arr, d2_arr), r=r)
+        tmp_dip = pd(eps, del_x, d_arr=(d1_arr, d2_arr), r=r, outer=outer)
         dipole = np.dot(tmp_dip, mod_matrix)
 
         tmp_doub = sd(eps, del_x, h_arr=(h2_arr, h1p_arr, h2p_arr), r=r)
