@@ -31,12 +31,12 @@ def assemble_vel_cases(sphere_nodes, shear_rate=1., shear_vec=True):
 
 def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
                                  distance=0., theta=0., phi=0., shear_vec=True,
-                                 proc=1):
+                                 proc=1, precompute_array=None):
     print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
         eps, n_nodes))
     s_matrix, weights, nodes = assemble_quad_matrix(
         eps=eps, n_nodes=n_nodes, a=a, b=b, domain=domain, distance=distance,
-        theta=theta, phi=phi, proc=proc
+        theta=theta, phi=phi, proc=proc, precompute_array=precompute_array
     )
     # Solve for the forces given 6 different velocity cases
     # print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))

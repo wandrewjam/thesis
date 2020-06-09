@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pickle
 from resistance_matrix_test import generate_resistance_matrices
+from sphere_integration_utils import compute_helper_funs
 import cProfile
 import line_profiler
 
@@ -34,18 +35,28 @@ def main(server='mac', proc=1):
 
     result_dict = {}
     exact_dict = {}
+    h = np.sqrt(surf_area / (6 * n_nodes ** 2 + 2))
+    epsilon = c * h ** n
+
+    # Precompute up to r=25
+    precompute_arrays = list()
+    r_save = np.linspace(0, 34, num=34 * 10**3)
+    for ii in range(len(epsilon)):
+        e = epsilon[ii]
+        precompute_array = (r_save, ) + tuple(compute_helper_funs(r_save, e))
+        precompute_arrays.append(precompute_array)
+
     for phi in phi_list:
         for theta in theta_list:
             for d in d_list:
-                h = np.sqrt(surf_area / (6 * n_nodes ** 2 + 2))
-                epsilon = c * h ** n
                 result = [
                     (node,
                      generate_resistance_matrices(
                          e, node, a=a, b=b, domain='wall', distance=d,
-                         theta=theta, phi=phi, shear_vec=True, proc=proc)
-                     )
-                    for (e, node) in zip(epsilon, n_nodes)
+                         theta=theta, phi=phi, shear_vec=True, proc=proc,
+                         precompute_array=precompute_array
+                     )) for (e, node, precompute_array)
+                    in zip(epsilon, n_nodes, precompute_arrays)
                 ]
 
                 processed_result = list()
@@ -110,5 +121,12 @@ if __name__ == '__main__':
         os.environ["MKL_NUM_THREADS"] = num_threads
     import numpy as np
 
-    cProfile.run('main(server=sys.argv[1], proc=int(num_threads))',
-                 filename='ho_fast_conv_profile.stats')
+    # Check that the stats file doesn't already exist
+
+    stats_file = 'ho_sym_lookup_conv_profile.stats'
+
+    if os.path.isfile(stats_file):
+        raise NameError('file already exists!')
+    else:
+        cProfile.run('main(server=sys.argv[1], proc=int(num_threads))',
+                     filename=stats_file)
