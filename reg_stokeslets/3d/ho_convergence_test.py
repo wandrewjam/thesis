@@ -91,19 +91,19 @@ def main(server='mac', proc=1):
     with open('ho_errors.pkl', 'w') as f:
         pickle.dump(errors, f)
 
-    # if server == 'mac':
-    #     fig, ax = plt.subplots()
-    #     for key, err in errors.items():
-    #         sorter = np.argsort(err.keys())
-    #         jonathan, vals = np.array(err.keys()), np.array(err.values())
-    #         jonathan_h = np.sqrt(surf_area / (6 * jonathan ** 2 + 2))
-    #         label_str = 'd = {}, $\\theta$ = {}, $\\phi$ = {}'.format(
-    #             key[2], key[1], key[0])
-    #         ax.plot(jonathan_h[sorter], vals[sorter], label=label_str)
-    #     ax.legend()
-    #     ax.set_xlabel('Discretization size ($h$)')
-    #     ax.set_ylabel('Relative Error')
-    #     plt.show()
+    if server == 'mac':
+        fig, ax = plt.subplots()
+        for key, err in errors.items():
+            sorter = np.argsort(err.keys())
+            jonathan, vals = np.array(err.keys()), np.array(err.values())
+            jonathan_h = np.sqrt(surf_area / (6 * jonathan ** 2 + 2))
+            label_str = 'd = {}, $\\theta$ = {}, $\\phi$ = {}'.format(
+                key[2], key[1], key[0])
+            ax.plot(jonathan_h[sorter], vals[sorter], label=label_str)
+        ax.legend()
+        ax.set_xlabel('Discretization size ($h$)')
+        ax.set_ylabel('Relative Error')
+        plt.show()
 
     print()
 
@@ -114,6 +114,14 @@ if __name__ == '__main__':
 
     server = sys.argv[1]
     num_threads = sys.argv[2]
+    try:
+        arg3 = sys.argv[3]
+        if arg3 == 'profile':
+            profile = True
+        else:
+            profile = False
+    except IndexError:
+        profile = False
 
     if server == 'linux':
         os.environ["OPENBLAS_NUM_THREADS"] = num_threads
@@ -121,12 +129,14 @@ if __name__ == '__main__':
         os.environ["MKL_NUM_THREADS"] = num_threads
     import numpy as np
 
-    # Check that the stats file doesn't already exist
+    if profile:
+        # Check that the stats file doesn't already exist
+        stats_file = 'ho_sym_lookup_conv_profile.stats'
 
-    stats_file = 'ho_sym_lookup_conv_profile.stats'
-
-    if os.path.isfile(stats_file):
-        raise NameError('file already exists!')
+        if os.path.isfile(stats_file):
+            raise NameError('file already exists!')
+        else:
+            cProfile.run('main(server=server, proc=int(num_threads))',
+                         filename=stats_file)
     else:
-        cProfile.run('main(server=sys.argv[1], proc=int(num_threads))',
-                     filename=stats_file)
+        main(server=server, proc=int(num_threads))
