@@ -17,7 +17,7 @@ def spheroid_surface_area(a, b):
 def main(server='mac'):
     a, b = 1.5, 0.5
     surf_area = spheroid_surface_area(a, b)
-    phi=np.pi/2
+    phi = np.pi/2
 
     c, n = 0.6, 1.0
 
@@ -101,10 +101,10 @@ if __name__ == '__main__':
     server = sys.argv[1]
     num_threads = sys.argv[2]
 
-    if server == 'linux':
-        os.environ["OPENBLAS_NUM_THREADS"] = num_threads
-    elif server == 'mac':
-        os.environ["MKL_NUM_THREADS"] = num_threads
-    import numpy as np
+    # if server == 'linux':
+    #     os.environ["OPENBLAS_NUM_THREADS"] = num_threads
+    # elif server == 'mac':
+    #     os.environ["MKL_NUM_THREADS"] = num_threads
+    # import numpy as np
 
     main(server=server)
