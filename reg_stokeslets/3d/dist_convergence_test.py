@@ -17,10 +17,11 @@ def spheroid_surface_area(a, b):
 def main(server='mac'):
     a, b = 1.5, 0.5
     surf_area = spheroid_surface_area(a, b)
+    phi=np.pi/2
 
     c, n = 0.6, 1.0
 
-    d_list = np.array([1.5, 1.0, .75, .6, .51, .501])
+    d_list = np.array([2.5, 2.0, 1.75, 1.6, 1.51, 1.501])
 
     if server == 'linux':
         n_nodes = (1 + np.arange(10)) * 4
@@ -39,7 +40,8 @@ def main(server='mac'):
         result = [
             (node,
              generate_resistance_matrices(
-                 e, node, a=a, b=b, domain='wall', distance=d, shear_vec=True)
+                 e, node, a=a, b=b, domain='wall', distance=d, phi=phi,
+                 shear_vec=True)
              )
             for (e, node) in zip(epsilon, n_nodes)
         ]
@@ -58,7 +60,7 @@ def main(server='mac'):
         result_dict.update([(d, processed_result)])
         exact_dict.update([(d, processed_result[n_max])])
 
-    with open('ho_convergence.pkl', 'w') as f:
+    with open('dist_convergence_pi2.pkl', 'w') as f:
         pickle.dump(result_dict, f)
 
     errors = {}
@@ -73,7 +75,7 @@ def main(server='mac'):
 
         errors.update([(key, dict(err_sequence))])
 
-    with open('ho_errors.pkl', 'w') as f:
+    with open('dist_errs_pi2.pkl', 'w') as f:
         pickle.dump(errors, f)
 
     if server == 'mac':
@@ -82,12 +84,11 @@ def main(server='mac'):
             sorter = np.argsort(err.keys())
             jonathan, vals = np.array(err.keys()), np.array(err.values())
             jonathan_h = np.sqrt(surf_area / (6 * jonathan ** 2 + 2))
-            label_str = 'd = {}, $\\theta$ = {}, $\\phi$ = {}'.format(
-                key[2], key[1], key[0])
+            label_str = 'd = {}'.format(key)
             ax.plot(jonathan_h[sorter], vals[sorter], label=label_str)
         ax.legend()
         ax.set_xlabel('Discretization size ($h$)')
-        ax.set_ylabel('Relative Error')
+        ax.set_ylabel('Absolute Error')
         plt.show()
 
     print()
