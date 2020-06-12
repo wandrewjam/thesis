@@ -10,10 +10,10 @@ from timeit import default_timer as timer
 def main(server):
     if server == 'linux':
         eps = [0.1, 0.05, 0.01]
-        n_nodes = [12, 24, 36, 48]
+        n_nodes = [4, 12, 24, 36]
     elif server == 'mac':
-        eps = [0.1, 0.05]
-        n_nodes = [4, 8]
+        eps = [0.1, 0.05, 0.01]
+        n_nodes = [4, 8, 12]
     else:
         raise ValueError('\'server\' variable is not valid')
 
