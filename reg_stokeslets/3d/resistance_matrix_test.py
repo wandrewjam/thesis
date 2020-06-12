@@ -1,5 +1,5 @@
 import os
-os.environ["OPENBLAS_NUM_THREADS"] = "4"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
 
 import numpy as np
 from scipy.linalg import solve

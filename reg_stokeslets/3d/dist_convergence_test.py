@@ -1,3 +1,8 @@
+import os
+
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+
+import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 from resistance_matrix_test import generate_resistance_matrices
@@ -18,7 +23,7 @@ def main(server='mac'):
     d_list = np.array([1.5, 1.0, .75, .6, .51, .501])
 
     if server == 'linux':
-        n_nodes = (1 + np.arange(9)) * 4
+        n_nodes = (1 + np.arange(10)) * 4
     elif server == 'mac':
         n_nodes = (1 + np.arange(4)) * 4
     else:

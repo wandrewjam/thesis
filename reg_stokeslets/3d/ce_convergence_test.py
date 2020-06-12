@@ -1,3 +1,8 @@
+import os
+
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+
+import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 from resistance_matrix_test import generate_resistance_matrices
@@ -19,7 +24,7 @@ def main(server='mac'):
                                 1.1276, 1.0453, 1.005])
 
     if server == 'linux':
-        n_nodes = (1 + np.arange(9)) * 4
+        n_nodes = (1 + np.arange(10)) * 4
     elif server == 'mac':
         n_nodes = (1 + np.arange(4)) * 4
     else:
@@ -95,10 +100,10 @@ if __name__ == '__main__':
     server = sys.argv[1]
     num_threads = sys.argv[2]
 
-    if server == 'linux':
-        os.environ["OPENBLAS_NUM_THREADS"] = num_threads
-    elif server == 'mac':
-        os.environ["MKL_NUM_THREADS"] = num_threads
-    import numpy as np
+    ## if server == 'linux':
+    ##     os.environ["OPENBLAS_NUM_THREADS"] = num_threads
+    ## elif server == 'mac':
+    ##     os.environ["MKL_NUM_THREADS"] = num_threads
+    ## import numpy as np
 
     main(server=server)

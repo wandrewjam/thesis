@@ -1,9 +1,14 @@
+import os
+
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+
+import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 from resistance_matrix_test import generate_resistance_matrices
 from sphere_integration_utils import compute_helper_funs
 import cProfile
-import line_profiler
+## import line_profiler
 
 
 def spheroid_surface_area(a, b):
@@ -25,7 +30,8 @@ def main(server='mac', proc=1):
     d_list = distance_ratios * a
 
     if server == 'linux':
-        n_nodes = (1 + np.arange(9)) * 4
+        n_nodes = (1 + np.arange(10)) * 4
+        print(os.environ["OPENBLAS_NUM_THREADS"])
     elif server == 'mac':
         n_nodes = (1 + np.arange(4)) * 4
     else:
@@ -123,11 +129,12 @@ if __name__ == '__main__':
     except IndexError:
         profile = False
 
-    if server == 'linux':
-        os.environ["OPENBLAS_NUM_THREADS"] = num_threads
-    elif server == 'mac':
-        os.environ["MKL_NUM_THREADS"] = num_threads
-    import numpy as np
+    ## if server == 'linux':
+    ##     os.environ["OPENBLAS_NUM_THREADS"] = num_threads
+    ## elif server == 'mac':
+    ##     os.environ["MKL_NUM_THREADS"] = num_threads
+
+    ## import numpy as np
 
     if profile:
         # Check that the stats file doesn't already exist
