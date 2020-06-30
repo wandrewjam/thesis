@@ -8,10 +8,12 @@ from sphere_integration_utils import sphere_integrate
 import multiprocessing as mp
 
 
-def assemble_vel_cases(sphere_nodes, shear_rate=1., shear_vec=True):
+def assemble_vel_cases(sphere_nodes, distance=0., shear_rate=1.,
+                       shear_vec=True):
+    centered_nodes = sphere_nodes - distance * np.array([1, 0, 0])
     v_array = np.tile(np.eye(3), (sphere_nodes.shape[0], 1))
     om_array = np.cross(np.eye(3)[np.newaxis, :, :],
-                        sphere_nodes[:, np.newaxis, :],
+                        centered_nodes[:, np.newaxis, :],
                         axisc=1).reshape((-1, 3))
 
     if shear_vec:
@@ -40,7 +42,7 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
     )
     # Solve for the forces given 6 different velocity cases
     # print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
-    rhs = assemble_vel_cases(nodes, shear_vec=shear_vec)
+    rhs = assemble_vel_cases(nodes, distance=distance, shear_vec=shear_vec)
     rhs_cases = rhs.shape[1]
     print('Solving for forces for eps = {}, nodes = {}'.format(eps, n_nodes))
     intermediate_solve = solve(
@@ -82,7 +84,7 @@ def main(proc=1, a=1., b=1., domain='free', distance=0, server='mac'):
         n_nodes = [12, 24, 36, 48]
     elif server == 'mac':
         eps = [0.1, 0.05]
-        n_nodes = [4, 8]
+        n_nodes = [12, 24]
     else:
         raise ValueError('\'server\' variable is not valid')
 

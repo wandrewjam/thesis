@@ -9,9 +9,13 @@ from resistance_matrix_test import generate_resistance_matrices
 
 
 def spheroid_surface_area(a, b):
-    assert a > b
-    e = np.sqrt(1 - b**2 / a**2)
-    return 2 * np.pi * a ** 2 * (1 + b ** 2 * np.arctanh(e) / (e * a ** 2))
+    if a > b:
+        e = np.sqrt(1 - b**2 / a**2)
+        return 2 * np.pi * a ** 2 * (1 + b ** 2 * np.arctanh(e) / (e * a ** 2))
+    elif a == b:
+        return 4 * np.pi * a**2
+    else:
+        raise ValueError('\'a\' must be larger than \'b\'')
 
 
 def main(server='mac'):
