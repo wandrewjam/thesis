@@ -355,16 +355,17 @@
 \item The first test case I tried was a sphere in an unbounded shear
   flow. The velocity of the sphere in this case is $v_x = v_y = v_z =
   0$ (assuming $x = 0$), and the angular velocities are $\omega_x =
-  \omega_z = 0$ and $\omega_y = \gamma/2$.
+  \omega_z = 0$ and $\omega_y = -\gamma/2$.
 \item Therefore with $\gamma = 1$,
-  \textcolor{black}{$\dfrac{de_{m,x}}{dt} = \dfrac{e_{m, z}}{2}$,
-    $\dfrac{de_{m, y}}{dt} = 0$, and $\dfrac{de_{m,z}}{dt} =
-    -e_{m,x}$. These have the analytical solutions $\vect{e}_m =
-    \frac{1}{2} (e_{m,x,0} \cos(t) + e_{m,z,0} \sin(t), e_{m,y,0},
-    e_{m,z,0} \cos(t) - e_{m,x,0}\sin(t))^T$.}
-\item Then I compared this analytic solution with the routine
-  described above using regularized Stokeslets (results in Figure
-  \ref{fig:com_plot})
+  \textcolor{black}{$\dfrac{de_{m,x}}{dt} = -\dfrac{e_{m, z}}{2}$,
+    $\dfrac{de_{m, y}}{dt} = 0$, and
+    $\dfrac{de_{m,z}}{dt} = \dfrac{e_{m,x}}{2}$. These have the
+    analytical solutions
+    $\vect{e}_m = \frac{1}{2} (e_{m,x,0} \cos(t) - e_{m,z,0} \sin(t),
+    e_{m,y,0}, e_{m,z,0} \cos(t) + e_{m,x,0}\sin(t))^T$.}
+\item \textcolor{black}{Then I compared this analytic solution with
+    the routine described above using regularized Stokeslets (results
+    in Figure \ref{fig:com_plot})}
 \item Note: in this test case, the regularized Stokeslets routine
   gives translational and angular velocities that are exact within
   machine precision (I don't really know why, perhaps because of
@@ -384,8 +385,8 @@
     \includegraphics[width=\textwidth]{orient_plot}
   \end{subfigure}
   \caption{Plots of the platelet position and orientation in an
-    unbounded shear flow. Orientation is initialized at $\theta = 0$
-    and $\phi = \pi/8$.}
+    unbounded shear flow. Orientation is initialized at
+    $\vect{e}_m = \vect{e}_x$.}
   \label{fig:com_plot}
 \end{figure}
 
@@ -402,7 +403,7 @@
   components of the velocity are $v_z$ and $\omega_y$.
 \item With the center of mass at $x = h = 1.5431$, $y = z = 0$, the
   translational velocity is $v_z = 0.92185 h$ and the rotational
-  velocity is $\omega_y = 0.92368 / 2$
+  velocity is $\omega_y = -0.92368 / 2$
 \item 
 \end{itemize}
 }
@@ -418,7 +419,7 @@
   \end{subfigure}
   \caption{Plots of the platelet position and orientation in a shear
     flow near a wall. Same as the previous example, orientation is
-    initialized at $\theta = 0$ and $\phi = \pi/8$}
+    initialized at $\vect{e}_m = \vect{e}_x$.}
   \label{fig:com_plot2}
 \end{figure}
 
