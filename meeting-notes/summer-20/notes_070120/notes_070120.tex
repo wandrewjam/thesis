@@ -378,11 +378,15 @@
 \begin{figure}
   \centering
   \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{com_plot}    
+    \includegraphics[width=\textwidth]{com_plot1}
   \end{subfigure}
   \hfill
   \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{orient_plot}
+    \includegraphics[width=\textwidth]{orient_plot1}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot1}
   \end{subfigure}
   \caption{Plots of the platelet position and orientation in an
     unbounded shear flow. Orientation is initialized at
@@ -394,19 +398,47 @@
 
 \textbf{Test Case: Sphere in a shear flow, adjacent to a wall}
 
-{\color{gray}
 \begin{itemize}
 \item For the second test case, place a sphere in a shear flow near a
   plane wall.
 \item Goldman, Cox, and Brenner \cite{Goldman1967b} assemble results
-  for the free motion of a sphere in this case. The only nonzero
-  components of the velocity are $v_z$ and $\omega_y$.
-\item With the center of mass at $x = h = 1.5431$, $y = z = 0$, the
-  translational velocity is $v_z = 0.92185 h$ and the rotational
-  velocity is $\omega_y = -0.92368 / 2$
-\item 
+  from an asymptotic approximation for the free motion of a sphere in
+  this case (the approximation is valid in the limit
+  $x \rightarrow a$, where $a$ is the radius of the sphere). The only
+  nonzero components of the velocity are $v_z$ and $\omega_y$.
+\item I experimented with different distances from the wall, and two
+  different discretization sizes. I present my results below.
 \end{itemize}
-}
+
+\emph{Experiments with different distances and 2 different mesh
+  widths}
+
+\begin{itemize}
+\item I tried two different mesh sizes: 386 nodes, and 1538 nodes
+  ($\approx 4\times$ more). The widths of these two meshes are
+  $\approx 0.18$ and $\approx 0.09$, and the regularization parameter
+  $\epsilon$ is chosen to be $\epsilon = 0.6 * h$, resulting in
+  $\epsilon$ values of $0.108$ and $0.054$.
+\item In the series of plots below, I plot the center of mass as a
+  function of time, the components of the orientation vector
+  $\vect{e}_m$, the error in each of the estimated $\vect{e}_m$
+  components, and the error in the velocity estimate at each step. The
+  error in the velocity is calculated as the max norm of the
+  approximate 6D velocity vector minus the exact 6D velocity vector.
+\item As the sphere is moved closer the to wall, the regularized
+  Stokeslets cause the sphere to be ``sticky,'' in that the estimated
+  translation velocity is slower than the analytic velocity, and the estimated
+  angular velocity is higher than the analytic angular velocity.
+\item Overall, as expected the accuracy gets worse as the sphere
+  approaches the wall. However one weird result is that the fine mesh
+  doesn't do any better than the coarse mesh at the smallest
+  distance. I should revisit this to make sure this isn't the result
+  of some bug.
+\item At the larger distances, the error in the simulation with the
+  fine grid is about 1/2 the error with the coarse grid, but when the
+  distance to the wall is the same order as the blob size, the finer
+  mesh doesn't do much better.
+\end{itemize}
 
 \begin{figure}
   \centering
@@ -417,10 +449,179 @@
   \begin{subfigure}{0.49\textwidth}
     \includegraphics[width=\textwidth]{orient_plot2}
   \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot2}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{vel_err_plot2}
+  \end{subfigure}
   \caption{Plots of the platelet position and orientation in a shear
-    flow near a wall. Same as the previous example, orientation is
-    initialized at $\vect{e}_m = \vect{e}_x$.}
+    flow near a wall. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.} 
   \label{fig:com_plot2}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot3}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot3}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot3}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{vel_err_plot3}
+  \end{subfigure}
+  \caption{Plots of the platelet position and orientation in a shear
+    flow near a wall. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.} 
+  \label{fig:com_plot3}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot4}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot4}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot4}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{vel_err_plot4}
+  \end{subfigure}
+  \caption{Plots of the platelet position and orientation in a shear
+    flow near a wall. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.} 
+  \label{fig:com_plot4}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot5}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot5}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot5}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{vel_err_plot5}
+  \end{subfigure}
+  \caption{Plots of the platelet position and orientation in a shear
+    flow near a wall. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.} 
+  \label{fig:com_plot5}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot6}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot6}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot6}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{vel_err_plot6}
+  \end{subfigure}
+  \caption{Plots of the platelet position and orientation in a shear
+    flow near a wall. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.} 
+  \label{fig:com_plot6}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot7}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot7}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot7}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{vel_err_plot7}
+  \end{subfigure}
+  \caption{Plots of the platelet position and orientation in a shear
+    flow near a wall. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.} 
+  \label{fig:com_plot7}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot8}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot8}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot8}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{vel_err_plot8}
+  \end{subfigure}
+  \caption{Plots of the platelet position and orientation in a shear
+    flow near a wall. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.} 
+  \label{fig:com_plot8}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot9}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot9}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot9}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{vel_err_plot9}
+  \end{subfigure}
+  \caption{Plots of the platelet position and orientation in a shear
+    flow near a wall. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.} 
+  \label{fig:com_plot9}
 \end{figure}
 
 \bibliographystyle{plain}
