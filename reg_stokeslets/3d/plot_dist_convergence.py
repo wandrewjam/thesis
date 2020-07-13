@@ -8,22 +8,23 @@ from ce_convergence_test import spheroid_surface_area
 def main():
     a, b = 1.5, 0.5
 
-    with open('dist_errs.pkl', 'r') as f:
+    with open('dist_errs_pi2.pkl', 'r') as f:
         err = pickle.load(f)
 
-    with open('dist_convergence.pkl', 'r') as f:
+    with open('dist_convergence_pi2.pkl', 'r') as f:
         conv = pickle.load(f)
 
     line_fmt = '{} & {} & {} & {} \\\\'
 
-    d_list = np.array([1.5, 1.0, .75, .6, .51, .501])
+    # d_list = np.array([1.5, 1.0, .75, .6, .51, .501])
+    d_list = np.array([2.5, 2.0, 1.75, 1.6, 1.51, 1.501])
     surf_area = spheroid_surface_area(a, b)
     d_dict = {d_list[0]: '#edf8e9', d_list[1]: '#c7e9c0', d_list[2]: '#a1d99b',
               d_list[3]: '#74c476', d_list[4]: '#31a354', d_list[5]: '#006d2c'}
     fig, ax = plt.subplots()
     for key, err_sequence in err.items():
         exact = conv[key][36]
-        max_el = np.amax(np.concatenate(exact, axis=1))
+        max_el = np.amax(np.abs(np.concatenate(exact, axis=1)))
 
         sorter = np.argsort(err_sequence.keys())
         mesh_size = np.array(err_sequence.keys())
