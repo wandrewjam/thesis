@@ -93,7 +93,7 @@ def main(plot_num):
     # Set platelet geometry
     if 1 <= plot_num <= 9:
         a, b = 1.0, 1.0
-    if 11 == plot_num:
+    if 11 <= plot_num:
         a, b = 1.5, 0.5
     else:
         raise ValueError('plot_num is invalid')
@@ -101,7 +101,7 @@ def main(plot_num):
     # Set number of nodes
     if 1 <= plot_num <= 5 or 11 == plot_num:
         n_nodes = 8
-    elif 6 <= plot_num <= 9:
+    elif 6 <= plot_num <= 9 or 16 == plot_num:
         n_nodes = 16
     else:
         raise ValueError('plot_num is invalid')
