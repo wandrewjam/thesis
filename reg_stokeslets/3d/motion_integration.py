@@ -99,7 +99,7 @@ def main(plot_num):
         raise ValueError('plot_num is invalid')
 
     # Set number of nodes
-    if 1 <= plot_num <= 5 or 11 == plot_num:
+    if 1 <= plot_num <= 5 or 11 <= plot_num <= 15:
         n_nodes = 8
     elif 6 <= plot_num <= 9 or 16 == plot_num:
         n_nodes = 16
@@ -127,16 +127,22 @@ def main(plot_num):
         distance = 1.005004
         rot_correction = 0.50818
         trn_correction = 0.47861
-    elif plot_num == 11:
+    elif plot_num == 11 or plot_num == 16:
         distance = 0.
+    elif plot_num == 12 or plot_num == 17:
+        distance = 1.5
+    elif plot_num == 13 or plot_num == 18:
+        distance = 1.2
+    elif plot_num == 14 or plot_num == 19:
+        distance = 1.0
     else:
         raise ValueError('plot_num is invalid')
 
     # Set initial position and orientation
     init[0] = distance
-    init[3] = 0
+    init[3] = 1
     init[4] = 0
-    init[5] = 1
+    init[5] = 0
 
     # Find analytic solution
     t = np.linspace(0, 10, num=t_steps + 1)
@@ -154,7 +160,7 @@ def main(plot_num):
         e2_exact = ey0 * np.ones(shape=t_adj.shape)
         e3_exact = ez0 * np.cos(t_adj) + ex0 * np.sin(t_adj)
         x3_exact = distance * trn_correction * t
-    else:
+    elif 11 == plot_num or 16 == plot_num:
         e = np.sqrt(1 - b**2 / a**2)
         xc = 2. / 3 * e**3 * (np.arctan(e / np.sqrt(1 - e**2))
                               - e * np.sqrt(1 - e**2)) ** (-1)
@@ -196,10 +202,21 @@ def main(plot_num):
 
         e1_exact, e2_exact, e3_exact = em_exact
         x3_exact = np.zeros(t_steps+1)
+    else:
+        exact_nodes = 36
+
+        def exact_vels(em):
+            return np.zeros(6)
+
+        x1_exact, x2_exact, x3_exact, em_exact = integrate_motion(
+            [0., 10.], t_steps, init, exact_nodes,
+            exact_vels, a=a, b=b)[:-1]
+
+        e1_exact, e2_exact, e3_exact = em_exact
 
     # Integrate platelet motion
-    x1, x2, x3, e_m, errs = integrate_motion([0., 10.], t_steps, init, n_nodes,
-                                             exact_vels, a=a, b=b)
+    x1, x2, x3, e_m, errs = integrate_motion([0., 10.], t_steps, init,
+                                             n_nodes, exact_vels, a=a, b=b)
 
     # Plot numerical and analytical solutions
     fig1, ax1 = plt.subplots()
