@@ -1,4 +1,12 @@
+import os
+
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+
 import numpy as np
+import matplotlib
+
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from resistance_matrix_test import generate_resistance_matrices
 from dist_convergence_test import spheroid_surface_area
@@ -76,7 +84,7 @@ def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
 
 def main(plot_num):
     import os
-    plot_dir = os.path.expanduser('~/thesis/meeting-notes/summer-20/'
+    plot_dir = os.path.expanduser('~/Documents/thesis/meeting-notes/summer-20/'
                                   'notes_070120/')
     save_plots = False
     init = np.zeros(6)
