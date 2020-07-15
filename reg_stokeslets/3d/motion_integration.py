@@ -10,6 +10,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from resistance_matrix_test import generate_resistance_matrices
 from dist_convergence_test import spheroid_surface_area
+from timeit import default_timer as timer
 
 
 def eps_picker(n_nodes, a, b):
@@ -93,7 +94,7 @@ def main(plot_num):
     # Set platelet geometry
     if 1 <= plot_num <= 9:
         a, b = 1.0, 1.0
-    if 11 <= plot_num:
+    elif 11 <= plot_num:
         a, b = 1.5, 0.5
     else:
         raise ValueError('plot_num is invalid')
@@ -203,20 +204,31 @@ def main(plot_num):
         e1_exact, e2_exact, e3_exact = em_exact
         x3_exact = np.zeros(t_steps+1)
     else:
-        exact_nodes = 36
+        exact_nodes = 24
 
         def exact_vels(em):
             return np.zeros(6)
 
+        ex_start = timer()
         x1_exact, x2_exact, x3_exact, em_exact = integrate_motion(
             [0., 10.], t_steps, init, exact_nodes,
             exact_vels, a=a, b=b)[:-1]
+        ex_end = timer()
 
         e1_exact, e2_exact, e3_exact = em_exact
 
     # Integrate platelet motion
+    start = timer()
     x1, x2, x3, e_m, errs = integrate_motion([0., 10.], t_steps, init,
                                              n_nodes, exact_vels, a=a, b=b)
+    end = timer()
+
+    try:
+        print('Exact solve took {} seconds'.format(ex_end - ex_start))
+    except NameError:
+        pass
+
+    print('Approx solve took {} seconds'.format(end - start))
 
     # Plot numerical and analytical solutions
     fig1, ax1 = plt.subplots()
