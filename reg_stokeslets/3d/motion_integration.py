@@ -3,9 +3,9 @@ import os
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 
 import numpy as np
-import matplotlib
-
-matplotlib.use('Agg')
+# import matplotlib
+#
+# matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 from resistance_matrix_test import generate_resistance_matrices
@@ -22,12 +22,12 @@ def eps_picker(n_nodes, a, b):
 
 
 def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
-                              b=1.0, n_nodes=8):
+                              b=1.0, n_nodes=8, domain='free'):
     eps = eps_picker(n_nodes, a, b)
     theta = np.arctan2(e_m[2], e_m[1])
     phi = np.arccos(e_m[0])
     t_matrix, p_matrix, pt_matrix, r_matrix, shear_f, shear_t = (
-        generate_resistance_matrices(eps, n_nodes, a=a, b=b, domain='free',
+        generate_resistance_matrices(eps, n_nodes, a=a, b=b, domain=domain,
                                      distance=h, theta=theta, phi=phi))
 
     res_matrix = np.block([[t_matrix, p_matrix], [pt_matrix, r_matrix]])
@@ -49,10 +49,10 @@ def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
 
 
 def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
-              a=1.0, b=1.0):
+              a=1.0, b=1.0, domain='free'):
     dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
-        evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
-                                  n_nodes=n_nodes, a=a, b=b)
+        evaluate_motion_equations(x1, e_m, forces, torques, exact_vels, a=a,
+                                  b=b, n_nodes=n_nodes, domain=domain)
     )
     new_x1 = x1 + dt * dx1
     new_x2 = x2 + dt * dx2
@@ -64,7 +64,7 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
 
 
 def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
-                     b=1.0):
+                     b=1.0, domain='free'):
     x1, x2, x3 = np.zeros(shape=(3, num_steps+1))
     e_m = np.zeros(shape=(3, num_steps+1))
     x1[0], x2[0], x3[0] = init[:3]
@@ -77,7 +77,7 @@ def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
     for i in range(num_steps):
         x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = (
             time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques,
-                      exact_vels, n_nodes=n_nodes, a=a, b=b)
+                      exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain)
         )
 
     return x1, x2, x3, e_m, errs
@@ -85,9 +85,12 @@ def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
 
 def main(plot_num):
     import os
-    plot_dir = os.path.expanduser('~/Documents/thesis/meeting-notes/summer-20/'
+    # plot_dir = os.path.expanduser('~/Documents/thesis/meeting-notes/summer-20/'
+    #                               'notes_070120/')
+
+    plot_dir = os.path.expanduser('~/thesis/meeting-notes/summer-20/'
                                   'notes_070120/')
-    save_plots = False
+    save_plots = True
     init = np.zeros(6)
     t_steps = 200
 
@@ -100,9 +103,9 @@ def main(plot_num):
         raise ValueError('plot_num is invalid')
 
     # Set number of nodes
-    if 1 <= plot_num <= 5 or 11 <= plot_num <= 15:
+    if 1 <= plot_num <= 5 or 11 <= plot_num <= 15 or 21 <= plot_num <= 25 or 31 == plot_num:
         n_nodes = 8
-    elif 6 <= plot_num <= 9 or 16 == plot_num:
+    elif 6 <= plot_num <= 9 or 16 <= plot_num <= 19 or 26 <= plot_num <= 29 or 36 == plot_num:
         n_nodes = 16
     else:
         raise ValueError('plot_num is invalid')
@@ -110,40 +113,64 @@ def main(plot_num):
     # Set distance to wall
     if plot_num == 1:
         distance = 0.
+        ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 1.0
         trn_correction = 1.0
     elif plot_num == 2 or plot_num == 6:
         distance = 1.5431
+        ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 0.92368
         trn_correction = 0.92185
     elif plot_num == 3 or plot_num == 7:
         distance = 1.1276
+        ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 0.77916
         trn_correction = 0.76692
     elif plot_num == 4 or plot_num == 8:
         distance = 1.0453
+        ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 0.67462
         trn_correction = 0.65375
     elif plot_num == 5 or plot_num == 9:
         distance = 1.005004
+        ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 0.50818
         trn_correction = 0.47861
     elif plot_num == 11 or plot_num == 16:
         distance = 0.
+        ex0, ey0, ez0 = 1., 0., 0.
     elif plot_num == 12 or plot_num == 17:
         distance = 1.5
+        ex0, ey0, ez0 = 1., 0., 0.
     elif plot_num == 13 or plot_num == 18:
         distance = 1.2
+        ex0, ey0, ez0 = 1., 0., 0.
     elif plot_num == 14 or plot_num == 19:
         distance = 1.0
+        ex0, ey0, ez0 = 1., 0., 0.
+    elif plot_num == 21 or plot_num == 26:
+        distance = 0.
+        ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+    elif plot_num == 22 or plot_num == 27:
+        distance = 1.5
+        ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+    elif plot_num == 23 or plot_num == 28:
+        distance = 1.2
+        ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+    elif plot_num == 24 or plot_num == 29:
+        distance = 1.0
+        ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+    elif plot_num == 31 or plot_num == 36:
+        distance = 0.
+        ex0, ey0, ez0 = 0, 1., 0
     else:
         raise ValueError('plot_num is invalid')
 
     # Set initial position and orientation
     init[0] = distance
-    init[3] = 1
-    init[4] = 0
-    init[5] = 0
+    init[3] = ex0
+    init[4] = ey0
+    init[5] = ez0
 
     # Find analytic solution
     t = np.linspace(0, 10, num=t_steps + 1)
@@ -160,8 +187,8 @@ def main(plot_num):
         e1_exact = ex0 * np.cos(t_adj) - ez0 * np.sin(t_adj)
         e2_exact = ey0 * np.ones(shape=t_adj.shape)
         e3_exact = ez0 * np.cos(t_adj) + ex0 * np.sin(t_adj)
-        x3_exact = distance * trn_correction * t
-    elif 11 == plot_num or 16 == plot_num:
+        x3_exact = distance * trn_correction * tk
+    elif 11 == plot_num or 16 == plot_num or 21 == plot_num or 26 == plot_num or 31 == plot_num or 36 == plot_num:
         e = np.sqrt(1 - b**2 / a**2)
         xc = 2. / 3 * e**3 * (np.arctan(e / np.sqrt(1 - e**2))
                               - e * np.sqrt(1 - e**2)) ** (-1)
@@ -211,16 +238,24 @@ def main(plot_num):
 
         ex_start = timer()
         x1_exact, x2_exact, x3_exact, em_exact = integrate_motion(
-            [0., 10.], t_steps, init, exact_nodes,
-            exact_vels, a=a, b=b)[:-1]
+            [0., 10.], t_steps, init, exact_nodes, exact_vels,
+            a=a, b=b, domain='wall')[:-1]
         ex_end = timer()
 
         e1_exact, e2_exact, e3_exact = em_exact
 
+    if distance == 0:
+        domain = 'free'
+    elif distance > 0:
+        domain = 'wall'
+    else:
+        raise ValueError('value of distance is unexpected')
+
     # Integrate platelet motion
     start = timer()
-    x1, x2, x3, e_m, errs = integrate_motion([0., 10.], t_steps, init,
-                                             n_nodes, exact_vels, a=a, b=b)
+    x1, x2, x3, e_m, errs = integrate_motion(
+        [0., 10.], t_steps, init, n_nodes, exact_vels,
+        a=a, b=b, domain=domain)
     end = timer()
 
     try:
