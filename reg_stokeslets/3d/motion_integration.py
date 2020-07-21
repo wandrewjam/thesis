@@ -49,22 +49,48 @@ def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
 
 
 def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
-              a=1.0, b=1.0, domain='free'):
-    dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
-        evaluate_motion_equations(x1, e_m, forces, torques, exact_vels, a=a,
-                                  b=b, n_nodes=n_nodes, domain=domain)
-    )
-    new_x1 = x1 + dt * dx1
-    new_x2 = x2 + dt * dx2
-    new_x3 = x3 + dt * dx3
-    new_e_m = e_m + dt * np.array([dem1, dem2, dem3])
-    new_e_m /= np.linalg.norm(new_e_m)
+              a=1.0, b=1.0, domain='free', order='2nd'):
+    if order == '1st':
+        dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
+            evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
+                                      a=a, b=b, n_nodes=n_nodes, domain=domain)
+        )
+        new_x1 = x1 + dt * dx1
+        new_x2 = x2 + dt * dx2
+        new_x3 = x3 + dt * dx3
+        new_e_m = e_m + dt * np.array([dem1, dem2, dem3])
+        new_e_m /= np.linalg.norm(new_e_m)
+    elif order == '2nd':
+        dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
+            evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
+                                      a=a, b=b, n_nodes=n_nodes, domain=domain)
+        )
+        prd_x1 = x1 + dt * dx1
+        prd_x2 = x2 + dt * dx2
+        prd_x3 = x3 + dt * dx3
+        prd_e_m = e_m + dt * np.array([dem1, dem2, dem3])
+        prd_e_m /= np.linalg.norm(prd_e_m)
+
+        dx1_p, dx2_p, dx3_p, dem1_p, dem2_p, dem3_p = (
+            evaluate_motion_equations(prd_x1, prd_e_m, forces, torques,
+                                      exact_vels, a=a, b=b, n_nodes=n_nodes,
+                                      domain=domain)
+        )[:-1]
+
+        new_x1 = x1 + dt / 2 * (dx1 + dx1_p)
+        new_x2 = x2 + dt / 2 * (dx2 + dx2_p)
+        new_x3 = x3 + dt / 2 * (dx3 + dx3_p)
+        new_e_m = e_m + dt / 2 * (np.array([dem1 + dem1_p, dem2 + dem2_p,
+                                            dem3 + dem3_p]))
+        new_e_m /= np.linalg.norm(new_e_m)
+    else:
+        raise ValueError('order is not valid')
 
     return new_x1, new_x2, new_x3, new_e_m, velocity_errors
 
 
 def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
-                     b=1.0, domain='free'):
+                     b=1.0, domain='free', order='2nd'):
     x1, x2, x3 = np.zeros(shape=(3, num_steps+1))
     e_m = np.zeros(shape=(3, num_steps+1))
     x1[0], x2[0], x3[0] = init[:3]
@@ -77,7 +103,8 @@ def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
     for i in range(num_steps):
         x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = (
             time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques,
-                      exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain)
+                      exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain,
+                      order=order)
         )
 
     return x1, x2, x3, e_m, errs
@@ -89,10 +116,12 @@ def main(plot_num):
     #                               'notes_070120/')
 
     plot_dir = os.path.expanduser('~/thesis/meeting-notes/summer-20/'
-                                  'notes_070120/')
-    save_plots = True
+                                  'notes_072220/')
+    save_plots = False
     init = np.zeros(6)
-    t_steps = 200
+    stop = 10
+    t_steps = 64
+    order = '2nd'
 
     # Set platelet geometry
     if 1 <= plot_num <= 9:
@@ -173,7 +202,7 @@ def main(plot_num):
     init[5] = ez0
 
     # Find analytic solution
-    t = np.linspace(0, 10, num=t_steps + 1)
+    t = np.linspace(0, stop, num=t_steps + 1)
 
     if 1 <= plot_num <= 9:
         def exact_vels(em):
@@ -187,7 +216,7 @@ def main(plot_num):
         e1_exact = ex0 * np.cos(t_adj) - ez0 * np.sin(t_adj)
         e2_exact = ey0 * np.ones(shape=t_adj.shape)
         e3_exact = ez0 * np.cos(t_adj) + ex0 * np.sin(t_adj)
-        x3_exact = distance * trn_correction * tk
+        x3_exact = distance * trn_correction * t
     elif 11 == plot_num or 16 == plot_num or 21 == plot_num or 26 == plot_num or 31 == plot_num or 36 == plot_num:
         e = np.sqrt(1 - b**2 / a**2)
         xc = 2. / 3 * e**3 * (np.arctan(e / np.sqrt(1 - e**2))
@@ -224,8 +253,11 @@ def main(plot_num):
         dt = t[1] - t[0]
         for (i, t_el) in enumerate(t[1:]):
             d_em = exact_vels(em_exact[:, i])[3:]
-            em_exact[:, i+1] = (em_exact[:, i]
-                                + dt * np.cross(d_em, em_exact[:, i]))
+            cur = np.cross(d_em, em_exact[:, i])
+            tmp = (em_exact[:, i] + dt * cur)
+            tmp /= np.linalg.norm(tmp)
+            prd = np.cross(exact_vels(tmp)[3:], tmp)
+            em_exact[:, i+1] = (em_exact[:, i] + dt / 2 * (cur + prd))
             em_exact[:, i+1] /= np.linalg.norm(em_exact[:, i+1])
 
         e1_exact, e2_exact, e3_exact = em_exact
@@ -238,8 +270,8 @@ def main(plot_num):
 
         ex_start = timer()
         x1_exact, x2_exact, x3_exact, em_exact = integrate_motion(
-            [0., 10.], t_steps, init, exact_nodes, exact_vels,
-            a=a, b=b, domain='wall')[:-1]
+            [0., stop], t_steps, init, exact_nodes, exact_vels,  a=a, b=b,
+            domain='wall', order=order)[:-1]
         ex_end = timer()
 
         e1_exact, e2_exact, e3_exact = em_exact
@@ -254,8 +286,8 @@ def main(plot_num):
     # Integrate platelet motion
     start = timer()
     x1, x2, x3, e_m, errs = integrate_motion(
-        [0., 10.], t_steps, init, n_nodes, exact_vels,
-        a=a, b=b, domain=domain)
+        [0., stop], t_steps, init, n_nodes, exact_vels,
+        a=a, b=b, domain=domain, order=order)
     end = timer()
 
     try:
@@ -272,7 +304,7 @@ def main(plot_num):
     ax1.set_xlabel('Time elapsed')
     ax1.set_ylabel('Center of mass position')
     if save_plots:
-        fig1.savefig(plot_dir + 'com_plot{}'.format(plot_num),
+        fig1.savefig(plot_dir + 'com_plot{}_{}'.format(plot_num, order),
                      bbox_inches='tight')
     else:
         plt.tight_layout()
@@ -286,7 +318,7 @@ def main(plot_num):
     ax2.set_xlabel('Time elapsed')
     ax2.set_ylabel('Orientation components')
     if save_plots:
-        fig2.savefig(plot_dir + 'orient_plot{}'.format(plot_num),
+        fig2.savefig(plot_dir + 'orient_plot{}_{}'.format(plot_num, order),
                      bbox_inches='tight')
     else:
         plt.tight_layout()
@@ -298,11 +330,21 @@ def main(plot_num):
     ax3.set_xlabel('Time elapsed')
     ax3.set_ylabel('Absolute error (approx - exact)')
     if save_plots:
-        fig3.savefig(plot_dir + 'orient_err_plot{}'.format(plot_num),
+        fig3.savefig(plot_dir + 'orient_err_plot{}_{}'.format(plot_num, order),
                      bbox_inches='tight')
     else:
         plt.tight_layout()
         plt.show()
+
+    # fig_mag, ax_mag = plt.subplots()
+    # ax_mag.plot(t, np.linalg.norm(e_m, axis=0),
+    #             t, np.sqrt(e1_exact**2 + e2_exact**2 + e3_exact**2))
+    # ax_mag.legend(['$e_m$ magnitude', 'Exact magnitude'])
+    # ax_mag.set_xlabel('Time elapsed')
+    # ax_mag.set_ylabel('Magnitude')
+    # if not save_plots:
+    #     plt.tight_layout()
+    #     plt.show()
 
     fig4, ax4 = plt.subplots()
     ax4.plot(t[1:], errs[:, 1:].T)
@@ -311,7 +353,7 @@ def main(plot_num):
     ax4.legend(['$v_x$ error', '$v_y$ error', '$v_z$ error',
                 '$\\omega_x$ error', '$\\omega_y$ error', '$\\omega_z$ error'])
     if save_plots:
-        fig4.savefig(plot_dir + 'vel_err_plot{}'.format(plot_num),
+        fig4.savefig(plot_dir + 'vel_err_plot{}_{}'.format(plot_num, order),
                      bbox_inches='tight')
     else:
         plt.tight_layout()
