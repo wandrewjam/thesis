@@ -142,12 +142,15 @@ def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
     forces, torques = np.zeros((3, 1)), np.zeros((3, 1))
     errs = np.zeros(shape=(6, num_steps+1))
 
-    for i in range(num_steps):
-        x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = (
-            time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques,
-                      exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain,
-                      order=order)
-        )
+    try:
+        for i in range(num_steps):
+            x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = (
+                time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques,
+                          exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain,
+                          order=order)
+            )
+    except AssertionError:
+        pass
 
     return x1, x2, x3, e_m, errs
 
@@ -159,9 +162,10 @@ def main(plot_num):
 
     plot_dir = os.path.expanduser('~/thesis/meeting-notes/summer-20/'
                                   'notes_072220/')
+    data_dir = 'data'
     save_plots = False
     init = np.zeros(6)
-    stop = 50.
+    stop = 1.
     t_steps = 10
     order = '2nd'
 
@@ -258,7 +262,14 @@ def main(plot_num):
         e1_exact = ex0 * np.cos(t_adj) - ez0 * np.sin(t_adj)
         e2_exact = ey0 * np.ones(shape=t_adj.shape)
         e3_exact = ez0 * np.cos(t_adj) + ex0 * np.sin(t_adj)
+
+        x1_exact, x2_exact = np.zeros((2, t_steps+1))
         x3_exact = distance * trn_correction * t
+
+        np.savez(data_dir + '/exact' + str(plot_num), x1_exact, x2_exact,
+                 x3_exact, e1_exact, e2_exact, e3_exact, x1=x1_exact,
+                 x2=x2_exact, x3=x3_exact, e1=e1_exact, e2=e2_exact,
+                 e3=e3_exact)
     elif 11 == plot_num or 16 == plot_num or 21 == plot_num or 26 == plot_num or 31 == plot_num or 36 == plot_num:
         e = np.sqrt(1 - b**2 / a**2)
         xc = 2. / 3 * e**3 * (np.arctan(e / np.sqrt(1 - e**2))
@@ -303,20 +314,30 @@ def main(plot_num):
             em_exact[:, i+1] /= np.linalg.norm(em_exact[:, i+1])
 
         e1_exact, e2_exact, e3_exact = em_exact
+        x1_exact, x2_exact = np.zeros((2, t_steps+1))
         x3_exact = np.zeros(t_steps+1)
+        np.savez(data_dir + '/exact' + str(plot_num), x1_exact, x2_exact,
+                 x3_exact, e1_exact, e2_exact, e3_exact, x1=x1_exact,
+                 x2=x2_exact, x3=x3_exact, e1=e1_exact, e2=e2_exact,
+                 e3=e3_exact)
     else:
-        exact_nodes = 16
+        exact_nodes = 8
 
         def exact_vels(em):
             return np.zeros(6)
 
         ex_start = timer()
         x1_exact, x2_exact, x3_exact, em_exact = integrate_motion(
-            [0., stop], t_steps, init, exact_nodes, exact_vels,  a=a, b=b,
+            [0., stop], t_steps, init, exact_nodes, exact_vels, a=a, b=b,
             domain='wall', order=order)[:-1]
         ex_end = timer()
 
         e1_exact, e2_exact, e3_exact = em_exact
+
+        np.savez(data_dir + '/exact' + str(plot_num), x1_exact, x2_exact,
+                 x3_exact, e1_exact, e2_exact, e3_exact, x1=x1_exact,
+                 x2=x2_exact, x3=x3_exact, e1=e1_exact, e2=e2_exact,
+                 e3=e3_exact)
 
     if distance == 0:
         domain = 'free'
@@ -331,6 +352,10 @@ def main(plot_num):
         [0., stop], t_steps, init, n_nodes, exact_vels,
         a=a, b=b, domain=domain, order=order)
     end = timer()
+
+    e1, e2, e3 = e_m
+    np.savez(data_dir + '/approx' + str(plot_num), x1, x2, x3, e1, e2, e3,
+             x1=x1, x2=x2, x3=x3, e1=e1, e2=e2, e3=e3)
 
     try:
         print('Exact solve took {} seconds'.format(ex_end - ex_start))
