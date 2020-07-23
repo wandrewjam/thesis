@@ -126,89 +126,91 @@
   \caption{Sketch of the approximate and exact orientation vectors}
   \label{fig:orient-sketch}
 \end{figure}
-  
-% {\Large \textbf{Rolling tests with an ellipsoid in an unbounded shear
-%     flow, and near a wall}}
 
-% \begin{itemize}
-% \item As an extension from the previous experiments with a sphere
-%   rolling near a plane wall, I next ran experiments with an ellipsoid
-%   with a minor axis of length $b = 0.5$, and major axes with length $a
-%   = 1.5$.
-% \item I ran tests with the ellipsoid in free space with three different
-%   initial configurations, and two different mesh widths. The coarse
-%   mesh had 386 Stokeslets on the platelet surface, and the fine mesh
-%   width had 1538 Stokeslets. These two meshes had approximate widths
-%   of $0.18$ and $0.09$ respectively.
-% \item There are analytic solutions for the motion of an ellipsoid in
-%   an unbounded shear flow, I used the expressions given in
-%   \cite{Kim86}, which give the angular velocities as a function of the
-%   ellipsoid orientation. Then I numerically integrated the ODE
-%   $\frac{d\vect{e}_m}{dt} = \vect{\Omega} \times \vect{e}_m$ to get the
-%   ``exact'' solution for the orientation of the platelet as a function
-%   of time.
-% \item Using the formulas from \cite{Kim86}, I also compared the
-%   approximate angular velocities found by the regularized Stokeslets
-%   method with the exact angular velocities at each time step, and
-%   plotted the results.
-% \item Plots of the orientation vector components, the error in
-%   orientation as a function of time, and the error in the velocity
-%   estimate at each step are plotted in Figures
-%   \ref{fig:first-free-test}, \ref{fig:second-free-test}, and
-%   \ref{fig:third-free-test}.
-% \item In all three of these simulations, the orientation vector (the
-%   minor axis) rotates around the $y$-axis. These are the Jeffery
-%   orbits from \cite{Jeffery22}.
-% \item The errors are largest in Figure \ref{fig:first-free-test},
-%   where the orientation vector starts at $\vect{e}_x$, and is always
-%   in the $x$--$z$ plane. The errors in the orientation get quite large
-%   ($\sim 20\%$ for the coarse mesh, and $\sim 10\%$ for the fine
-%   mesh), however this only occurs briefly--where the angular
-%   velocities are the largest--and then the errors return to about 1/4
-%   of their maximum point once the platelet has fully flipped over.
-% \item Similar to the experiments with a sphere rolling near a wall,
-%   the regularized Stokeslets method \emph{over}estimates the angular
-%   velocity when the ellipsoid is ``flat'' in the shear flow ($\omega_y
-%   < 0$, so the negative error shown in the plots corresponds to an
-%   overestimate of the magnitude of the angular velocity). However,
-%   when the minor axis is pointing in the direction of flow (the
-%   platelet is ``vertical'' in the shear flow), the regularized
-%   Stokeslets underestimate the angular velocity.
-% \item When the orientation vector starts at $(1/\sqrt{2}, 1/\sqrt{2},
-%   0)$, the errors are more than 2$\times$ smaller than the previous
-%   case. There isn't much else to point out here, except that the
-%   accuracy again improves by a factor of roughly 2 when the mesh width
-%   is decreased.
-% \item In the third free experiment, the orientation is initialized to
-%   $\vect{e}_m = \vect{e}_y$. Here the orientation of the ellipsoid
-%   remains constant, and there is some kind of symmetry that results in
-%   errors canceling, and regularized Stokeslets accurately find the
-%   angular velocities within machine precision (Figure
-%   \ref{fig:third-free-test}). 
-% \item In the three remaining figures, I show errors from experiments
-%   where the ellipsoid was placed near a plane wall (all with an
-%   initial orientation $\vect{e}_m = \vect{e}_x$). The center of the
-%   ellipsoid was placed at initial heights of $1.5$, $1.2$, and $1.0$
-%   in Figures \ref{fig:first-wall-test}, \ref{fig:second-wall-test},
-%   and \ref{fig:third-wall-test} respectively.
-% \item In these experiments, ``exact'' solutions were found by using an
-%   even finer mesh ($\sim 1/3$ the width of the coarse mesh). The
-%   ``exact'' simulations took $\sim 4.5$ hours to run on a single core
-%   for 200 time steps. This means each time step takes about 80 sec.
-% \item In Figure \ref{fig:first-wall-test}, we can nearly see a full
-%   flip, and the shape of the orientation error is similar to the
-%   unbounded case. That is, the coarse mesh overestimates the angular
-%   velocity when the platelet is flat, and underestimates it when the
-%   platelet is vertical.
-% \item In the center of mass plot, we can see that the height of the
-%   platelet increases slightly when the platelet is vertical. This has
-%   to happen in order to give the platelet room to flip over.
-% \item In the other two experiments, we don't get a full flip. I will
-%   need to run a longer simulation in order to see that.
-% \item I am also going to work on implementing receptor binding this
-%   week. I'm thinking of tracking every receptor on the cell surface,
-%   instead of the hybrid method I used for the 2D model. 
-% \end{itemize}
+{\large \textbf{Improved time-stepping and some numerical issues}}
+
+\begin{itemize}
+\item I modified the time-stepping code to use a 2nd order explicit
+  Runge-Kutta update. There is one difference between my code and a
+  standard Runge-Kutta algorithm: I need to re-normalize my
+  orientation vector at every step. When I was using forward Euler, I
+  just re-normalized at the end of the time step, but with Runge Kutta
+  I think it makes sense to renormalize every ``guess'' at the next
+  function value. The algorithm I use is the following:
+  
+  \begin{align*}
+    \vect{k}_1 = \vect{\Omega}(\vect{e}_m^i) \times \vect{e}_m^i,
+    \qquad \hat{\vect{e}}_m^{i+1} = \vect{e}_m^i + \Delta t \cdot
+    \vect{k}_1, \qquad \tilde{\vect{e}}_m^{i+1} =
+    \hat{\vect{e}}_m^{i+1} / \|\hat{\vect{e}}_m^{i+1}\| \\ 
+    \vect{k}_2 = \vect{\Omega}(\tilde{\vect{e}}_m^{i+1}) \times
+    \tilde{\vect{e}}_m^{i+1}, \qquad {\vect{e}_m^\dag}^{i+1} =
+    \vect{e}_m^i + \frac{\Delta t}{2} (\vect{k}_1 + \vect{k}_2),
+    \qquad \vect{e}_m^{i+1} = {\vect{e}_m^\dag}^{i+1} /
+    \|{\vect{e}_m^\dag}^{i+1}\|
+  \end{align*}
+\item The time-consuming factor here is finding the angular velocities
+  $\vect{\Omega}$. This algorithm is globally 2nd order accurate,
+  compared to the 1st order accuracy of forward Euler, but requires 2
+  regularized Stokeslet solves per time step.
+\item From previous numerical experiments, we can estimate the error
+  in each RS solve to be roughly 0.01 with 386 nodes, and with
+  $4\times$ as many nodes (the spacing between nodes goes down by a
+  factor of 2), the error is roughly cut in half. Assuming
+  the RS solves are 1st order in the node spacing, matching the RS
+  error to the local truncation error gives us a way to choose the
+  time step size for a given mesh size on the ellipsoid.
+\item For 386 nodes, we are fine with an error of around 0.01 on each
+  step. The local truncation error of forward Euler is
+  $\mathcal{O}(\Delta t^2)$, so we want to take $\Delta t \sim
+  0.1$. For RK2, the local truncation error is $\mathcal{O}(\Delta
+  t^3)$ and so if we're using that method we want $\Delta t \sim
+  0.22$. However, because each time step incurs twice the work in RK2,
+  these two methods are comparable (for this mesh size).
+\item When the mesh is finer ($4\times$ as many nodes), RK2 does
+  better than forward Euler. For forward Euler we want $\Delta t \sim
+  0.0707$ and for RK2 we want $\Delta t \sim 0.171$. For finer meshes,
+  RK2 gives bigger improvements over forward Euler.
+\item Also as a continuation from last week, I tried to run the
+  experiments with an ellipsoid close to the wall (e.g. starting the
+  ellipsoid with $\vect{e}_m = \vect{e}_x$ and a distance of
+  1). Basically I wanted to extend the experiment shown in Figure
+  \ref{fig:third-wall-test} to show a full flip of the
+  platelet. However, the integration failed when the surface of the
+  ellipsoid overlapped with the wall after one of the time steps.
+\item I didn't save any data from this run, so I can only guess what
+  happened, but I think my time step must've been too large when the
+  ellipsoid got close to the wall.
+\item It seems like the fix here is to check at the end of each time
+  step that I have a valid orientation, and if I don't, cut the time
+  step in half.
+\item Interestingly, this only occurred at the finest mesh size, but
+  not either of the coarser sizes.
+\item I didn't have time to re-run the finest mesh, but I did run a
+  long experiment with the coarse mesh and the intermediate mesh and
+  plotted results in Figure \ref{fig:long-wall-test} (labeled as the
+  ``exact'' solution in the plots).
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot13_2nd}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot13_2nd}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot13_2nd}
+  \end{subfigure}
+  \caption{Plots of the ellipsoid orientation, orientation error, and
+     center of mass in a shear flow near a wall. The height of the
+     center of mass is initialized at $1.2$. Orientation is initialized
+     at $\vect{e}_m = \vect{e}_x$. }
+  \label{fig:long-wall-test}
+\end{figure}
 
 % \begin{figure}
 %   \centering
@@ -374,39 +376,39 @@
 %   \label{fig:second-wall-test}
 % \end{figure}
 
-% \begin{figure}
-%   \centering
-%   \begin{subfigure}{0.49\textwidth}
-%     \includegraphics[width=\textwidth]{orient_plot14}
-%   \end{subfigure}
-%   \hfill
-%   \begin{subfigure}{0.49\textwidth}
-%     \includegraphics[width=\textwidth]{orient_plot19}
-%   \end{subfigure}
-%   \\
-%   \begin{subfigure}{0.49\textwidth}
-%     \includegraphics[width=\textwidth]{orient_err_plot14}
-%   \end{subfigure}
-%   \hfill
-%   \begin{subfigure}{0.49\textwidth}
-%     \includegraphics[width=\textwidth]{orient_err_plot19}
-%   \end{subfigure}
-%   \\
-%   \begin{subfigure}{0.49\textwidth}
-%     \includegraphics[width=\textwidth]{com_plot14}
-%   \end{subfigure}
-%   \hfill
-%   \begin{subfigure}{0.49\textwidth}
-%     \includegraphics[width=\textwidth]{com_plot19}
-%   \end{subfigure}
-%   \caption{Plots of the ellipsoid orientation, orientation error, and
-%     center of mass in a shear flow near a wall. The height of the
-%     center of mass is initialized at $1.0$. Orientation is initialized
-%     at $\vect{e}_m = \vect{e}_x$. The three plots in the left column
-%     are with the coarse mesh, and the three plots in the right column
-%     are with the fine mesh.}
-%   \label{fig:third-wall-test}
-% \end{figure}
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot14}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot19}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot14}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot19}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot14}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot19}
+  \end{subfigure}
+  \caption{Plots of the ellipsoid orientation, orientation error, and
+    center of mass in a shear flow near a wall. The height of the
+    center of mass is initialized at $1.0$. Orientation is initialized
+    at $\vect{e}_m = \vect{e}_x$. The three plots in the left column
+    are with the coarse mesh, and the three plots in the right column
+    are with the fine mesh.}
+  \label{fig:third-wall-test}
+\end{figure}
 
 \bibliographystyle{plain}
 \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
