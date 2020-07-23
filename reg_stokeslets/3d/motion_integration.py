@@ -60,6 +60,9 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         new_x3 = x3 + dt * dx3
         new_e_m = e_m + dt * np.array([dem1, dem2, dem3])
         new_e_m /= np.linalg.norm(new_e_m)
+
+        # Need to check @ end of time step that we
+        # won't get an error on the next step
     elif order == '2nd':
         dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
             evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
@@ -119,8 +122,8 @@ def main(plot_num):
                                   'notes_072220/')
     save_plots = False
     init = np.zeros(6)
-    stop = 10
-    t_steps = 64
+    stop = 50.
+    t_steps = 400
     order = '2nd'
 
     # Set platelet geometry
@@ -263,7 +266,7 @@ def main(plot_num):
         e1_exact, e2_exact, e3_exact = em_exact
         x3_exact = np.zeros(t_steps+1)
     else:
-        exact_nodes = 24
+        exact_nodes = 16
 
         def exact_vels(em):
             return np.zeros(6)
@@ -299,10 +302,15 @@ def main(plot_num):
 
     # Plot numerical and analytical solutions
     fig1, ax1 = plt.subplots()
-    ax1.plot(t, x1, t, x2, t, x3, t, x3_exact)
-    ax1.legend(['$x$', '$y$', '$z$', '$z$ exact'])
+    ax1.plot(t, x1, t, x1_exact, t, x2, t, x2_exact)
+    ax_tw = ax1.twinx()
+    ax_tw.plot(t, x3, color='tab:purple')
+    ax_tw.plot(t, x3_exact, color='tab:brown')
+    ax1.legend(['$x$', '$x$ exact', '$y$', '$y$ exact'])
+    ax_tw.legend(['$z$', '$z$ exact'])
     ax1.set_xlabel('Time elapsed')
     ax1.set_ylabel('Center of mass position')
+    ax_tw.tick_params(axis='y')
     if save_plots:
         fig1.savefig(plot_dir + 'com_plot{}_{}'.format(plot_num, order),
                      bbox_inches='tight')
