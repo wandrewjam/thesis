@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from resistance_matrix_test import generate_resistance_matrices
 from dist_convergence_test import spheroid_surface_area
+from sphere_integration_utils import generate_grid
 from timeit import default_timer as timer
 
 
@@ -19,6 +20,19 @@ def eps_picker(n_nodes, a, b):
     h = np.sqrt(surf_area / (6 * n_nodes ** 2 + 2))
     eps = c * h**n
     return eps
+
+
+def valid_orientation(n_nodes, e_m, distance, a, b):
+    xi_mesh, eta_mesh, nodes, ind_map = generate_grid(n_nodes, a=a, b=b)
+    theta = np.arctan2(e_m[2], e_m[1])
+    phi = np.arccos(e_m[0])
+    ct, st, cp, sp = np.cos(theta), np.sin(theta), np.cos(phi), np.sin(phi)
+    rot_matrix = np.array([[cp, -sp, 0],
+                           [ct * sp, ct * cp, -st],
+                           [st * sp, st * cp, ct]])
+    nodes = np.dot(rot_matrix, nodes.T).T
+    nodes[:, 0] += distance
+    return np.all(nodes[:, 0] > 0)
 
 
 def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
@@ -61,8 +75,18 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         new_e_m = e_m + dt * np.array([dem1, dem2, dem3])
         new_e_m /= np.linalg.norm(new_e_m)
 
-        # Need to check @ end of time step that we
-        # won't get an error on the next step
+        # Check that we have a valid orientation
+        if (not valid_orientation(n_nodes, new_e_m, distance=new_x1, a=a, b=b)
+                and domain == 'wall'):
+            # Then take 2 half time-steps
+            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
+                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                a, b, domain, order
+            )[:-1]
+            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
+                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
+                exact_vels, n_nodes, a, b, domain, order
+            )
     elif order == '2nd':
         dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
             evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
@@ -74,18 +98,33 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         prd_e_m = e_m + dt * np.array([dem1, dem2, dem3])
         prd_e_m /= np.linalg.norm(prd_e_m)
 
-        dx1_p, dx2_p, dx3_p, dem1_p, dem2_p, dem3_p = (
-            evaluate_motion_equations(prd_x1, prd_e_m, forces, torques,
-                                      exact_vels, a=a, b=b, n_nodes=n_nodes,
-                                      domain=domain)
-        )[:-1]
+        try:
+            dx1_p, dx2_p, dx3_p, dem1_p, dem2_p, dem3_p = (
+                evaluate_motion_equations(prd_x1, prd_e_m, forces, torques,
+                                          exact_vels, a=a, b=b,
+                                          n_nodes=n_nodes, domain=domain)
+            )[:-1]
 
-        new_x1 = x1 + dt / 2 * (dx1 + dx1_p)
-        new_x2 = x2 + dt / 2 * (dx2 + dx2_p)
-        new_x3 = x3 + dt / 2 * (dx3 + dx3_p)
-        new_e_m = e_m + dt / 2 * (np.array([dem1 + dem1_p, dem2 + dem2_p,
-                                            dem3 + dem3_p]))
-        new_e_m /= np.linalg.norm(new_e_m)
+            new_x1 = x1 + dt / 2 * (dx1 + dx1_p)
+            new_x2 = x2 + dt / 2 * (dx2 + dx2_p)
+            new_x3 = x3 + dt / 2 * (dx3 + dx3_p)
+            new_e_m = e_m + dt / 2 * (np.array([dem1 + dem1_p, dem2 + dem2_p,
+                                                dem3 + dem3_p]))
+            new_e_m /= np.linalg.norm(new_e_m)
+
+            if not valid_orientation(n_nodes, new_e_m, distance=new_x1,
+                                      a=a, b=b) and domain == 'wall':
+                raise AssertionError('next step will not be valid')
+        except AssertionError:
+            # If we get an invalid orientation, then take 2 half-steps
+            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
+                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                a, b, domain, order
+            )[:-1]
+            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
+                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
+                exact_vels, n_nodes, a, b, domain, order
+            )
     else:
         raise ValueError('order is not valid')
 
@@ -123,7 +162,7 @@ def main(plot_num):
     save_plots = False
     init = np.zeros(6)
     stop = 50.
-    t_steps = 400
+    t_steps = 10
     order = '2nd'
 
     # Set platelet geometry
@@ -306,8 +345,8 @@ def main(plot_num):
     ax_tw = ax1.twinx()
     ax_tw.plot(t, x3, color='tab:purple')
     ax_tw.plot(t, x3_exact, color='tab:brown')
-    ax1.legend(['$x$', '$x$ exact', '$y$', '$y$ exact'])
-    ax_tw.legend(['$z$', '$z$ exact'])
+    ax1.legend(['$x$ coarse', '$x$ fine', '$y$ coarse', '$y$ fine'])
+    ax_tw.legend(['$z$ coarse', '$z$ fine'])
     ax1.set_xlabel('Time elapsed')
     ax1.set_ylabel('Center of mass position')
     ax_tw.tick_params(axis='y')
