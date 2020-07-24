@@ -59,6 +59,9 @@ def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
     dx1, dx2, dx3 = trans_vels
     dem1, dem2, dem3 = np.cross(rot_vels, e_m)
 
+    # Define a counter for the number of RHS evaluations
+    evaluate_motion_equations.counter += 1
+
     return dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors
 
 
@@ -113,7 +116,7 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
             new_e_m /= np.linalg.norm(new_e_m)
 
             if not valid_orientation(n_nodes, new_e_m, distance=new_x1,
-                                      a=a, b=b) and domain == 'wall':
+                                     a=a, b=b) and domain == 'wall':
                 raise AssertionError('next step will not be valid')
         except AssertionError:
             # If we get an invalid orientation, then take 2 half-steps
@@ -150,24 +153,22 @@ def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
                           order=order)
             )
     except AssertionError:
+        print('Encountered an assertion error while integrating. Halting and '
+              'outputting computation results so far.')
         pass
 
     return x1, x2, x3, e_m, errs
 
 
 def main(plot_num):
-    import os
-    # plot_dir = os.path.expanduser('~/Documents/thesis/meeting-notes/summer-20/'
-    #                               'notes_070120/')
-
-    plot_dir = os.path.expanduser('~/thesis/meeting-notes/summer-20/'
-                                  'notes_072220/')
-    data_dir = 'data'
-    save_plots = False
+    data_dir = 'data/'
     init = np.zeros(6)
     stop = 1.
     t_steps = 10
     order = '2nd'
+
+    # Initialize the function counter
+    evaluate_motion_equations.counter = 0
 
     # Set platelet geometry
     if 1 <= plot_num <= 9:
@@ -256,20 +257,24 @@ def main(plot_num):
             exact_rot_vel = rot_correction / 2 * np.array([0, -1, 0])
             vels = np.concatenate((exact_trn_vel, exact_rot_vel))
             return vels
+
         t_adj = t * rot_correction / 2
 
         ex0, ey0, ez0 = init[3:]
-        e1_exact = ex0 * np.cos(t_adj) - ez0 * np.sin(t_adj)
-        e2_exact = ey0 * np.ones(shape=t_adj.shape)
-        e3_exact = ez0 * np.cos(t_adj) + ex0 * np.sin(t_adj)
+        e1_fine = ex0 * np.cos(t_adj) - ez0 * np.sin(t_adj)
+        e2_fine = ey0 * np.ones(shape=t_adj.shape)
+        e3_fine = ez0 * np.cos(t_adj) + ex0 * np.sin(t_adj)
 
-        x1_exact, x2_exact = np.zeros((2, t_steps+1))
-        x3_exact = distance * trn_correction * t
+        x1_fine, x2_fine = np.zeros((2, t_steps+1))
+        x3_fine = distance * trn_correction * t
 
-        np.savez(data_dir + '/exact' + str(plot_num), x1_exact, x2_exact,
-                 x3_exact, e1_exact, e2_exact, e3_exact, x1=x1_exact,
-                 x2=x2_exact, x3=x3_exact, e1=e1_exact, e2=e2_exact,
-                 e3=e3_exact)
+        np.savez(data_dir + 'fine' + str(plot_num), x1_fine, x2_fine,
+                 x3_fine, e1_fine, e2_fine, e3_fine, t, x1=x1_fine,
+                 x2=x2_fine, x3=x3_fine, e1=e1_fine, e2=e2_fine,
+                 e3=e3_fine, t=t)
+
+        exact_solution = True
+
     elif 11 == plot_num or 16 == plot_num or 21 == plot_num or 26 == plot_num or 31 == plot_num or 36 == plot_num:
         e = np.sqrt(1 - b**2 / a**2)
         xc = 2. / 3 * e**3 * (np.arctan(e / np.sqrt(1 - e**2))
@@ -301,43 +306,54 @@ def main(plot_num):
             vels = np.linalg.solve(A, rhs)
             return np.concatenate((trn_vels, vels))
 
-        em_exact = np.zeros(shape=(3, t_steps + 1))
-        em_exact[:, 0] = init[3:]
+        em_fine = np.zeros(shape=(3, t_steps + 1))
+        em_fine[:, 0] = init[3:]
         dt = t[1] - t[0]
         for (i, t_el) in enumerate(t[1:]):
-            d_em = exact_vels(em_exact[:, i])[3:]
-            cur = np.cross(d_em, em_exact[:, i])
-            tmp = (em_exact[:, i] + dt * cur)
+            d_em = exact_vels(em_fine[:, i])[3:]
+            cur = np.cross(d_em, em_fine[:, i])
+            tmp = (em_fine[:, i] + dt * cur)
             tmp /= np.linalg.norm(tmp)
             prd = np.cross(exact_vels(tmp)[3:], tmp)
-            em_exact[:, i+1] = (em_exact[:, i] + dt / 2 * (cur + prd))
-            em_exact[:, i+1] /= np.linalg.norm(em_exact[:, i+1])
+            em_fine[:, i+1] = (em_fine[:, i] + dt / 2 * (cur + prd))
+            em_fine[:, i+1] /= np.linalg.norm(em_fine[:, i+1])
 
-        e1_exact, e2_exact, e3_exact = em_exact
-        x1_exact, x2_exact = np.zeros((2, t_steps+1))
-        x3_exact = np.zeros(t_steps+1)
-        np.savez(data_dir + '/exact' + str(plot_num), x1_exact, x2_exact,
-                 x3_exact, e1_exact, e2_exact, e3_exact, x1=x1_exact,
-                 x2=x2_exact, x3=x3_exact, e1=e1_exact, e2=e2_exact,
-                 e3=e3_exact)
+        e1_fine, e2_fine, e3_fine = em_fine
+        x1_fine, x2_fine = np.zeros((2, t_steps+1))
+        x3_fine = np.zeros(t_steps+1)
+        np.savez(data_dir + 'fine' + str(plot_num), x1_fine, x2_fine,
+                 x3_fine, e1_fine, e2_fine, e3_fine, t, x1=x1_fine,
+                 x2=x2_fine, x3=x3_fine, e1=e1_fine, e2=e2_fine,
+                 e3=e3_fine, t=t)
+
+        exact_solution = True
     else:
-        exact_nodes = 8
+        fine_nodes = 8
 
         def exact_vels(em):
             return np.zeros(6)
 
-        ex_start = timer()
-        x1_exact, x2_exact, x3_exact, em_exact = integrate_motion(
-            [0., stop], t_steps, init, exact_nodes, exact_vels, a=a, b=b,
+        # Initialize counter and timer for fine simulation
+        evaluate_motion_equations.counter = 0
+        fine_start = timer()
+
+        # Run the fine simulations
+        x1_fine, x2_fine, x3_fine, em_fine = integrate_motion(
+            [0., stop], t_steps, init, fine_nodes, exact_vels, a=a, b=b,
             domain='wall', order=order)[:-1]
-        ex_end = timer()
 
-        e1_exact, e2_exact, e3_exact = em_exact
+        # Save the end state after the fine simulations
+        fine_end = timer()
+        fine_counter = evaluate_motion_equations.counter
 
-        np.savez(data_dir + '/exact' + str(plot_num), x1_exact, x2_exact,
-                 x3_exact, e1_exact, e2_exact, e3_exact, x1=x1_exact,
-                 x2=x2_exact, x3=x3_exact, e1=e1_exact, e2=e2_exact,
-                 e3=e3_exact)
+        e1_fine, e2_fine, e3_fine = em_fine
+
+        np.savez(data_dir + 'fine' + str(plot_num), x1_fine, x2_fine,
+                 x3_fine, e1_fine, e2_fine, e3_fine, t, x1=x1_fine,
+                 x2=x2_fine, x3=x3_fine, e1=e1_fine, e2=e2_fine,
+                 e3=e3_fine, t=t)
+
+        exact_solution = False
 
     if distance == 0:
         domain = 'free'
@@ -346,90 +362,51 @@ def main(plot_num):
     else:
         raise ValueError('value of distance is unexpected')
 
-    # Integrate platelet motion
+    # Initialize counter and timer for coarse simulation
     start = timer()
+    evaluate_motion_equations.counter = 0
+
+    # Run the coarse simulations
     x1, x2, x3, e_m, errs = integrate_motion(
         [0., stop], t_steps, init, n_nodes, exact_vels,
         a=a, b=b, domain=domain, order=order)
+
+    # Save the end state after the coarse simulations
     end = timer()
+    coarse_counter = evaluate_motion_equations.counter
 
     e1, e2, e3 = e_m
-    np.savez(data_dir + '/approx' + str(plot_num), x1, x2, x3, e1, e2, e3,
-             x1=x1, x2=x2, x3=x3, e1=e1, e2=e2, e3=e3)
+    np.savez(data_dir + 'coarse' + str(plot_num), x1, x2, x3, e1, e2, e3, t,
+             errs, x1=x1, x2=x2, x3=x3, e1=e1, e2=e2, e3=e3, t=t, errs=errs)
 
     try:
-        print('Exact solve took {} seconds'.format(ex_end - ex_start))
+        print('Exact solve took {} seconds for {} RHS evaluations'
+              .format(fine_end - fine_start, fine_counter))
     except NameError:
         pass
 
-    print('Approx solve took {} seconds'.format(end - start))
+    print('Approx solve took {} seconds for {} RHS evaluations'
+          .format(end - start, coarse_counter))
 
-    # Plot numerical and analytical solutions
-    fig1, ax1 = plt.subplots()
-    ax1.plot(t, x1, t, x1_exact, t, x2, t, x2_exact)
-    ax_tw = ax1.twinx()
-    ax_tw.plot(t, x3, color='tab:purple')
-    ax_tw.plot(t, x3_exact, color='tab:brown')
-    ax1.legend(['$x$ coarse', '$x$ fine', '$y$ coarse', '$y$ fine'])
-    ax_tw.legend(['$z$ coarse', '$z$ fine'])
-    ax1.set_xlabel('Time elapsed')
-    ax1.set_ylabel('Center of mass position')
-    ax_tw.tick_params(axis='y')
-    if save_plots:
-        fig1.savefig(plot_dir + 'com_plot{}_{}'.format(plot_num, order),
-                     bbox_inches='tight')
-    else:
-        plt.tight_layout()
-        plt.show()
+    # Save info from the experiments
+    with open(data_dir + 'info' + str(plot_num) + '.txt', 'w') as f:
+        expt_info = ['distance, {}\n'.format(distance),
+                     'e0, ({}, {}, {})\n'.format(ex0, ey0, ez0),
+                     'order, {}\n'.format(order),
+                     'steps, {}\n'.format(t_steps),
+                     'stop, {}\n'.format(stop),
+                     'exact solution, {}\n'.format(exact_solution),
+                     'coarse counter, {}\n'.format(coarse_counter),
+                     'coarse time, {}\n'.format(end - start)]
+        try:
+            expt_info += ['fine counter, {}\n'.format(fine_counter),
+                          'fine time, {}\n'.format(fine_end - fine_start)]
+        except NameError:
+            pass
 
-    fig2, ax2 = plt.subplots()
-    ax2.plot(t, e_m[0], t, e_m[1], t, e_m[2],
-             t, e1_exact, t, e2_exact, t, e3_exact)
-    ax2.legend(['$e_{mx}$ approx', '$e_{my}$ approx', '$e_{mz}$ approx',
-                '$e_{mx}$ exact', '$e_{my}$ exact', '$e_{mz}$ exact'])
-    ax2.set_xlabel('Time elapsed')
-    ax2.set_ylabel('Orientation components')
-    if save_plots:
-        fig2.savefig(plot_dir + 'orient_plot{}_{}'.format(plot_num, order),
-                     bbox_inches='tight')
-    else:
-        plt.tight_layout()
-        plt.show()
+        f.writelines(expt_info)
 
-    fig3, ax3 = plt.subplots()
-    ax3.plot(t, e_m[0] - e1_exact, t, e_m[1] - e2_exact, t, e_m[2] - e3_exact)
-    ax3.legend(['$e_{mx}$ error', '$e_{my}$ error', '$e_{mz}$ error'])
-    ax3.set_xlabel('Time elapsed')
-    ax3.set_ylabel('Absolute error (approx - exact)')
-    if save_plots:
-        fig3.savefig(plot_dir + 'orient_err_plot{}_{}'.format(plot_num, order),
-                     bbox_inches='tight')
-    else:
-        plt.tight_layout()
-        plt.show()
-
-    # fig_mag, ax_mag = plt.subplots()
-    # ax_mag.plot(t, np.linalg.norm(e_m, axis=0),
-    #             t, np.sqrt(e1_exact**2 + e2_exact**2 + e3_exact**2))
-    # ax_mag.legend(['$e_m$ magnitude', 'Exact magnitude'])
-    # ax_mag.set_xlabel('Time elapsed')
-    # ax_mag.set_ylabel('Magnitude')
-    # if not save_plots:
-    #     plt.tight_layout()
-    #     plt.show()
-
-    fig4, ax4 = plt.subplots()
-    ax4.plot(t[1:], errs[:, 1:].T)
-    ax4.set_xlabel('Time elapsed')
-    ax4.set_ylabel('Velocity error (approx - exact)')
-    ax4.legend(['$v_x$ error', '$v_y$ error', '$v_z$ error',
-                '$\\omega_x$ error', '$\\omega_y$ error', '$\\omega_z$ error'])
-    if save_plots:
-        fig4.savefig(plot_dir + 'vel_err_plot{}_{}'.format(plot_num, order),
-                     bbox_inches='tight')
-    else:
-        plt.tight_layout()
-        plt.show()
+    print('Done writing data!')
 
 
 if __name__ == '__main__':
