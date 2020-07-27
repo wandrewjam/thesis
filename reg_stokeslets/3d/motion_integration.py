@@ -160,11 +160,18 @@ def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
     return x1, x2, x3, e_m, errs
 
 
-def main(plot_num):
+def main(plot_num, server='mac'):
     data_dir = 'data/'
     init = np.zeros(6)
-    stop = 1.
-    t_steps = 10
+
+    if server == 'mac':
+        stop = 1.
+        t_steps = 10
+    elif server == 'linux':
+        stop = 50.
+        t_steps = 400
+    else:
+        raise ValueError('server is an invalid value')
     order = '2nd'
 
     # Initialize the function counter
@@ -328,7 +335,12 @@ def main(plot_num):
 
         exact_solution = True
     else:
-        fine_nodes = 8
+        if server == 'mac':
+            fine_nodes = 16
+        elif server == 'linux':
+            fine_nodes = 24
+        else:
+            raise ValueError('server is an invalid value')
 
         def exact_vels(em):
             return np.zeros(6)
@@ -413,4 +425,7 @@ if __name__ == '__main__':
     import sys
 
     expt = int(sys.argv[1])
-    main(expt)
+    try:
+        main(expt, sys.argv[2])
+    except IndexError:
+        main(expt)

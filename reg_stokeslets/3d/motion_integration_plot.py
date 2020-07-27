@@ -1,4 +1,5 @@
 import numpy as np
+from mpl_toolkits.axes_grid1 import host_subplot
 import matplotlib.pyplot as plt
 
 
@@ -49,23 +50,37 @@ def main(file_suffix, save_plots=False):
     order = info['order']
 
     # Plot numerical and analytical solutions
-    fig1, ax1 = plt.subplots()
-    ax1.plot(t, x1, t, x1_fine, t, x2, t, x2_fine)
+    ax1 = host_subplot(111)
     ax_tw = ax1.twinx()
-    ax_tw.plot(t, x3, color='tab:purple')
-    ax_tw.plot(t, x3_fine, color='tab:brown')
-    if exact_solution:
-        ax1.legend(['$x$ approx', '$x$ exact', '$y$ approx', '$y$ exact'])
-        ax_tw.legend(['$z$ approx', '$z$ exact'])
-    else:
-        ax1.legend(['$x$ coarse', '$x$ fine', '$y$ coarse', '$y$ fine'])
-        ax_tw.legend(['$z$ coarse', '$z$ fine'])
+
     ax1.set_xlabel('Time elapsed')
     ax1.set_ylabel('Center of mass position')
-    ax_tw.tick_params(axis='y')
+    # ax_tw.tick_params(axis='y')
+    ax_tw.set_ylabel('$z$ position')
+
+    # Pick the curve labels
+    if exact_solution:
+        x1_label, x1f_label, x2_label, x2f_label, x3_label, x3f_label = (
+            '$x$ approx', '$x$ exact', '$y$ approx', '$y$ exact',
+            '$z$ approx', '$z$ exact')
+    else:
+        x1_label, x1f_label, x2_label, x2f_label, x3_label, x3f_label = (
+            '$x$ coarse', '$x$ fine', '$y$ coarse', '$y$ fine',
+            '$z$ coarse', '$z$ fine')
+
+    # Plot the 6 curves
+    ax1.plot(t, x1, label=x1_label)
+    ax1.plot(t, x1_fine, label=x1f_label)
+    ax1.plot(t, x2, label=x2_label)
+    ax1.plot(t, x2_fine,label=x2f_label)
+    ax_tw.plot(t, x3, label=x3_label, color='tab:purple')
+    ax_tw.plot(t, x3_fine, label=x3f_label, color='tab:brown')
+
+    ax1.legend()
+
     if save_plots:
-        fig1.savefig(plot_dir + 'com_plot{}_{}'.format(file_suffix, order),
-                     bbox_inches='tight')
+        plt.savefig(plot_dir + 'com_plot{}_{}'.format(file_suffix, order),
+                    bbox_inches='tight')
     else:
         plt.tight_layout()
         plt.show()
