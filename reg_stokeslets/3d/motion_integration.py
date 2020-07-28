@@ -216,11 +216,13 @@ def main(plot_num, server='mac'):
     # Set number of nodes
     if (1 <= plot_num <= 5 or 11 <= plot_num <= 15 or 21 <= plot_num <= 25
             or 31 == plot_num or 41 <= plot_num <= 45 or 51 <= plot_num <= 55
-            or 71 <= plot_num <= 74):
+            or 71 <= plot_num <= 74 or 81 <= plot_num <= 84
+            or 91 <= plot_num <= 94):
         n_nodes = 8
     elif (6 <= plot_num <= 9 or 16 <= plot_num <= 19 or 26 <= plot_num <= 29
           or 36 == plot_num or 46 <= plot_num <= 49 or 56 <= plot_num <= 59
-          or 76 <= plot_num <= 79):
+          or 76 <= plot_num <= 79 or 86 <= plot_num <= 89
+          or 96 <= plot_num <= 99):
         n_nodes = 16
     else:
         raise ValueError('plot_num is invalid')
@@ -332,6 +334,14 @@ def main(plot_num, server='mac'):
         distance = 0.8
         ex0, ey0, ez0 = 1., 0., 0.
         adaptive = True
+    elif plot_num == 81 or plot_num == 86:
+        distance = 0.
+        ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = False
+    elif plot_num == 91 or plot_num == 96:
+        distance = 0.
+        ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+        adaptive = False
     else:
         raise ValueError('plot_num is invalid')
 
@@ -438,9 +448,14 @@ def main(plot_num, server='mac'):
         fine_start = timer()
 
         # Run the fine simulations
-        fine_result = integrate_motion(
-            [0., stop], t_steps, init, exact_vels, fine_nodes, a=a,
-            b=b, domain='wall', order=order, adaptive=False)
+        if plot_num < 80:
+            fine_result = integrate_motion(
+                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a,
+                b=b, domain='wall', order=order, adaptive=False)
+        else:
+            fine_result = integrate_motion(
+                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a,
+                b=b, domain='free', order=order, adaptive=False)
         x1_fine, x2_fine, x3_fine, em_fine = fine_result[:4]
 
         # Save the end state after the fine simulations
