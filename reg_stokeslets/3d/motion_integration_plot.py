@@ -54,9 +54,9 @@ def main(file_suffix, save_plots=False):
     ax_tw = ax1.twinx()
 
     ax1.set_xlabel('Time elapsed')
-    ax1.set_ylabel('Center of mass position')
+    ax1.set_ylabel('$x$ component of CoM')
     # ax_tw.tick_params(axis='y')
-    ax_tw.set_ylabel('$z$ position')
+    ax_tw.set_ylabel('$y$ and $z$ components of CoM')
 
     # Pick the curve labels
     if exact_solution:
@@ -71,8 +71,8 @@ def main(file_suffix, save_plots=False):
     # Plot the 6 curves
     ax1.plot(t, x1, label=x1_label)
     ax1.plot(t, x1_fine, label=x1f_label)
-    ax1.plot(t, x2, label=x2_label)
-    ax1.plot(t, x2_fine,label=x2f_label)
+    ax_tw.plot(t, x2, label=x2_label)
+    ax_tw.plot(t, x2_fine,label=x2f_label)
     ax_tw.plot(t, x3, label=x3_label, color='tab:purple')
     ax_tw.plot(t, x3_fine, label=x3f_label, color='tab:brown')
 

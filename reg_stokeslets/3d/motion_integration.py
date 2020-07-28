@@ -186,9 +186,11 @@ def main(plot_num, server='mac'):
         raise ValueError('plot_num is invalid')
 
     # Set number of nodes
-    if 1 <= plot_num <= 5 or 11 <= plot_num <= 15 or 21 <= plot_num <= 25 or 31 == plot_num:
+    if (1 <= plot_num <= 5 or 11 <= plot_num <= 15 or 21 <= plot_num <= 25
+            or 31 == plot_num or 41 <= plot_num <= 45 or 51 <= plot_num <= 55):
         n_nodes = 8
-    elif 6 <= plot_num <= 9 or 16 <= plot_num <= 19 or 26 <= plot_num <= 29 or 36 == plot_num:
+    elif (6 <= plot_num <= 9 or 16 <= plot_num <= 19 or 26 <= plot_num <= 29
+          or 36 == plot_num or 46 <= plot_num <= 49 or 56 <= plot_num <= 59):
         n_nodes = 16
     else:
         raise ValueError('plot_num is invalid')
@@ -246,6 +248,24 @@ def main(plot_num, server='mac'):
     elif plot_num == 31 or plot_num == 36:
         distance = 0.
         ex0, ey0, ez0 = 0, 1., 0
+    elif plot_num == 41 or plot_num == 46:
+        distance = 0.
+        ex0, ey0, ez0 = np.cos(np.pi / 8), np.sin(np.pi / 8), 0.
+    elif plot_num == 42 or plot_num == 47:
+        distance = 1.5
+        ex0, ey0, ez0 = np.cos(np.pi / 8), np.sin(np.pi / 8), 0.
+    elif plot_num == 43 or plot_num == 48:
+        distance = 1.2
+        ex0, ey0, ez0 = np.cos(np.pi / 8), np.sin(np.pi / 8), 0.
+    elif plot_num == 44 or plot_num == 49:
+        distance = 1.0
+        ex0, ey0, ez0 = np.cos(np.pi / 8), np.sin(np.pi / 8), 0.
+    elif plot_num == 51 or plot_num == 56:
+        distance = 0.8
+        ex0, ey0, ez0 = 1., 0., 0.
+    elif plot_num == 52 or plot_num == 57:
+        distance = 0.6
+        ex0, ey0, ez0 = 1., 0., 0.
     else:
         raise ValueError('plot_num is invalid')
 
@@ -282,7 +302,9 @@ def main(plot_num, server='mac'):
 
         exact_solution = True
 
-    elif 11 == plot_num or 16 == plot_num or 21 == plot_num or 26 == plot_num or 31 == plot_num or 36 == plot_num:
+    elif (11 == plot_num or 16 == plot_num or 21 == plot_num or 26 == plot_num
+          or 31 == plot_num or 36 == plot_num or 41 == plot_num
+          or 46 == plot_num):
         e = np.sqrt(1 - b**2 / a**2)
         xc = 2. / 3 * e**3 * (np.arctan(e / np.sqrt(1 - e**2))
                               - e * np.sqrt(1 - e**2)) ** (-1)
