@@ -14,7 +14,7 @@ def parse_info(filename):
                 val = int(val_str)
             elif key == 'order':
                 val = val_str
-            elif key == 'exact solution':
+            elif key == 'exact solution' or key == 'adaptive':
                 val = val_str == 'True'
             elif key == 'e0':
                 val = tuple([float(s) for s in val_str[1:-1].split(', ')])
@@ -46,7 +46,14 @@ def main(file_suffix, save_plots=False):
     e1_fine, e2_fine, e3_fine = (fine_data['e1'], fine_data['e2'],
                                  fine_data['e3'])
 
+    n_array, sep_array = coarse_data['node_array'], coarse_data['sep_array']
+
     exact_solution = info['exact solution']
+    try:
+        adaptive = info['adaptive']
+    except KeyError:
+        # Backwards compatibility with old code w/o adaptive specified
+        adaptive = False
     order = info['order']
 
     # Plot numerical and analytical solutions
@@ -63,6 +70,10 @@ def main(file_suffix, save_plots=False):
         x1_label, x1f_label, x2_label, x2f_label, x3_label, x3f_label = (
             '$x$ approx', '$x$ exact', '$y$ approx', '$y$ exact',
             '$z$ approx', '$z$ exact')
+    elif adaptive:
+        x1_label, x1f_label, x2_label, x2f_label, x3_label, x3f_label = (
+            '$x$ adapt', '$x$ unif', '$y$ adapt', '$y$ unif',
+            '$z$ adapt', '$z$ unif')
     else:
         x1_label, x1f_label, x2_label, x2f_label, x3_label, x3f_label = (
             '$x$ coarse', '$x$ fine', '$y$ coarse', '$y$ fine',
@@ -142,6 +153,14 @@ def main(file_suffix, save_plots=False):
         else:
             plt.tight_layout()
             plt.show()
+
+    if not save_plots:
+        fig_n, ax_n = plt.subplots()
+        ax_n.plot(t[:-1], n_array[:-1])
+        ax_n.set_xlabel('Time elapsed')
+        ax_n.set_ylabel('N chosen')
+        plt.tight_layout()
+        plt.show()
 
     print('Done!')
 

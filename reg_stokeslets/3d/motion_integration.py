@@ -22,6 +22,15 @@ def eps_picker(n_nodes, a, b):
     return eps
 
 
+def n_picker(sep):
+    c_star = 1.
+    n_min, n_max = 4, 12
+    s = spheroid_surface_area(a=1.5, b=.5)
+    k = int(np.ceil(0.5 * np.sqrt((s * (c_star * sep / 0.6) ** (-2) - 2) / 6)))
+    n_nodes = np.max([np.min([2 * k, n_max]), n_min])
+    return n_nodes
+
+
 def valid_orientation(n_nodes, e_m, distance, a, b):
     xi_mesh, eta_mesh, nodes, ind_map = generate_grid(n_nodes, a=a, b=b)
     theta = np.arctan2(e_m[2], e_m[1])
@@ -33,6 +42,20 @@ def valid_orientation(n_nodes, e_m, distance, a, b):
     nodes = np.dot(rot_matrix, nodes.T).T
     nodes[:, 0] += distance
     return np.all(nodes[:, 0] > 0)
+
+
+def find_min_separation(com_dist, e_m):
+    mesh = generate_grid(n_nodes=36, a=1.5, b=0.5)[2]
+    theta = np.arctan2(e_m[2], e_m[1])
+    phi = np.arccos(e_m[0])
+    ct, st, cp, sp = np.cos(theta), np.sin(theta), np.cos(phi), np.sin(phi)
+    rot_matrix = np.array([[cp, -sp, 0],
+                           [ct * sp, ct * cp, -st],
+                           [st * sp, st * cp, ct]])
+    mesh = np.dot(rot_matrix, mesh.T).T
+    mesh[:, 0] += com_dist
+    sep = np.amin(mesh[:, 0])
+    return sep
 
 
 def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
@@ -82,14 +105,11 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         if (not valid_orientation(n_nodes, new_e_m, distance=new_x1, a=a, b=b)
                 and domain == 'wall'):
             # Then take 2 half time-steps
-            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
-                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
-                a, b, domain, order
-            )[:-1]
-            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
-                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
-                exact_vels, n_nodes, a, b, domain, order
-            )
+            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                                                        a, b, domain, order)[:-1]
+            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m,
+                                                                         forces, torques, exact_vels, n_nodes, a, b,
+                                                                         domain, order)
     elif order == '2nd':
         dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
             evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
@@ -120,22 +140,22 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
                 raise AssertionError('next step will not be valid')
         except AssertionError:
             # If we get an invalid orientation, then take 2 half-steps
-            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
-                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
-                a, b, domain, order
-            )[:-1]
-            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
-                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
-                exact_vels, n_nodes, a, b, domain, order
-            )
+            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                                                        a, b, domain, order)[:-1]
+            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m,
+                                                                         forces, torques, exact_vels, n_nodes, a, b,
+                                                                         domain, order)
     else:
         raise ValueError('order is not valid')
 
     return new_x1, new_x2, new_x3, new_e_m, velocity_errors
 
 
-def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
-                     b=1.0, domain='free', order='2nd'):
+def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
+                     b=1.0, domain='free', order='2nd', adaptive=True):
+    # Check that we have a valid combination of n_nodes and adaptive
+    assert n_nodes > 0 or adaptive
+
     x1, x2, x3 = np.zeros(shape=(3, num_steps+1))
     e_m = np.zeros(shape=(3, num_steps+1))
     x1[0], x2[0], x3[0] = init[:3]
@@ -144,20 +164,28 @@ def integrate_motion(t_span, num_steps, init, n_nodes, exact_vels, a=1.0,
     dt = t_length / num_steps
     forces, torques = np.zeros((3, 1)), np.zeros((3, 1))
     errs = np.zeros(shape=(6, num_steps+1))
+    node_array, sep_array = np.zeros(shape=(2, num_steps+1))
 
     try:
         for i in range(num_steps):
+            if adaptive:
+                # Find the wall separation
+                sep = find_min_separation(x1[i], e_m[:,i])
+                sep_array[i] = sep
+
+                # Pick n_nodes based on separation
+                n_nodes = n_picker(sep)
+            node_array[i] = n_nodes
             x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = (
-                time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques,
-                          exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain,
-                          order=order)
+                time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques, exact_vels, n_nodes=n_nodes, a=a, b=b,
+                          domain=domain, order=order)
             )
     except AssertionError:
         print('Encountered an assertion error while integrating. Halting and '
               'outputting computation results so far.')
         pass
 
-    return x1, x2, x3, e_m, errs
+    return x1, x2, x3, e_m, errs, node_array, sep_array
 
 
 def main(plot_num, server='mac'):
@@ -165,8 +193,8 @@ def main(plot_num, server='mac'):
     init = np.zeros(6)
 
     if server == 'mac':
-        stop = 1.
-        t_steps = 10
+        stop = 10.
+        t_steps = 50
     elif server == 'linux':
         stop = 50.
         t_steps = 400
@@ -187,10 +215,12 @@ def main(plot_num, server='mac'):
 
     # Set number of nodes
     if (1 <= plot_num <= 5 or 11 <= plot_num <= 15 or 21 <= plot_num <= 25
-            or 31 == plot_num or 41 <= plot_num <= 45 or 51 <= plot_num <= 55):
+            or 31 == plot_num or 41 <= plot_num <= 45 or 51 <= plot_num <= 55
+            or 71 <= plot_num <= 74):
         n_nodes = 8
     elif (6 <= plot_num <= 9 or 16 <= plot_num <= 19 or 26 <= plot_num <= 29
-          or 36 == plot_num or 46 <= plot_num <= 49 or 56 <= plot_num <= 59):
+          or 36 == plot_num or 46 <= plot_num <= 49 or 56 <= plot_num <= 59
+          or 76 <= plot_num <= 79):
         n_nodes = 16
     else:
         raise ValueError('plot_num is invalid')
@@ -201,71 +231,107 @@ def main(plot_num, server='mac'):
         ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 1.0
         trn_correction = 1.0
+        adaptive = False
     elif plot_num == 2 or plot_num == 6:
         distance = 1.5431
         ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 0.92368
         trn_correction = 0.92185
+        adaptive = False
     elif plot_num == 3 or plot_num == 7:
         distance = 1.1276
         ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 0.77916
         trn_correction = 0.76692
+        adaptive = False
     elif plot_num == 4 or plot_num == 8:
         distance = 1.0453
         ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 0.67462
         trn_correction = 0.65375
+        adaptive = False
     elif plot_num == 5 or plot_num == 9:
         distance = 1.005004
         ex0, ey0, ez0 = 1., 0., 0.
         rot_correction = 0.50818
         trn_correction = 0.47861
+        adaptive = False
     elif plot_num == 11 or plot_num == 16:
         distance = 0.
         ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = False
     elif plot_num == 12 or plot_num == 17:
         distance = 1.5
         ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = False
     elif plot_num == 13 or plot_num == 18:
         distance = 1.2
         ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = False
     elif plot_num == 14 or plot_num == 19:
         distance = 1.0
         ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = False
     elif plot_num == 21 or plot_num == 26:
         distance = 0.
         ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+        adaptive = False
     elif plot_num == 22 or plot_num == 27:
         distance = 1.5
         ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+        adaptive = False
     elif plot_num == 23 or plot_num == 28:
         distance = 1.2
         ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+        adaptive = False
     elif plot_num == 24 or plot_num == 29:
         distance = 1.0
         ex0, ey0, ez0 = np.sqrt(2)/2, np.sqrt(2)/2, 0.
+        adaptive = False
     elif plot_num == 31 or plot_num == 36:
         distance = 0.
         ex0, ey0, ez0 = 0, 1., 0
+        adaptive = False
     elif plot_num == 41 or plot_num == 46:
         distance = 0.
         ex0, ey0, ez0 = np.cos(np.pi / 8), np.sin(np.pi / 8), 0.
+        adaptive = False
     elif plot_num == 42 or plot_num == 47:
         distance = 1.5
         ex0, ey0, ez0 = np.cos(np.pi / 8), np.sin(np.pi / 8), 0.
+        adaptive = False
     elif plot_num == 43 or plot_num == 48:
         distance = 1.2
         ex0, ey0, ez0 = np.cos(np.pi / 8), np.sin(np.pi / 8), 0.
+        adaptive = False
     elif plot_num == 44 or plot_num == 49:
         distance = 1.0
         ex0, ey0, ez0 = np.cos(np.pi / 8), np.sin(np.pi / 8), 0.
+        adaptive = False
     elif plot_num == 51 or plot_num == 56:
         distance = 0.8
         ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = False
     elif plot_num == 52 or plot_num == 57:
         distance = 0.6
         ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = False
+    elif plot_num == 71 or plot_num == 76:
+        distance = 1.5
+        ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = True
+    elif plot_num == 72 or plot_num == 77:
+        distance = 1.2
+        ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = True
+    elif plot_num == 73 or plot_num == 78:
+        distance = 1.0
+        ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = True
+    elif plot_num == 74 or plot_num == 79:
+        distance = 0.8
+        ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = True
     else:
         raise ValueError('plot_num is invalid')
 
@@ -358,7 +424,7 @@ def main(plot_num, server='mac'):
         exact_solution = True
     else:
         if server == 'mac':
-            fine_nodes = 16
+            fine_nodes = 8
         elif server == 'linux':
             fine_nodes = 24
         else:
@@ -372,9 +438,10 @@ def main(plot_num, server='mac'):
         fine_start = timer()
 
         # Run the fine simulations
-        x1_fine, x2_fine, x3_fine, em_fine = integrate_motion(
-            [0., stop], t_steps, init, fine_nodes, exact_vels, a=a, b=b,
-            domain='wall', order=order)[:-1]
+        fine_result = integrate_motion(
+            [0., stop], t_steps, init, exact_vels, fine_nodes, a=a,
+            b=b, domain='wall', order=order, adaptive=False)
+        x1_fine, x2_fine, x3_fine, em_fine = fine_result[:4]
 
         # Save the end state after the fine simulations
         fine_end = timer()
@@ -401,9 +468,10 @@ def main(plot_num, server='mac'):
     evaluate_motion_equations.counter = 0
 
     # Run the coarse simulations
-    x1, x2, x3, e_m, errs = integrate_motion(
-        [0., stop], t_steps, init, n_nodes, exact_vels,
-        a=a, b=b, domain=domain, order=order)
+    coarse_result = integrate_motion(
+        [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
+        domain=domain, order=order, adaptive=adaptive)
+    x1, x2, x3, e_m, errs, node_array, sep_array = coarse_result
 
     # Save the end state after the coarse simulations
     end = timer()
@@ -411,7 +479,9 @@ def main(plot_num, server='mac'):
 
     e1, e2, e3 = e_m
     np.savez(data_dir + 'coarse' + str(plot_num), x1, x2, x3, e1, e2, e3, t,
-             errs, x1=x1, x2=x2, x3=x3, e1=e1, e2=e2, e3=e3, t=t, errs=errs)
+             errs, node_array, sep_array, x1=x1, x2=x2, x3=x3, e1=e1, e2=e2,
+             e3=e3, t=t, errs=errs, node_array=node_array,
+             sep_array=sep_array)
 
     try:
         print('Exact solve took {} seconds for {} RHS evaluations'
@@ -427,6 +497,7 @@ def main(plot_num, server='mac'):
         expt_info = ['distance, {}\n'.format(distance),
                      'e0, ({}, {}, {})\n'.format(ex0, ey0, ez0),
                      'order, {}\n'.format(order),
+                     'adaptive, {}\n'.format(adaptive),
                      'steps, {}\n'.format(t_steps),
                      'stop, {}\n'.format(stop),
                      'exact solution, {}\n'.format(exact_solution),
