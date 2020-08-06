@@ -27,7 +27,7 @@ def main(file_suffix, save_plots=False):
     # Define directories
     import os
     plot_dir = os.path.expanduser('~/thesis/meeting-notes/summer-20/'
-                                  'notes_072220/')
+                                  'notes_072920/')
     data_dir = 'data/'
 
     # Load data
@@ -45,8 +45,12 @@ def main(file_suffix, save_plots=False):
                                  fine_data['x3'])
     e1_fine, e2_fine, e3_fine = (fine_data['e1'], fine_data['e2'],
                                  fine_data['e3'])
-
-    n_array, sep_array = coarse_data['node_array'], coarse_data['sep_array']
+    try:
+        n_array = coarse_data['node_array']
+        sep_array = coarse_data['sep_array']
+    except KeyError:
+        # Backwards compatibility with old code w/o node array saved
+        pass
 
     exact_solution = info['exact solution']
     try:
@@ -155,12 +159,18 @@ def main(file_suffix, save_plots=False):
             plt.show()
 
     if not save_plots:
-        fig_n, ax_n = plt.subplots()
-        ax_n.plot(t[:-1], n_array[:-1])
-        ax_n.set_xlabel('Time elapsed')
-        ax_n.set_ylabel('N chosen')
-        plt.tight_layout()
-        plt.show()
+        try:
+            fig_n, ax_n = plt.subplots()
+            ax_sep = ax_n.twinx()
+            ax_n.plot(t[:-1], n_array[:-1])
+            ax_sep.plot(t[:-1], sep_array[:-1], color='tab:orange')
+            ax_n.set_xlabel('Time elapsed')
+            ax_n.set_ylabel('N chosen')
+            ax_sep.set_ylabel('Plt-wall separation')
+            plt.tight_layout()
+            plt.show()
+        except NameError:
+            pass
 
     print('Done!')
 

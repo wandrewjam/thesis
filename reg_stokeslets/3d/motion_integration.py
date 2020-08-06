@@ -7,7 +7,6 @@ import numpy as np
 #
 # matplotlib.use('Agg')
 
-import matplotlib.pyplot as plt
 from resistance_matrix_test import generate_resistance_matrices
 from dist_convergence_test import spheroid_surface_area
 from sphere_integration_utils import generate_grid
@@ -24,7 +23,7 @@ def eps_picker(n_nodes, a, b):
 
 def n_picker(sep):
     c_star = 1.
-    n_min, n_max = 4, 12
+    n_min, n_max = 16, 24
     s = spheroid_surface_area(a=1.5, b=.5)
     k = int(np.ceil(0.5 * np.sqrt((s * (c_star * sep / 0.6) ** (-2) - 2) / 6)))
     n_nodes = np.max([np.min([2 * k, n_max]), n_min])
