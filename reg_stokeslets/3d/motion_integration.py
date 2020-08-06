@@ -1,12 +1,4 @@
-import os
-
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-
 import numpy as np
-# import matplotlib
-#
-# matplotlib.use('Agg')
-
 from resistance_matrix_test import generate_resistance_matrices
 from dist_convergence_test import spheroid_surface_area
 from sphere_integration_utils import generate_grid
