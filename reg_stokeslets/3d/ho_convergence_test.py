@@ -1,7 +1,3 @@
-import os
-
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
@@ -31,7 +27,6 @@ def main(server='mac', proc=1):
 
     if server == 'linux':
         n_nodes = (1 + np.arange(10)) * 4
-        print(os.environ["OPENBLAS_NUM_THREADS"])
     elif server == 'mac':
         n_nodes = (1 + np.arange(4)) * 4
     else:
@@ -128,13 +123,6 @@ if __name__ == '__main__':
             profile = False
     except IndexError:
         profile = False
-
-    ## if server == 'linux':
-    ##     os.environ["OPENBLAS_NUM_THREADS"] = num_threads
-    ## elif server == 'mac':
-    ##     os.environ["MKL_NUM_THREADS"] = num_threads
-
-    ## import numpy as np
 
     if profile:
         # Check that the stats file doesn't already exist

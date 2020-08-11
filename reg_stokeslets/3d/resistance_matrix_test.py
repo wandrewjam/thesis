@@ -1,6 +1,3 @@
-import os
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-
 import numpy as np
 from scipy.linalg import solve
 from force_test import assemble_quad_matrix

@@ -1,7 +1,3 @@
-import os
-
-os.environ["OPENBLAS_NUM_THREADS"] = "16"
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
@@ -99,16 +95,9 @@ def main(server='mac'):
 
 
 if __name__ == '__main__':
-    import os
     import sys
 
     server = sys.argv[1]
     num_threads = sys.argv[2]
-
-    # if server == 'linux':
-    #     os.environ["OPENBLAS_NUM_THREADS"] = num_threads
-    # elif server == 'mac':
-    #     os.environ["MKL_NUM_THREADS"] = num_threads
-    # import numpy as np
 
     main(server=server)

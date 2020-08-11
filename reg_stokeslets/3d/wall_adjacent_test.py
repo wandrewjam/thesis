@@ -1,7 +1,4 @@
 from __future__ import division
-import os
-os.environ["OPENBLAS_NUM_THREADS"] = "16"
-
 import numpy as np
 from resistance_matrix_test import generate_resistance_matrices
 

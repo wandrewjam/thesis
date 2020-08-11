@@ -1,8 +1,3 @@
-import os
-
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-
-import numpy as np
 from resistance_matrix_test import generate_resistance_matrices
 from timeit import default_timer as timer
 
