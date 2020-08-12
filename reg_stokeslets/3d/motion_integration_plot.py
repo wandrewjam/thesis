@@ -27,7 +27,7 @@ def main(file_suffix, save_plots=False):
     # Define directories
     import os
     plot_dir = os.path.expanduser('~/thesis/meeting-notes/summer-20/'
-                                  'notes_072920/')
+                                  'notes_081220/')
     data_dir = 'data/'
 
     # Load data
@@ -45,6 +45,16 @@ def main(file_suffix, save_plots=False):
                                  fine_data['x3'])
     e1_fine, e2_fine, e3_fine = (fine_data['e1'], fine_data['e2'],
                                  fine_data['e3'])
+
+    if file_suffix == '72':
+        bad_data = np.load(data_dir + 'coarse18.npz')
+        x1c, x2c, x3c = bad_data['x1'], bad_data['x2'], bad_data['x3']
+        e1c, e2c, e3c = bad_data['e1'], bad_data['e2'], bad_data['e3']
+    elif file_suffix == '73':
+        bad_data = np.load(data_dir + 'coarse19.npz')
+        x1c, x2c, x3c = bad_data['x1'], bad_data['x2'], bad_data['x3']
+        e1c, e2c, e3c = bad_data['e1'], bad_data['e2'], bad_data['e3']
+
     try:
         n_array = coarse_data['node_array']
         sep_array = coarse_data['sep_array']
@@ -76,20 +86,24 @@ def main(file_suffix, save_plots=False):
             '$z$ approx', '$z$ exact')
     elif adaptive:
         x1_label, x1f_label, x2_label, x2f_label, x3_label, x3f_label = (
-            '$x$ adapt', '$x$ unif', '$y$ adapt', '$y$ unif',
-            '$z$ adapt', '$z$ unif')
+            '$x$ adapt', '$x$ fine', '$y$ adapt', '$y$ fine',
+            '$z$ adapt', '$z$ fine')
     else:
         x1_label, x1f_label, x2_label, x2f_label, x3_label, x3f_label = (
             '$x$ coarse', '$x$ fine', '$y$ coarse', '$y$ fine',
             '$z$ coarse', '$z$ fine')
 
     # Plot the 6 curves
-    ax1.plot(t, x1, label=x1_label)
-    ax1.plot(t, x1_fine, label=x1f_label)
-    ax_tw.plot(t, x2, label=x2_label)
-    ax_tw.plot(t, x2_fine,label=x2f_label)
-    ax_tw.plot(t, x3, label=x3_label, color='tab:purple')
-    ax_tw.plot(t, x3_fine, label=x3f_label, color='tab:brown')
+    ax1.plot(t, x1, label=x1_label, color='tab:blue')
+    ax1.plot(t, x1_fine, label=x1f_label, color='tab:orange')
+    ax_tw.plot(t, x2, label=x2_label, color='tab:red')
+    ax_tw.plot(t, x2_fine,label=x2f_label, color='tab:purple')
+    ax_tw.plot(t, x3, label=x3_label, color='tab:pink')
+    ax_tw.plot(t, x3_fine, label=x3f_label, color='tab:gray')
+    if file_suffix == '72' or file_suffix == '73':
+        ax1.plot(t, x1c, label='$x$ coarse', color='tab:green')
+        ax_tw.plot(t, x2c, label='$y$ coarse', color='tab:brown')
+        ax_tw.plot(t, x3c, label='$z$ coarse', color='tab:olive')
 
     ax1.legend()
 
@@ -101,16 +115,37 @@ def main(file_suffix, save_plots=False):
         plt.show()
 
     fig2, ax2 = plt.subplots()
-    ax2.plot(t, e1, t, e2, t, e3,
-             t, e1_fine, t, e2_fine, t, e3_fine)
+
+    # Pick the curve labels
     if exact_solution:
-        ax2.legend(['$e_{mx}$ approx', '$e_{my}$ approx', '$e_{mz}$ approx',
-                    '$e_{mx}$ exact', '$e_{my}$ exact', '$e_{mz}$ exact'])
+        e1_label, e2_label, e3_label, e1f_label, e2f_label, e3f_label = (
+            '$e_{mx}$ approx', '$e_{my}$ approx', '$e_{mz}$ approx',
+            '$e_{mx}$ exact', '$e_{my}$ exact', '$e_{mz}$ exact')
+    elif adaptive:
+        e1_label, e2_label, e3_label, e1f_label, e2f_label, e3f_label = (
+            '$e_{mx}$ adapt', '$e_{my}$ adapt', '$e_{mz}$ adapt',
+            '$e_{mx}$ fine', '$e_{my}$ fine', '$e_{mz}$ fine')
     else:
-        ax2.legend(['$e_{mx}$ coarse', '$e_{my}$ coarse', '$e_{mz}$ coarse',
-                    '$e_{mx}$ fine', '$e_{my}$ fine', '$e_{mz}$ fine'])
+        e1_label, e2_label, e3_label, e1f_label, e2f_label, e3f_label = (
+            '$e_{mx}$ coarse', '$e_{my}$ coarse', '$e_{mz}$ coarse',
+            '$e_{mx}$ fine', '$e_{my}$ fine', '$e_{mz}$ fine')
     ax2.set_xlabel('Time elapsed')
     ax2.set_ylabel('Orientation components')
+
+    # Plot the 6 curves
+    ax2.plot(t, e1, label=e1_label, color='tab:blue')
+    ax2.plot(t, e1_fine, label=e1f_label, color='tab:orange')
+    ax2.plot(t, e2, label=e2_label, color='tab:red')
+    ax2.plot(t, e2_fine, label=e2f_label, color='tab:purple')
+    ax2.plot(t, e3, label=e3_label, color='tab:pink')
+    ax2.plot(t, e3_fine, label=e3f_label, color='tab:gray')
+    if file_suffix == '72' or file_suffix == '73':
+        ax2.plot(t, e1c, label='$e_{mx}$ coarse', color='tab:green')
+        ax2.plot(t, e2c, label='$e_{my}$ coarse', color='tab:brown')
+        ax2.plot(t, e3c, label='$e_{mz}$ coarse', color='tab:olive')
+
+    ax2.legend()
+
     if save_plots:
         fig2.savefig(plot_dir + 'orient_plot{}_{}'.format(file_suffix, order),
                      bbox_inches='tight')
@@ -158,19 +193,23 @@ def main(file_suffix, save_plots=False):
             plt.tight_layout()
             plt.show()
 
-    if not save_plots:
-        try:
-            fig_n, ax_n = plt.subplots()
-            ax_sep = ax_n.twinx()
-            ax_n.plot(t[:-1], n_array[:-1])
-            ax_sep.plot(t[:-1], sep_array[:-1], color='tab:orange')
-            ax_n.set_xlabel('Time elapsed')
-            ax_n.set_ylabel('N chosen')
-            ax_sep.set_ylabel('Plt-wall separation')
+    try:
+        fig_n, ax_n = plt.subplots()
+        ax_sep = ax_n.twinx()
+        ax_n.plot(t[:-1], n_array[:-1])
+        ax_sep.plot(t[:-1], sep_array[:-1], color='tab:orange')
+        ax_n.set_xlabel('Time elapsed')
+        ax_n.set_ylabel('N chosen')
+        ax_sep.set_ylabel('Plt-wall separation')
+
+        if save_plots:
+            fig_n.savefig(plot_dir + 'nsep_plot{}'.format(file_suffix),
+                          bbox_inches='tight')
+        else:
             plt.tight_layout()
             plt.show()
-        except NameError:
-            pass
+    except NameError:
+        pass
 
     print('Done!')
 
