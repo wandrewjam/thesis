@@ -309,20 +309,28 @@ def main(plot_num, server='mac'):
         distance = 0.6
         ex0, ey0, ez0 = 1., 0., 0.
         adaptive = False
-    elif plot_num == 71 or plot_num == 76:
+    elif plot_num == 71:
         distance = 1.5
         ex0, ey0, ez0 = 1., 0., 0.
         adaptive = True
-    elif plot_num == 72 or plot_num == 77:
+    elif plot_num == 72:
         distance = 1.2
         ex0, ey0, ez0 = 1., 0., 0.
         adaptive = True
-    elif plot_num == 73 or plot_num == 78:
+    elif plot_num == 73:
         distance = 1.0
         ex0, ey0, ez0 = 1., 0., 0.
         adaptive = True
-    elif plot_num == 74 or plot_num == 79:
+    elif plot_num == 74:
         distance = 0.8
+        ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = True
+    elif plot_num == 76:
+        distance = 1.1
+        ex0, ey0, ez0 = 1., 0., 0.
+        adaptive = True
+    elif plot_num == 77:
+        distance = 0.9
         ex0, ey0, ez0 = 1., 0., 0.
         adaptive = True
     elif plot_num == 81 or plot_num == 86:
@@ -335,6 +343,10 @@ def main(plot_num, server='mac'):
         adaptive = False
     else:
         raise ValueError('plot_num is invalid')
+
+    if adaptive:
+        stop *= 2
+        t_steps *= 2
 
     # Set initial position and orientation
     init[0] = distance
