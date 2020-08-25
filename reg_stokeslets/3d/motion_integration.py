@@ -5,6 +5,28 @@ from sphere_integration_utils import generate_grid
 from timeit import default_timer as timer
 
 
+def read_parameter_file(filename):
+    txt_dir = 'par-files/experiments/'
+    parlist = [('filename', filename)]
+
+    with open(txt_dir + filename + '.txt') as f:
+        # Need the following keys: distance, ex0, ey0, ez0, t_steps,
+        # stop, adaptive, a, b, n_nodes, order, domain
+        while True:
+            command = f.readline().split()
+            if len(command) < 1:
+                continue
+            if command[0] == 'done':
+                break
+
+            key, value = command
+            if key == 'num_expt':
+                parlist.append((key, int(value)))
+            else:
+                parlist.append((key, float(value)))
+    return dict(parlist)
+
+
 def eps_picker(n_nodes, a, b):
     c, n = 0.6, 1.0
     surf_area = spheroid_surface_area(a, b)
