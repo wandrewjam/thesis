@@ -1,0 +1,169 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{itemize}
+\item No new experiments---math compute servers have been down. I've
+  been setting up my environment on the CHPC servers, learning
+  about/testing out the job submission process. I've run small tests,
+  but not any full experiments yet.
+\item Almost everything is in place now to run some longer experiments
+\item From last time, there was an issue in one of the adaptive
+  experiments (see Figure \ref{fig:plt73}) at time $t=21$.
+\item The source of the error is in the time-adaptive part of the
+  solver. The time-adaptive part senses if the platelet will intersect
+  the wall at the end of the step.
+  \begin{itemize}
+  \item Problem: at the mesh size I was using, none of the nodes
+    crossed the wall, but after refining the mesh further, nodes did
+    appear on the other side of the wall
+  \item Solution: use a finer mesh to sense platelet-wall
+    interactions. There isn't a significant penalty for using a finer
+    mesh in this step.
+  \end{itemize}
+\item To give a sense of the relationship between the platelet-wall
+  separation, and the mesh size chosen, I plotted the $N$ that would
+  be chosen by the adaptive solver for a range of separations (Figure
+  \ref{fig:sep_N_plot}).
+\item The range of separations over which the solver ``adapts'' is
+  pretty small, sort of what we'd expect given the bottom-right plot
+  in Figure \ref{fig:plt73}. The adaptivity mostly acts as a switch
+  between a coarse mesh and a fine mesh.
+\item Finally, I found a paper by Mody and King where they perform the
+  same experiments that we are (with a platelet initially flat). I was
+  skimming through it this morning, and their results are very similar
+  to ours. They see the same three behaviors that we've seen, and the
+  starting center of mass height is what differentiates between the
+  three behaviors.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.6\textwidth]{sep_N_plot}
+  \caption{Relationship between platelet-wall separation distance and
+    the $N$ chosen by the adaptive solver}
+  \label{fig:sep_N_plot}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot73_2nd}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot73_2nd}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot73_2nd}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{nsep_plot73}
+  \end{subfigure}  
+  \caption{Plots of the ellipsoid orientation, orientation error,
+    center of mass, and the $N$ value with the plt-wall
+    separation. The height of the center of mass is initialized at
+    $1.0$. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$. Similar to the previous figure, the adaptive solver
+    used the minimum mesh size for most of the simulation, apart from
+    a few short intervals. However something strange is going on in
+    the adaptive solver in this experiment: there's a weird hitch in
+    the graph around $t = 20$, and the ellipsoid stays in the vertical
+    orientation for much longer than in any other run.}
+  \label{fig:plt73}
+\end{figure}
+
+% \begin{figure}[h!]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_plot12_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_err_plot12_2nd}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{com_plot12_2nd}
+%   \end{subfigure}
+%   \caption{Plots of the ellipsoid orientation, orientation error, and
+%      center of mass in a shear flow near a wall. The height of the
+%      center of mass is initialized at $1.5$. Orientation is
+%      initialized at $\vect{e}_m = \vect{e}_x$. The coarse solution
+%      used the same number of nodes as the minimum node size in the
+%      adaptive code.}
+%   \label{fig:plt12}
+% \end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
