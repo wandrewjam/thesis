@@ -58,7 +58,7 @@ def valid_orientation(n_nodes, e_m, distance, a, b):
 
 
 def find_min_separation(com_dist, e_m):
-    mesh = generate_grid(n_nodes=36, a=1.5, b=0.5)[2]
+    mesh = generate_grid(n_nodes=48, a=1.5, b=0.5)[2]
     theta = np.arctan2(e_m[2], e_m[1])
     phi = np.arccos(e_m[0])
     ct, st, cp, sp = np.cos(theta), np.sin(theta), np.cos(phi), np.sin(phi)
@@ -103,6 +103,7 @@ def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
 
 def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
               a=1.0, b=1.0, domain='free', order='2nd'):
+    valid_test_nodes = 48
     if order == '1st':
         dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
             evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
@@ -115,7 +116,7 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         new_e_m /= np.linalg.norm(new_e_m)
 
         # Check that we have a valid orientation
-        if (not valid_orientation(n_nodes, new_e_m, distance=new_x1, a=a, b=b)
+        if (not valid_orientation(valid_test_nodes, new_e_m, distance=new_x1, a=a, b=b)
                 and domain == 'wall'):
             # Then take 2 half time-steps
             tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
@@ -148,16 +149,17 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
                                                 dem3 + dem3_p]))
             new_e_m /= np.linalg.norm(new_e_m)
 
-            if not valid_orientation(n_nodes, new_e_m, distance=new_x1,
+            if not valid_orientation(valid_test_nodes, new_e_m, distance=new_x1,
                                      a=a, b=b) and domain == 'wall':
                 raise AssertionError('next step will not be valid')
         except AssertionError:
             # If we get an invalid orientation, then take 2 half-steps
-            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
-                                                        a, b, domain, order)[:-1]
-            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m,
-                                                                         forces, torques, exact_vels, n_nodes, a, b,
-                                                                         domain, order)
+            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
+                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                a, b, domain, order)[:-1]
+            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
+                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
+                exact_vels, n_nodes, a, b, domain, order)
     else:
         raise ValueError('order is not valid')
 
@@ -229,12 +231,11 @@ def main(plot_num, server='mac'):
     # Set number of nodes
     if (1 <= plot_num <= 5 or 11 <= plot_num <= 15 or 21 <= plot_num <= 25
             or 31 == plot_num or 41 <= plot_num <= 45 or 51 <= plot_num <= 55
-            or 71 <= plot_num <= 74 or 81 <= plot_num <= 84
-            or 91 <= plot_num <= 94):
+            or 81 <= plot_num <= 84 or 91 <= plot_num <= 94):
         n_nodes = 8
     elif (6 <= plot_num <= 9 or 16 <= plot_num <= 19 or 26 <= plot_num <= 29
           or 36 == plot_num or 46 <= plot_num <= 49 or 56 <= plot_num <= 59
-          or 76 <= plot_num <= 79 or 86 <= plot_num <= 89
+          or 70 <= plot_num <= 79 or 86 <= plot_num <= 89
           or 96 <= plot_num <= 99):
         n_nodes = 16
     else:
@@ -503,6 +504,30 @@ def main(plot_num, server='mac'):
     else:
         raise ValueError('value of distance is unexpected')
 
+    if adaptive:
+        # Initialize counter and timer for adaptive simulation
+        adapt_start = timer()
+        evaluate_motion_equations.counter = 0
+
+        # Run the adaptive simulations
+        adapt_result = integrate_motion(
+            [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
+            domain=domain, order=order, adaptive=adaptive)
+        (x1_adapt, x2_adapt, x3_adapt, em_adapt, errs_adapt, node_array,
+         sep_array) = adapt_result
+
+        # Save the end state after the adaptive simulations
+        adapt_end = timer()
+        adapt_counter = evaluate_motion_equations.counter
+
+        e1_adapt, e2_adapt, e3_adapt = em_adapt
+        np.savez(data_dir + 'adapt' + str(plot_num), x1_adapt, x2_adapt,
+                 x3_adapt, e1_adapt, e2_adapt, e3_adapt, t, errs_adapt,
+                 node_array, sep_array, x1_adapt=x1_adapt, x2_adapt=x2_adapt,
+                 x3_adapt=x3_adapt, e1_adapt=e1_adapt, e2_adapt=e2_adapt,
+                 e3_adapt=e3_adapt, t=t, errs_adapt=errs_adapt,
+                 node_array=node_array, sep_array=sep_array)
+
     # Initialize counter and timer for coarse simulation
     start = timer()
     evaluate_motion_equations.counter = 0
@@ -510,7 +535,7 @@ def main(plot_num, server='mac'):
     # Run the coarse simulations
     coarse_result = integrate_motion(
         [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
-        domain=domain, order=order, adaptive=adaptive)
+        domain=domain, order=order, adaptive=False)
     x1, x2, x3, e_m, errs, node_array, sep_array = coarse_result
 
     # Save the end state after the coarse simulations
@@ -526,6 +551,12 @@ def main(plot_num, server='mac'):
     try:
         print('Exact solve took {} seconds for {} RHS evaluations'
               .format(fine_end - fine_start, fine_counter))
+    except NameError:
+        pass
+
+    try:
+        print('Adaptive solve took {} seconds for {} RHS evaluations'
+              .format(adapt_end - adapt_start, adapt_counter))
     except NameError:
         pass
 

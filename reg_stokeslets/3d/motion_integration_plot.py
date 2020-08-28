@@ -1,6 +1,7 @@
 import numpy as np
 from mpl_toolkits.axes_grid1 import host_subplot
 import matplotlib.pyplot as plt
+from motion_integration import find_min_separation, evaluate_motion_equations
 
 
 def parse_info(filename):
@@ -21,6 +22,14 @@ def parse_info(filename):
             info_dict.update([(key, val)])
 
     return info_dict
+
+
+def find_separation(x1, e1, e2, e3):
+    sep = np.zeros(shape=x1.shape)
+    e_m = np.stack([e1, e2, e3])
+    for i in range(len(x1)):
+        sep[i] = find_min_separation(x1[i], e_m[:, i])
+    return sep
 
 
 def main(file_suffix, save_plots=False):
@@ -69,6 +78,9 @@ def main(file_suffix, save_plots=False):
         # Backwards compatibility with old code w/o adaptive specified
         adaptive = False
     order = info['order']
+
+    fine_sep_array = find_separation(x1_fine, e1_fine, e2_fine, e3_fine)
+    coarse_sep_array = find_separation(x1c, e1c, e2c, e3c)
 
     # Plot numerical and analytical solutions
     ax1 = host_subplot(111)
@@ -194,17 +206,23 @@ def main(file_suffix, save_plots=False):
             plt.show()
 
     try:
-        fig_n, ax_n = plt.subplots()
+        ax_n = host_subplot(111)
         ax_sep = ax_n.twinx()
-        ax_n.plot(t[:-1], n_array[:-1])
-        ax_sep.plot(t[:-1], sep_array[:-1], color='tab:orange')
+        ax_n.plot(t[:-1], n_array[:-1], label='$N$ choice', color='k')
+        ax_sep.plot(t[:-1], sep_array[:-1], label='Adaptive sep',
+                    color='tab:blue')
+        ax_sep.plot(t[:-1], fine_sep_array[:-1], label='Fine sep',
+                    color='tab:orange')
+        ax_sep.plot(t[:-1], coarse_sep_array[:-1], label='Coarse sep',
+                    color='tab:green')
         ax_n.set_xlabel('Time elapsed')
         ax_n.set_ylabel('N chosen')
         ax_sep.set_ylabel('Plt-wall separation')
+        ax_n.legend()
 
         if save_plots:
-            fig_n.savefig(plot_dir + 'nsep_plot{}'.format(file_suffix),
-                          bbox_inches='tight')
+            plt.savefig(plot_dir + 'nsep_plot{}'.format(file_suffix),
+                        bbox_inches='tight')
         else:
             plt.tight_layout()
             plt.show()
