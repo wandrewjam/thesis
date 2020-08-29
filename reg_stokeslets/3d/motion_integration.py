@@ -579,6 +579,11 @@ def main(plot_num, server='mac'):
                           'fine time, {}\n'.format(fine_end - fine_start)]
         except NameError:
             pass
+        try:
+            expt_info += ['adapt counter, {}\n'.format(adapt_counter),
+                          'adapt time, {}\n'.format(adapt_end - adapt_start)]
+        except NameError:
+            pass
 
         f.writelines(expt_info)
 
