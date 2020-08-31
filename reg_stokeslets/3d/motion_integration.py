@@ -72,13 +72,14 @@ def find_min_separation(com_dist, e_m):
 
 
 def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
-                              b=1.0, n_nodes=8, domain='free'):
+                              b=1.0, n_nodes=8, domain='free', proc=1):
     eps = eps_picker(n_nodes, a, b)
     theta = np.arctan2(e_m[2], e_m[1])
     phi = np.arccos(e_m[0])
     t_matrix, p_matrix, pt_matrix, r_matrix, shear_f, shear_t = (
         generate_resistance_matrices(eps, n_nodes, a=a, b=b, domain=domain,
-                                     distance=h, theta=theta, phi=phi))
+                                     distance=h, theta=theta, phi=phi,
+                                     proc=proc))
 
     res_matrix = np.block([[t_matrix, p_matrix], [pt_matrix, r_matrix]])
     gen_forces = np.block([[shear_f], [shear_t]])
@@ -102,12 +103,13 @@ def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
 
 
 def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
-              a=1.0, b=1.0, domain='free', order='2nd'):
+              a=1.0, b=1.0, domain='free', order='2nd', proc=1):
     valid_test_nodes = 48
     if order == '1st':
         dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
             evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
-                                      a=a, b=b, n_nodes=n_nodes, domain=domain)
+                                      a=a, b=b, n_nodes=n_nodes, domain=domain,
+                                      proc=proc)
         )
         new_x1 = x1 + dt * dx1
         new_x2 = x2 + dt * dx2
@@ -116,18 +118,20 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         new_e_m /= np.linalg.norm(new_e_m)
 
         # Check that we have a valid orientation
-        if (not valid_orientation(valid_test_nodes, new_e_m, distance=new_x1, a=a, b=b)
-                and domain == 'wall'):
+        if (not valid_orientation(valid_test_nodes, new_e_m, distance=new_x1,
+                                  a=a, b=b) and domain == 'wall'):
             # Then take 2 half time-steps
-            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
-                                                        a, b, domain, order)[:-1]
-            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m,
-                                                                         forces, torques, exact_vels, n_nodes, a, b,
-                                                                         domain, order)
+            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
+                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                a, b, domain, order, proc)[:-1]
+            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
+                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
+                exact_vels, n_nodes, a, b, domain, order, proc)
     elif order == '2nd':
         dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
             evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
-                                      a=a, b=b, n_nodes=n_nodes, domain=domain)
+                                      a=a, b=b, n_nodes=n_nodes, domain=domain,
+                                      proc=proc)
         )
         prd_x1 = x1 + dt * dx1
         prd_x2 = x2 + dt * dx2
@@ -136,11 +140,10 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         prd_e_m /= np.linalg.norm(prd_e_m)
 
         try:
-            dx1_p, dx2_p, dx3_p, dem1_p, dem2_p, dem3_p = (
-                evaluate_motion_equations(prd_x1, prd_e_m, forces, torques,
-                                          exact_vels, a=a, b=b,
-                                          n_nodes=n_nodes, domain=domain)
-            )[:-1]
+            diff_eq_rhs = (evaluate_motion_equations(
+                prd_x1, prd_e_m, forces, torques, exact_vels, a=a, b=b,
+                n_nodes=n_nodes, domain=domain, proc=proc))[:-1]
+            dx1_p, dx2_p, dx3_p, dem1_p, dem2_p, dem3_p = diff_eq_rhs
 
             new_x1 = x1 + dt / 2 * (dx1 + dx1_p)
             new_x2 = x2 + dt / 2 * (dx2 + dx2_p)
@@ -149,17 +152,17 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
                                                 dem3 + dem3_p]))
             new_e_m /= np.linalg.norm(new_e_m)
 
-            if not valid_orientation(valid_test_nodes, new_e_m, distance=new_x1,
-                                     a=a, b=b) and domain == 'wall':
+            if (not valid_orientation(valid_test_nodes, new_e_m,
+                                      distance=new_x1, a=a, b=b)
+                    and domain == 'wall'):
                 raise AssertionError('next step will not be valid')
         except AssertionError:
             # If we get an invalid orientation, then take 2 half-steps
-            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
-                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
-                a, b, domain, order)[:-1]
-            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
-                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
-                exact_vels, n_nodes, a, b, domain, order)
+            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                                                        a, b, domain, order)[:-1]
+            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m,
+                                                                         forces, torques, exact_vels, n_nodes, a, b,
+                                                                         domain, order)
     else:
         raise ValueError('order is not valid')
 
@@ -167,7 +170,7 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
 
 
 def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
-                     b=1.0, domain='free', order='2nd', adaptive=True):
+                     b=1.0, domain='free', order='2nd', adaptive=True, proc=1):
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
 
@@ -192,8 +195,9 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                 n_nodes = n_picker(sep)
             node_array[i] = n_nodes
             x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = (
-                time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques, exact_vels, n_nodes=n_nodes, a=a, b=b,
-                          domain=domain, order=order)
+                time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques,
+                          exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain,
+                          order=order, proc=proc)
             )
     except AssertionError:
         print('Encountered an assertion error while integrating. Halting and '
@@ -203,7 +207,7 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
     return x1, x2, x3, e_m, errs, node_array, sep_array
 
 
-def main(plot_num, server='mac'):
+def main(plot_num, server='mac', proc=1):
     data_dir = 'data/'
     init = np.zeros(6)
 
@@ -211,8 +215,8 @@ def main(plot_num, server='mac'):
         stop = 10.
         t_steps = 50
     elif server == 'linux':
-        stop = 50.
-        t_steps = 400
+        stop = .25
+        t_steps = 4
     else:
         raise ValueError('server is an invalid value')
     order = '2nd'
@@ -476,12 +480,12 @@ def main(plot_num, server='mac'):
         # Run the fine simulations
         if plot_num < 80:
             fine_result = integrate_motion(
-                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a,
-                b=b, domain='wall', order=order, adaptive=False)
+                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
+                domain='wall', order=order, adaptive=False, proc=proc)
         else:
             fine_result = integrate_motion(
-                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a,
-                b=b, domain='free', order=order, adaptive=False)
+                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
+                domain='free', order=order, adaptive=False, proc=proc)
         x1_fine, x2_fine, x3_fine, em_fine = fine_result[:4]
 
         # Save the end state after the fine simulations
@@ -512,7 +516,7 @@ def main(plot_num, server='mac'):
         # Run the adaptive simulations
         adapt_result = integrate_motion(
             [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
-            domain=domain, order=order, adaptive=adaptive)
+            domain=domain, order=order, adaptive=adaptive, proc=proc)
         (x1_adapt, x2_adapt, x3_adapt, em_adapt, errs_adapt, node_array,
          sep_array) = adapt_result
 
@@ -535,7 +539,7 @@ def main(plot_num, server='mac'):
     # Run the coarse simulations
     coarse_result = integrate_motion(
         [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
-        domain=domain, order=order, adaptive=False)
+        domain=domain, order=order, adaptive=False, proc=proc)
     x1, x2, x3, e_m, errs, node_array, sep_array = coarse_result
 
     # Save the end state after the coarse simulations
@@ -595,6 +599,9 @@ if __name__ == '__main__':
 
     expt = int(sys.argv[1])
     try:
-        main(expt, sys.argv[2])
+        main(expt, sys.argv[2], int(sys.argv[3]))
     except IndexError:
-        main(expt)
+        try:
+            main(expt, sys.argv[2])
+        except IndexError:
+            main(expt)
