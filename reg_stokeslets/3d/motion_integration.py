@@ -82,7 +82,8 @@ def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
                                      proc=proc))
 
     res_matrix = np.block([[t_matrix, p_matrix], [pt_matrix, r_matrix]])
-    gen_forces = np.block([[shear_f], [shear_t]])
+    gen_forces = np.block([[shear_f + forces[:, None]],
+                           [shear_t + torques[:, None]]])
     gen_vels = np.linalg.solve(res_matrix, -gen_forces)
     trans_vels, rot_vels = np.squeeze(gen_vels[:3]), np.squeeze(gen_vels[3:])
     # trans_vels = (np.linalg.solve(t_matrix, forces + shear_f)
@@ -158,11 +159,12 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
                 raise AssertionError('next step will not be valid')
         except AssertionError:
             # If we get an invalid orientation, then take 2 half-steps
-            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
-                                                        a, b, domain, order)[:-1]
-            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m,
-                                                                         forces, torques, exact_vels, n_nodes, a, b,
-                                                                         domain, order)
+            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
+                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                a, b, domain, order)[:-1]
+            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
+                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
+                exact_vels, n_nodes, a, b, domain, order)
     else:
         raise ValueError('order is not valid')
 
@@ -170,7 +172,8 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
 
 
 def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
-                     b=1.0, domain='free', order='2nd', adaptive=True, proc=1):
+                     b=1.0, domain='free', order='2nd', adaptive=True, proc=1,
+                     forces=None, torques=None):
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
 
@@ -180,7 +183,11 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
     e_m[:, 0] = init[3:]
     t_length = t_span[1] - t_span[0]
     dt = t_length / num_steps
-    forces, torques = np.zeros((3, 1)), np.zeros((3, 1))
+    if forces is None:
+        forces = np.zeros((3, 1))
+    if torques is None:
+        torques = np.zeros((3, 1))
+
     errs = np.zeros(shape=(6, num_steps+1))
     node_array, sep_array = np.zeros(shape=(2, num_steps+1))
 
@@ -537,9 +544,8 @@ def main(plot_num, server='mac', proc=1):
     evaluate_motion_equations.counter = 0
 
     # Run the coarse simulations
-    coarse_result = integrate_motion(
-        [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
-        domain=domain, order=order, adaptive=False, proc=proc)
+    coarse_result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=domain,
+                                     order=order, adaptive=False, proc=proc)
     x1, x2, x3, e_m, errs, node_array, sep_array = coarse_result
 
     # Save the end state after the coarse simulations
