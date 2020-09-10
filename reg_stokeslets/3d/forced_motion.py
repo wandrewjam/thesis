@@ -5,8 +5,8 @@ from motion_integration import integrate_motion, evaluate_motion_equations
 
 def run_experiment(dist=0., a=1., b=1., exact_vels=None, proc=1,
                    forces=None, torques=None):
-    stop = 50.
-    t_steps = 100
+    stop = 5.
+    t_steps = 10
     init = np.zeros(6)
     order = '2nd'
 
@@ -36,8 +36,8 @@ def run_experiment(dist=0., a=1., b=1., exact_vels=None, proc=1,
 
 
 def find_exact_solution(f, dist):
-    stop = 50.
-    t_steps = 100
+    stop = 5.
+    t_steps = 10
     init = np.zeros(6)
     init[0] = dist
     init[3] = 1.
@@ -75,14 +75,16 @@ def main():
 
     evaluate_motion_equations.counter = 0
 
-    for (a, b) in [(1., 1.), (1.5, .5)]:
-        for gen_forces in np.eye(6)[1:]:
+    # for (a, b) in [(1., 1.), (1.5, .5)]:
+    for (a, b) in [(1., 1.)]:
+        # for gen_forces in np.eye(6)[1:]:
+        for gen_forces in np.eye(6)[[3, 5]]:
             forces = gen_forces[:3]
             torques = gen_forces[3:]
             if a == 1.:
                 dist = 0
-                trn = -forces / (6 * np.pi * a)
-                rot = -np.array([0, .5, 0]) - torques / (4 * np.pi * a**3)
+                trn = forces / (6 * np.pi * a)
+                rot = -np.array([0, .5, 0]) + torques / (4 * np.pi * a**3)
 
                 def exact_vels(em):
                     return np.concatenate([trn, rot])
@@ -101,10 +103,10 @@ def main():
 
                 xa = 8. / 3 * e**3 * (
                         2 * (2*e**2 - 1) * np.arctan(e / np.sqrt(1 - e**2))
-                + 2 * e * np.sqrt(1 - e**2)) ** (-1)
+                        + 2 * e * np.sqrt(1 - e**2)) ** (-1)
                 ya = 8. / 3 * e**3 * (
                         (2*e**2 + 1) * np.arctan(e / np.sqrt(1 - e**2))
-                - e * np.sqrt(1 - e**2)) ** (-1)
+                        - e * np.sqrt(1 - e**2)) ** (-1)
 
                 xc = 2. / 3 * e**3 * (np.arctan(e / np.sqrt(1 - e**2))
                                       - e * np.sqrt(1 - e**2)) ** (-1)
@@ -129,11 +131,11 @@ def main():
                     Aa = xa * outer + ya * (I - outer)
                     Ac = xc * outer + yc * (I - outer)
 
-                    rhs_f = -forces / (6 * np.pi * a)
+                    rhs_f = forces / (6 * np.pi * a)
                     rhs_t = yh / 2 * np.tensordot(np.dot(
                         (eps[:, :, None, :] * em[None, None, :, None]
                          + eps[:, None, :, :] * em[None, :, None, None]), em
-                    ), ros) + np.dot(Ac, om_inf) - torques / (8 * np.pi * a**3)
+                    ), ros) + np.dot(Ac, om_inf) + torques / (8 * np.pi * a**3)
                     trn_vels = np.linalg.solve(Aa, rhs_f)
                     rot_vels = np.linalg.solve(Ac, rhs_t)
                     return np.concatenate((trn_vels, rot_vels))
