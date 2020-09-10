@@ -1,0 +1,199 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{itemize}
+\item Ran longer experiments on CHPC servers of a couple of the
+  platelet rolling experiments (Figures \ref{fig:plt72} and \ref{fig:plt74})
+\item I miscalculated some run times, and so don't have results with
+  an initial height of $1.0$ micron. However, I checked on a shorter
+  experiment and verified that the adaptive scheme is working
+  correctly now (this was the experiment that was breaking before.
+\item These longer experiments confirm the trends that we noticed in
+  the shorter experiments (and match the results of the Mody paper)
+\item I also ran tests with a constant applied force (Figures
+  \ref{fig:f0_plot}---\ref{fig:f9_plot}).
+\end{itemize}
+
+\begin{figure}[b]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot72_2nd}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot72_2nd}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot72_2nd}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{nsep_plot72}
+  \end{subfigure}  
+  \caption{Plots of the ellipsoid orientation, orientation error,
+    center of mass, and the $N$ value with the plt-wall
+    separation. The height of the center of mass is initialized at
+    $1.2$. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.}
+  \label{fig:plt72}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_plot74_2nd}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{orient_err_plot74_2nd}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{com_plot74_2nd}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{nsep_plot74}
+  \end{subfigure}  
+  \caption{Plots of the ellipsoid orientation, orientation error,
+    center of mass, and the $N$ value with the plt-wall
+    separation. The height of the center of mass is initialized at
+    $0.8$. Orientation is initialized at $\vect{e}_m =
+    \vect{e}_x$.}
+  \label{fig:plt74}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{f_test0}
+  \caption{Motion integration of a sphere (radius $=1$) in a shear
+    flow, with applied force vector $\vec{e}_y$ and no applied torque.}
+  \label{fig:f0_plot}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{f_test3}
+  \caption{Motion integration of a sphere (radius $=1$) in a shear
+    flow, with no applied force and an applied torque of $\vec{e}_y$.}
+  \label{fig:f3_plot}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{f_test4}
+  \caption{Motion integration of a sphere (radius $=1$) in a shear
+    flow, with no applied force and an applied torque of $\vec{e}_z$.}
+  \label{fig:f4_plot}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{f_test6}
+  \caption{Motion integration of an ellipsoid in a shear flow, with an
+    applied force of $\vec{e}_z$ and no applied torque.}
+  \label{fig:f6_plot}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{f_test9}
+  \caption{Motion integration of an ellipsoid in a shear flow, with no
+    applied force and an applied torque of $\vec{e}_z$.}
+  \label{fig:f9_plot}
+\end{figure}
+
+% \begin{figure}[h!]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_plot12_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_err_plot12_2nd}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{com_plot12_2nd}
+%   \end{subfigure}
+%   \caption{Plots of the ellipsoid orientation, orientation error, and
+%      center of mass in a shear flow near a wall. The height of the
+%      center of mass is initialized at $1.5$. Orientation is
+%      initialized at $\vect{e}_m = \vect{e}_x$. The coarse solution
+%      used the same number of nodes as the minimum node size in the
+%      adaptive code.}
+%   \label{fig:plt12}
+% \end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
