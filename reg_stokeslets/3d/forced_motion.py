@@ -5,8 +5,8 @@ from motion_integration import integrate_motion, evaluate_motion_equations
 
 def run_experiment(dist=0., a=1., b=1., exact_vels=None, proc=1,
                    forces=None, torques=None):
-    stop = 5.
-    t_steps = 10
+    stop = 50.
+    t_steps = 100
     init = np.zeros(6)
     order = '2nd'
 
@@ -36,8 +36,8 @@ def run_experiment(dist=0., a=1., b=1., exact_vels=None, proc=1,
 
 
 def find_exact_solution(f, dist):
-    stop = 5.
-    t_steps = 10
+    stop = 50.
+    t_steps = 100
     init = np.zeros(6)
     init[0] = dist
     init[3] = 1.
@@ -75,16 +75,16 @@ def main():
 
     evaluate_motion_equations.counter = 0
 
-    # for (a, b) in [(1., 1.), (1.5, .5)]:
-    for (a, b) in [(1., 1.)]:
-        # for gen_forces in np.eye(6)[1:]:
-        for gen_forces in np.eye(6)[[3, 5]]:
+    for (a, b) in [(1., 1.), (1.5, .5)]:
+    # for (a, b) in [(1., 1.)]:
+        for gen_forces in np.eye(6)[1:]:
+        # for gen_forces in np.eye(6)[[3, 5]]:
             forces = gen_forces[:3]
             torques = gen_forces[3:]
             if a == 1.:
                 dist = 0
                 trn = forces / (6 * np.pi * a)
-                rot = -np.array([0, .5, 0]) + torques / (4 * np.pi * a**3)
+                rot = -np.array([0, .5, 0]) + torques / (8 * np.pi * a**3)
 
                 def exact_vels(em):
                     return np.concatenate([trn, rot])
@@ -166,11 +166,15 @@ def main():
                         '$z$ analytic'])
         ax[0,0].set_ylabel('CoM position')
 
-        ax[0,1].plot(t, e_m[0], t, e_m[1], t, e_m[2], t, em_fine[0], t, em_fine[1],
-                 t, em_fine[2])
-        ax[0,1].legend(['$e_{mx}$ approx', '$e_{my}$ approx', '$e_{mz}$ approx',
-                        '$e_{mx}$ analytic', '$e_{my}$ analytic',
-                        '$e_{mz}$ analytic'])
+        # Compute orientation angles
+        phi = np.arccos(e_m[0])
+        theta = np.arctan2(e_m[2], e_m[1])
+        phi_fine = np.arccos(em_fine[0])
+        theta_fine = np.arctan2(em_fine[2], em_fine[1])
+
+        ax[0,1].plot(t, phi, t, theta, t, phi_fine, t, theta_fine)
+        ax[0,1].legend(['$\\phi$ approx', '$\\theta$ approx',
+                        '$\\phi$ analytic', '$\\theta$ analytic'])
         ax[0,1].set_ylabel('Components of orientation vector')
 
         ax[1,0].plot(t, x2 - x_vec[1], t, x3 - x_vec[2])
@@ -178,11 +182,17 @@ def main():
         ax[1,0].set_xlabel('t')
         ax[1,0].set_ylabel('CoM error')
 
-        ax[1,1].plot(t, e_m[0] - em_fine[0], t, e_m[1] - em_fine[1],
-                     t, e_m[2] - em_fine[2])
-        ax[1,1].legend(['$e_{mx}$ error', '$e_{my}$ error', '$e_{mz}$ error'])
+        ax[1,1].plot(t, phi - phi_fine, t, theta - theta_fine)
+        ax[1,1].legend(['$\\phi$ error', '$\\theta$ error'])
         ax[1,1].set_xlabel('t')
         ax[1,1].set_ylabel('Orientation error')
+
+        # ax[1, 1].plot(t, np.linalg.norm(e_m, axis=0),
+        #               t, np.linalg.norm(em_fine, axis=0),
+        #               t, np.ones(shape=t.shape))
+        # ax[1, 1].legend(['$e_m$ norm', 'Exact norm', 'One'])
+        # ax[1, 1].set_xlabel('t')
+        # ax[1, 1].set_ylabel('Norm')
 
         # plt.savefig('f_test{}'.format(i), bbox_inches='tight')
         plt.tight_layout()
