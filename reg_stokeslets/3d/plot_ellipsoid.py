@@ -18,7 +18,7 @@ def define_parametric_vars():
     return x_wall, xp, y_wall, yp, z_wall, zp
 
 
-def generate_3d_plot(em):
+def generate_3d_plot(em, plot_num):
     x_wall, xp, y_wall, yp, z_wall, zp = define_parametric_vars()
     ph = np.arccos(em[0])
     th = np.arctan2(em[2], em[1])
@@ -41,12 +41,12 @@ def generate_3d_plot(em):
 
     # Output to Matlab data, need x, y, z, and x_wall, y_wall, z_wall
     mat_dict = {
-        'x': x, 'y': y, 'z': z,
+        'x': x, 'y': y, 'z': z, 't': t,
         'x_wall': x_wall, 'y_wall': y_wall, 'z_wall': z_wall,
         'x_vec': x_vec, 'y_vec': y_vec, 'z_vec': z_vec,
         'u_vec': u_vec, 'v_vec': v_vec, 'w_vec': w_vec
     }
-    savemat('data/e1_data', mat_dict)
+    savemat('data/data{}'.format(plot_num), mat_dict)
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -57,8 +57,8 @@ def generate_3d_plot(em):
     plt.show()
 
 
-def main():
-    data = np.load('data/fine48.npz')
+def main(plot_num):
+    data = np.load('data/fine{}.npz'.format(plot_num))
     em_arr = np.stack([data[key] for key in ['e1', 'e2', 'e3']], axis=0)
     t = data['t']
     imax = 280
@@ -71,9 +71,10 @@ def main():
 
     for i in [i0, i1, i2, i3, i4]:
         em = em_arr[:, i]
-        generate_3d_plot(em)
+        generate_3d_plot(em, plot_num)
         print('t = {}'.format(t[i]))
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    main(sys.argv[1])
