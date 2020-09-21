@@ -222,8 +222,8 @@ def main(plot_num, server='mac', proc=1):
         stop = 10.
         t_steps = 50
     elif server == 'linux':
-        stop = .25
-        t_steps = 2
+        stop = 50
+        t_steps = 400
     else:
         raise ValueError('server is an invalid value')
     order = '2nd'
