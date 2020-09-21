@@ -14,7 +14,8 @@ def run_experiment(dist=0., a=1., b=1., exact_vels=None, proc=1,
         def exact_vels(em):
             return np.zeros(6)
 
-    n_nodes = 8
+    global n_nodes
+    n_nodes = 16
     if dist == 0.:
         dom = 'free'
     elif dist >= 0:
@@ -194,9 +195,10 @@ def main():
         # ax[1, 1].set_xlabel('t')
         # ax[1, 1].set_ylabel('Norm')
 
-        # plt.savefig('f_test{}'.format(i), bbox_inches='tight')
-        plt.tight_layout()
-        plt.show()
+        # ii = [3, 5]
+        plt.savefig('f_test{}_{}'.format(i, n_nodes), bbox_inches='tight')
+        # plt.tight_layout()
+        # plt.show()
 
 
 if __name__ == '__main__':
