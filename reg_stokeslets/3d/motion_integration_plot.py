@@ -35,8 +35,8 @@ def find_separation(x1, e1, e2, e3):
 def main(file_suffix, save_plots=False):
     # Define directories
     import os
-    plot_dir = os.path.expanduser('~/thesis/meeting-notes/summer-20/'
-                                  'notes_081220/')
+    plot_dir = os.path.expanduser('~/thesis/meeting-notes/fall-20/'
+                                  'notes_091720/')
     data_dir = 'data/'
 
     # Load data
@@ -56,11 +56,15 @@ def main(file_suffix, save_plots=False):
                                  fine_data['e3'])
 
     if file_suffix == '72':
-        bad_data = np.load(data_dir + 'coarse18.npz')
+        bad_data = np.load(data_dir + 'coarse72.npz')
         x1c, x2c, x3c = bad_data['x1'], bad_data['x2'], bad_data['x3']
         e1c, e2c, e3c = bad_data['e1'], bad_data['e2'], bad_data['e3']
     elif file_suffix == '73':
-        bad_data = np.load(data_dir + 'coarse19.npz')
+        bad_data = np.load(data_dir + 'coarse73.npz')
+        x1c, x2c, x3c = bad_data['x1'], bad_data['x2'], bad_data['x3']
+        e1c, e2c, e3c = bad_data['e1'], bad_data['e2'], bad_data['e3']
+    elif file_suffix == '74':
+        bad_data = np.load(data_dir + 'coarse74.npz')
         x1c, x2c, x3c = bad_data['x1'], bad_data['x2'], bad_data['x3']
         e1c, e2c, e3c = bad_data['e1'], bad_data['e2'], bad_data['e3']
 
@@ -206,23 +210,24 @@ def main(file_suffix, save_plots=False):
             plt.show()
 
     try:
-        ax_n = host_subplot(111)
-        ax_sep = ax_n.twinx()
-        ax_n.plot(t[:-1], n_array[:-1], label='$N$ choice', color='k')
-        ax_sep.plot(t[:-1], sep_array[:-1], label='Adaptive sep',
+        fig4 = plt.figure()
+        ax4 = host_subplot(111)
+        ax_sep = ax4.twinx()
+        ax4.plot(t[:-1], n_array[:-1], label='$N$ choice', color='k')
+        ax_sep.plot(t[:-1], coarse_sep_array[:-1], label='Adaptive sep',
                     color='tab:blue')
         ax_sep.plot(t[:-1], fine_sep_array[:-1], label='Fine sep',
                     color='tab:orange')
-        ax_sep.plot(t[:-1], coarse_sep_array[:-1], label='Coarse sep',
-                    color='tab:green')
-        ax_n.set_xlabel('Time elapsed')
-        ax_n.set_ylabel('N chosen')
+        # ax_sep.plot(t[:-1], coarse_sep_array[:-1], label='Coarse sep',
+        #             color='tab:green')
+        ax4.set_xlabel('Time elapsed')
+        ax4.set_ylabel('N chosen')
         ax_sep.set_ylabel('Plt-wall separation')
-        ax_n.legend()
+        ax4.legend()
 
         if save_plots:
-            plt.savefig(plot_dir + 'nsep_plot{}'.format(file_suffix),
-                        bbox_inches='tight')
+            fig4.savefig(plot_dir + 'nsep_plot{}'.format(file_suffix),
+                         bbox_inches='tight')
         else:
             plt.tight_layout()
             plt.show()

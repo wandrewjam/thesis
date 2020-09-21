@@ -82,8 +82,8 @@ def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
                                      proc=proc))
 
     res_matrix = np.block([[t_matrix, p_matrix], [pt_matrix, r_matrix]])
-    gen_forces = np.block([[shear_f - forces[:, None]],
-                           [shear_t - torques[:, None]]])
+    gen_forces = np.block([[shear_f - forces.reshape((3, 1))],
+                           [shear_t - torques.reshape((3, 1))]])
     gen_vels = np.linalg.solve(res_matrix, -gen_forces)
     trans_vels, rot_vels = np.squeeze(gen_vels[:3]), np.squeeze(gen_vels[3:])
     # trans_vels = (np.linalg.solve(t_matrix, forces + shear_f)
