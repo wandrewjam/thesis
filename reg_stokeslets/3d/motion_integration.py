@@ -165,6 +165,43 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
             new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
                 dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
                 exact_vels, n_nodes, a, b, domain, order)
+    elif order == '4th':
+        k1 = evaluate_motion_equations(
+            x1, e_m, forces, torques, exact_vels, a=a, b=b, n_nodes=n_nodes,
+            domain=domain, proc=proc)[:6]
+
+        p1_em = e_m + dt * np.array(k1[3:]) / 2
+        p1_em /= np.linalg.norm(p1_em)
+        p1_x1 = x1 + dt * k1[0] / 2
+
+        k2 = evaluate_motion_equations(
+            p1_x1, p1_em, forces, torques, exact_vels, a=a, b=b,
+            n_nodes=n_nodes, domain=domain, proc=proc)[:6]
+
+        p2_em = e_m + dt * np.array(k2[3:]) / 2
+        p2_em /= np.linalg.norm(p2_em)
+        p2_x1 = x1 + dt * k2[0] / 2
+
+        k3 = evaluate_motion_equations(
+            p2_x1, p2_em, forces, torques, exact_vels, a=a, b=b,
+            n_nodes=n_nodes, domain=domain, proc=proc)[:6]
+
+        p3_em = e_m + dt * np.array(k3[3:])
+        p3_em /= np.linalg.norm(p3_em)
+        p3_x1 = x1 + dt * k3[0]
+
+        result = evaluate_motion_equations(
+            p3_x1, p3_em, forces, torques, exact_vels, a=a, b=b,
+            n_nodes=n_nodes, domain=domain, proc=proc)
+
+        k4, velocity_errors = result[:6], result[6]
+
+        new_x1 = x1 + (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]) / 6
+        new_x2 = x2 + (k1[1] + 2*k2[1] + 2*k3[1] + k4[1]) / 6
+        new_x3 = x3 + (k1[2] + 2*k2[2] + 2*k3[2] + k4[2]) / 6
+        new_e_m = e_m + (np.array(k1[3:]) + 2*np.array(k2[3:])
+                         + 2*np.array(k3[3:]) + np.array(k4[3:])) / 6
+        new_e_m /= np.linalg.norm(new_e_m)
     else:
         raise ValueError('order is not valid')
 
@@ -226,7 +263,7 @@ def main(plot_num, server='mac', proc=1):
         t_steps = 400
     else:
         raise ValueError('server is an invalid value')
-    order = '2nd'
+    order = '4th'
 
     # Initialize the function counter
     evaluate_motion_equations.counter = 0
@@ -517,8 +554,8 @@ def main(plot_num, server='mac', proc=1):
 
     if adaptive:
         # Initialize counter and timer for adaptive simulation
-        adapt_start = timer()
         evaluate_motion_equations.counter = 0
+        adapt_start = timer()
 
         # Run the adaptive simulations
         adapt_result = integrate_motion(
