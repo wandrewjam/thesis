@@ -4,7 +4,13 @@ from motion_integration import integrate_motion, evaluate_motion_equations
 
 
 def run_experiment(dist=0., a=1., b=1., exact_vels=None, proc=1,
-                   forces=None, torques=None):
+                   gen_forces=None):
+    if gen_forces is None:
+        forces = None
+        torques = None
+    else:
+        forces, torques = gen_forces[:3], gen_forces[3:]
+
     stop = 50.
     t_steps = 100
     init = np.zeros(6)
@@ -14,8 +20,10 @@ def run_experiment(dist=0., a=1., b=1., exact_vels=None, proc=1,
         def exact_vels(em):
             return np.zeros(6)
 
+
     global n_nodes
     n_nodes = 16
+
     if dist == 0.:
         dom = 'free'
     elif dist >= 0:
@@ -70,6 +78,25 @@ def find_exact_solution(f, dist):
     return x_vec, em_fine, t
 
 
+def find_corrections(dist):
+    if dist == 0:
+        ft_star = 1.
+        fr_star, tt_star = 0., 0.
+        tr_star = 1.
+        fs_star = 1.
+        ts_star = 1.
+    elif dist == 1.5431:
+        ft_star = 1.5675
+        fr_star = 1.9532e-2
+        tt_star = 1.4649e-2
+        tr_star = 1.0998
+        fs_star = 1.4391
+        ts_star = 0.97419
+    else:
+        raise ValueError('unexpected dist value')
+    return ft_star, fr_star, tt_star, tr_star, fs_star, ts_star
+
+
 def main():
     # Construct experiment list
     expt_list = list()
@@ -78,24 +105,41 @@ def main():
 
     for (a, b) in [(1., 1.), (1.5, .5)]:
     # for (a, b) in [(1., 1.)]:
-        for gen_forces in np.eye(6)[1:]:
+        for gen_forces in np.eye(6)[[1, 2, 4, 5]]:
         # for gen_forces in np.eye(6)[[3, 5]]:
-            forces = gen_forces[:3]
-            torques = gen_forces[3:]
             if a == 1.:
-                dist = 0
-                trn = forces / (6 * np.pi * a)
-                rot = -np.array([0, .5, 0]) + torques / (8 * np.pi * a**3)
+                dist = 1.5431
+                stars = find_corrections(dist)
+                ft_star, fr_star, tt_star, tr_star, fs_star, ts_star = stars
+                res_mat = np.zeros(shape=(6, 6))
+                res_mat[1, 1] = - 6 * np.pi * ft_star
+                res_mat[1, 5] = 6 * np.pi * fr_star
+                res_mat[2, 2] = - 6 * np.pi * ft_star
+                res_mat[2, 4] = - 6 * np.pi * fr_star
+                res_mat[3, 3] = - 8 * np.pi * tr_star
+                res_mat[4, 2] = 8 * np.pi * tt_star
+                res_mat[4, 4] = - 8 * np.pi * tr_star
+                res_mat[5, 1] = 8 * np.pi * tt_star
+                res_mat[5, 5] = - 8 * np.pi * tr_star
+
+                # Set elements of res_mat to make it non-singular
+                res_mat[0, 0] = 1
+
+                shr_vec = np.zeros(shape=(6,))
+                shr_vec[2] = 6 * np.pi * dist * fs_star
+                shr_vec[4] = - 4 * np.pi * ts_star
+
+                gen_vels = np.linalg.solve(res_mat, - shr_vec - gen_forces)
 
                 def exact_vels(em):
-                    return np.concatenate([trn, rot])
+                    return gen_vels
 
                 x_vec, em_fine, t = find_exact_solution(
                     exact_vels, dist)
                 expt_list.append(
                     {'a': a, 'b': b, 'dist': dist,
-                     'forces': forces, 'torques': torques,
-                     'x_vec': x_vec, 'em_fine': em_fine, 't': t}
+                     'gen_forces': gen_forces, 'x_vec': x_vec,
+                     'em_fine': em_fine, 't': t}
                     )
             elif a == 1.5:
                 dist = 0.
@@ -132,11 +176,12 @@ def main():
                     Aa = xa * outer + ya * (I - outer)
                     Ac = xc * outer + yc * (I - outer)
 
-                    rhs_f = forces / (6 * np.pi * a)
-                    rhs_t = yh / 2 * np.tensordot(np.dot(
-                        (eps[:, :, None, :] * em[None, None, :, None]
-                         + eps[:, None, :, :] * em[None, :, None, None]), em
-                    ), ros) + np.dot(Ac, om_inf) + torques / (8 * np.pi * a**3)
+                    rhs_f = gen_forces[:3] / (6 * np.pi * a)
+                    rhs_t = (yh / 2 * np.tensordot(
+                        np.dot((eps[:, :, None, :] * em[None, None, :, None]
+                                + eps[:, None, :, :] * em[None, :, None, None])
+                               , em), ros) + np.dot(Ac, om_inf)
+                             + gen_forces[3:] / (8 * np.pi * a**3))
                     trn_vels = np.linalg.solve(Aa, rhs_f)
                     rot_vels = np.linalg.solve(Ac, rhs_t)
                     return np.concatenate((trn_vels, rot_vels))
@@ -145,14 +190,13 @@ def main():
                     exact_vels, dist)
                 expt_list.append(
                     {'a': a, 'b': b, 'dist': dist,
-                     'forces': forces, 'torques': torques,
-                     'x_vec': x_vec, 'em_fine': em_fine, 't': t}
+                     'gen_forces': gen_forces, 'x_vec': x_vec,
+                     'em_fine': em_fine, 't': t}
                     )
 
     for (i, expt) in enumerate(expt_list):
         a, b, dist = expt['a'], expt['b'], expt['dist']
-        f1, f2, f3 = expt['forces']
-        t1, t2, t3 = expt['torques']
+        f1, f2, f3, t1, t2, t3 = expt['gen_forces']
         x_vec, em_fine, t = expt.pop('x_vec'), expt.pop('em_fine'), expt.pop('t')
         x1, x2, x3, e_m = run_experiment(**expt)
 
@@ -173,9 +217,15 @@ def main():
         phi_fine = np.arccos(em_fine[0])
         theta_fine = np.arctan2(em_fine[2], em_fine[1])
 
-        ax[0,1].plot(t, phi, t, theta, t, phi_fine, t, theta_fine)
-        ax[0,1].legend(['$\\phi$ approx', '$\\theta$ approx',
-                        '$\\phi$ analytic', '$\\theta$ analytic'])
+        # ax[0,1].plot(t, phi, t, theta, t, phi_fine, t, theta_fine)
+        # ax[0,1].legend(['$\\phi$ approx', '$\\theta$ approx',
+        #                 '$\\phi$ analytic', '$\\theta$ analytic'])
+        # ax[0,1].set_ylabel('Components of orientation vector')
+
+        ax[0,1].plot(t, e_m[0], t, e_m[1], t, e_m[2], t, em_fine[0],
+                     t, em_fine[1], t, em_fine[2])
+        ax[0,1].legend(['$e_x$ approx', '$e_y$ approx', '$e_z$ approx',
+                        '$e_x$ analytic', '$e_y$ analytic', '$e_z$ analytic'])
         ax[0,1].set_ylabel('Components of orientation vector')
 
         ax[1,0].plot(t, x2 - x_vec[1], t, x3 - x_vec[2])
@@ -183,8 +233,14 @@ def main():
         ax[1,0].set_xlabel('t')
         ax[1,0].set_ylabel('CoM error')
 
-        ax[1,1].plot(t, phi - phi_fine, t, theta - theta_fine)
-        ax[1,1].legend(['$\\phi$ error', '$\\theta$ error'])
+        # ax[1,1].plot(t, phi - phi_fine, t, theta - theta_fine)
+        # ax[1,1].legend(['$\\phi$ error', '$\\theta$ error'])
+        # ax[1,1].set_xlabel('t')
+        # ax[1,1].set_ylabel('Orientation error')
+
+        ax[1,1].plot(t, e_m[0] - em_fine[0], t, e_m[1] - em_fine[1],
+                     t, e_m[2] - em_fine[2])
+        ax[1,1].legend(['$e_x$ error', '$e_y$ error', '$e_z$ error'])
         ax[1,1].set_xlabel('t')
         ax[1,1].set_ylabel('Orientation error')
 
