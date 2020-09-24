@@ -18,6 +18,7 @@ ss*.txt
 \#*\#
 *.zip
 *.dep
+*.fig
 
 # Folders
 literature_repository/*
