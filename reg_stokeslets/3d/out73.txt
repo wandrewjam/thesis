@@ -1,0 +1,76 @@
+Assembling quadrature matrix for eps = 0.0421606199499, nodes = 24
+Solving for forces for eps = 0.0421606199499, nodes = 24
+Finished eps=0.0421606199499, n_nodes=24
+Assembling quadrature matrix for eps = 0.0421606199499, nodes = 24
+Solving for forces for eps = 0.0421606199499, nodes = 24
+Finished eps=0.0421606199499, n_nodes=24
+Assembling quadrature matrix for eps = 0.0421606199499, nodes = 24
+Solving for forces for eps = 0.0421606199499, nodes = 24
+Finished eps=0.0421606199499, n_nodes=24
+Assembling quadrature matrix for eps = 0.0421606199499, nodes = 24
+Solving for forces for eps = 0.0421606199499, nodes = 24
+Finished eps=0.0421606199499, n_nodes=24
+Assembling quadrature matrix for eps = 0.0421606199499, nodes = 24
+Solving for forces for eps = 0.0421606199499, nodes = 24
+Finished eps=0.0421606199499, n_nodes=24
+Assembling quadrature matrix for eps = 0.0421606199499, nodes = 24
+Solving for forces for eps = 0.0421606199499, nodes = 24
+Finished eps=0.0421606199499, n_nodes=24
+Assembling quadrature matrix for eps = 0.0421606199499, nodes = 24
+Solving for forces for eps = 0.0421606199499, nodes = 24
+Finished eps=0.0421606199499, n_nodes=24
+Assembling quadrature matrix for eps = 0.0421606199499, nodes = 24
+Solving for forces for eps = 0.0421606199499, nodes = 24
+Finished eps=0.0421606199499, n_nodes=24
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Assembling quadrature matrix for eps = 0.0632180819419, nodes = 16
+Solving for forces for eps = 0.0632180819419, nodes = 16
+Finished eps=0.0632180819419, n_nodes=16
+Exact solve took 360.102993011 seconds for 8 RHS evaluations
+Adaptive solve took 55.0540239811 seconds for 8 RHS evaluations
+Approx solve took 55.1607182026 seconds for 8 RHS evaluations
+Done writing data!
