@@ -41,20 +41,33 @@ def main(file_suffix, save_plots=False):
 
     # Load data
     fine_data = np.load(data_dir + 'fine' + file_suffix + '.npz')
-    coarse_data = np.load(data_dir + 'coarse' + file_suffix + '.npz')
+    coarse_data = np.load(data_dir + 'adapt' + file_suffix + '.npz')
 
     info = parse_info(data_dir + 'info' + file_suffix + '.txt')
 
     # Define local variables
-    t, errs = coarse_data['t'], coarse_data['errs']
-    x1, x2, x3 = coarse_data['x1'], coarse_data['x2'], coarse_data['x3']
-    e1, e2, e3 = coarse_data['e1'], coarse_data['e2'], coarse_data['e3']
+    if info['adaptive']:
+        t = coarse_data['t']
+        errs = coarse_data['errs_adapt']
+        x1, x2, x3 = (coarse_data['x1_adapt'], coarse_data['x2_adapt'],
+                      coarse_data['x3_adapt'])
+        e1, e2, e3 = (coarse_data['e1_adapt'], coarse_data['e2_adapt'],
+                      coarse_data['e3_adapt'])
+    else:
+        t = coarse_data['t']
+        errs = coarse_data['errs']
+        x1, x2, x3 = coarse_data['x1'], coarse_data['x2'], coarse_data['x3']
+        e1, e2, e3 = coarse_data['e1'], coarse_data['e2'], coarse_data['e3']
 
     x1_fine, x2_fine, x3_fine = (fine_data['x1'], fine_data['x2'],
                                  fine_data['x3'])
     e1_fine, e2_fine, e3_fine = (fine_data['e1'], fine_data['e2'],
                                  fine_data['e3'])
 
+    if file_suffix == '71':
+        bad_data = np.load(data_dir + 'coarse71.npz')
+        x1c, x2c, x3c = bad_data['x1'], bad_data['x2'], bad_data['x3']
+        e1c, e2c, e3c = bad_data['e1'], bad_data['e2'], bad_data['e3']
     if file_suffix == '72':
         bad_data = np.load(data_dir + 'coarse72.npz')
         x1c, x2c, x3c = bad_data['x1'], bad_data['x2'], bad_data['x3']
