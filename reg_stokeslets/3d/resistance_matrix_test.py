@@ -30,7 +30,8 @@ def assemble_vel_cases(sphere_nodes, distance=0., shear_rate=1.,
 
 def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
                                  distance=0., theta=0., phi=0., shear_vec=True,
-                                 proc=1, precompute_array=None):
+                                 proc=1, precompute_array=None,
+                                 save_quad_matrix=False):
     print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
         eps, n_nodes))
     s_matrix, weights, nodes = assemble_quad_matrix(
@@ -72,7 +73,11 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
     pt_matrix, r_matrix, shear_t = (tmp_matrix2[:, :3], tmp_matrix2[:, 3:6],
                                     tmp_matrix2[:, 6:])
     print('Finished eps={}, n_nodes={}'.format(eps, n_nodes))
-    return t_matrix, p_matrix, pt_matrix, r_matrix, shear_f, shear_t
+    if save_quad_matrix:
+        return (t_matrix, p_matrix, pt_matrix, r_matrix, shear_f, shear_t,
+                s_matrix)
+    else:
+        return t_matrix, p_matrix, pt_matrix, r_matrix, shear_f, shear_t
 
 
 def main(proc=1, a=1., b=1., domain='free', distance=0, server='mac'):

@@ -72,14 +72,20 @@ def find_min_separation(com_dist, e_m):
 
 
 def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
-                              b=1.0, n_nodes=8, domain='free', proc=1):
+                              b=1.0, n_nodes=8, domain='free', proc=1,
+                              save_quad_matrix=False):
     eps = eps_picker(n_nodes, a, b)
     theta = np.arctan2(e_m[2], e_m[1])
     phi = np.arccos(e_m[0])
-    t_matrix, p_matrix, pt_matrix, r_matrix, shear_f, shear_t = (
-        generate_resistance_matrices(eps, n_nodes, a=a, b=b, domain=domain,
-                                     distance=h, theta=theta, phi=phi,
-                                     proc=proc))
+    result = generate_resistance_matrices(
+        eps, n_nodes, a=a, b=b, domain=domain, distance=h, theta=theta,
+        phi=phi, proc=proc, save_quad_matrix=save_quad_matrix)
+
+    if save_quad_matrix:
+        (t_matrix, p_matrix, pt_matrix, r_matrix,
+         shear_f, shear_t, s_matrix) = result
+    else:
+        t_matrix, p_matrix, pt_matrix, r_matrix, shear_f, shear_t = result
 
     res_matrix = np.block([[t_matrix, p_matrix], [pt_matrix, r_matrix]])
     gen_forces = np.block([[shear_f - forces.reshape((3, 1))],
@@ -100,18 +106,27 @@ def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
     # Define a counter for the number of RHS evaluations
     evaluate_motion_equations.counter += 1
 
-    return dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors
+    if save_quad_matrix:
+        return dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors, s_matrix
+    else:
+        return dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors
 
 
 def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
-              a=1.0, b=1.0, domain='free', order='2nd', proc=1):
+              a=1.0, b=1.0, domain='free', order='2nd', proc=1,
+              save_quad_matrix_info=False):
     valid_test_nodes = 48
     if order == '1st':
-        dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
-            evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
-                                      a=a, b=b, n_nodes=n_nodes, domain=domain,
-                                      proc=proc)
-        )
+        result = evaluate_motion_equations(
+            x1, e_m, forces, torques, exact_vels, a=a, b=b, n_nodes=n_nodes,
+            domain=domain, proc=proc, save_quad_matrix=save_quad_matrix_info)
+
+        if save_quad_matrix_info:
+            dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors, s_matrix = result
+            s_matrices = (s_matrix,)
+        else:
+            dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = result
+
         new_x1 = x1 + dt * dx1
         new_x2 = x2 + dt * dx2
         new_x3 = x3 + dt * dx3
@@ -121,19 +136,38 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         # Check that we have a valid orientation
         if (not valid_orientation(valid_test_nodes, new_e_m, distance=new_x1,
                                   a=a, b=b) and domain == 'wall'):
+            s_matrices = tuple()
             # Then take 2 half time-steps
-            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
+            result1 = time_step(
                 dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
-                a, b, domain, order, proc)[:-1]
-            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
+                a, b, domain, order, proc, save_quad_matrix_info)[:-1]
+            if save_quad_matrix_info:
+                tmp_x1, tmp_x2, tmp_x3, tmp_e_m = result1[:-1]
+                s_matrices += result1[-1]
+            else:
+                tmp_x1, tmp_x2, tmp_x3, tmp_e_m = result1
+
+            half_step2 = time_step(
                 dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
-                exact_vels, n_nodes, a, b, domain, order, proc)
+                exact_vels, n_nodes, a, b, domain, order, proc,
+                save_quad_matrix_info)
+            if save_quad_matrix_info:
+                new_x1, new_x2, new_x3, new_e_m, velocity_errors = half_step2[:-1]
+                s_matrices += half_step2[-1]
+            else:
+                new_x1, new_x2, new_x3, new_e_m, velocity_errors = half_step2
+
     elif order == '2nd':
-        dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = (
-            evaluate_motion_equations(x1, e_m, forces, torques, exact_vels,
-                                      a=a, b=b, n_nodes=n_nodes, domain=domain,
-                                      proc=proc)
-        )
+        result = evaluate_motion_equations(
+            x1, e_m, forces, torques, exact_vels, a=a, b=b, n_nodes=n_nodes,
+            domain=domain, proc=proc, save_quad_matrix=save_quad_matrix_info)
+
+        if save_quad_matrix_info:
+            dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = result[:-1]
+            s_matrices = (result[-1],)
+        else:
+            dx1, dx2, dx3, dem1, dem2, dem3, velocity_errors = result
+
         prd_x1 = x1 + dt * dx1
         prd_x2 = x2 + dt * dx2
         prd_x3 = x3 + dt * dx3
@@ -141,9 +175,17 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
         prd_e_m /= np.linalg.norm(prd_e_m)
 
         try:
-            diff_eq_rhs = (evaluate_motion_equations(
+            half_step2 = evaluate_motion_equations(
                 prd_x1, prd_e_m, forces, torques, exact_vels, a=a, b=b,
-                n_nodes=n_nodes, domain=domain, proc=proc))[:-1]
+                n_nodes=n_nodes, domain=domain, proc=proc,
+                save_quad_matrix=save_quad_matrix_info)
+
+            if save_quad_matrix_info:
+                diff_eq_rhs = half_step2[:-2]
+                s_matrices += (half_step2[-1],)
+            else:
+                diff_eq_rhs = half_step2[:-1]
+
             dx1_p, dx2_p, dx3_p, dem1_p, dem2_p, dem3_p = diff_eq_rhs
 
             new_x1 = x1 + dt / 2 * (dx1 + dx1_p)
@@ -159,58 +201,114 @@ def time_step(dt, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes=8,
                 raise AssertionError('next step will not be valid')
         except AssertionError:
             # If we get an invalid orientation, then take 2 half-steps
-            tmp_x1, tmp_x2, tmp_x3, tmp_e_m = time_step(
+            s_matrices = tuple()
+            result1 = time_step(
                 dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
-                a, b, domain, order)[:-1]
-            new_x1, new_x2, new_x3, new_e_m, velocity_errors = time_step(
+                a, b, domain, order, proc, save_quad_matrix_info)
+
+            if save_quad_matrix_info:
+                tmp_x1, tmp_x2, tmp_x3, tmp_e_m = result1[:-2]
+                s_matrices += result1[-1]
+            else:
+                tmp_x1, tmp_x2, tmp_x3, tmp_e_m = result1[:-1]
+
+            half_step2 = time_step(
                 dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
-                exact_vels, n_nodes, a, b, domain, order)
+                exact_vels, n_nodes, a, b, domain, order, proc,
+                save_quad_matrix_info)
+
+            if save_quad_matrix_info:
+                new_x1, new_x2, new_x3, new_e_m, velocity_errors = half_step2[:-1]
+                s_matrices += half_step2[-1]
+            else:
+                new_x1, new_x2, new_x3, new_e_m, velocity_errors = half_step2
+
     elif order == '4th':
         k1 = evaluate_motion_equations(
             x1, e_m, forces, torques, exact_vels, a=a, b=b, n_nodes=n_nodes,
-            domain=domain, proc=proc)[:6]
+            domain=domain, proc=proc, save_quad_matrix=save_quad_matrix_info)
 
-        p1_em = e_m + dt * np.array(k1[3:]) / 2
+        p1_em = e_m + dt * np.array(k1[3:6]) / 2
         p1_em /= np.linalg.norm(p1_em)
         p1_x1 = x1 + dt * k1[0] / 2
 
-        k2 = evaluate_motion_equations(
-            p1_x1, p1_em, forces, torques, exact_vels, a=a, b=b,
-            n_nodes=n_nodes, domain=domain, proc=proc)[:6]
+        try:
+            k2 = evaluate_motion_equations(
+                p1_x1, p1_em, forces, torques, exact_vels, a=a, b=b,
+                n_nodes=n_nodes, domain=domain, proc=proc,
+                save_quad_matrix=save_quad_matrix_info)
 
-        p2_em = e_m + dt * np.array(k2[3:]) / 2
-        p2_em /= np.linalg.norm(p2_em)
-        p2_x1 = x1 + dt * k2[0] / 2
+            p2_em = e_m + dt * np.array(k2[3:6]) / 2
+            p2_em /= np.linalg.norm(p2_em)
+            p2_x1 = x1 + dt * k2[0] / 2
 
-        k3 = evaluate_motion_equations(
-            p2_x1, p2_em, forces, torques, exact_vels, a=a, b=b,
-            n_nodes=n_nodes, domain=domain, proc=proc)[:6]
+            k3 = evaluate_motion_equations(
+                p2_x1, p2_em, forces, torques, exact_vels, a=a, b=b,
+                n_nodes=n_nodes, domain=domain, proc=proc,
+                save_quad_matrix=save_quad_matrix_info)
 
-        p3_em = e_m + dt * np.array(k3[3:])
-        p3_em /= np.linalg.norm(p3_em)
-        p3_x1 = x1 + dt * k3[0]
+            p3_em = e_m + dt * np.array(k3[3:6])
+            p3_em /= np.linalg.norm(p3_em)
+            p3_x1 = x1 + dt * k3[0]
 
-        result = evaluate_motion_equations(
-            p3_x1, p3_em, forces, torques, exact_vels, a=a, b=b,
-            n_nodes=n_nodes, domain=domain, proc=proc)
+            k4 = evaluate_motion_equations(
+                p3_x1, p3_em, forces, torques, exact_vels, a=a, b=b,
+                n_nodes=n_nodes, domain=domain, proc=proc,
+                save_quad_matrix=save_quad_matrix_info)
 
-        k4, velocity_errors = result[:6], result[6]
+            velocity_errors = k4[6]
 
-        new_x1 = x1 + (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]) / 6
-        new_x2 = x2 + (k1[1] + 2*k2[1] + 2*k3[1] + k4[1]) / 6
-        new_x3 = x3 + (k1[2] + 2*k2[2] + 2*k3[2] + k4[2]) / 6
-        new_e_m = e_m + (np.array(k1[3:]) + 2*np.array(k2[3:])
-                         + 2*np.array(k3[3:]) + np.array(k4[3:])) / 6
-        new_e_m /= np.linalg.norm(new_e_m)
+            if save_quad_matrix_info:
+                s_matrices = (k1[-1], k2[-1], k3[-1], k4[-1])
+
+            new_x1 = x1 + (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]) / 6
+            new_x2 = x2 + (k1[1] + 2*k2[1] + 2*k3[1] + k4[1]) / 6
+            new_x3 = x3 + (k1[2] + 2*k2[2] + 2*k3[2] + k4[2]) / 6
+            new_e_m = e_m + (np.array(k1[3:6]) + 2*np.array(k2[3:6])
+                             + 2*np.array(k3[3:6]) + np.array(k4[3:6])) / 6
+            new_e_m /= np.linalg.norm(new_e_m)
+
+            if (not valid_orientation(valid_test_nodes, new_e_m,
+                                      distance=new_x1, a=a, b=b)
+                    and domain == 'wall'):
+                raise AssertionError('next step will not be valid')
+        except AssertionError:
+            # Take two half-steps
+            s_matrices = tuple()
+
+            half_step1 = time_step(
+                dt / 2, x1, x2, x3, e_m, forces, torques, exact_vels, n_nodes,
+                a, b, domain, order, proc, save_quad_matrix_info)
+
+            if save_quad_matrix_info:
+                tmp_x1, tmp_x2, tmp_x3, tmp_e_m = half_step1[:-2]
+                s_matrices += half_step1[-1]
+            else:
+                tmp_x1, tmp_x2, tmp_x3, tmp_e_m = half_step1[:-1]
+
+            half_step2 = time_step(
+                dt / 2, tmp_x1, tmp_x2, tmp_x3, tmp_e_m, forces, torques,
+                exact_vels, n_nodes, a, b, domain, order, proc,
+                save_quad_matrix_info)
+
+            if save_quad_matrix_info:
+                new_x1, new_x2, new_x3, new_e_m, velocity_errors = half_step2[:-1]
+                s_matrices += half_step2[-1]
+            else:
+                new_x1, new_x2, new_x3, new_e_m, velocity_errors = half_step2
+
     else:
         raise ValueError('order is not valid')
 
-    return new_x1, new_x2, new_x3, new_e_m, velocity_errors
+    if save_quad_matrix_info:
+        return new_x1, new_x2, new_x3, new_e_m, velocity_errors, s_matrices
+    else:
+        return new_x1, new_x2, new_x3, new_e_m, velocity_errors
 
 
 def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                      b=1.0, domain='free', order='2nd', adaptive=True, proc=1,
-                     forces=None, torques=None):
+                     forces=None, torques=None, save_quad_matrix_info=False):
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
 
@@ -228,6 +326,9 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
     errs = np.zeros(shape=(6, num_steps+1))
     node_array, sep_array = np.zeros(shape=(2, num_steps+1))
 
+    if save_quad_matrix_info:
+        s_matrices = []
+
     try:
         for i in range(num_steps):
             if adaptive:
@@ -237,18 +338,27 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
 
                 # Pick n_nodes based on separation
                 n_nodes = n_picker(sep)
+
             node_array[i] = n_nodes
-            x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = (
-                time_step(dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques,
-                          exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain,
-                          order=order, proc=proc)
-            )
+            res = time_step(
+                dt, x1[i], x2[i], x3[i], e_m[:, i], forces, torques,
+                exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain,
+                order=order, proc=proc,
+                save_quad_matrix_info=save_quad_matrix_info)
+            if save_quad_matrix_info:
+                x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = res[:-1]
+                s_matrices.append(res[-1])
+            else:
+                x1[i+1], x2[i+1], x3[i+1], e_m[:, i+1], errs[:, i+1] = res
     except AssertionError:
         print('Encountered an assertion error while integrating. Halting and '
               'outputting computation results so far.')
         pass
 
-    return x1, x2, x3, e_m, errs, node_array, sep_array
+    if save_quad_matrix_info:
+        return x1, x2, x3, e_m, errs, node_array, sep_array, s_matrices
+    else:
+        return x1, x2, x3, e_m, errs, node_array, sep_array
 
 
 def main(plot_num, server='mac', proc=1):
@@ -523,13 +633,11 @@ def main(plot_num, server='mac', proc=1):
 
         # Run the fine simulations
         if plot_num < 80:
-            fine_result = integrate_motion(
-                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
-                domain='wall', order=order, adaptive=False, proc=proc)
+            fine_result = integrate_motion([0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b, domain='wall',
+                                           order=order, adaptive=False, proc=proc)
         else:
-            fine_result = integrate_motion(
-                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
-                domain='free', order=order, adaptive=False, proc=proc)
+            fine_result = integrate_motion([0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b, domain='free',
+                                           order=order, adaptive=False, proc=proc)
         x1_fine, x2_fine, x3_fine, em_fine = fine_result[:4]
 
         # Save the end state after the fine simulations
@@ -558,9 +666,8 @@ def main(plot_num, server='mac', proc=1):
         adapt_start = timer()
 
         # Run the adaptive simulations
-        adapt_result = integrate_motion(
-            [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
-            domain=domain, order=order, adaptive=adaptive, proc=proc)
+        adapt_result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=domain,
+                                        order=order, adaptive=adaptive, proc=proc)
         (x1_adapt, x2_adapt, x3_adapt, em_adapt, errs_adapt, node_array,
          sep_array) = adapt_result
 
@@ -611,7 +718,7 @@ def main(plot_num, server='mac', proc=1):
           .format(end - start, coarse_counter))
 
     # Save info from the experiments
-    with open(data_dir + 'info' + str(plot_num) + '.txt', 'w') as f:
+    with open(data_dir + 'info' + str(plot_num) + '-.txt', 'w') as f:
         expt_info = ['distance, {}\n'.format(distance),
                      'e0, ({}, {}, {})\n'.format(ex0, ey0, ez0),
                      'order, {}\n'.format(order),
