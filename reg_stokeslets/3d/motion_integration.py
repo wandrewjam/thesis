@@ -370,7 +370,7 @@ def main(plot_num, server='mac', proc=1):
         t_steps = 50
     elif server == 'linux':
         stop = 50
-        t_steps = 400
+        t_steps = 200
     else:
         raise ValueError('server is an invalid value')
     order = '4th'
@@ -610,7 +610,7 @@ def main(plot_num, server='mac', proc=1):
         e1_fine, e2_fine, e3_fine = em_fine
         x1_fine, x2_fine = np.zeros((2, t_steps+1))
         x3_fine = np.zeros(t_steps+1)
-        np.savez(data_dir + 'fine' + str(plot_num), x1_fine, x2_fine,
+        np.savez(data_dir + 'fine' + str(plot_num) + '_' + order, x1_fine, x2_fine,
                  x3_fine, e1_fine, e2_fine, e3_fine, t, x1=x1_fine,
                  x2=x2_fine, x3=x3_fine, e1=e1_fine, e2=e2_fine,
                  e3=e3_fine, t=t)
@@ -627,29 +627,31 @@ def main(plot_num, server='mac', proc=1):
         def exact_vels(em):
             return np.zeros(6)
 
-        # Initialize counter and timer for fine simulation
-        evaluate_motion_equations.counter = 0
-        fine_start = timer()
+        ## # Initialize counter and timer for fine simulation
+        ## evaluate_motion_equations.counter = 0
+        ## fine_start = timer()
 
         # Run the fine simulations
         if plot_num < 80:
-            fine_result = integrate_motion([0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b, domain='wall',
-                                           order=order, adaptive=False, proc=proc)
+            fine_result = integrate_motion(
+                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
+                domain='wall', order=order, adaptive=False, proc=proc)
         else:
-            fine_result = integrate_motion([0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b, domain='free',
-                                           order=order, adaptive=False, proc=proc)
+            fine_result = integrate_motion(
+                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
+                domain='free', order=order, adaptive=False, proc=proc)
         x1_fine, x2_fine, x3_fine, em_fine = fine_result[:4]
 
-        # Save the end state after the fine simulations
-        fine_end = timer()
-        fine_counter = evaluate_motion_equations.counter
+        ## # Save the end state after the fine simulations
+        ## fine_end = timer()
+        ## fine_counter = evaluate_motion_equations.counter
 
-        e1_fine, e2_fine, e3_fine = em_fine
+        ## e1_fine, e2_fine, e3_fine = em_fine
 
-        np.savez(data_dir + 'fine' + str(plot_num), x1_fine, x2_fine,
-                 x3_fine, e1_fine, e2_fine, e3_fine, t, x1=x1_fine,
-                 x2=x2_fine, x3=x3_fine, e1=e1_fine, e2=e2_fine,
-                 e3=e3_fine, t=t)
+        ## np.savez(data_dir + 'fine' + str(plot_num), x1_fine, x2_fine,
+        ##          x3_fine, e1_fine, e2_fine, e3_fine, t, x1=x1_fine,
+        ##          x2=x2_fine, x3=x3_fine, e1=e1_fine, e2=e2_fine,
+        ##          e3=e3_fine, t=t)
 
         exact_solution = False
 
@@ -666,8 +668,9 @@ def main(plot_num, server='mac', proc=1):
         adapt_start = timer()
 
         # Run the adaptive simulations
-        adapt_result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=domain,
-                                        order=order, adaptive=adaptive, proc=proc)
+        adapt_result = integrate_motion(
+            [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
+            domain=domain, order=order, adaptive=adaptive, proc=proc)
         (x1_adapt, x2_adapt, x3_adapt, em_adapt, errs_adapt, node_array,
          sep_array) = adapt_result
 
@@ -676,7 +679,7 @@ def main(plot_num, server='mac', proc=1):
         adapt_counter = evaluate_motion_equations.counter
 
         e1_adapt, e2_adapt, e3_adapt = em_adapt
-        np.savez(data_dir + 'adapt' + str(plot_num), x1_adapt, x2_adapt,
+        np.savez(data_dir + 'adapt' + str(plot_num) + '_' + order, x1_adapt, x2_adapt,
                  x3_adapt, e1_adapt, e2_adapt, e3_adapt, t, errs_adapt,
                  node_array, sep_array, x1_adapt=x1_adapt, x2_adapt=x2_adapt,
                  x3_adapt=x3_adapt, e1_adapt=e1_adapt, e2_adapt=e2_adapt,
@@ -688,8 +691,9 @@ def main(plot_num, server='mac', proc=1):
     evaluate_motion_equations.counter = 0
 
     # Run the coarse simulations
-    coarse_result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=domain,
-                                     order=order, adaptive=False, proc=proc)
+    coarse_result = integrate_motion(
+        [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
+        domain=domain, order=order, adaptive=False, proc=proc)
     x1, x2, x3, e_m, errs, node_array, sep_array = coarse_result
 
     # Save the end state after the coarse simulations
@@ -697,7 +701,7 @@ def main(plot_num, server='mac', proc=1):
     coarse_counter = evaluate_motion_equations.counter
 
     e1, e2, e3 = e_m
-    np.savez(data_dir + 'coarse' + str(plot_num), x1, x2, x3, e1, e2, e3, t,
+    np.savez(data_dir + 'coarse' + str(plot_num) + '_' + order, x1, x2, x3, e1, e2, e3, t,
              errs, node_array, sep_array, x1=x1, x2=x2, x3=x3, e1=e1, e2=e2,
              e3=e3, t=t, errs=errs, node_array=node_array,
              sep_array=sep_array)
@@ -718,7 +722,7 @@ def main(plot_num, server='mac', proc=1):
           .format(end - start, coarse_counter))
 
     # Save info from the experiments
-    with open(data_dir + 'info' + str(plot_num) + '-.txt', 'w') as f:
+    with open(data_dir + 'info' + str(plot_num) + '_' + order + '.txt', 'w') as f:
         expt_info = ['distance, {}\n'.format(distance),
                      'e0, ({}, {}, {})\n'.format(ex0, ey0, ez0),
                      'order, {}\n'.format(order),
