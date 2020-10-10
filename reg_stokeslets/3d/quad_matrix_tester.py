@@ -63,13 +63,15 @@ def main():
             for j, time_step in enumerate(run):
                 for k, eval in enumerate(time_step):
                     # Do I also want to try a diagonal preconditioner?
+                    D = np.diag(eval)
                     cond_dict.update([((n_nodes, i, j, k),
-                                       np.linalg.cond(eval))])
+                                       (np.linalg.cond(eval),
+                                        np.linalg.cond(eval / D[:, None])))])
 
-    cond_array = np.zeros(shape=(len(cond_dict), 5))
+    cond_array = np.zeros(shape=(len(cond_dict), 6))
     for i, key in enumerate(cond_dict.keys()):
         cond_array[i, :4] = key
-        cond_array[i, 4] = cond_dict[key]
+        cond_array[i, 4:] = cond_dict[key]
 
     svd_dict = {}
     for n_nodes, expt_list in s_dict.items():
