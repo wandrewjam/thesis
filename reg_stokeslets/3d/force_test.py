@@ -82,8 +82,7 @@ def assemble_quad_matrix(eps, n_nodes, a=1., b=1., domain='free', distance=0.,
 
     del_xi = xi_mesh[1] - xi_mesh[0]
     del_eta = eta_mesh[1] - eta_mesh[0]
-    stokeslet = generate_stokeslet(eps, nodes, domain, chunks=proc,
-                                   precompute_array=precompute_array)
+    stokeslet = generate_stokeslet(eps, nodes, domain, chunks=proc, precompute_array=precompute_array)
 
     ind_u = np.triu_indices(nodes.shape[0])
     s_array = np.zeros(shape=(nodes.shape[0], nodes.shape[0], 3, 3))
@@ -188,13 +187,16 @@ def rt(eps, del_x, h_arr=None, r=None):
 
 
 # @profile
-def generate_stokeslet(eps, nodes, type, chunks=1, precompute_array=None):
+def generate_stokeslet(eps, nodes, type, chunks=1, precompute_array=None,
+                       aux_nodes=1, H=None):
     """Generate a S x S x 3 x 3 array of Stokeslet strengths at 'nodes'
     S_{ijkl} is the (k,l) component of the Stokeslet centered at x_j
     and evaluated at x_i
 
     Parameters
     ----------
+    H
+    aux_nodes
     chunks
     eps
     nodes
@@ -227,6 +229,16 @@ def generate_stokeslet(eps, nodes, type, chunks=1, precompute_array=None):
 
         result = [res.get() for res in result]
         stokeslet = np.concatenate(result)
+
+    # Correct diagonal elements of stokeslet
+    # Generate auxiliary stokeslets
+    # theta_arr = 2*np.pi*np.arange(aux_nodes) / (aux_nodes - 1)
+    # phi_arr = np.arcsin(H / 2) * np.arange(aux_nodes) / (aux_nodes - 1)
+    # xp = np.ones(shape=(1, aux_nodes)) * np.cos(phi_arr)
+    # yp = np.sin(phi_arr) * np.cos(theta_arr[:, None])
+    # zp = np.sin(phi_arr) * np.sin(theta_arr[:, None])
+
+    # Still need to rotate these to be located on top of the primary stokeslet
 
     return stokeslet
 
