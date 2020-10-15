@@ -20,9 +20,9 @@ if __name__ == '__main__':
     intermediate_solve = solve(
         s_matrix, rhs, overwrite_a=True, overwrite_b=True, check_finite=False,
         assume_a='pos')
+    end = timer()
 
     pt_forces = (intermediate_solve.T / np.repeat(weights, repeats=3)).T
     pt_forces = pt_forces.reshape((-1, 3, rhs_cases))
-    end = timer()
 
     print(end - start)
