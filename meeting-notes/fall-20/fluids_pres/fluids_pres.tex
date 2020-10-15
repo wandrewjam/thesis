@@ -1,0 +1,136 @@
+\documentclass[10pt]{beamer}
+
+\usetheme[progressbar=foot]{metropolis}
+\makeatletter
+\usepackage[caption=false]{subfig}
+\usepackage{float}
+\newlength\beamerleftmargin
+\setlength\beamerleftmargin{\Gm@lmargin}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{appendixnumberbeamer}
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}[subsections numbered]
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\definecolor{utred}{RGB}{204,0,0}
+\definecolor{utgray}{RGB}{128,128,128}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\usepackage{caption}
+\captionsetup[figure]{labelformat=empty}
+\setbeamertemplate{subsection in toc}
+{\leavevmode\leftskip=2em\rlap{\hskip-2em$\quad$\inserttocsectionnumber.\inserttocsubsectionnumber}$\quad$\inserttocsubsection\par}
+%%%%%%
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\title{Fluids presentation with a clever name}
+% \date{\today}
+\date{}
+\author{Andrew Watson}
+\institute{University of Utah}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+\setbeamercolor{progress bar in head/foot}{fg=utred,bg=utgray}
+\setbeamercolor{progress bar in section page}{fg=utred,bg=utgray}
+\setbeamercolor{progress bar in title separator}{fg=utgray,bg=black}
+\setbeamercolor{frametitle}{bg=utred, fg=white}
+\setbeamercolor{block title alerted}{fg=utred}
+\setbeamercolor{alerted text}{fg = utred}
+\setlength{\metropolis@titleseparator@linewidth}{1.5pt}
+\setlength{\metropolis@progressonsectionpage@linewidth}{1.5pt}
+\setlength{\metropolis@progressinheadfoot@linewidth}{3pt}
+\setlength{\metropolis@progressonsectionpage@linewidth}{1.5pt}
+
+\setbeamerfont{bibliography item}{size=\scriptsize}
+\setbeamerfont{bibliography entry author}{size=\scriptsize}
+\setbeamerfont{bibliography entry title}{size=\scriptsize}
+\setbeamerfont{bibliography entry location}{size=\scriptsize}
+\setbeamerfont{bibliography entry note}{size=\scriptsize}
+
+
+
+\begin{document}
+
+\maketitle
+
+\addtobeamertemplate{frametitle}{}{%
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=north east,yshift=2pt] at (current page.north east) {\includegraphics[height=0.7cm]{ulogo@2x.png}};
+\end{tikzpicture}}
+
+
+\begin{frame}{Biological motivation}
+Biology and stuff
+\end{frame}
+
+\begin{frame}{Rolling}
+\begin{itemize}
+\item Rolling stuff
+\end{itemize}
+\end{frame}
+
+\section{A section}
+
+\begin{frame}{More Rolling}
+  Stuff
+\end{frame}
+
+% \begin{frame}
+%   Some Text
+% \end{frame}
+
+% \begin{frame}[fragile]{Fibrin-fibrinogen branching model}
+% \begin{columns}
+% \begin{column}{0.5\textwidth}
+% \begin{itemize}
+% \item Allow only fibrinogen monomer to bind to free fibrin reaction sites
+% \item $C_{m,g,k}$ - oligomer with $m + 2(k+g-2)$ total fibrin monomer, $g$ total fibrinogen monomer, $k$ free fibrin reaction sites
+% \end{itemize}
+% \end{column}
+% \begin{column}{0.5\textwidth}
+% \vspace{-0.5cm}
+
+
+
+% \begin{figure}
+% \centering
+% % \includegraphics[width=\textwidth]{reactions.pdf}
+% \vspace*{-5mm}
+% \caption{Reactions in fibrin branching model}
+% \end{figure}
+% \end{column}
+% \end{columns}
+% \end{frame}
+
+% \begin{frame}[fragile]{Fibrin-fibrinogen branching model}
+% \begin{itemize}
+% \item Let $R_f$ denote free fibrin reaction sites
+% \end{itemize}
+% \begin{multline*}
+% \scriptsize \frac{d {c}_{mgk} }{dt} = \overbrace{\frac{k_{{l}}}{2} \sum_{\substack{ m_1+m_2 = m \\ g_1+g_2= g\\ k_1+k_2=k+2}} k_1k_2 c_{m_1g_1k_1}{c}_{m_2g_2k_2} - k_{{l}}k{c}_{mgk} R_f}^{\text{link formation}} \\ \scriptsize + \overbrace{\frac{k_{{b}}}{6} \sum_{\substack{m_1+m_2+m_3= m+2 \\ g_1+g_2+g_3= g -1\\k_1+k_2+k_3  = k+3}} k_1k_2k_3 {c}_{m_1g_1k_1}c_{m_2g_2k_2}c_{m_3g_3k_3} - \frac{k_b}{2}kc_{mgk}R_f^2}^{\text{branch formation}}\\
+% \scriptsize+ \overbrace{\alert{2k_{g}c_{010} (k+1)c_{mg(k+1)} - 2 k_{g}c_{010} kc_{mgk}}}^{\text{fibrinogen reaction}}
+% \scriptsize- \overbrace{\delta_{m,0}\delta_{g,1}\delta_{k,0}\left(2kgc_{010}R_f + k_s c_{010}\right) + \delta_{m,1}\delta_{g,0}\delta_{k,2}k_s c_{010}}^{\text{sources}}\\
+% \end{multline*}
+% \begin{equation*}
+% \scriptsize \frac{d {c}_{010} }{dt} = -2k_g c_{010} R_f, \qquad \qquad \frac{dR_f}{dt} = -k_l R_f^2-\frac{k_b}{3} R_f^3 - 2k_g c_{010} R_f
+% \end{equation*}
+% \end{frame}
+
+% \begin{frame}{Results compared with experiments}
+% \begin{center}
+% % \includegraphics[width = 0.5\textwidth]{histogram.png}
+% % \includegraphics[width = 0.5\textwidth]{histo_fbfg_k3g07s2.pdf}
+% \end{center}
+% \end{frame}
+
+% \begin{frame}{Life in Utah!}
+% \vspace{-3cm}
+% % \includegraphics[width = \textwidth]{hike.pdf}
+% \end{frame}
+
+
+\end{document}
