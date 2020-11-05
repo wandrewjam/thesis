@@ -1,0 +1,350 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{enumerate}
+\item I talked to Suraj last Thursday to see how he is solving his RS
+  systems. For systems of $\sim 1000$ Stokeslets, he is using MATLAB
+  backslash, so I ran some timing experiments comparing the solve times
+  of MATLAB backslash to my Python code. They take basically the same
+  time (Python actually does slightly better, 50 seconds on the
+  compute servers vs 54 seconds, $6 (24)^2 + 2 = 3458$ stokeslets).
+\item I read the paper \cite{Barrero-Gil2013} on the method of
+  auxiliary Stokeslets.
+\item Started working on adding receptors and binding dynamics to the
+  model.
+\end{enumerate}
+
+\textbf{Auxiliary Stokeslets}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\textwidth]{aux-stks.jpg}
+  \caption{Sketch of primary and auxiliary Stokeslets from
+    Barrero-Gil \cite{Barrero-Gil2013}}
+  \label{fig:aux-stks}
+\end{figure}
+
+\begin{itemize}
+\item The main idea behind this method is to generate a set of
+  ``primary'' Stokeslets on the surface (these are always present, so
+  in the original R.S. method, all Stokeslets are primary Stokeslets),
+  and then generate a grid of temporary/auxiliary Stokeslets around
+  your current evaluation point (see Figure \ref{fig:aux-stks}). This
+  allows us to choose an $\epsilon$ on the order of the auxiliary
+  Stokeslet separation distance, instead of the primary Stokeslet
+  separation. 
+\item In the usual method of R.S., the fluid velocity $\vect{u}$ at a
+  point $\vect{x}$ is computed by
+  \begin{equation}
+    u_i(\vect{x}) = \frac{1}{8\pi\mu} \sum_{n=1}^{N_s} \sum_{j=1}^3
+    S_{ij}^\epsilon (\vect{x}, \vect{x}_n) f_{n, j}
+    w_n. \label{eq:org-mrs} 
+  \end{equation}
+\item Then, enforcing a specified velocity at each Stokeslet center
+  gives us a $3N_s \times 3N_s$ system that we can solve for the
+  Stokeslet strengths $f_{n, j}$.
+\item In the method of auxiliary Stokeslets proposed by
+  \cite{Barrero-Gil2013}, the fluid velocity at Stokeslet center $m$
+  is found by
+  \begin{equation}
+    \label{eq:eq:mod-mrs}
+    u_i(\vect{x}_m) = \frac{1}{8\pi\mu} \sum_{n \neq m} \sum_{j=1}^3
+    S_{ij}^\epsilon (\vect{x}_m, \vect{x}_n) f_{n, j} w_n +
+    \frac{1}{8\pi\mu} \sum_{j=1}^3 \langle S_{ij}^\epsilon
+    (\vect{x}_m, \vect{x}_a) \rangle f_{m, j} w_m,
+  \end{equation}
+  where $\langle S_{ij}^\epsilon (\vect{x_m}, \vect{x_a}) \rangle$ is
+  the averaged regularized Stokeslet value over all auxiliary
+  Stokeslets $\vect{x}_a$.
+\item By adding the auxiliary Stokeslets, the regularization parameter
+  can be taken on the order of $h$, the separation distance of the
+  auxiliary Stokeslets. They don't do any rigorous error analysis of
+  this, but they test it on a variety of numerical experiments. In the
+  original method of R.S., $\epsilon$ needs to be on the order of the
+  separation distance of the primary Stokeslets.
+\item Their numerical experiments are convincing: they show better
+  accuracy for less computational work solving for Stokes' drag
+  coefficient, and they demonstrate the method works for ellipsoidal
+  and toroidal bodies.
+\item However, all of these tests are performed in an unbounded
+  domain, so we'd have to test it ourselves near a wall.
+\item They also don't say much about how to distribute the auxiliary
+  Stokeslets, apart from mentioning that you should distribute them
+  across a diameter on the order of $H$---the separation distance of
+  the primary Stokeslets. In Figure \ref{fig:aux-stks} they show the
+  $\vect{x}_a$s distributed in a rectangular mesh, although my
+  instinct is to distribute them radially, since the stokeslet is
+  radially symmetric (however my mesh of primary Stokeslets is
+  rectangular).
+\item Finally, they don't do any analysis on choosing $N_s$ and $N_a$,
+  they just mention that it is computationally easier to increase $N_a$.
+\end{itemize}
+
+\textbf{Binding}
+
+\begin{itemize}
+\item There are two common models for length-dependent binding and
+  unbinding used in the rolling literature: the Bell model and the
+  Dembo model. However, one review \cite{Pospieszalska2009} notes that
+  in the parameter ranges typically encountered in cell rolling, the
+  models are interchangeable.
+\item In the Bell model, the formation $k_f$ and dissociation $k_d$
+  rates are (let $r$ be the distance between the receptor and ligand): 
+  \begin{align*}
+    k_f(r) &= k_f^0 \exp\left(\frac{\sigma |r - \lambda | (\delta - 0.5
+    |r - \lambda)}{k_B T}\right) \\
+    k_d(r) &= k_d^0 \exp\left(\frac{\delta \sigma |r - \lambda|}{k_b
+             T}\right).
+  \end{align*}
+\item In the Dembo model, the rates are:
+  \begin{align*}
+    k_f(r) &= k_f^0 \exp\left(\frac{-\sigma_\tn{ts}(r -
+             \lambda)^2}{2k_B T}\right) \\
+    k_d(r) &= k_d^0 \exp\left(\frac{(\sigma - \sigma_\tn{ts})(r -
+             \lambda)^2}{2k_b T}\right). 
+  \end{align*}
+\item In both of these models, the dissociation constant is the
+  following function of the length:
+  \begin{equation*}
+    \frac{k_d}{k_f} = \left(\frac{k_d^0}{k_f^0}\right) \exp \left(
+      \frac{-\sigma(r - \lambda)^2}{2 k_B T} \right).
+  \end{equation*}
+\item In order to model binding between receptors on the platelet and
+  ligands on the wall, we have to first place receptors on the
+  platelet surface.
+\item I initially tried placing them as I described on Wednesday
+  (generate a uniform rectangular mesh on a parallelpiped with a 3:3:1
+  aspect ratio and project to the ellipsoid). However, Andy sent me an example
+  of a set of 1000 nodes generated by Poisson disc sampling, which
+  looks more uniform to me.
+\item For ligands on the wall, in the 2D model we assumed there was a
+  continuum of ligands, which allowed us to generate
+  $\mathcal{O}(N_R)$ random numbers for the bond formation part of
+  each time step ($N_R$---number of receptors) instead of
+  $\mathcal{O}(N_R N_L)$ random numbers. However, I think this depends
+  on which model of bond formation we use. Specifically, if we use the
+  Dembo model with $\lambda = 0$, then $k_f$ is a Gaussian function
+  and the probablility of a bond forming from a recptor to \emph{any}
+  point on the wall is a an integral of $k_f$ (which is easy to find
+  analytically), and the wall-attachment point of the bond is
+  distributed normally.
+\item This same logic applies to the 3D model (using the Dembo model
+  with $\lambda = 0$), but if $\lambda > 0$ then I don't think there
+  is an analytic expression for the integral of $k_f$ over the wall,
+  and generating a random variable with the right probability
+  distribution is harder.
+\item If we do end up distributing discrete ligands on the wall, there
+  may be clever ways to distribute random numbers so that we don't
+  have to generate $N_R N_L$ new ones at each time step.
+\end{itemize}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test4_16}
+%   \caption{Motion integration of a sphere (radius $=1$) in a shear
+%     flow, with no applied force and an applied torque of
+%     $\vec{e}_z$. Mesh parameter $N = 16$.}
+%   \label{fig:f416_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test0_8w}
+%   \caption{Motion integration of a sphere (radius $=1$) in a shear
+%     flow and at a distance of $1.54$ from the wall, with an applied
+%     force of $\vec{e}_y$ and no applied torque. Mesh parameter $N =
+%     8$.}
+%   \label{fig:f08w_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.5\textwidth]{timings}
+%   \caption{Timings for generating a resistance matrix with a mesh with
+%     mesh parameter $N$. There are $6N^2 + 2$ nodes/Stokeslets on the surface of
+%     the platelet. Therefore the Stokeslets matrix contains
+%     $\mathcal{O}(N^4)$ elements, and factoring the matrix requires
+%     $\mathcal{O}(N^6)$ operations.}
+%   \label{fig:timings_plot}
+% \end{figure}
+
+% \begin{figure}[b]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_plot71_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_err_plot71_2nd}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{com_plot71_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{nsep_plot71}
+%   \end{subfigure}  
+%   \caption{Plots of the ellipsoid orientation, orientation error,
+%     center of mass, and the $N$ value with the plt-wall
+%     separation. The height of the center of mass is initialized at
+%     $1.5$. Orientation is initialized at $\vect{e}_m =
+%     \vect{e}_x$.}
+%   \label{fig:plt71}
+% \end{figure}
+
+% \begin{figure}[b]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_plot72_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_err_plot72_2nd}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{com_plot72_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{nsep_plot72}
+%   \end{subfigure}  
+%   \caption{Plots of the ellipsoid orientation, orientation error,
+%     center of mass, and the $N$ value with the plt-wall
+%     separation. The height of the center of mass is initialized at
+%     $1.2$. Orientation is initialized at $\vect{e}_m =
+%     \vect{e}_x$.}
+%   \label{fig:plt72}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_plot74_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_err_plot74_2nd}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{com_plot74_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{nsep_plot74}
+%   \end{subfigure}  
+%   \caption{Plots of the ellipsoid orientation, orientation error,
+%     center of mass, and the $N$ value with the plt-wall
+%     separation. The height of the center of mass is initialized at
+%     $0.8$. Orientation is initialized at $\vect{e}_m =
+%     \vect{e}_x$.}
+%   \label{fig:plt74}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test0_8}
+%   \caption{Motion integration of an ellipsoid in a shear flow, with an
+%     applied force of $\vec{e}_y$ and no applied torque. Mesh parameter
+%   $N = 8$.}
+%   \label{fig:f08_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test0_16}
+%   \caption{Motion integration of an ellipsoid in a shear flow, with an
+%     applied force of $\vec{e}_y$ and no applied torque. Mesh parameter
+%   $N = 16$.}
+%   \label{fig:f016_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test4_16}
+%   \caption{Motion integration of a sphere (radius $=1$) in a shear
+%     flow, with no applied force and an applied torque of $\vec{e}_z$.}
+%   \label{fig:f4_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test6_16}
+%   \caption{Motion integration of an ellipsoid in a shear flow, with an
+%     applied force of $\vec{e}_z$ and no applied torque.}
+%   \label{fig:f6_plot}
+% \end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
