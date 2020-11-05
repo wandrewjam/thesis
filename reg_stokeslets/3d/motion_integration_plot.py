@@ -79,7 +79,7 @@ def main(file_suffix, save_plots=False):
     elif file_suffix == '74':
         bad_data = np.load(data_dir + 'coarse74.npz')
         x1c, x2c, x3c = bad_data['x1'], bad_data['x2'], bad_data['x3']
-        e1c, e2c, e3c = bad_data['e1'], bad_data['e2'], bad_data['e3']
+        e1c, e2c, e3c = bad_data['e1'], bad_data['e2'], bad_data['e3']        
 
     try:
         n_array = coarse_data['node_array']
