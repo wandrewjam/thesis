@@ -1,0 +1,330 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\textbf{Binding Model}
+
+\begin{itemize}
+\item At the moment, I'm using the Dembo model for binding and unbinding
+  with 0 rest length:
+  \begin{align*}
+    k_f(r) &= k_f^0 \exp\left(\frac{-\sigma_\tn{ts} \|\vect{x}_r -
+             \vect{x}_l\|^2}{2k_B T}\right) \\
+    k_d(r) &= k_d^0 \exp\left(\frac{(\sigma - \sigma_\tn{ts})\|\vect{x}_r -
+             \vect{x}_l\|^2}{2k_b T}\right).
+  \end{align*}
+\item Parameters I used are $\gamma = 100 / s$, $k_d^0 = 5 / s$,
+  $\sigma = 100 pN / \mu m$, and $\sigma_\tn{ts} = 99 pN / \mu m$.
+\item $\sigma$ is 100$\times$ smaller than the stiffness used in Mody
+  and King, however they also assume GP1b-vWF has a rest length of 50
+  nm. The $\sigma$ I'm using comes from Fitzgibbon et. al., where they
+  also assume a 0 rest length.
+\item I haven't been able to find a value of $\sigma_\tn{ts}$; the papers
+  I've found estimating GP1b unbinding parameters use the Bell model
+  of unbinding, and estimate the bond compliance to be 0.04 nm. This
+  gives a binding rate that increases slowly relative to the typical
+  length scale of a bond.
+\item In the Dembo model for unbinding, this means that
+  $\sigma - \sigma_\tn{ts}$ should be small (and positive). In Figure
+  \ref{fig:binding-models} I plotted the Dembo binding/unbinding rates
+  with the Bell rates for the given parameters.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\textwidth]{dembo_bell}
+  \caption{Comparison of the Dembo and Bell models}
+  \label{fig:binding-models}
+\end{figure}
+
+\begin{itemize}
+\item With these parameters, I ran test simulations where the platelet
+  is initially bound and either ran the simulation long enough to
+  reach steady state, or until the bond broke. No binding was allowed
+  in these simulations.
+\item I also tried some binding experiments, however I had to change
+  some of the parameters above. I set $\sigma = 10$ and $\sigma_\tn{ts} =
+  9.9$, and $k_on^0 = 10^6$ in order to get binding within a simulation.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{com_exp1}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{emz_exp1}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{len_exp1}
+  \end{subfigure}
+  \caption{Bound experiment: Platelet initially bound in a flat
+    orientation, no unbinding}
+  \label{fig:exp1}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{com_exp2}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{emz_exp2}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{len_exp2}
+  \end{subfigure}
+  \caption{Bound experiment: Platelet initially bound in a vertical
+    orientation, no unbinding}
+  \label{fig:exp2}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{com_exp3}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{emz_exp3}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{len_exp3}
+  \end{subfigure}
+  \caption{Bound experiment: Platelet initially bound in a flat
+    orientation, with unbinding}
+  \label{fig:exp3}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{com_exp4}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{emz_exp4}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{len_exp4}
+  \end{subfigure}
+  \caption{Bound experiment: Platelet initially bound in a vertical
+    orientation, with unbinding}
+  \label{fig:exp4}
+\end{figure}
+
+%\begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test4_16}
+%   \caption{Motion integration of a sphere (radius $=1$) in a shear
+%     flow, with no applied force and an applied torque of
+%     $\vec{e}_z$. Mesh parameter $N = 16$.}
+%   \label{fig:f416_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test0_8w}
+%   \caption{Motion integration of a sphere (radius $=1$) in a shear
+%     flow and at a distance of $1.54$ from the wall, with an applied
+%     force of $\vec{e}_y$ and no applied torque. Mesh parameter $N =
+%     8$.}
+%   \label{fig:f08w_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.5\textwidth]{timings}
+%   \caption{Timings for generating a resistance matrix with a mesh with
+%     mesh parameter $N$. There are $6N^2 + 2$ nodes/Stokeslets on the surface of
+%     the platelet. Therefore the Stokeslets matrix contains
+%     $\mathcal{O}(N^4)$ elements, and factoring the matrix requires
+%     $\mathcal{O}(N^6)$ operations.}
+%   \label{fig:timings_plot}
+% \end{figure}
+
+% \begin{figure}[b]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_plot71_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_err_plot71_2nd}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{com_plot71_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{nsep_plot71}
+%   \end{subfigure}  
+%   \caption{Plots of the ellipsoid orientation, orientation error,
+%     center of mass, and the $N$ value with the plt-wall
+%     separation. The height of the center of mass is initialized at
+%     $1.5$. Orientation is initialized at $\vect{e}_m =
+%     \vect{e}_x$.}
+%   \label{fig:plt71}
+% \end{figure}
+
+% \begin{figure}[b]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_plot72_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_err_plot72_2nd}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{com_plot72_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{nsep_plot72}
+%   \end{subfigure}  
+%   \caption{Plots of the ellipsoid orientation, orientation error,
+%     center of mass, and the $N$ value with the plt-wall
+%     separation. The height of the center of mass is initialized at
+%     $1.2$. Orientation is initialized at $\vect{e}_m =
+%     \vect{e}_x$.}
+%   \label{fig:plt72}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_plot74_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{orient_err_plot74_2nd}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{com_plot74_2nd}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{nsep_plot74}
+%   \end{subfigure}  
+%   \caption{Plots of the ellipsoid orientation, orientation error,
+%     center of mass, and the $N$ value with the plt-wall
+%     separation. The height of the center of mass is initialized at
+%     $0.8$. Orientation is initialized at $\vect{e}_m =
+%     \vect{e}_x$.}
+%   \label{fig:plt74}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test0_8}
+%   \caption{Motion integration of an ellipsoid in a shear flow, with an
+%     applied force of $\vec{e}_y$ and no applied torque. Mesh parameter
+%   $N = 8$.}
+%   \label{fig:f08_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test0_16}
+%   \caption{Motion integration of an ellipsoid in a shear flow, with an
+%     applied force of $\vec{e}_y$ and no applied torque. Mesh parameter
+%   $N = 16$.}
+%   \label{fig:f016_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test4_16}
+%   \caption{Motion integration of a sphere (radius $=1$) in a shear
+%     flow, with no applied force and an applied torque of $\vec{e}_z$.}
+%   \label{fig:f4_plot}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{f_test6_16}
+%   \caption{Motion integration of an ellipsoid in a shear flow, with an
+%     applied force of $\vec{e}_z$ and no applied torque.}
+%   \label{fig:f6_plot}
+% \end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
