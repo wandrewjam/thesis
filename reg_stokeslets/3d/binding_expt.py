@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     expt = 2
     t_span = [0., 8.]
-    num_steps = 400
+    num_steps = 200
 
     def exact_vels(em):
         return np.zeros(6)
@@ -19,21 +19,22 @@ if __name__ == '__main__':
 
     if expt == 1:
         bonds = np.array([[0, 0., 0.]])
-        init = np.array([.8, 0, 0, 1., 0, 0])
+        init = np.array([.6, 0, 0, 1., 0, 0])
         receptors = np.array([[-.5, 0., 0.]])
     elif expt == 2:
         bonds = np.array([[0, 0., 0.]])
         init = np.array([1.55, 0, 0, 0, 0, -1.])
         receptors = np.array([[0., 1.5, 0.]])
     elif expt == 3:
-        bonds = np.zeros(shape=(0, 3), dtype='float')
-        init = np.array([.8, 0, 0, 1., 0, 0])
+        init = np.array([1.55, 0, 0, 0, 0, -1.])
         receptors = np.load('Xb_0.26.npy')
+        bonds = np.zeros(shape=(0, 3), dtype='float')
+        # bonds = np.array([[np.argmax(receptors[:, 1]), 0., 0.]])
     else:
         raise ValueError('expt is not valid')
 
     t_sc, f_sc, lam, k0_on, k0_off, eta, eta_ts, kappa = nondimensionalize(
-        l_scale=1, shear=100., mu=4e-3, l_sep=0., dimk0_on=5., dimk0_off=0.,
+        l_scale=1, shear=100., mu=4e-3, l_sep=0., dimk0_on=1000000., dimk0_off=5.,
         sig=100., sig_ts=99., temp=310.)
 
     result = integrate_motion(
@@ -56,15 +57,22 @@ if __name__ == '__main__':
     plt.show()
 
     center = np.stack(result[:3])
-    lengths = np.linalg.norm(
-        center[:, None, :] + np.dot(result[3].transpose((2, 0, 1)),
-                                    receptors.T).transpose((1, 2, 0)),
-        axis=0)
+    if expt == 3:
+        lengths = np.linalg.norm(center + np.dot(result[3].transpose(
+            (2, 0, 1)), receptors[np.argmax(receptors[:, 1]), :].T).T, axis=0)
+    else:
+        lengths = np.linalg.norm(
+            center[:, None, :] + np.dot(result[3].transpose((2, 0, 1)),
+                                        receptors.T).transpose((1, 2, 0)),
+            axis=0)
     plt.plot(t[mask], lengths.T[mask])
     plt.title('Bond length')
     plt.xlabel('Time (s)')
     plt.ylabel('Length (\\mu m)')
     plt.show()
+
+    bond_num = [bond.shape[0] for bond in result[-1]]
+    print(bond_num)
 
     theta = np.arctan2(result[3][2, 0, mask][-1], result[3][1, 0, mask][-1])
     phi = np.arccos(result[3][0, 0, mask][-1])
@@ -72,7 +80,7 @@ if __name__ == '__main__':
     eps = eps_picker(n_nodes, a=a, b=b)
     shear_f, shear_t = generate_resistance_matrices(
         eps, n_nodes, a=a, b=b, domain=domain, distance=center[0, mask][-1],
-        theta=theta, phi=phi)[:2]
+        theta=theta, phi=phi)[-2:]
 
     print(np.stack([shear_f, shear_t]))
 

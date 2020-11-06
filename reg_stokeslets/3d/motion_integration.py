@@ -96,7 +96,7 @@ def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off,
     # Form bonds
     for i, el in enumerate(form_bonds):
         if el:
-            ligand = np.sqrt(eta_ts)*np.random.randn(2) + true_receptors[i, 1:]
+            ligand = np.sqrt(1 / eta_ts)*np.random.randn(2) + true_receptors[i, 1:]
             bonds = np.append(bonds, np.append(i, ligand)[None, :], axis=0)
 
     # Break bonds
@@ -496,7 +496,9 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                  errs[:, i+1]) = res[:-2]
                 receptor_history.append(res[-2])
                 bond_history.append(res[-1])
-            if bond_history[-1].shape[0] == 0:
+
+            if (bond_history[-1].shape[0] == 0
+                    and bond_history[-2].shape[0] > 0):
                 return (x1, x2, x3, r_matrices, errs, node_array, sep_array,
                         receptor_history, bond_history)
     except AssertionError:
