@@ -1,0 +1,125 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{itemize}
+\item Fixed the binding within half time-steps
+\item I was still having an issue where some simulations reached
+  Python's maximum recursion limit (1000) and terminated. When I
+  checked some simulations, the platelet would get extremely close to
+  the wall: $< 1 \tn{nm}$
+\item So I added a short range repulsive force:
+  $\displaystyle{F_\tn{rep} = F_0 \frac{\tau e^{-\tau \delta}}{1 -
+      e^{-\tau \delta}}}$ with $F_0 = 500 \tn{pN} \cdot \tn{m}$ and
+  $\tau = 2000 \mu\tn{m}^{-1}$ (from Mody and King)
+\item This has \emph{mostly} fixed the issue. However, I still get
+  some simulations that reach the (new) recursion limit. I somewhat
+  arbitrarily set the new limit at 8.
+\item Some examples of simulations with binding are shown below
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{bd_expt}
+  \caption{}
+  \label{fig:fig1}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{bd_expta}
+  \caption{}
+  \label{fig:fig2}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{bd_exptb}
+  \caption{}
+  \label{fig:fig3}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{bd_exptc}
+  \caption{}
+  \label{fig:fig4}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{bd_exptd}
+  \caption{}
+  \label{fig:fig5}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
