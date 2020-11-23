@@ -6,11 +6,14 @@
 *.pdf
 *.pages
 *.numbers
+*.key
 *.DS_Store
 *.idea
 *.png
 *.tiff
 *.jpg
+*.jpeg
+*.sty
 ss*.txt
 *.ai
 *.mp4
