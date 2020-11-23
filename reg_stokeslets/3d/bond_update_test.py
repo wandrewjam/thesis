@@ -13,7 +13,7 @@ if __name__ == '__main__':
     k0_on, k0_off, eta = 1, 1, 1
 
     for i in range(100):
-        bonds = update_bonds(receptors, bonds, 0, 0, 0, np.eye(3), dt, k0_on, k0_off, eta, eta_ts)
+        bonds = update_bonds(receptors, bonds, 0, 0, 0, np.eye(3), dt, k0_on, k0_off, eta, eta_ts, 0)
         bond_history.append(bonds)
 
     n_bonds = np.zeros(101)
