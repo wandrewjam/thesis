@@ -42,7 +42,10 @@ def main():
     t_span = [0., 50.]
     num_steps = 250
 
-    seed = None
+    # seed = np.random.randint(int('1'*32, 2)+1)
+    seed = 21554160
+    # seed = 215541690
+    # seed = 4072544895
     np.random.seed(seed)
 
     def exact_vels(em):
@@ -71,7 +74,7 @@ def main():
     # Define parameters
     shear = 100.
     l_sep = .1
-    dimk0_on = 1000.
+    dimk0_on = 10.
     dimk0_off = 5.
     sig = 1e2
     sig_ts = 9.99e1
@@ -84,8 +87,8 @@ def main():
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off)
 
-    # t = result[9] * t_sc
-    t = np.linspace(t_span[0], t_span[1], num=num_steps+1) * t_sc
+    t = result[9] * t_sc
+    # t = np.linspace(t_span[0], t_span[1], num=num_steps+1) * t_sc
     mask = result[0] > 0
 
     if plot_data:
@@ -111,13 +114,13 @@ def main():
         for i, t_i in enumerate(t):
             rmat = result[3][:, :, i]
             true_receptors = center[:, [i]].T + np.dot(receptors, rmat.T)
-            bond_lens = get_bond_lengths(result[-1][i], true_receptors)
-            for j in range(len(result[-1][i])):
-                key = tuple(result[-1][i][j])
+            bond_lens = get_bond_lengths(result[8][i], true_receptors)
+            for j in range(len(result[8][i])):
+                key = tuple(result[8][i][j])
                 try:
                     bond_dict[key] = (np.append(bond_dict[key][0], t_i),
-                                      np.append(bond_dict[key][1], bond_lens[j]
-                                                ))
+                                      np.append(bond_dict[key][1],
+                                                bond_lens[j]))
                 except KeyError:
                     bond_dict[key] = (t_i, bond_lens[j])
         for times, bond_len in bond_dict.values():
@@ -158,7 +161,7 @@ def main():
         save_info(fname, seed, t_span, num_steps, n_nodes, a, b, adaptive,
                   shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts)
 
-    bond_num = [bond.shape[0] for bond in result[-1]]
+    bond_num = [bond.shape[0] for bond in result[8]]
     print(bond_num)
     theta = np.arctan2(result[3][2, 0, mask][-1], result[3][1, 0, mask][-1])
     phi = np.arccos(result[3][0, 0, mask][-1])
@@ -167,6 +170,7 @@ def main():
         eps, n_nodes, a=a, b=b, domain=domain, distance=center[0, mask][-1],
         theta=theta, phi=phi)[-2:]
     print(np.stack([shear_f, shear_t]))
+    print('Seed = ' + str(seed))
     print('Done!')
 
 
