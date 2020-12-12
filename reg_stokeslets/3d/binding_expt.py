@@ -28,29 +28,55 @@ def save_info(fname, seed, t_span, num_steps, n_nodes, a, b, adaptive, shear,
         f.writelines(expt_info)
 
 
-def main():
-    save_data = True
-    plot_data = True
+def main(expt_num=None, save_data=True, plot_data=False):
     save_dir = 'data/'
     # Read in previous file names
-    file_i = [int(f[6:9]) for f in os.listdir(save_dir) if f[:6] == 'bd_exp']
-    try:
-        max_i = max(file_i)
-    except ValueError:
-        max_i = -1
-    expt = 3
+    file_i = [int(f[7:10]) for f in os.listdir(save_dir) if f[:7] == 'bd_expt']
+    if expt_num is None:
+        try:
+            max_i = max(file_i)
+        except ValueError:
+            max_i = -1
+    else:
+        if expt_num in file_i:
+            while True:
+                cont = raw_input('Do you want to overwrite file {}?: (Y or N) '
+                                 .format(save_dir + 'bd_expt{:03d}.npz'
+                                         .format(expt_num)))
+                if cont == 'Y':
+                    break
+                elif cont == 'N':
+                    print('Exiting program')
+                    return None
+                print('Type Y or N')
+
     t_span = [0., 50.]
     num_steps = 250
 
-    # seed = np.random.randint(int('1'*32, 2)+1)
-    seed = 21554160
-    # seed = 215541690
-    # seed = 4072544895
+    if expt_num % 3 == 0:
+        one_side = False
+        check_bonds = False
+    elif expt_num % 3 == 1:
+        one_side = True
+        check_bonds = False
+    elif expt_num % 3 == 2:
+        one_side = True
+        check_bonds = True
+
+    if expt_num // 3 == 0:
+        seed = 21554160
+    elif expt_num // 3 == 1:
+        seed = 215541690
+    elif expt_num // 3 == 2:
+        seed = 4072544895
+    else:
+        seed = np.random.randint(int('1'*32, 2)+1)
     np.random.seed(seed)
 
     def exact_vels(em):
         return np.zeros(6)
 
+    expt = 3
     n_nodes = 8
     a, b = 1.5, .5
     domain = 'wall'
@@ -82,14 +108,15 @@ def main():
         l_scale=1, shear=shear, mu=4e-3, l_sep=l_sep, dimk0_on=dimk0_on,
         dimk0_off=dimk0_off, sig=sig, sig_ts=sig_ts, temp=310.)
 
-    result = integrate_motion(
-        t_span, num_steps, init, exact_vels, n_nodes, a, b, domain,
-        adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
-        eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off)
+    result = integrate_motion(t_span, num_steps, init, exact_vels, n_nodes, a, b, domain, adaptive=adaptive,
+                              receptors=receptors, bonds=bonds, eta=eta, eta_ts=eta_ts, kappa=kappa, lam=lam,
+                              k0_on=k0_on, k0_off=k0_off, check_bonds=check_bonds, one_side=one_side)
 
     t = result[9] * t_sc
     # t = np.linspace(t_span[0], t_span[1], num=num_steps+1) * t_sc
     mask = result[0] > 0
+
+    center = np.stack(result[:3])
 
     if plot_data:
         fig, axs = plt.subplots(3, sharex='all', figsize=(6, 8))
@@ -105,7 +132,6 @@ def main():
         axs[1].set_ylabel('Orientation component')
         axs[1].legend(['e_mz'])
 
-        center = np.stack(result[:3])
         # fig, ax = plt.subplots()
         # if expt == 3:
         # Figure out how to plot bonds individually (and only bonds that exist at a particular time point)
@@ -139,10 +165,7 @@ def main():
         plt.show()
 
     if save_data:
-        new_i = str(max_i + 1)
-        new_i = '0' * (3 - len(new_i)) + new_i
-
-        file_fmt = 'bd_expt{}'.format(new_i)
+        file_fmt = 'bd_expt{:03d}'.format(expt_num)
 
         x, y, z, r_matrices = result[:4]
         bond_history = result[8]
@@ -154,10 +177,13 @@ def main():
                         for bd in bond_history]
         bond_array = np.stack(padded_bonds, axis=-1)
 
-        np.savez(file_fmt, t, x, y, z, r_matrices, bond_array, receptors, t=t,
-                 x=x, y=y, z=z, r_matrices=r_matrices, bond_array=bond_array,
-                 receptors=receptors)
-        fname = 'info_' + file_fmt + '.txt'
+        np.savez(save_dir + file_fmt, t, x, y, z, r_matrices, bond_array,
+                 receptors, t=t, x=x, y=y, z=z, r_matrices=r_matrices,
+                 bond_array=bond_array, receptors=receptors)
+        savemat(save_dir + file_fmt,
+                {'t': t, 'x': x, 'y': y, 'z': z, 'R': r_matrices,
+                 'bond_array': bond_array, 'receptors': receptors})
+        fname = save_dir + 'info_' + file_fmt + '.txt'
         save_info(fname, seed, t_span, num_steps, n_nodes, a, b, adaptive,
                   shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts)
 
@@ -175,4 +201,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+
+    try:
+        expt_num = int(sys.argv[1])
+    except IndexError:
+        expt_num = None
+
+    main(expt_num)

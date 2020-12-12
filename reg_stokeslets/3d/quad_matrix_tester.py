@@ -49,10 +49,8 @@ def main():
         for start, init in zip([time1, time2, time3, time4, time5],
                                [pos1, pos2, pos3, pos4, pos5]):
             s_matrices.append(
-                integrate_motion([start, start+t_interval], t_steps, init,
-                                 exact_vels, n_nodes, a=1.5, b=0.5,
-                                 order='2nd', domain='wall', adaptive=False,
-                                 save_quad_matrix_info=True)[-1]
+                integrate_motion([start, start + t_interval], t_steps, init, exact_vels, n_nodes, a=1.5, b=0.5,
+                                 domain='wall', order='2nd', adaptive=False, save_quad_matrix_info=True)[-1]
             )
 
         s_dict.update([(n_nodes, s_matrices)])
