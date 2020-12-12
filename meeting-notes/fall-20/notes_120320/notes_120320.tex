@@ -1,0 +1,237 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{itemize}
+\item Short range repulsive force (Figure \ref{fig:sep}):
+  $\displaystyle{F_\tn{rep} = F_0 \frac{\tau e^{-\tau \delta}}{1 -
+      e^{-\tau \delta}}}$ with $F_0 = 500 \tn{pN} \cdot \tn{m}$ and
+  $\tau = 2000 \mu\tn{m}^{-1}$
+  \begin{itemize}
+  \item I fixed the way I was applying this force (before, I was
+    using the distance from the wall to the center of mass as the
+    separation distance $\delta$)
+  \item Also, I was previously applying this (only) as a body force on
+    the platelet. I think a slightly more accurate assumption is to
+    apply the force \emph{at} the point on the platelet closest to the
+    wall, so that there is a contribution to the body torque as well.
+  \item Because this force grows rapidly as the separation distance
+    gets small, this introduced a problem where once the platelet got
+    close to the wall, the large repulsive force pushed the platelet
+    100s of nm away from the wall in a single time step. I didn't see
+    any binding in any simulations.
+  \item In successive time steps as the platelet approached the wall,
+    the separation distance went from $\sim 30$nm with a repulsive
+    force of $\sim 10^{-19}$, to $\sim 20$nm with a repulsive force of
+    $\sim 10^{-6}$, to $\sim 11$nm with a repulsive force of
+    $\sim 500$. With this force, the separation distance jumped back
+    to $\sim 50$nm.
+  \item Fix---implement a heuristic restriction on the time step. I
+    set it up so that if the repulsive force grows or shrinks by more
+    than a factor of 10 within a time step, I take two half
+    time-steps (if the repulsive force is $< 0.1$, then I don't apply
+    this restriction)
+  \end{itemize}
+\item Also, I modified the bond force function to eliminate
+  compression forces. This reduced the oscillations we had been seeing
+  previously in some tests, though not all of them
+\item I implemented a similar time step restriction where I took half
+  time steps if the bond forces differed too much at the beginning and
+  end of a time step
+\end{itemize}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.8\textwidth]{rep_force}
+  \caption{Repulsive force as a function of the minimum separation
+    distance}
+  \label{fig:sep}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt000}
+  \caption{1st random seed, two-sided bond force, no step restriction
+    for the bond force. Top subplot shows the $x$ and $z$ components
+    of the center of mass. 2nd subplot shows the $z$ component of the
+    orientation vector. 3rd subplot shows the bond lengths. 4th
+    subplot shows the difference between $z$ components of the bound
+    receptor and the center of mass. Bottom subplot shows the $z$
+    component of each bond.}
+  \label{fig:fig1}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt001}
+  \caption{1st random seed, one-sided bond force, no step restriction
+    for the bond force. Top subplot shows the $x$ and $z$ components
+    of the center of mass. 2nd subplot shows the $z$ component of the
+    orientation vector. 3rd subplot shows the bond lengths. 4th
+    subplot shows the difference between $z$ components of the bound
+    receptor and the center of mass. Bottom subplot shows the $z$
+    component of each bond.}
+  \label{fig:fig2}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt002}
+  \caption{1st random seed, one-sided bond force, plus step
+    restriction for the bond force. Top subplot shows the $x$ and $z$
+    components of the center of mass. 2nd subplot shows the $z$
+    component of the orientation vector. 3rd subplot shows the bond
+    lengths. 4th subplot shows the difference between $z$ components
+    of the bound receptor and the center of mass. Bottom subplot shows
+    the $z$ component of each bond.}
+  \label{fig:fig3}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt003}
+  \caption{2nd random seed, two-sided bond force, no step restriction
+    for the bond force. Top subplot shows the $x$ and $z$ components
+    of the center of mass. 2nd subplot shows the $z$ component of the
+    orientation vector. 3rd subplot shows the bond lengths. 4th
+    subplot shows the difference between $z$ components of the bound
+    receptor and the center of mass. Bottom subplot shows the $z$
+    component of each bond.}
+  \label{fig:fig4}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt004}
+  \caption{2nd random seed, one-sided bond force, no step restriction
+    for the bond force. Top subplot shows the $x$ and $z$ components
+    of the center of mass. 2nd subplot shows the $z$ component of the
+    orientation vector. 3rd subplot shows the bond lengths. 4th
+    subplot shows the difference between $z$ components of the bound
+    receptor and the center of mass. Bottom subplot shows the $z$
+    component of each bond.}
+  \label{fig:fig5}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt005}
+  \caption{2nd random seed, one-sided bond force, plus step
+    restriction for the bond force. Top subplot shows the $x$ and $z$
+    components of the center of mass. 2nd subplot shows the $z$
+    component of the orientation vector. 3rd subplot shows the bond
+    lengths. 4th subplot shows the difference between $z$ components
+    of the bound receptor and the center of mass. Bottom subplot shows
+    the $z$ component of each bond.}
+  \label{fig:fig6}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt006}
+  \caption{3rd random seed, two-sided bond force, no step restriction
+    for the bond force. Top subplot shows the $x$ and $z$ components
+    of the center of mass. 2nd subplot shows the $z$ component of the
+    orientation vector. 3rd subplot shows the bond lengths. 4th
+    subplot shows the difference between $z$ components of the bound
+    receptor and the center of mass. Bottom subplot shows the $z$
+    component of each bond.}
+  \label{fig:fig7}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt007}
+  \caption{3rd random seed, one-sided bond force, no step restriction
+    for the bond force. Top subplot shows the $x$ and $z$ components
+    of the center of mass. 2nd subplot shows the $z$ component of the
+    orientation vector. 3rd subplot shows the bond lengths. 4th
+    subplot shows the difference between $z$ components of the bound
+    receptor and the center of mass. Bottom subplot shows the $z$
+    component of each bond.}
+  \label{fig:fig8}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{bd_expt008}
+  \caption{3rd random seed, one-sided bond force, plus step
+    restriction for the bond force. Top subplot shows the $x$ and $z$
+    components of the center of mass. 2nd subplot shows the $z$
+    component of the orientation vector. 3rd subplot shows the bond
+    lengths. 4th subplot shows the difference between $z$ components
+    of the bound receptor and the center of mass. Bottom subplot shows
+    the $z$ component of each bond.}
+  \label{fig:fig9}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
