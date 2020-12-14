@@ -272,7 +272,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
               lam=0, k0_on=1, k0_off=1, precompute_array=None, level=0, check_bonds=True, one_side=True):
     valid_test_nodes = 48
 
-    if level >= 8:
+    if level >= 16:
         print('max recursions reached in time_step')
         raise OverflowError()
 

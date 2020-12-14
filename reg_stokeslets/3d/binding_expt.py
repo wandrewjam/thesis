@@ -21,8 +21,8 @@ def save_info(fname, seed, t_span, num_steps, n_nodes, a, b, adaptive, shear,
                      'l_sep, {}\n'.format(l_sep),
                      'dimk0_on, {}\n'.format(dimk0_on),
                      'dimk0_off, {}\n'.format(dimk0_off),
-                     'sig, {}'.format(sig),
-                     'sig_ts, {}'.format(sig_ts)
+                     'sig, {}\n'.format(sig),
+                     'sig_ts, {}\n'.format(sig_ts)
                      ]
 
         f.writelines(expt_info)
@@ -69,6 +69,8 @@ def main(expt_num=None, save_data=True, plot_data=False):
         seed = 215541690
     elif expt_num // 3 == 2:
         seed = 4072544895
+    elif expt_num // 3 == 27:
+        seed = 803402144
     else:
         seed = np.random.randint(int('1'*32, 2)+1)
     np.random.seed(seed)
@@ -102,8 +104,8 @@ def main(expt_num=None, save_data=True, plot_data=False):
     l_sep = .1
     dimk0_on = 10.
     dimk0_off = 5.
-    sig = 1e2
-    sig_ts = 9.99e1
+    sig = 1e4
+    sig_ts = 9.99e3
     t_sc, f_sc, lam, k0_on, k0_off, eta, eta_ts, kappa = nondimensionalize(
         l_scale=1, shear=shear, mu=4e-3, l_sep=l_sep, dimk0_on=dimk0_on,
         dimk0_off=dimk0_off, sig=sig, sig_ts=sig_ts, temp=310.)
@@ -132,9 +134,6 @@ def main(expt_num=None, save_data=True, plot_data=False):
         axs[1].set_ylabel('Orientation component')
         axs[1].legend(['e_mz'])
 
-        # fig, ax = plt.subplots()
-        # if expt == 3:
-        # Figure out how to plot bonds individually (and only bonds that exist at a particular time point)
         # Use a dict to track individual bonds over time
         bond_dict = {}
         for i, t_i in enumerate(t):
