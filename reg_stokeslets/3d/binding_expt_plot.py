@@ -80,9 +80,9 @@ def main(expt_num):
     axs[3].set_ylabel('$z$ difference ($\\mu$m)')
     axs[4].set_ylabel('$z$ difference ($\\mu$m)')
     axs[-1].set_xlabel('Time (s)')
-    # plt.savefig(plot_dir + file_fmt, bbox_inches='tight')
-    plt.tight_layout()
-    plt.show()
+    plt.savefig(plot_dir + file_fmt + '_1', bbox_inches='tight')
+    # plt.tight_layout()
+    # plt.show()
 
     # Compute separation distance and rep force for each time step
     sep_distance = np.zeros(shape=x.shape)
@@ -98,11 +98,11 @@ def main(expt_num):
     for times, bond_len, z_rec, z_cmp, x_cmp, y_cmp in bond_dict.values():
         axs[2].plot(times, x_cmp)
         axs[2].plot(times, y_cmp, linestyle='--')
-    plt.show()
-
+    plt.savefig(plot_dir + file_fmt + '_2', bbox_inches='tight')
+    # plt.show()
 
 
 if __name__ == '__main__':
     # for num in range(9):
     #     main(num)
-    main(6)
+    main(92)
