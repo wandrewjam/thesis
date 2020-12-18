@@ -7,29 +7,58 @@ import os
 from scipy.io import savemat
 
 
-def save_info(fname, seed, t_span, num_steps, n_nodes, a, b, adaptive, shear,
-              l_sep, dimk0_on, dimk0_off, sig, sig_ts):
-    with open(fname, 'w') as f:
-        expt_info = ['seed, {}\n'.format(seed),
-                     't_span, [{} {}]\n'.format(*t_span),
-                     'num_steps, {}\n'.format(num_steps),
-                     'n_nodes, {}\n'.format(n_nodes),
-                     'a, {}\n'.format(a),
-                     'b, {}\n'.format(b),
-                     'adaptive, {}\n'.format(adaptive),
-                     'shear, {}\n'.format(shear),
-                     'l_sep, {}\n'.format(l_sep),
-                     'dimk0_on, {}\n'.format(dimk0_on),
-                     'dimk0_off, {}\n'.format(dimk0_off),
-                     'sig, {}\n'.format(sig),
-                     'sig_ts, {}\n'.format(sig_ts)
+def parse_file(filename):
+    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
+    parlist = [('filename', filename)]
+    with open(txt_dir + filename + '.txt', 'r') as f:
+        while True:
+            command = f.readline().split()
+            if len(command) < 1:
+                continue
+            if command[0] == 'done':
+                break
+
+            key, value = command
+            if key in ['seed', 'num_steps', 'n_nodes']:
+                parlist.append((key, int(value)))
+            elif key == 'adaptive':
+                parlist.append((key, 'True' == value))
+            else:
+                parlist.append((key, float(value)))
+    return dict(parlist)
+
+
+def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
+              adaptive, shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts):
+    import os
+    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
+    with open(txt_dir + filename + '.txt', 'w') as f:
+        expt_info = ['seed {}\n'.format(seed),
+                     't_start {}\n'.format(t_start),
+                     't_end {}\n'.format(t_end),
+                     'num_steps {}\n'.format(num_steps),
+                     'n_nodes {}\n'.format(n_nodes),
+                     'a {}\n'.format(a),
+                     'b {}\n'.format(b),
+                     'adaptive {}\n'.format(adaptive),
+                     'shear {}\n'.format(shear),
+                     'l_sep {}\n'.format(l_sep),
+                     'dimk0_on {}\n'.format(dimk0_on),
+                     'dimk0_off {}\n'.format(dimk0_off),
+                     'sig {}\n'.format(sig),
+                     'sig_ts {}\n'.format(sig_ts),
+                     '\n', 'done\n'
                      ]
 
         f.writelines(expt_info)
 
 
-def main(expt_num=None, save_data=True, plot_data=False):
+def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
+         t_end=50., num_steps=250, seed=None, n_nodes=8, adaptive=False, a=1.5,
+         b=.5, shear=100., l_sep=0.1, dimk0_on=10., dimk0_off=5., sig=1e4,
+         sig_ts=9.99e3, one_side=False, check_bonds=False):
     save_dir = 'data/'
+    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
     # Read in previous file names
     file_i = [int(f[7:10]) for f in os.listdir(save_dir) if f[:7] == 'bd_expt']
     if expt_num is None:
@@ -50,28 +79,30 @@ def main(expt_num=None, save_data=True, plot_data=False):
                     return None
                 print('Type Y or N')
 
-    t_span = [0., 50.]
-    num_steps = 250
+    # t_span = [0., 50.]
+    # num_steps = 250
 
-    if expt_num % 3 == 0:
-        one_side = False
-        check_bonds = False
-    elif expt_num % 3 == 1:
-        one_side = True
-        check_bonds = False
-    elif expt_num % 3 == 2:
-        one_side = True
-        check_bonds = True
+    # if expt_num % 3 == 0:
+    #     one_side = False
+    #     check_bonds = False
+    # elif expt_num % 3 == 1:
+    #     one_side = True
+    #     check_bonds = False
+    # elif expt_num % 3 == 2:
+    #     one_side = True
+    #     check_bonds = True
 
-    if expt_num // 3 == 0:
-        seed = 21554160
-    elif expt_num // 3 == 1:
-        seed = 215541690
-    elif expt_num // 3 == 2:
-        seed = 4072544895
-    elif expt_num // 3 == 27:
-        seed = 803402144
-    else:
+    # if expt_num // 3 == 0:
+    #     seed = 21554160
+    # elif expt_num // 3 == 1:
+    #     seed = 215541690
+    # elif expt_num // 3 == 2:
+    #     seed = 4072544895
+    # elif expt_num // 3 == 27:
+    #     seed = 803402144
+    # else:
+    #     seed = np.random.randint(int('1'*32, 2)+1)
+    if seed is None:
         seed = np.random.randint(int('1'*32, 2)+1)
     np.random.seed(seed)
 
@@ -79,10 +110,10 @@ def main(expt_num=None, save_data=True, plot_data=False):
         return np.zeros(6)
 
     expt = 3
-    n_nodes = 8
-    a, b = 1.5, .5
+    # n_nodes = 8
+    # a, b = 1.5, .5
     domain = 'wall'
-    adaptive = False
+    # adaptive = False
     if expt == 1:
         bonds = np.array([[0, 0., 0.]])
         init = np.array([.6, 0, 0, 1., 0, 0])
@@ -100,19 +131,23 @@ def main(expt_num=None, save_data=True, plot_data=False):
         raise ValueError('expt is not valid')
 
     # Define parameters
-    shear = 100.
-    l_sep = .1
-    dimk0_on = 10.
-    dimk0_off = 5.
-    sig = 1e4
-    sig_ts = 9.99e3
+    # shear = 100.
+    # l_sep = .1
+    # dimk0_on = 10.
+    # dimk0_off = 5.
+    # sig = 1e4
+    # sig_ts = 9.99e3
     t_sc, f_sc, lam, k0_on, k0_off, eta, eta_ts, kappa = nondimensionalize(
         l_scale=1, shear=shear, mu=4e-3, l_sep=l_sep, dimk0_on=dimk0_on,
         dimk0_off=dimk0_off, sig=sig, sig_ts=sig_ts, temp=310.)
 
-    result = integrate_motion(t_span, num_steps, init, exact_vels, n_nodes, a, b, domain, adaptive=adaptive,
-                              receptors=receptors, bonds=bonds, eta=eta, eta_ts=eta_ts, kappa=kappa, lam=lam,
-                              k0_on=k0_on, k0_off=k0_off, check_bonds=check_bonds, one_side=one_side)
+    nd_start, nd_end = t_start / t_sc, t_end / t_sc
+
+    result = integrate_motion(
+        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain,
+        adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
+        eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
+        check_bonds=check_bonds, one_side=one_side)
 
     t = result[9] * t_sc
     # t = np.linspace(t_span[0], t_span[1], num=num_steps+1) * t_sc
@@ -164,7 +199,7 @@ def main(expt_num=None, save_data=True, plot_data=False):
         plt.show()
 
     if save_data:
-        file_fmt = 'bd_expt{:03d}'.format(expt_num)
+        # file_fmt = 'bd_expt{:03d}'.format(expt_num)
 
         x, y, z, r_matrices = result[:4]
         bond_history = result[8]
@@ -176,15 +211,15 @@ def main(expt_num=None, save_data=True, plot_data=False):
                         for bd in bond_history]
         bond_array = np.stack(padded_bonds, axis=-1)
 
-        np.savez(save_dir + file_fmt, t, x, y, z, r_matrices, bond_array,
+        np.savez(save_dir + filename, t, x, y, z, r_matrices, bond_array,
                  receptors, t=t, x=x, y=y, z=z, r_matrices=r_matrices,
                  bond_array=bond_array, receptors=receptors)
-        savemat(save_dir + file_fmt,
+        savemat(save_dir + filename,
                 {'t': t, 'x': x, 'y': y, 'z': z, 'R': r_matrices,
                  'bond_array': bond_array, 'receptors': receptors})
-        fname = save_dir + 'info_' + file_fmt + '.txt'
-        save_info(fname, seed, t_span, num_steps, n_nodes, a, b, adaptive,
-                  shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts)
+        save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
+                  adaptive, shear, l_sep, dimk0_on, dimk0_off,
+                  sig, sig_ts)
 
     bond_num = [bond.shape[0] for bond in result[8]]
     print(bond_num)
@@ -202,9 +237,5 @@ def main(expt_num=None, save_data=True, plot_data=False):
 if __name__ == '__main__':
     import sys
 
-    try:
-        expt_num = int(sys.argv[1])
-    except IndexError:
-        expt_num = None
-
-    main(expt_num)
+    pars = parse_file(sys.argv[1])
+    main(**pars)
