@@ -10,7 +10,8 @@ def main(num_expts, filename, runner):
     all_filenames = []
 
     for i in range(num_expts):
-        file_i = [int(f[6:9]) for f in os.listdir(txt_dir) if f[:6] == 'bd_run']
+        file_i = [int(f[6:9]) for f in os.listdir(txt_dir) 
+                  if (f[:6] == 'bd_run' and f[6:9] != 'ner')]
         try:
             k = max(file_i)
         except ValueError:
@@ -18,7 +19,7 @@ def main(num_expts, filename, runner):
         filename = 'bd_run{:03d}'.format(k+1)
         all_filenames.append(filename + '\n')
         seed = np.random.randint(2**32)
-        pars.update([('seed', seed), ('filename', filename), ('num_steps', 5), ('t_end', 0.01)])
+        pars.update([('seed', seed), ('filename', filename)])
         save_info(**pars)
 
     with open(txt_dir + runner + '.txt', 'w') as f:
