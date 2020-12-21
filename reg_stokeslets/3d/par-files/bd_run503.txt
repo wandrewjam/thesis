@@ -1,4 +1,4 @@
-seed 75050822
+seed 1081306971
 t_start 0.0
 t_end 0.5
 num_steps 250
@@ -12,5 +12,7 @@ dimk0_on 25.0
 dimk0_off 5.0
 sig 10000.0
 sig_ts 9999.0
+one_side True
+check_bonds True
 
 done

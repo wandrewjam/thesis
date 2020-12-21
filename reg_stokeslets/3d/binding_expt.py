@@ -21,7 +21,7 @@ def parse_file(filename):
             key, value = command
             if key in ['seed', 'num_steps', 'n_nodes']:
                 parlist.append((key, int(value)))
-            elif key == 'adaptive':
+            elif key in ['adaptive', 'one_side', 'check_bonds']:
                 parlist.append((key, 'True' == value))
             else:
                 parlist.append((key, float(value)))
@@ -29,7 +29,8 @@ def parse_file(filename):
 
 
 def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
-              adaptive, shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts):
+              adaptive, shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts,
+              one_side, check_bonds):
     import os
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
     with open(txt_dir + filename + '.txt', 'w') as f:
@@ -47,6 +48,8 @@ def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
                      'dimk0_off {}\n'.format(dimk0_off),
                      'sig {}\n'.format(sig),
                      'sig_ts {}\n'.format(sig_ts),
+                     'one_side {}\n'.format(one_side),
+                     'check_bonds {}\n'.format(check_bonds),
                      '\n', 'done\n'
                      ]
 
@@ -219,7 +222,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
                  'bond_array': bond_array, 'receptors': receptors})
         save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
                   adaptive, shear, l_sep, dimk0_on, dimk0_off,
-                  sig, sig_ts)
+                  sig, sig_ts, one_side, check_bonds)
 
     bond_num = [bond.shape[0] for bond in result[8]]
     print(bond_num)

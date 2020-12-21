@@ -12,5 +12,7 @@ dimk0_on 10.0
 dimk0_off 5.0
 sig 1000.0
 sig_ts 999.9
+one_side True
+check_bonds True
 
 done
