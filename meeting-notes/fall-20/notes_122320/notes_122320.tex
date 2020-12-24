@@ -1,0 +1,163 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{itemize}
+\item Ran simulations with 4 different $k_\tn{on}$ values: $1 / s$, $5
+  / s$, $10 / s$, and $25 / s$. These values were chosen pretty
+  arbitrarily, $10 / s$ is the $k_\tn{on}$ value I have been using in
+  my previous experiments
+\item I plotted trajectories from these experiments, found the
+  proportion of platelets that bind at any point, the proportion of
+  platelets that are bound at the end of the experiment, as well as
+  average velocities, steps, and dwells
+\end{itemize}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.8\textwidth]{trajectories03}
+  \caption{Platelet trajectories with $k_\tn{on} = 1 \ s$. 15.6\% of
+    platelets bound at some point, and 12.5\% were bound at the end of
+  the simulation.}
+  \label{fig:traj03}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{trajectories02}
+  \caption{Platelet trajectories with $k_\tn{on} = 5 \ s$. 79.7\% of
+    platelets bound at some point, and 43.0\% were bound at the end of
+  the simulation.}
+  \label{fig:traj02}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{trajectories01}
+  \caption{Platelet trajectories with $k_\tn{on} = 10 \ s$. 93.8\% of
+    platelets bound at some point, and 51.6\% were bound at the end of
+  the simulation.}
+  \label{fig:traj01}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{trajectories04}
+  \caption{Platelet trajectories with $k_\tn{on} = 25 \ s$. 100\% of
+    platelets bound at some point, and 47.7\% were bound at the end of
+  the simulation.}
+  \label{fig:traj04}
+\end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.8\textwidth]{avg_vels}
+%   \caption{}
+%   \label{fig:avg_vels}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.8\textwidth]{steps_plot}
+%   \caption{}
+%   \label{fig:steps}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.8\textwidth]{dwells_plot}
+%   \caption{}
+%   \label{fig:dwells}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.8\textwidth]{bd_expt006}
+%   \caption{}
+%   \label{fig:fig7}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.8\textwidth]{bd_expt007}
+%   \caption{}
+%   \label{fig:fig8}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.8\textwidth]{bd_expt008}
+%   \caption{}
+%   \label{fig:fig9}
+% \end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
