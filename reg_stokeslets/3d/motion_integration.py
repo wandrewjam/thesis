@@ -1,5 +1,6 @@
 import numpy as np
 from resistance_matrix_test import generate_resistance_matrices
+from sphere_integration_utils import compute_helper_funs
 from dist_convergence_test import spheroid_surface_area
 from sphere_integration_utils import generate_grid
 from timeit import default_timer as timer
@@ -552,7 +553,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
 
 def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b=1.0, domain='free', order='2nd',
                      adaptive=True, proc=1, forces=None, torques=None, save_quad_matrix_info=False, receptors=None,
-                     bonds=None, eta=1, eta_ts=1, kappa=1, lam=0, k0_on=1, k0_off=1, check_bonds=True, one_side=True):
+                     bonds=None, eta=1, eta_ts=1, kappa=1, lam=0, k0_on=1, k0_off=1, check_bonds=True, one_side=True, precompute=True):
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
 
@@ -587,6 +588,16 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
         s_matrices = []
 
     t = [0]
+    if precompute:
+        assert not adaptive
+        eps = eps_picker(n_nodes, a, b)
+        r_pre = np.linspace(0, 10, num=10**6+1)
+        h1_pre, h2_pre, d1_pre, d2_pre, h1p_pre, h2p_pre = (
+            compute_helper_funs(r_pre, eps=eps))
+        precompute_array = [r_pre, h1_pre, h2_pre, d1_pre,
+                            d2_pre, h1p_pre, h2p_pre]
+
+
     try:
         for i in range(num_steps):
             if adaptive:
