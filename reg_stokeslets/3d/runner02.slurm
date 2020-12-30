@@ -1,10 +1,9 @@
 #!/bin/bash
-#SBATCH --time=12:00:00
+#SBATCH --time=08:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=20
-#SBATCH -C "c20"
-#SBATCH --account=fogelson
-#SBATCH --partition=kingspeak
+#SBATCH --ntasks=32
+#SBATCH --account=notchpeak-shared-short
+#SBATCH --partition=notchpeak-shared-short
 #SBATCH -o runner02.out
 #SBATCH -e runner02.err
 
@@ -27,7 +26,11 @@ module unload miniconda3/latest
 module load miniconda3/latest
 conda activate rolling
 
+export start=$SECONDS
 cat par-files/bd_runner02.txt | parallel --results outdir2 \
 -j $TPN python binding_expt.py
+
+export duration=$(( SECONDS - start ))
+echo "Completed in $duration seconds'
 
 wait

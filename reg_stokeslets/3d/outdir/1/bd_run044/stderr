@@ -1,0 +1,18 @@
+/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/3d/motion_integration.py:254: RuntimeWarning: divide by zero encountered in double_scalars
+  valid_rep_force = np.abs(np.log10(old_rep_force / new_rep_force)) < 1
+Traceback (most recent call last):
+  File "binding_expt.py", line 244, in <module>
+    main(**pars)
+  File "binding_expt.py", line 153, in main
+    check_bonds=check_bonds, one_side=one_side)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/3d/motion_integration.py", line 613, in integrate_motion
+    eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off, check_bonds=check_bonds, one_side=one_side)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/3d/motion_integration.py", line 372, in time_step
+    precompute_array=precompute_array)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/3d/motion_integration.py", line 196, in evaluate_motion_equations
+    precompute_array=precompute_array)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/3d/resistance_matrix_test.py", line 48, in generate_resistance_matrices
+    check_finite=False, assume_a='pos'
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python2.7/site-packages/scipy/linalg/basic.py", line 219, in solve
+    raise LinAlgError('Matrix is singular.')
+numpy.linalg.linalg.LinAlgError: Matrix is singular.

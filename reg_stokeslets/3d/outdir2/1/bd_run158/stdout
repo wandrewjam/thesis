@@ -1616,11 +1616,6 @@ Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
-Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
-Solving for forces for eps = 0.126190258632, nodes = 8
-Finished eps=0.126190258632, n_nodes=8
-Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
-Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
@@ -1690,26 +1685,26 @@ Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
-Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
-Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
-Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
-Solving for forces for eps = 0.126190258632, nodes = 8
-Finished eps=0.126190258632, n_nodes=8
-Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
@@ -1806,16 +1801,1609 @@ Finished eps=0.126190258632, n_nodes=8
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
 Solving for forces for eps = 0.126190258632, nodes = 8
 Finished eps=0.126190258632, n_nodes=8
-[[[  5.70597921]
-  [ -0.54649085]
-  [-42.71305165]]
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+Assembling quadrature matrix for eps = 0.126190258632, nodes = 8
+Solving for forces for eps = 0.126190258632, nodes = 8
+Finished eps=0.126190258632, n_nodes=8
+[[[  8.96435422e+00]
+  [ -8.31292620e-02]
+  [ -5.39797104e+01]]
 
- [[ -1.88576741]
-  [ 11.7104538 ]
-  [ -0.19870816]]]
-Seed = 1507429260
+ [[ -6.66769638e-02]
+  [  2.42033071e+01]
+  [ -2.99600538e-02]]]
+Seed = 3815191149
 Done!

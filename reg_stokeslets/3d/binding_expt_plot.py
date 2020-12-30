@@ -4,11 +4,12 @@ from motion_integration import (get_bond_lengths, find_min_separation,
                                 repulsive_force)
 
 
-def main(expt_num):
+def main(filename):
     load_dir = 'data/'
     plot_dir = 'plots/'
-    file_fmt = 'bd_expt{:03d}'.format(expt_num)
-    load_data = np.load(load_dir + file_fmt + '.npz')
+    # file_fmt = 'bd_expt{:03d}'.format(expt_num)
+
+    load_data = np.load(load_dir + filename + '.npz')
     t, x, y, z = load_data['t'], load_data['x'], load_data['y'], load_data['z']
     r_matrices = load_data['r_matrices']
     receptors = load_data['receptors']
@@ -80,9 +81,9 @@ def main(expt_num):
     axs[3].set_ylabel('$z$ difference ($\\mu$m)')
     axs[4].set_ylabel('$z$ difference ($\\mu$m)')
     axs[-1].set_xlabel('Time (s)')
-    plt.savefig(plot_dir + file_fmt + '_1', bbox_inches='tight')
-    # plt.tight_layout()
-    # plt.show()
+    # plt.savefig(plot_dir + filename + '_1', bbox_inches='tight')
+    plt.tight_layout()
+    plt.show()
 
     # Compute separation distance and rep force for each time step
     sep_distance = np.zeros(shape=x.shape)
@@ -98,11 +99,14 @@ def main(expt_num):
     for times, bond_len, z_rec, z_cmp, x_cmp, y_cmp in bond_dict.values():
         axs[2].plot(times, x_cmp)
         axs[2].plot(times, y_cmp, linestyle='--')
-    plt.savefig(plot_dir + file_fmt + '_2', bbox_inches='tight')
-    # plt.show()
+    # plt.savefig(plot_dir + filename + '_2', bbox_inches='tight')
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == '__main__':
     # for num in range(9):
     #     main(num)
-    main(92)
+    import sys
+
+    main(sys.argv[1])
