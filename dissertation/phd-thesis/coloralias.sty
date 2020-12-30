@@ -12,7 +12,7 @@
 %%% Usage: \definecoloralias{newcolor}{existingcolor}
 \providecommand{\definecoloralias}[2]%
 {%
-    \@ifundefined{\string\color @#1}{}{\PackageInfo{hocbook}{Redefining color #1}}%
+    \@ifundefined{\string\color @#1}{}{\PackageInfo{coloralias}{Redefining color #1}}%
     \expandafter \def \csname\string\color @#1\endcsname {\csname\string\color @#2\endcsname}%
     \expandafter \def \csname name@#1\endcsname {#2}%
 }

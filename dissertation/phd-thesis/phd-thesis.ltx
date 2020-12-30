@@ -112,7 +112,6 @@
 \usepackage {bibnames}                  % for BibTeX- and TeX-related names
 \usepackage {cite}                      % for numbered and ranged numeric citations
 \usepackage {graphicx}                  % for graphics file inclusions
-% \usepackage {graphpap}                  % for figures in UofUtah sample theses
 %%: OPTIONAL:  \usepackage {longtable}  % for multipage tables
 %%: OPTIONAL:  \usepackage {multirow}   % for multirow-spanning table cells
 \usepackage {tikz}       % for tikz graphics files
@@ -154,11 +153,11 @@
 %%% This is an OPTIONAL package that sets chapter and sectional headings
 %%% in color:
 %%% Use one or the other of these:
-% \usepackage {color}
-\usepackage {uuthesis-color}            % for improved color support
+%% \usepackage {color}
+%% \usepackage {uuthesis-color}            % for improved color support
 %% \definecolor {utahheadingcolor} {rgb}  {0.7, 0.0, 0.0}
 %% \definecolor {utahtheoremcolor} {rgb}  {0.490,0.149,0.804} % purple4
-\definecolor {utahtheoremcolor} {rgb}  {0.545,0.137,0.137} % brown4
+%% \definecolor {utahtheoremcolor} {rgb}  {0.545,0.137,0.137} % brown4
 
 %%% Here is another, and more convenient, way to define colors, via
 %%% aliases of named colors in the X11-derived rgb.sty file
@@ -169,7 +168,7 @@
 %% \definecoloralias {utahheadingcolor}{utahgreen}
 %% \definecoloralias {utahheadingcolor}{darkgreen}
 %% \definecoloralias {utahtheoremcolor}{forestgreen}
-\definecoloralias {utahheadingcolor}{utahred}
+%% \definecoloralias {utahheadingcolor}{utahred}
 
 %%% The default heading color is utahred (defined by University Printing
 %%% Services as 0.8 red, 0.0 green, 0.0 blue), but you could redefine
@@ -278,18 +277,16 @@
 \titlepage                              % MANDATORY
 \copyrightpage                          % optional, but strongly recommended
 \dissertationapproval                   % MANDATORY
-%% \include {latex-input}                  % ONLY for this sample document
-%% \include {latex-processing}             % ONLY for this sample document
-\dedicationpage                         % optional
+%% \dedicationpage                         % optional
 
 %% Most theses have just one table of contents, like this:
-% \tableofcontents                        % MANDATORY
-%% but we can also get brief and extended tables of contents like this:
-\shorttableofcontents {Brief Contents} {0}
-%
-\setcounter   {tocdepth}      {5}
-\renewcommand {\contentsname} {Extended Contents}
 \tableofcontents                        % MANDATORY
+%% but we can also get brief and extended tables of contents like this:
+%% \shorttableofcontents {Brief Contents} {0}
+%
+%% \setcounter   {tocdepth}      {5}
+%% \renewcommand {\contentsname} {Extended Contents}
+%% \tableofcontents                        % MANDATORY
 %
 \setcounter {secnumdepth}     {2}       % for default sectional numbering
 

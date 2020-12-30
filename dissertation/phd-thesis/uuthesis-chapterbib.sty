@@ -6,17 +6,20 @@
 %%% The original version was created by Karl Schwede.
 %%% This file is maintained by Nelson Beebe and Karl Schwede.
 %%%
-%%% [27-Jan-2018] -- version 2.00: extend for optional hyperref usage
+%%% [01-Jun-2020] -- version 2.01: use \sectionbib{}{} command to make
+%%%                  in-chapter bibliographies appear as sections,
+%%%                  rather than independent chapters.
+%%% [27-Jan-2018] -- version 2.00: extend for optional hyperref usage.
 %%% [01-Apr-2016] -- version 1.02: adapt for uuthesis-*.sty conventions.
-%%% [24-Apr-2016] -- version 1.01: second version
+%%% [24-Apr-2016] -- version 1.01: second version.
 %%% ====================================================================
 
 \NeedsTeXFormat {LaTeX2e} [1994/12/01]
-\ProvidesPackage {uuthesis-chapterbib} [2018/01/27 v2.00]
+\ProvidesPackage {uuthesis-chapterbib} [2020/06/01 v2.01]
 
 \immediate \write16 {===============================================================================}%
 \immediate \write16 {}%
-\immediate \write16 {This is uuthesis-chapterbib.sty version 2.00 <27 January 2018>}%
+\immediate \write16 {This is uuthesis-chapterbib.sty version 2.01 <01 June 2020>}%
 \immediate \write16 {}%
 \immediate \write16 {===============================================================================}%
 
@@ -25,7 +28,20 @@
 %%% automate the numbering of various objects.
 
 \usepackage {chapterbib}
+
+%% The UofUtah Thesis Office requires numbered sections for reference
+%% lists, so override chapterbib's use of \section* when the
+%% [sectionbib] option is supplied.  This command MUST appear in the
+%% preamble (i.e., this style file), because it is undefined during
+%% the AtBeginDocument actions.
+\sectionbib {\section} {section}
+
 \usepackage [nomessages] {fp}
+
+% \DeclareOption{sectionbib}{\AtBeginDocument{\sectionbib{\section}{section}}
+% \AtBeginDocument{\sectionbib{\section*}{section}}
+% \AtBeginDocument{\sectionbib{\section}{section}}
+% \sectionbib {\section} {section}
 
 %%% We need references at the end of each section to appear in the
 %%% table of contents as a numbered section.  Hence we redefine the
@@ -87,7 +103,7 @@
 
 \def \setupuuchapterbib
 {%
-    \addtocontents {toc} {\protect \vspace{\protect \uuchapterbib@chaptersectionspace} \protect }%
+    %% [10-Jun-2020] SUPPRESS: \addtocontents {toc} {\protect \vspace{\protect \uuchapterbib@chaptersectionspace} \protect }%
     \FPeval {\uuchapterbib@cursection}       {0}%
     \FPeval {\uuchapterbib@cursubsection}    {0}%
     \FPeval {\uuchapterbib@cursubsubsection} {0}%

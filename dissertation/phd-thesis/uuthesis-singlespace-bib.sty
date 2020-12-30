@@ -1,6 +1,39 @@
+%%% -*-TeX-*-
+%%% ====================================================================
+%%% This file implements a small to the thebibliography environment to
+%%% force it to typeset with single spacing.  This may be useful to
+%%% shorten lengthy bibliographies generated from reliable BibTeX
+%%% data, because little proofreading should be needed,
+%%% 
+%%% [30-May-2020] -- version 1.00
+%%% ====================================================================
+
+\NeedsTeXFormat {LaTeX2e} [1994/12/01]
+\ProvidesPackage {uuthesis-singlespace-bib} [2020/06/01 v1.01]
+
+\immediate \write16 {===============================================================================}%
+\immediate \write16 {}%
+\immediate \write16 {This is uuthesis-singlespace-bib.sty version 1.01 <01 June 2020>}%
+\immediate \write16 {}%
+\immediate \write16 {===============================================================================}%
+
+\newcommand {\uuthesissinglespacebib} {}
+
 \renewenvironment{thebibliography}[1]
-     {\chapter*{\bibname}%
+     {%
+      %% NEW: use unnumbered section in chapter bibliographies, else unnumbered chapter
+      %% NEW: record bibliography in table of contents (UofU Thesis Office request)
+      \ifx \undefined \cbunit
+          \chapter*{\bibname}%
+          \addcontentsline{toc}{chapter}{\bibname}
+      \else
+          \section{\bibname}%
+      \fi
+      %% NEW: recognize optional \thebibliographyhook
+      \ifx \undefined \thebibliographyhook \else \thebibliographyhook \fi
       \singlespace
+      %% The remainder is unchanged from the LaTeX standard book class,
+      %% except the addition of a final \doublespace
       \@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}%
       \list{\@biblabel{\@arabic\c@enumiv}}%
            {\settowidth\labelwidth{\@biblabel{#1}}%
