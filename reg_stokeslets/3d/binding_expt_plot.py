@@ -81,6 +81,7 @@ def main(filename):
     axs[3].set_ylabel('$z$ difference ($\\mu$m)')
     axs[4].set_ylabel('$z$ difference ($\\mu$m)')
     axs[-1].set_xlabel('Time (s)')
+
     # plt.savefig(plot_dir + filename + '_1', bbox_inches='tight')
     plt.tight_layout()
     plt.show()
@@ -99,6 +100,7 @@ def main(filename):
     for times, bond_len, z_rec, z_cmp, x_cmp, y_cmp in bond_dict.values():
         axs[2].plot(times, x_cmp)
         axs[2].plot(times, y_cmp, linestyle='--')
+
     # plt.savefig(plot_dir + filename + '_2', bbox_inches='tight')
     plt.tight_layout()
     plt.show()
