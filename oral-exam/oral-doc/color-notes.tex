@@ -1,0 +1,212 @@
+%%% -*-LaTeX-*-
+%%% ====================================================================
+%%% This file is intended to be included as a front-matter section of
+%%% the sample thesis, with a command like this
+%%%
+%%% \optionalfront{Color in typesetting}{\input{color-notes}}
+%%%
+%%% just before the \uumaintext macro that begins the body of the thesis,
+%%% and starts chapter numbering.
+%%%
+%%% [28-Jan-2018]
+%%% ====================================================================
+
+Color is ubiquitous in the commercial publishing industry, color
+computer displays are now standard, and color printers are commonly
+available on university campuses and in home offices.
+
+The human visual system is acutely aware of color, and when used
+carefully, color can make documents more attractive, and easier to
+read.  Complex figures are often best presented in color to help
+distinguish features, and color background shading in long tabular
+displays can make them easier to understand, as illustrated in
+Table~\vref{dfact}.
+
+Here is how a portion of that table was written in \LaTeX{}, with
+row-shading support from the \texttt{colortbl} package that is loaded
+in the document preamble.
+
+\begin{Verbatim}[formatcom = \color{brown4}]
+\begin{table}[t]
+    \definecolor {HeadingColor} {rgb} {0.60, 0.60, 0.90}
+    \definecolor {ShadingColor} {rgb} {0.90, 0.90, 0.99}
+    \newcommand{\R}{\rowcolor{ShadingColor}}
+    \begin{center}
+        \caption{Table of double factorials.}
+        \label{dfact}
+        \medskip
+        % Generate table data and replace _ by \, (thin space)
+        % hocd128> load("dfact")
+        % hocd128> for (k = -1 ; k < 41; ++k) { m = k % 10; \
+        %                if ((0 < m) && (m < 6)) s = "\\R" else s = "  " ; \
+        %                printf("%2s %5d & %35.0..3f \\\\\n", s, k, dfact(k)) }
+        \begin{tabular}{rr}
+            \hline
+            \rowcolor{HeadingColor}
+            \boldmath $n$ & \multicolumn{1}{c}{\boldmath $n!!$} \\
+            \hline
+                  -1 &                                   1 \\
+                   0 &                                   1 \\
+            \R     1 &                                   1 \\
+            \R     2 &                                   2 \\
+            \R     3 &                                   3 \\
+            \R     4 &                                   8 \\
+            \R     5 &                                  15 \\
+                   6 &                                  48 \\
+                   7 &                                 105 \\
+                   8 &                                 384 \\
+                   9 &                                 945 \\
+                  10 &                              3\,840 \\
+            ...
+        \end{tabular}
+    \end{center}
+\end{table}
+\end{Verbatim}
+
+\begin{table}[t]
+    \definecolor {HeadingColor} {rgb} {0.60, 0.60, 0.90}
+    \definecolor {ShadingColor} {rgb} {0.90, 0.90, 0.99}
+    \newcommand{\R}{\rowcolor{ShadingColor}}
+    \begin{center}
+        \caption{Table of double factorials.}
+        \label{dfact}
+        \medskip
+        % Generate table data and replace _ by \, (thin space)
+        % hocd128> load("dfact")
+        % hocd128> for (k = -1 ; k < 41; ++k) { m = k % 10; \
+        %                if ((0 < m) && (m < 6)) s = "\\R" else s = "  " ; \
+        %                printf("%2s %5d & %35.0..3f \\\\\n", s, k, dfact(k)) }
+        \begin{tabular}{rr}
+            \hline
+            \rowcolor{HeadingColor}
+            \boldmath $n$ & \multicolumn{1}{c}{\boldmath $n!!$} \\
+            \hline
+                  -1 &                                   1 \\
+                   0 &                                   1 \\
+            \R     1 &                                   1 \\
+            \R     2 &                                   2 \\
+            \R     3 &                                   3 \\
+            \R     4 &                                   8 \\
+            \R     5 &                                  15 \\
+                   6 &                                  48 \\
+                   7 &                                 105 \\
+                   8 &                                 384 \\
+                   9 &                                 945 \\
+                  10 &                               3\,840 \\
+            \R    11 &                              10\,395 \\
+            \R    12 &                              46\,080 \\
+            \R    13 &                             135\,135 \\
+            \R    14 &                             645\,120 \\
+            \R    15 &                           2\,027\,025 \\
+                  16 &                          10\,321\,920 \\
+                  17 &                          34\,459\,425 \\
+                  18 &                         185\,794\,560 \\
+                  19 &                         654\,729\,075 \\
+                  20 &                       3\,715\,891\,200 \\
+            \R    21 &                      13\,749\,310\,575 \\
+            \R    22 &                      81\,749\,606\,400 \\
+            \R    23 &                     316\,234\,143\,225 \\
+            \R    24 &                   1\,961\,990\,553\,600 \\
+            \R    25 &                   7\,905\,853\,580\,625 \\
+                  26 &                  51\,011\,754\,393\,600 \\
+                  27 &                 213\,458\,046\,676\,875 \\
+                  28 &               1\,428\,329\,123\,020\,800 \\
+                  29 &               6\,190\,283\,353\,629\,375 \\
+                  30 &              42\,849\,873\,690\,624\,000 \\
+            \R    31 &             191\,898\,783\,962\,510\,625 \\
+            \R    32 &           1\,371\,195\,958\,099\,968\,000 \\
+            \R    33 &           6\,332\,659\,870\,762\,850\,625 \\
+            \R    34 &          46\,620\,662\,575\,398\,912\,000 \\
+            \R    35 &         221\,643\,095\,476\,699\,771\,875 \\
+                  36 &       1\,678\,343\,852\,714\,360\,832\,000 \\
+                  37 &       8\,200\,794\,532\,637\,891\,559\,375 \\
+                  38 &      63\,777\,066\,403\,145\,711\,616\,000 \\
+                  39 &     319\,830\,986\,772\,877\,770\,815\,625 \\
+                  40 &   2\,551\,082\,656\,125\,828\,464\,640\,000 \\
+            \hline
+        \end{tabular}
+    \end{center}
+\end{table}
+
+
+The distinction between computer input and output is often improved by
+showing them in different colors, as in the following indented examples.
+
+\begin{quotation}
+\begin{singlespace}
+This is human input to a computer:
+\definecoloralias {verbatimcolor} {utahred}
+\begin{verbatim}
+    % cal 1 2018
+\end{verbatim}
+%
+Here is the computer output from that command:
+%
+\definecoloralias {verbatimcolor} {darkblue}
+\begin{verbatim}
+        January 2018      
+    Su Mo Tu We Th Fr Sa  
+        1  2  3  4  5  6  
+     7  8  9 10 11 12 13  
+    14 15 16 17 18 19 20  
+    21 22 23 24 25 26 27  
+    28 29 30 31           
+\end{verbatim}
+\end{singlespace}
+\end{quotation}
+%
+Here is how those paragraphs were written in \LaTeX{}:
+%
+\begin{Verbatim}[formatcom = \color{brown4}]
+\begin{quotation}
+\begin{singlespace}
+This is human input to a computer:
+\definecoloralias {verbatimcolor} {utahred}
+\begin{verbatim}
+    % cal 1 2018
+\end{verbatim}
+%
+Here is the computer output from that command:
+%
+\definecoloralias {verbatimcolor} {darkblue}
+\begin{verbatim}
+        January 2018      
+    Su Mo Tu We Th Fr Sa  
+        1  2  3  4  5  6  
+     7  8  9 10 11 12 13  
+    14 15 16 17 18 19 20  
+    21 22 23 24 25 26 27  
+    28 29 30 31           
+\end{verbatim}
+\end{singlespace}
+\end{quotation}
+\end{Verbatim}
+
+\definecoloralias {verbatimcolor} {brown4}
+
+Because verbatim displays are terminated by the first matching
+\verb=\end= command, the illustrated input fragment had to be wrapped
+in a second kind of verbatim supplied by the \texttt{fancyvrb} package
+that is included in the \LaTeX{} preamble of this document.
+%
+\begin{verbatim}
+\begin{Verbatim}[formatcom = \color{brown4}]
+...
+\end{Verbatim}
+\end{verbatim}
+%
+
+Color reproduction fidelity is device dependent, and care must be
+taken to avoid use of colors that should be distinct, but are not, on
+some output devices, or for those humans who have some degree of color
+blindness.  For many such people, red and green are just similar
+shades of brown.
+
+You should also ensure sufficient contrast between foreground and
+background colors: yellow text on a white background, or blue text on
+a black background, both pose severe reading difficulties.
+
+For dissertations and theses, it is of particular concern that color
+documents output on black-and-white printers should not suffer serious
+loss of readability, such as a light color being printed in a
+hard-to-see faint grey.

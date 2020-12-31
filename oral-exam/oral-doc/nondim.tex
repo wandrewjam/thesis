@@ -1,0 +1,240 @@
+%%% -*-LaTeX-*-
+
+\chapter{Nondimensionalization}
+\label{app:nondim}
+
+In order to eliminate redundant parameters in the system, we
+nondimensionalize equations
+\eqref{eq:bond-density}--\eqref{eq:torque-balance} using the
+following nondimensional variables:
+$\wallDist \equiv \radius \ndWallDist$,
+$\ndTime \equiv \offConst \dTime$, and
+$\bondDensity(\radius \ndWallDist, \recAngle, \ndTime/\offConst)
+\equiv \receptorDensity \ndBondDensity(\ndWallDist, \recAngle,
+\ndTime)/\radius$. With these substitutions, equation
+\eqref{eq:bond-density} becomes
+\begin{multline}
+  \label{eq:nd-density-1}
+  \frac{\receptorDensity \offConst}{\radius}
+  \Pder{\ndBondDensity}{\ndTime} = \rotation
+  \frac{\receptorDensity}{\radius} \Pder{\ndBondDensity}{\recAngle} +
+  \velocity \frac{\receptorDensity}{\radius^2}
+  \Pder{\ndBondDensity}{\ndWallDist} \\
+  + \onConst \exp\left( -
+    \frac{\stiffness \length^2(\radius\ndWallDist, \recAngle)}{2
+      \boltzmann \temp} \right) \left(\receptorDensity -
+    \receptorDensity \Int{\ndBondDensity(\ndWallDist, \recAngle,
+      \ndTime)}{\ndWallDist}{-\infty}{\infty}\right) 
+  - \offConst \exp\left( \frac{\stiffness \length(\radius\ndWallDist,
+      \recAngle)}{\refForce} \right).
+\end{multline}
+We can define a nondimensional length function $\ndLength$ so that
+$\length(\radius\ndWallDist, \recAngle) \equiv \radius
+\ndLength(\ndWallDist, \recAngle)$. We have from equation
+\eqref{eq:dim-length} that
+\begin{equation*}
+  \length^2(\radius\ndWallDist, \recAngle) = (\radius - \radius
+  \cos\recAngle + \separation)^2 + (\radius \sin\recAngle -
+  \radius\ndWallDist)^2 = \radius^{-2} \left((1 - \cos\recAngle +
+    \separation/\radius)^2 + (\sin\recAngle - \ndWallDist)^2
+  \right).
+\end{equation*}
+Define $\separation \equiv \radius \ndSeparation$, then
+\begin{equation}
+  \label{eq:nd-length}
+  \ndLength^2(\ndWallDist, \recAngle) = (1 - \cos\recAngle +
+  \ndSeparation)^2 + (\sin\recAngle - \ndWallDist)^2.
+\end{equation}
+After simplifying \eqref{eq:nd-density-1} and defining the
+nondimensional parameters $\rotation \equiv \ndRotation \offConst$,
+$\velocity = \ndVelocity \radius \offConst$,
+$\ndOnConst \equiv \radius \onConst/\offConst$,
+$\onForceScale \equiv \stiffness \radius^2/(\boltzmann \temp)$, and
+$\offForceScale \equiv \stiffness \radius/\refForce$ we get the
+following PDE for $\ndBondDensity$
+\begin{equation}
+  \label{eq:nd-density}
+  \Pder{\ndBondDensity}{\ndTime} = \ndRotation
+  \Pder{\ndBondDensity}{\recAngle} + \ndVelocity
+  \Pder{\ndBondDensity}{\ndWallDist} + \ndOnConst
+  \exp\left(-\onForceScale \frac{\ndLength^2}{2}\right) \left(1 -
+    \Int{\ndBondDensity(\ndWallDist, \recAngle,
+      \ndTime)}{\ndWallDist}{-\infty}{\infty} \right) -
+  \exp(\offForceScale \ndLength) \ndBondDensity. 
+\end{equation}
+
+Next, let's look at the force and torque calculations. By substituting
+out dimensional variables for nondimensional ones in equation
+\eqref{eq:horz-total-force}, we get
+\begin{align}
+  \nonumber
+  \horzTotalForce &= \frac{\stiffness \receptorDensity}{\radius}
+                    \Int{\Int{(\radius\ndWallDist -
+                    \radius\sin\recAngle) \ndBondDensity(\ndWallDist,
+                    \recAngle, \ndTime)} {\recAngle} {-\frac{\pi}{2}}
+                    {\frac{\pi}{2}}}
+                    {\radius\ndWallDist}{-\infty}{\infty} \\
+  \label{eq:nd-horz-force}
+                  &= \stiffness \receptorDensity \radius
+                    \Int{\Int{(\ndWallDist - \sin\recAngle)
+                    \ndBondDensity(\ndWallDist, \recAngle, \ndTime)}
+                    {\recAngle} {-\frac{\pi}{2}} {\frac{\pi}{2}}}
+                    {\ndWallDist} {-\infty} {\infty} \equiv \stiffness
+                    \receptorDensity \radius f'_h.
+\end{align}
+Finding the nondimensional torque from equation
+\eqref{eq:total-torque} follows the same procedure:
+\begin{align}
+  \nonumber
+  \totalTorque &= \frac{\stiffness \receptorDensity}{\radius}
+                 \Int{\Int{\radius \left[(\radius -
+                 \radius\cos\recAngle + \radius
+                 \ndSeparation)\sin\recAngle + (\radius\sin\recAngle -
+                 \radius \ndWallDist)\cos\recAngle \right]
+                 \ndBondDensity(\ndWallDist, \recAngle,
+                 \ndTime)}{\recAngle}{-\frac{\pi}{2}}{\frac{\pi}{2}}}
+                 {\radius\ndWallDist}{-\infty}{\infty} \\
+  \nonumber
+               &= \stiffness \receptorDensity \radius^2
+                 \Int{\Int{\left[(1 - \cos\recAngle +
+                 \ndSeparation)\sin\recAngle + (\sin\recAngle -
+                 \ndWallDist)\cos\recAngle \right]
+                 \ndBondDensity(\ndWallDist, \recAngle,
+                 \ndTime)}{\recAngle}{-\frac{\pi}{2}}{\frac{\pi}{2}}}
+                 {\ndWallDist}{-\infty}{\infty} \\
+  \label{eq:nd-total-torque}
+               &\equiv \stiffness
+                 \receptorDensity \radius^2 \ndTotalTorque.
+\end{align}
+
+Finally, we can nondimensionalize the force and torque balance
+equations. Define $\appliedRot \equiv \ndAppliedRot \offConst$ and
+$\appliedVel \equiv \ndAppliedVel \radius \offConst$. Then
+substituting \eqref{eq:nd-horz-force} and \eqref{eq:nd-total-torque}
+into equations \eqref{eq:force-balance} and \eqref{eq:torque-balance}
+respectively gives us the following two equations:
+\begin{align}
+  \label{eq:nd-forcebal-1}
+  0 &= \velFriction (\ndAppliedVel \radius \offConst - \ndVelocity
+      \radius \offConst) + \stiffness \receptorDensity \radius f'_h \\
+  \label{eq:nd-torquebal-1}
+  0 &= \rotFriction (\ndAppliedRot \offConst - \ndRotation \offConst)
+      + \stiffness \receptorDensity \radius^2 \ndTotalTorque.
+\end{align}
+
+Then taking
+$~\eqref{eq:nd-forcebal-1}/(\stiffness \receptorDensity \radius)$ and
+$~\eqref{eq:nd-torquebal-1}/(\stiffness \receptorDensity \radius^2)$
+gives
+\begin{align}
+  \label{eq:nd-forcebal}
+  0 &= \ndVelFriction (\ndAppliedVel - \ndVelocity) + f'_h \\ 
+  \label{eq:nd-torquebal}
+  0 &= \ndRotFriction (\ndAppliedRot - \ndRotation) + \ndTotalTorque
+\end{align}
+where $\ndVelFriction \equiv \offConst \velFriction / (\stiffness
+\receptorDensity)$ and $\ndRotFriction \equiv \offConst \rotFriction /
+(\stiffness \receptorDensity \radius^2)$. Note a complete list of the
+nondimensional variables and parameters are given in Table
+\ref{tab:nd-vars}.
+
+Then $\ndVelocity(\ndTime)$, $\ndRotation(\ndTime)$, and
+$\ndBondDensity(\ndWallDist, \recAngle, \ndTime)$ are found by
+simultaneously solving equations \eqref{eq:nd-density},
+\eqref{eq:nd-forcebal}, and \eqref{eq:nd-torquebal}.
+
+% The nondimensional system is given by the following equations:
+% \begin{align}
+%   \label{eq:nd-master1}
+%   \Pder{\ndBondDensity}{\ndTime} &= \ndRotation
+%   \Pder{\ndBondDensity}{\recAngle} + \ndVelocity
+%   \Pder{\ndBondDensity}{\ndWallDist} + \ndOnConst
+%   \exp\left(-\onForceScale \frac{l^2}{2}\right) \left(1 -
+%   \Int{\ndBondDensity(\ndWallDist,\recAngle,\ndTime)}
+%   {\ndWallDist}{-\infty}{\infty}\right) - \exp(\offForceScale l)
+%   \ndBondDensity(\ndWallDist,\recAngle,\ndTime) \\
+%   \label{eq:nd-torq}
+%   0 &= \ndRotFriction(\ndAppliedRot - \ndRotation) + \tau_s' \\
+%   \label{eq:nd-vel}
+%   0 &= \ndVelFriction (\ndAppliedVel - \ndVelocity) +
+%   \ndHorzTotalForce.
+% \end{align}
+
+% The nondimensional torque and force---$\tau_s'$ and
+% $\ndHorzTotalForce$ respectively---are defined in the following way
+% in terms of nondimensional parameters:
+% \begin{align}
+%   \label{eq:total-nd-torq}
+%   \ndTotalTorque &\equiv \Int{ \Int{((1 - \cos\recAngle +
+%   \ndSeparation) \sin\recAngle + 
+%           (\sin\recAngle - \ndWallDist) \cos\recAngle)
+%           \ndBondDensity(\ndWallDist,\recAngle,\dTime)}{ \recAngle 
+%           }{-\frac{\pi}{2}}{\frac{\pi}{2}} }{ \ndWallDist }{ -\infty
+%           }{ \infty } 
+%   &= \totalTorque/(\stiffness \receptorDensity \radius^2) \\  
+%   \label{eq:total-nd-force} 
+%   \ndHorzTotalForce &\equiv \Int{ \Int{(\ndWallDist - \sin\recAngle)
+%   \ndBondDensity(\ndWallDist,\recAngle,\dTime)}{ \recAngle }{ 
+%          -\frac{\pi}{2} }{\frac{\pi}{2}} }{ \ndWallDist }{ -\infty
+%          }{ \infty } 
+%   &= \horzTotalForce/(\stiffness \receptorDensity \radius). 
+% \end{align}
+
+% The definitions of the nondimensional variables and parameters are 
+% given in Table \ref{tab:nd-vars}. 
+
+\begin{table}
+  \renewcommand{\arraystretch}{1.5}
+  \centering
+  \begin{tabu}{ccX}
+    \toprule
+    ND Parameter & Parameter Definition & Description \\
+    \midrule $\ndWallDist$ & $\wallDist = \radius\ndWallDist$ & ND
+    distance
+    coordinate \\
+    $\ndTime$ & $\offConst \dTime = \ndTime$ & ND time \\
+    $\ndBondDensity$ & $\bondDensity = \ndBondDensity
+    \receptorDensity/\radius$ & ND bond density \\
+    $\ndRotation$ & $\rotation = \ndRotation \offConst$ & ND angular
+    velocity \\
+    $\ndVelocity$ & $\velocity = \radius \offConst \ndVelocity$ & ND
+    linear velocity
+    \\
+    $\ndSeparation$ & $\separation = \radius \ndSeparation$ & ND
+    cell-surface separation
+    \\
+    $\ndAppliedRot$ & $\appliedRot = \ndAppliedRot \offConst$ & ND
+    target angular
+    velocity \\
+    $\ndAppliedVel$ & $\appliedVel = \radius \offConst \ndAppliedVel$
+    & ND target linear velocity \\
+    $\ndOnConst$ & $\ndOnConst = \frac{\radius \onConst}{\offConst}$
+    & ND max on rate \\
+    $\onForceScale$ &
+    $\onForceScale = \frac{\stiffness \radius^2}{\boltzmann \temp}$ &
+    Ratio of characteristic bond energy to
+    thermal energy \\
+    $\offForceScale$ & $\offForceScale = \stiffness \radius/\refForce$
+    & Ratio of characteristic bond
+    force to breaking force\\
+    $\ndRotFriction$ &
+    $\ndRotFriction = \frac{\offConst}{\stiffness \receptorDensity
+      \radius^2} \rotFriction$ & ND drag coefficient
+    \\
+    $\ndVelFriction$ &
+    $\ndVelFriction = \frac{\offConst}{\stiffness \receptorDensity}
+    \velFriction$ & ND drag coefficient
+    \\
+    $\tau_s'$ & $\totalTorque = \stiffness \receptorDensity \radius^2
+    \tau_s'$ & ND torque \\
+    $\ndHorzTotalForce$ & $\horzForce = \stiffness \receptorDensity
+    \radius \ndHorzTotalForce$ & ND force \\
+    \bottomrule
+  \end{tabu}
+  \caption{Nondimensional variables and parameters}
+  \label{tab:nd-vars}
+\end{table}
+
+% Local Variables:
+% TeX-master: "oral-document.ltx"
+% End:

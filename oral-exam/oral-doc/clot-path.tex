@@ -1,0 +1,88 @@
+% \documentclass{article}
+% \usepackage{tikz}
+% \usetikzlibrary{backgrounds,fit,positioning}
+
+% \begin{document}
+
+\begin{tikzpicture}[
+  node text/.style={
+    align=center,
+    draw, very thick,
+    fill=white,
+    rounded corners,
+    inner xsep=10pt,
+    inner ysep=7pt,
+    minimum height=13mm,
+  },
+  connect/.style={shorten <=5pt, shorten >=5pt, thick},
+  background/.style={rounded corners, inner xsep=10pt, inner ysep=10pt, draw, dashed,
+    thick},
+  ]
+  
+  \node[node text] (roll)
+  {\begin{minipage}{.5\linewidth}
+      \underline{Rolling}
+      \begin{itemize}
+        \setlength\itemsep{-.3em}
+      \item transient contacts
+      \item hydrodynamic vs. bond forces
+      \item fast receptors trigger intracellular pathways
+      \end{itemize}
+    \end{minipage}
+  };
+  \node[node text] (actv) [below=of roll]
+  {\begin{minipage}{.5\linewidth}
+      \underline{Activation}
+      \begin{itemize}
+        \setlength\itemsep{-.3em}
+      \item intracellular signaling
+      \item release soluble agonists
+      \item activate integrins for aggregation
+      \end{itemize}
+    \end{minipage}
+  }
+  edge [<-, connect] (roll);
+  \node[node text] (aggr) [below=of actv]
+  {\begin{minipage}{.5\linewidth}
+      \underline{Aggregation}
+      \begin{itemize}
+        \setlength\itemsep{-.3em}
+      \item cohesion among platelets
+      \item adhesion to vessel wall
+      \end{itemize}
+    \end{minipage}
+  }
+  edge [<-, connect] (actv);
+  \node[node text] (thrb) [below=2cm of aggr]
+  {\begin{minipage}{.5\linewidth}
+      \underline{Thrombin Formation}
+      \begin{itemize}
+        \setlength\itemsep{-.3em}
+      \item plasma-phase reactions
+      \item many coagulation factors involved
+      \item prothrombin converted to thrombin
+      \end{itemize}
+    \end{minipage}
+  }
+  edge [<-, thick, shorten <=28pt, shorten >= 15pt] (aggr);
+  \node[node text] (fibr) [below=of thrb]
+  {\begin{minipage}{.5\linewidth}
+      \underline{Fibrin Gelation}
+      \begin{itemize}
+        \setlength\itemsep{-.3em}
+      \item thrombin converts fibrinogen to fibrin
+      \item stabilize the clot
+      \end{itemize}
+    \end{minipage}
+  }
+  edge [<-, connect] (thrb);
+
+  \begin{scope}[on background layer]
+    \node [fill=blue!50, fit=(roll) (aggr), background,
+    label=above:\textbf{Activation and Aggregation}] {};
+    \node [fill=red!50, fit=(thrb) (fibr), background,
+    label=above:\textbf{Coagulation}] {};
+  \end{scope}
+\end{tikzpicture}
+% \end{document}
+

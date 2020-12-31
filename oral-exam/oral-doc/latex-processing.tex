@@ -1,0 +1,52 @@
+%%% -*-LaTeX-*-
+
+\chapter* {\LaTeX{} processing for this dissertation}
+
+With the help of definitions and rules in the \texttt{Makefile}, this
+dissertation is typeset in under \emph{nine seconds} with a \emph{single}
+operating-system command:
+
+\begin{Verbatim}[formatcom = \color{blue}]
+    make
+\end{Verbatim}
+
+\noindent
+That asks the \texttt{make} utility to run these commands to produce a
+consistent typeset dissertation in Portable Document Format (PDF):
+
+\begin{Verbatim}[formatcom = \color{blue}]
+    egrep -v '^%|^ *$' sample-thesis-1.tex > sample-thesis-1.stripped
+
+    test -f sample-thesis-1-bioname.ind || touch sample-thesis-1-bioname.ind
+    test -f sample-thesis-1-fsfname.ind || touch sample-thesis-1-fsfname.ind
+    pdflatex sample-thesis-1.ltx
+    bibtex sample-thesis-1
+    mv sample-thesis-1.idx sample-thesis-1.idx.old
+    cat < sample-thesis-1.idx.old > sample-thesis-1.idx
+    fgrep -v fsfname sample-thesis-1.idx |
+        makeindex -c -s sample-thesis-1.ist > sample-thesis-1.ind
+    fgrep bioname sample-thesis-1.idx    |
+        fgrep -v '|see'                  |
+            makeindex -c -s sample-thesis-1.ist > sample-thesis-1-bioname.ind
+    fgrep fsfname sample-thesis-1.idx    |
+        fgrep -v '|see'                  |
+            makeindex -c -s sample-thesis-1.ist > sample-thesis-1-fsfname.ind
+
+    [same command block, repeated 3 more times]
+\end{Verbatim}
+
+\noindent
+The \texttt{egrep} filtering step is needed to remove empty lines and
+comments, producing the bare \LaTeX{} commands shown earlier.  Cross
+references in the dissertation text, and also inside bibliography
+entries, require multiple runs of \texttt{pdflatex} and
+\texttt{bibtex}.  At each step, the newly-created raw index file,
+\texttt{sample-thesis-1.idx}, is filtered to derive three formatted
+and sorted index files, \texttt{*.ind}, that are read and typeset
+on the next run of \texttt{pdflatex}.
+
+The \texttt{cat} command simply copies its input to its output, but a
+simple redefinition of the \texttt{FIXIDX} macro in the
+\texttt{Makefile} can turn it into a filter that modifies the raw
+index file.
+

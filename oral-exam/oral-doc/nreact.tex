@@ -1,0 +1,256 @@
+%%% -*-LaTeX-*-
+
+\chapter{The Modified Next Reaction Method}
+\label{cha:modif-next-react}
+
+The fundamental premise of the Gillespie algorithm and related methods
+\cite{Gillespie2007} is that each chemical reaction $k$ proceeds with
+a propensity function $a_j(\mathbf{x})$ that depends on the state of
+the system $\mathbf{x}$ and defined so that
+\begin{equation}
+  \label{eq:prop-def}
+  a_k(\mathbf{x}) \dd t \equiv \tn{the probability that reaction $k$
+    takes place in a small time interval $[t, t+\dd t)$}.
+\end{equation}
+
+Based on this assumption, the time $\Delta t_k$ that it takes for
+reaction $k$ to fire is exponentially distributed with rate parameter
+$a_k(\mathbf{x})$. As mentioned above, for each time step in the
+Gillespie algorithm, two random numbers are generated. The first is
+used to find the minimum firing time over all the reactions (the
+minimum firing time is exponentially distributed with rate parameter
+$a_0(\mathbf{x}) = \sum_{k=1}^M a_k(\mathbf{x})$), and the second is
+used to find which reaction occurred (reaction $k$ occurred with
+probability $a_k(\mathbf{x}) / a_0 (\mathbf{x})$).
+
+\section{Next reaction method}
+\label{sec:next-reaction-method}
+
+In the Gillespie algorithm, two random numbers must be generated at
+each time step, and the number of random numbers that must be
+generated is independent of the number of possible reactions. For
+chemical systems where the number of time steps is large relative to
+the number of possible reactions, the next reaction method improves on
+the Gillespie algorithm in that fewer random numbers are required to
+advance the simulation. However the feature that is most relevant for
+these notes is that the next reaction method is more easily
+generalized to the case where reaction rates are explicitly dependent
+on time.
+
+For the next reaction method, we represent the reaction times of each
+individual reaction as the firing times of Poisson processes. Let
+$R_k(t)$ be the number of times the $k$th reaction has occurred before
+time $t$. $R_k(t)$ can be represented as a Poisson process with a
+nondimensional firing rate related to the reaction rate. Specifically,
+if we define $k$ independent Poisson processes with unit firing rate:
+$Y_k(\tau)$, then
+\begin{equation}
+  \label{eq:R-def}
+  R_k(t) = Y_k\left(\int_0^t a_k(X(s)) ds \right).
+\end{equation}
+
+Anderson defines the \emph{internal time} of reaction $k$ as $T_k(t)$:
+\begin{equation}
+  \label{eq:T-def}
+  T_k(t) \equiv \int_0^t a_k(X(s)) ds.
+\end{equation}
+The internal time is a nondimensional quantity that scales time in the
+$k$th Poisson process based on the reaction rate $a_k(X(t))$.
+
+The idea of the next reaction method is to calculate the firing times
+of each Poisson process independently, and then to find the minimum
+firing time. The system is updated based on which reaction fired, and
+the internal times of each reaction are updated appropriately. All of
+the firing times of the other reactions are saved, and a new firing
+time is generated only for the reaction which fired.
+
+More explicitly, define $P_k$ to be the first firing time of $Y_k$ (in
+the time scale of $Y_k$) after $T_k(t)$:
+\begin{equation}
+  \label{eq:P-def}
+  P_k(t) = \min\{s > T_k(t) \mid Y_k(s) > Y_k(T_k(t)) \}.
+\end{equation}
+
+Then from the definition of $T_k(t)$ the absolute time required for
+reaction $k$ to fire $\Delta t_k$ is given by
+\begin{equation}
+  \label{eq:dtk-def}
+  \int_t^{t + \Delta t_k} a_k(X(s)) ds = P_k - T_k.
+\end{equation}
+
+
+Assuming $X(s)$ is constant in $[t, t + \Delta t_k)$, then so is $a_k$
+(as long as $a_k$ doesn't explicitly depend on time) and
+$\Delta t_k = (P_k - T_k)/a_k$. This gives us the following algorithm
+for the next reaction method for autonomous reaction rates:
+\begin{enumerate}
+\item Initialize chemical species, set $t=0$, and $T_k = 0$ for
+  each $k$
+\item Calculate $a_k$ for each reaction.
+\item Generate $M$ independent, uniform random numbers $r_k$.
+\item For each $k$, set $P_k = \log(1/r_k)$ (find the internal firing
+  times of each reaction).
+\item For each $k$, set $\Delta t_k = (P_k - T_k)/a_k$ (convert the
+  internal firing times to absolute firing times).
+\item Set $\Delta = \min_k \{\Delta t_k\}$ and
+  $\mu = \operatorname{argmin}_k \{\Delta t_k\}$.
+\item Set $t = t + \Delta$ and update the number of molecular species
+  associated with reaction $\mu$.
+\item For each $k$, set $T_k = T_k + a_k \Delta$ (advance the internal
+  times).
+\item For reaction $\mu$, choose a new random number $r$ and set
+  $P_\mu = P_\mu + \log(1/r)$.
+\item Recalculate the reaction rates $a_k$.
+\item Go to 5.
+\end{enumerate}
+
+\section{Time-dependent reaction rates}
+\label{sec:time-depend-react}
+
+If we now assume that the reaction rates can change explicitly as a
+function of time (that is $a_k = a_k(X(t), t)$), we can apply the next
+reaction method described above to this new case in a fairly
+straightforward way. $P_k$ and $T_k$ are defined in the same way as
+above, the only difference is that now $T_k$ is not necessarily a
+piecewise linear function of the absolute time $t$.
+
+In the algorithm described above, only steps 5 and 8 change. In step 5
+to find the absolute firing times of each reaction $\Delta t_k$, we
+must now solve
+\begin{equation}
+  \label{eq:step-5}
+  \int_t^{t + \Delta t_k} a_k(X(t), s) ds = P_k - T_k.
+\end{equation}
+
+In step 8 to advance each internal clock, we now have to set
+\begin{equation}
+  \label{eq:step-8}
+  T_k = T_k + \int_t^{t + \Delta} a_k(X(t), s) ds.
+\end{equation}
+
+\section{The modified next reaction method applied to platelet
+  rolling}
+\label{sec:plt-rolling}
+
+In the case of platelet rolling, it is clear that the reaction rates
+(i.e. bond formation and breaking rates) depend on time through the
+position of the platelet, and the method for simulating time-dependent
+reactions can nearly be directly applied to simulate random bond
+formation and breaking.
+
+Let's look at the force-balance equations for the platelet. We have
+\begin{align}
+  \label{eq:vel-force-bal}
+  0 &= \ndVelFriction \left(\ndAppliedVel - \ndVelocity \right) +
+      \ndHorzTotalForce \\
+  \label{eq:rot-force-bal}
+  0 &= \ndRotFriction \left(\ndAppliedRot - \ndRotation \right) +
+      \ndTotalTorque
+\end{align}
+where $\ndHorzTotalForce = \sum_{i=1}^\texttt{numBonds}
+(\sin\recAngle_i - \ndWallDist_i )$ and $\ndTotalTorque =
+-\sum_{i=1}^\texttt{numBonds} [(1 - \cos\recAngle_i +
+\ndSeparation)\sin\recAngle_i + (\sin\recAngle_i -
+\ndWallDist_i)\cos\recAngle_i]$.
+
+The motion of the platelet is defined so that
+$\Der{\ndWallDist_i}{\dTime} = -\ndVelocity$ and
+$\Der{\recAngle_i}{\dTime} = -\ndRotation$ for all $i = 1, \hdots
+\texttt{numBonds}$. These differential equations have the solution
+$\ndWallDist_i(\dTime) = -\ndVelocity \dTime + \ndWallDist_i^0$ and
+$\recAngle_i(\dTime) = -\ndRotation \dTime + \recAngle_i^0$. The
+time-dependent piece of these equations is independent of $i$, and so
+we can write $\ndWallDist_i(\dTime)$ and $\recAngle_i(\dTime)$ in
+terms of an initial value (that varies only over $i$) plus a reference
+point that varies only over $\dTime$:
+\begin{align}
+  \ndWallDist_i(t) &= \ndWallDist_\tn{ref}(\dTime) + \ndWallDist_i^0
+                     \quad \tn{where} \quad
+                     \ndWallDist_\tn{ref}(\dTime) \equiv
+                     -\ndVelocity\dTime \\
+  \recAngle_i(t) &= \recAngle_\tn{ref}(\dTime) + \recAngle_i^0 \quad
+                   \tn{where} \quad \recAngle_\tn{ref}(\dTime) \equiv
+                   -\ndRotation \dTime.
+\end{align}
+
+From the definitions of $\ndWallDist_\tn{ref}$ and
+$\recAngle_\tn{ref}$, we can rewrite equations
+\eqref{eq:vel-force-bal} and \eqref{eq:rot-force-bal} as a set of
+ODEs:
+\begin{align}
+  \label{eq:wall-evol}
+  \Der{\ndWallDist_\tn{ref}}{\dTime}
+  &= -\ndAppliedVel + F_h'\left(\ndWallDist_\tn{ref},
+    \recAngle_\tn{ref} \right)/\ndVelFriction \\
+  \label{eq:plt-evol}
+  \Der{\recAngle_\tn{ref}}{\dTime}
+  &= -\ndAppliedRot + \tau'\left(\ndWallDist_\tn{ref},
+    \recAngle_\tn{ref} \right)/\ndRotFriction.
+\end{align}
+
+Assuming that no bonds form or break in the time interval
+$[t_1, t_2]$, integrating equations \eqref{eq:wall-evol} and
+\eqref{eq:plt-evol} gives the position of the platelet at the times in
+that interval. Knowing the position and orientation of the platelet at
+all times $\dTime$ in some interval also means that the bond formation
+and breaking rates are also known for all times in that
+interval. Therefore equations \eqref{eq:wall-evol} and
+\eqref{eq:plt-evol} give us a way to evaluate the integral in
+equations \eqref{eq:step-5} and \eqref{eq:step-8}.
+
+One consideration we have to make is that we don't know \emph{a
+  priori} how long to integrate the above system to guarantee that a
+reaction fires in the time interval of integration. My solution to
+this is to augment the system with equations of the form
+$\Der{F_k}{\dTime} = a_k(\ndWallDist_\tn{ref}, \recAngle_\tn{ref})$
+where the $a_k$s are bond formation/breaking rates. That is, to
+integrate the reaction rates along with equations of motion, and
+then integrate the augmented system until one of the reactions fires.
+
+I propose the following stochastic simulation algorithm for platelet
+rolling with the next reaction method:
+\begin{enumerate}
+\item Initialize platelet velocities $\ndVelocity$ and $\ndRotation$,
+  and $\texttt{bondList}$. Set $\dTime = 0$ and $T_k = 0$ for each of the
+  $2N$ bins on the platelet surface, and any bonds that exist in the
+  initial condition.
+\item Generate $2N + \texttt{numBonds}$ independent, uniform random
+  numbers $r_k$.
+\item Set $P_k = \log(1/r_k)$ for each $k$ (i.e. set the internal
+  firing times for each reaction).
+\item Define $\dTime_0$ to be the current time $\dTime$,
+  $\ndWallDist_i^0$ to be the current $\ndWallDist$ coordinates of the
+  existing bonds, and $\recAngle_i^0$ to be the current $\recAngle$
+  coordinates of the existing bonds.
+\item Set up the ODE system
+  \begin{align}
+    \Der{\ndWallDist_\tn{ref}}{\dTime}
+    &= -\ndAppliedVel + F_h'\left(\ndWallDist_\tn{ref},
+      \recAngle_\tn{ref} \right)/\ndVelFriction \\
+    \Der{\recAngle_\tn{ref}}{\dTime}
+    &= -\ndAppliedRot + \tau'\left(\ndWallDist_\tn{ref},
+      \recAngle_\tn{ref} \right)/\ndRotFriction \\
+    \Der{F_k}{\dTime} &= a_k\left(\ndWallDist_\tn{ref},
+    \recAngle_\tn{ref} \right).
+  \end{align}
+  with initial conditions $\ndWallDist_\tn{ref}(\dTime_0) =
+  \recAngle_\tn{ref}(\dTime_0) = 0$ and $F_k(\dTime_0) = T_k - P_k$. 
+\item Integrate the ODE system until:
+  \begin{enumerate}
+  \item The end of the stochastic simulation $T_\tn{end}$ is reached,
+  \item One of the $F_k$s reaches 0 (i.e. a reaction fires), or
+  \item One of the bond endpoints exits the numerical domain.
+  \end{enumerate}
+\item If one of the bond endpoints exited the numerical domain, break
+  the appropriate bond, update the bond positions and bin positions on
+  the platelet, and return to step 4.
+\item If the $k$th reaction fired, either add or remove a bond as
+  needed, update the bond positions and bin positions, and return to
+  step 4.
+\item If $T_\tn{end}$ was reached, end the simulation. 
+\end{enumerate}
+
+
+% Local Variables:
+% TeX-master: "oral-document"
+% End:

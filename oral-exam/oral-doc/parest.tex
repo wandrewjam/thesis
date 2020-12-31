@@ -1,0 +1,201 @@
+%%% -*-LaTeX-*-
+
+\chapter{Parameter Estimates}
+\label{app:parameter-estimates}
+
+There are 13 dimensional parameters in the dimensional version of the
+PDE model, listed in Table \ref{tab:dim_pars}.
+
+\begin{table}
+  \renewcommand*{\arraystretch}{1.5}
+  \centering
+  \begin{tabu}{cXXX}
+    \toprule Symbol & Description & Estimate & Source \\ \midrule
+    $\radius$ & Platelet radius & 1 {\textmugreek}m & None \\
+    $\separation$ & Wall separation distance & 0.01 {\textmugreek}m &
+    None \\
+    \multirow{3}{*}{$\stiffness$} & \multirow{3}{*}{Bond stiffness} &
+    12 pN/nm & \cite{Litvinov2011} (\ITA{IIb}\ITB{3}--fbg) \\
+    & & 0.1 pN/nm & \cite{Fitzgibbon2014} (GP1b-vWF) \\
+    & & 10 pN/nm & \cite{Mody2008b} (GP1b-vWF) \\
+    $\boltzmann$ & Boltzmann constant & $1.38 \times 10^{-23}$ J/K
+    & None \\
+    $\temp$ & Blood temperature & 310 K & None \\
+    $\onConst$ & Maximum bond on rate &
+    &  \\
+    $\offConst$ & Unstressed bond off rate & 5 s$\inv$
+    & \cite{Fitzgibbon2014} (GP1b--vWF)\\
+    \multirow{2}{*}{$\refForce$} &
+    \multirow{2}{*}{\parbox{\textwidth}{Characteristic
+        breaking\\force}} & 6.03 pN & Estimated below from
+    \cite{Mody2008b} (GP1b--vWF) \\
+    & & 107 pN & Estimated below from \cite{Bhatia2003}
+    (E-selectin--sLe\textsuperscript{x}) (\cite{Doggett2002} gives similar)\\
+    $\receptorDensity$ & Angular receptor density & $\sim 1000$
+    receptors/radian & Estimated
+    below \\
+    $\appliedRot$ & Fluid-imposed rotation rate & $\gamma/2$ s$\inv$ &
+    \cite{Goldman1967b} \\
+    $\appliedVel$ & Fluid-imposed translation velocity &
+    $(R + d)\gamma$ {\textmugreek}m/s &
+    \cite{Goldman1967b} \\
+    $\velFriction$ & Translational drag coefficient &
+    $6 \times 10^{-5}$ g/s & Estimated below
+    (GP1b--vWF) \\
+    $\rotFriction$ & Rotational drag coefficient & $8 \times 10^{-5}$
+    {\textmugreek}m\textsuperscript{2}g/s & Estimated below \\
+    \bottomrule
+  \end{tabu}
+  \caption{Dimensional parameters in the PDE model}
+  \label{tab:dim_pars}
+\end{table}
+
+\section{Estimates for model parameters}
+\label{sec:estim-model-param}
+
+\subsection{Characteristic breaking force}
+\label{sec:char-break-force}
+
+$\refForce$ is equivalent to $\boltzmann\temp/\compliance$ in
+\cite{Pospieszalska2009} and \cite{Sundd2011}, where $\compliance$ is
+the reactive compliance and is estimated at 0.4 angstroms in
+\cite{Bhatia2003}. Then converting units as needed:
+\begin{align*}
+  &\compliance = 0.4 \text{ angstroms} = 4 \times 10^{-5}
+    \text{{\textmugreek}m} \text{, and} \\
+  &\boltzmann = 1.38 \times 10^{-23} \text{N}\cdot\text{m}/\text{K} =
+    1.38 \times 10^{-5} \text{pN}\cdot\text{{\textmugreek}m}/\text{K}.
+\end{align*}
+Finally, $\refForce = \frac{\boltzmann\cdot\temp}{\compliance} =
+\frac{310 \cdot 1.38 \times 10^{-5}}{4 \times 10^{-5}} \text{pN} = 107
+\text{pN}$.
+
+\subsection{Angular receptor density}
+\label{sec:ang-rec-dens}
+
+$\receptorDensity$ is related to the number of receptors on the
+surface of the platelet, but it is not clear how. Obviously in reality
+the receptors are distributed over a 2D surface, but in the model the
+platelet is 2D and its surface is 1D. There are 60,000--80,000 
+\ITA{IIb}\ITB{3}  receptors on the surface of a platelet, and more are
+recruited after platelet activation
+\cite{Shattil1998,Litvinov2011}. If we assume all of these are on the
+surface of our 2D platelet, that gives a range of 10,000--13,000 for
+$\receptorDensity$. 
+
+If we assume the reactive region is a narrow strip down the centerline
+of the platelet of width $\width$, then $\receptorDensity$ is found by
+first calculating the number of receptors in that reactive
+strip. Approximating the reactive region with a cylinder of radius
+$\radius$ and height $\width$ gives a surface area of
+$2\pi\width\radius$. The surface density of receptors is given by
+$\receptorNumber/(4\pi\radius^2)$, and so there are
+$\receptorNumber\cdot\width/(2\radius)$ total receptors in the
+reactive strip. After dividing by $2\pi$ to get the angular density of
+receptors, we end up with $\receptorDensity =
+\receptorNumber\cdot\width/(4\pi\radius)$. With our estimates of
+$\receptorNumber$ and $\radius$ above, this gives us a range for
+$\receptorDensity$ of $4,775\width$--$6,366\width$.
+
+% \subsection{Drag coefficients}
+% \label{sec:drag-coefficients}
+
+% The simplest case is to use the Stokes' drag coefficients for a sphere
+% in an unbounded uniform flow: $6\pi\viscosity\radius$ and
+% $8\pi\viscosity\radius^3$. With the  viscosity of blood around 3--4
+% cP (3--4 $\times 10^{-6}$ g/(\textmugreek{m} s)), this gives drag
+% coefficients of $6 \times 10^{-5}$ g/s and $8 \times 10^{-5}$
+% \textmugreek{m}\textsuperscript{2}g/s respectively.
+
+% A more sophisticated treatment would use the resistance coefficients
+% estimated by Goldman, Cox, and Brenner
+% \cite{Goldman1967a,Goldman1967b} for the case of a sphere moving in a
+% shear flow near an infinite plane wall. Based on their results, we can
+% relate the hydrodynamic force and torque on a sphere to its
+% translational and angular velocities with a 2x2 matrix equation:
+% $\mathbf{F}^h = \underline{\underline{R}} \mathbf{U} + \mathbf{F}^s$ where
+% $\mathbf{F}^h = (\, )^T$, $\mathbf{U} = (v, \omega)^T$, and $\mathbf{F}^s$
+% is the force and torque generated by the shear flow. The entries of
+% the resistance matrix $\underline{\underline{R}}$ are listed in Table
+% \ref{tab:resistance-coefficients}. The forces and torques generated by
+% the shear flow are taken to be $F^s = 6 \pi \viscosity \radius
+% (\radius + \separation) \gamma \cdot 1.6160$ and $T^s = 4 \pi
+% \viscosity \radius^3 \gamma \cdot 0.9537$, where $\mathbf{F}^s = (F^s,
+% T^s)^T$.
+
+% For a separation of 100 nm, we get the following values for elements
+% in the resistance matrix:
+% \begin{align*}
+%   r_{11} &= -1.24 \times 10^{-4} \frac{g}{s} \\
+%   r_{12} &= 3.08 \times 10^{-6} \frac{g \mu m}{s} \\
+%   r_{21} &= 3.07 \times 10^{-6} \frac{g \mu m}{s} \\
+%   r_{22} &= -9.83 \times 10^{-5} \frac{g \mu m^2}{s}.
+% \end{align*}
+
+% \begin{table}
+%   \centering
+%   \begin{tabular}{c|c}
+%     $r_{11} = 6 \pi \viscosity \radius
+%     \left(\frac{8}{15}\log(\separation/\radius) - 0.9588\right)$
+%   & $r_{12} = 6 \pi \viscosity \radius^2
+%     \left(-\frac{2}{15}\log(\separation/\radius) - 0.2526\right)$ \\ 
+%     \hline
+%     $r_{21} = 8 \pi \viscosity \radius^2
+%     \left(-\frac{1}{10}\log(\separation/\radius) - 0.1895\right)$
+%   & $r_{22} = 8 \pi \viscosity \radius^3
+%     \left(\frac{2}{5}\log(\separation/\radius) - 0.3817\right)$
+%   \end{tabular}
+%   \caption{Coefficients of the resistance matrix}
+%   \label{tab:resistance-coefficients}
+% \end{table}
+
+\section{Nondimensional parameters}
+\label{sec:nd-params}
+
+There are 8 parameters in the nondimensional PDE rolling model, listed
+in Table \ref{tab:nd-params} with values calculated from the
+dimensional parameter values listed in Table \ref{tab:dim_pars}.
+
+\begin{table}
+  \renewcommand*{\arraystretch}{1.5}
+  \centering
+  \begin{tabular}{ccll}
+    \toprule
+    Parameter & Definition & Value & Description \\ \midrule
+    $\ndSeparation$ & $\separation = \radius\ndSeparation$ & 0.01
+                                   & cell-surface separation \\
+    $\ndAppliedRot$ & $\appliedRot = \ndAppliedRot\offConst$
+                           & $(0.1 \text{ s})\shear$ & Fluid-imposed
+                                                       rotation rate
+    \\
+    $\ndAppliedVel$ & $\appliedVel = \ndAppliedVel\radius\offConst$
+                           & $(0.2 \text{ s}) (1 + \ndSeparation)
+                             \shear$
+                                   & Fluid-imposed translation
+                                     velocity \\
+    $\ndOnConst$ & $\ndOnConst = \frac{\radius\onConst}{\offConst}$
+                           &  & Maximum relative on rate \\
+    $\onForceScale$ & $\onForceScale =
+                    \frac{\stiffness\radius^2}{\boltzmann\temp}$
+                           & $2.34 \times 10^4$ & Length dependence of
+                                                  on rate \\
+    $\offForceScale$ & $\offForceScale = \stiffness\radius/\refForce$
+                           & 16.6 & Length dependence of off rate \\
+    $\ndVelFriction$ & $\ndVelFriction =
+                     \frac{\offConst}{\stiffness\receptorDensity}
+                       \velFriction$ & $7.36 \times 10^{-6}$
+                                   & Translational drag coefficient \\
+    $\ndRotFriction$ & $\ndRotFriction =
+                     \frac{\offConst}{\stiffness\receptorDensity
+                                      \radius^2}\rotFriction$
+                           & $9.82 \times 10^{-6}$ & Rotational drag
+                                                     coefficient \\
+    \bottomrule
+  \end{tabular}
+  \caption{Nondimensional parameters}
+  \label{tab:nd-params}
+\end{table}
+
+% Local Variables:
+% TeX-master: "oral-document.ltx"
+% End:
