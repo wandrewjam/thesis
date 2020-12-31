@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def get_steps_dwells(data_list, thresh=1, samples=15):
+def get_steps_dwells(data_list):
     steps = []
     dwell = []
     for data in data_list:
@@ -46,25 +46,35 @@ def count_bonds(data):
     return counts
 
 
-def plot_trajectories(data_list):
-    fig, ax = plt.subplots(nrows=2, sharex='all', figsize=(6, 8))
+def plot_trajectories(data_list, runner, save_plots=False):
+    subsets = 8
+    assert len(data_list) % subsets == 0
+    for i in range(len(data_list) // subsets):
+        data_subset = data_list[subsets * i:subsets * (i + 1)]
+        filename = runner + '_plot' + str(i)
+        plot_trajectory_subset(data_subset, filename, save_plots=save_plots)
+
+
+def plot_trajectory_subset(data_list, filename, save_plots=False):
+    plot_dir = 'plots/'
+    fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(5, 9))
     for data in data_list:
-        lw = .5
-        c = 'C0'
-        ax[0].plot(data['t'], data['z'], color=c, linewidth=lw)
-        # ax[1].plot(data['t'], data['r_matrices'][2, 0, :], color=c,
-        #            linewidth=lw)
+        ax[0].plot(data['t'], data['z'])
+        ax[1].plot(data['t'], data['r_matrices'][2, 0, :])
 
         # Count bonds and plot counts
         bond_counts = count_bonds(data)
-        ax[1].plot(data['t'], bond_counts, color=c, linewidth=lw)
-
+        ax[2].plot(data['t'], bond_counts)
     ax[0].set_ylabel('Downstream displacement ($\\mu m$)')
-    # ax[1].set_ylabel('Orientation (z-cmp of $e_m$)')
-    ax[1].set_ylabel('# of bonds')
-    ax[1].set_xlabel('Time (s)')
-    plt.tight_layout()
-    plt.show()
+    ax[1].set_ylabel('Orientation (z-cmp of $e_m$)')
+    ax[2].set_ylabel('# of bonds')
+    ax[2].set_xlabel('Time (s)')
+    if save_plots:
+        plt.savefig(plot_dir + filename, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
 
 
 def filter_traj(data_list):
@@ -99,6 +109,7 @@ def get_bound_at_end(data_list):
 
 
 def main():
+    save_plots = True
     runners = ['bd_runner03', 'bd_runner02', 'bd_runner01', 'bd_runner04']
     # runners = ['bd_runner03']
     steps_list = []
@@ -107,7 +118,7 @@ def main():
     for runner in runners:
         expt_names = extract_run_files(runner)
         data = extract_data(expt_names)
-        plot_trajectories(data)
+        plot_trajectories(data, runner, save_plots=save_plots)
 
         avg_v_list.append(get_average_vels(data))
         proportion_bound = get_proportion_bound(data)
