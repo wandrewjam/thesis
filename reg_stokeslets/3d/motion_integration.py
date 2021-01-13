@@ -251,6 +251,8 @@ def valid_forces(old_center, old_rmat, new_center, new_rmat, receptors, bonds, k
 
     if old_rep_force < 0.1 and new_rep_force < 0.1:
         valid_rep_force = True
+    elif new_rep_force < 1e-16:
+        valid_rep_force = False
     else:
         valid_rep_force = np.abs(np.log10(old_rep_force / new_rep_force)) < 1
 
@@ -573,11 +575,16 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
 
     x1, x2, x3 = [[xi] for xi in init[:3]]
 
-    theta, phi = np.arctan2(init[5], init[4]), np.arccos(init[3])
-    ct, st, cp, sp = np.cos(theta), np.sin(theta), np.cos(phi), np.sin(phi)
-    r_matrix = np.array([[cp, -sp, 0],
-                         [ct * sp, ct * cp, -st],
-                         [st * sp, st * cp, ct]])
+    if len(init) == 6:
+        theta, phi = np.arctan2(init[5], init[4]), np.arccos(init[3])
+        ct, st, cp, sp = np.cos(theta), np.sin(theta), np.cos(phi), np.sin(phi)
+        r_matrix = np.array([[cp, -sp, 0],
+                             [ct * sp, ct * cp, -st],
+                             [st * sp, st * cp, ct]])
+    elif len(init) == 12:
+        r_matrix = init[3:].reshape((3, 3))
+    else:
+        raise ValueError('init must be length 6 or 12')
     # r_matrices[:, :, 0] = r_matrix
     r_matrices = [r_matrix]
 
@@ -669,7 +676,7 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
               'outputting computation results so far.')
         pass
 
-    assert np.abs(t[-1] - t_span[1]) < 1e-10
+    # assert np.abs(t[-1] - t_span[1]) < 1e-10
 
     if save_quad_matrix_info:
         return (np.array(x1), np.array(x2), np.array(x3),
