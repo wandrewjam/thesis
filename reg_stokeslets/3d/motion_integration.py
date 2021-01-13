@@ -7,7 +7,7 @@ from timeit import default_timer as timer
 
 
 def read_parameter_file(filename):
-    txt_dir = 'par-files/experiments/'
+    txt_dir = 'par-files/'
     parlist = [('filename', filename)]
 
     with open(txt_dir + filename + '.txt') as f:
@@ -320,6 +320,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             tmp_x1, tmp_x2, tmp_x3, tmp_rmat = result1[:4]
             bonds = result1[6]
             dt_list = result1[7]
+            rand_states = result1[8]
 
             if save_quad_matrix_info:
                 s_matrices += result1[-1]
@@ -335,6 +336,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             new_rmat = tmp_rmat + tmp2_rmat
             new_bonds = half_step2[6]
             dt_list += half_step2[7]
+            rand_states += half_step2[8]
+
             if save_quad_matrix_info:
                 s_matrices += half_step2[-1]
         else:
@@ -343,6 +346,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             else:
                 new_bonds = None
             dt_list = [dt]
+            rand_states = [np.random.get_state()]
 
     elif order == '2nd':
         result = evaluate_motion_equations(
@@ -405,6 +409,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             else:
                 new_bonds = None
             dt_list = [dt]
+            rand_states = [np.random.get_state()]
 
         except AssertionError:
             # If we get an invalid orientation, then take 2 half-steps
@@ -416,6 +421,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             tmp_x1, tmp_x2, tmp_x3, tmp_rmat = result1[:4]
             new_bonds = result1[6]
             dt_list = result1[7]
+            rand_states = result1[8]
 
             if save_quad_matrix_info:
                 s_matrices += result1[-1]
@@ -433,6 +439,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
 
             new_bonds += half_step2[6]
             dt_list += half_step2[7]
+            rand_states += half_step2[8]
 
             if save_quad_matrix_info:
                 s_matrices += half_step2[-1]
@@ -499,6 +506,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             else:
                 new_bonds = None
             dt_list = [dt]
+            rand_states = [np.random.get_state()]
 
         except AssertionError:
             # Take two half-steps
@@ -512,6 +520,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             tmp_x1, tmp_x2, tmp_x3, tmp_rmat = half_step1[:4]
             bonds = half_step1[6]
             dt_list = half_step1[7]
+            rand_states = half_step1[8]
 
             if save_quad_matrix_info:
                 s_matrices += half_step1[-1]
@@ -528,6 +537,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             new_rmat = tmp_rmat + tmp2_rmat
             new_bonds = half_step2[6]
             dt_list += half_step2[7]
+            rand_states = half_step2[8]
 
             if save_quad_matrix_info:
                 s_matrices += half_step2[-1]
@@ -538,10 +548,10 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
 
     if save_quad_matrix_info:
         return (new_x1, new_x2, new_x3, new_rmat, velocity_errors, receptors,
-                new_bonds, dt_list, s_matrices)
+                new_bonds, dt_list, rand_states, s_matrices)
     else:
         return (new_x1, new_x2, new_x3, new_rmat, velocity_errors,
-                receptors, new_bonds, dt_list)
+                receptors, new_bonds, dt_list, rand_states)
 
     # if save_quad_matrix_info:
     #     return (new_x1, new_x2, new_x3, new_rmat, velocity_errors, receptors,
@@ -587,7 +597,8 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
     if save_quad_matrix_info:
         s_matrices = []
 
-    t = [0]
+    t = [t_span[0]]
+    rand_states = [np.random.get_state()]
     if precompute:
         assert not adaptive
         eps = eps_picker(n_nodes, a, b)
@@ -633,7 +644,8 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
                 receptor_history.append(res[5])
                 # bond_history.append(res[6])
                 bond_history += res[6]
-                s_matrices.append(res[8])
+                s_matrices.append(res[-1])
+                rand_states += res[8]
 
                 new_t = np.cumsum(res[7]) + t[-1]
                 t = np.append(t, new_t)
@@ -651,19 +663,22 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
                 bond_history += res[6]
                 new_t = np.cumsum(res[7]) + t[-1]
                 t = np.append(t, new_t)
+                rand_states += res[8]
     except (AssertionError, OverflowError, ValueError):
         print('Encountered an error while integrating. Halting and '
               'outputting computation results so far.')
         pass
 
+    assert np.abs(t[-1] - t_span[1]) < 1e-10
+
     if save_quad_matrix_info:
         return (np.array(x1), np.array(x2), np.array(x3),
                 np.stack(r_matrices, axis=-1), errs, node_array, sep_array,
-                receptor_history, bond_history, t, s_matrices)
+                receptor_history, bond_history, t, rand_states, s_matrices)
     else:
         return (np.array(x1), np.array(x2), np.array(x3),
                 np.stack(r_matrices, axis=-1), errs, node_array, sep_array,
-                receptor_history, bond_history, t)
+                receptor_history, bond_history, t, rand_states)
 
     # if save_quad_matrix_info:
     #     return (x1, x2, x3, r_matrices, errs, node_array, sep_array,

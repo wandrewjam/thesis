@@ -56,11 +56,18 @@ def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
         f.writelines(expt_info)
 
 
+def save_rng(filename, rng_states):
+    import pickle
+    save_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/data/')
+    with open(save_dir + filename + '.pkl', 'wb') as f:
+        pickle.dump(rng_states, f)
+
+
 def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
          t_end=50., num_steps=250, seed=None, n_nodes=8, adaptive=False, a=1.5,
          b=.5, shear=100., l_sep=0.1, dimk0_on=10., dimk0_off=5., sig=1e4,
          sig_ts=9.99e3, one_side=False, check_bonds=False):
-    save_dir = 'data/'
+    save_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/data/')
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
     # Read in previous file names
     file_i = [int(f[7:10]) for f in os.listdir(save_dir) if f[:7] == 'bd_expt']
@@ -206,6 +213,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
 
         x, y, z, r_matrices = result[:4]
         bond_history = result[8]
+        rng_states = result[10]
 
         max_bonds = len(max(*bond_history, key=len))
         padded_bonds = [np.pad(bd, pad_width=((0, max_bonds - bd.shape[0]),
@@ -223,6 +231,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
                   adaptive, shear, l_sep, dimk0_on, dimk0_off,
                   sig, sig_ts, one_side, check_bonds)
+        save_rng(filename, rng_states)
 
     bond_num = [bond.shape[0] for bond in result[8]]
     print(bond_num)
