@@ -1,0 +1,18 @@
+seed 123456789
+t_start 0.0
+t_end 0.1
+num_steps 50
+n_nodes 4
+a 1.5
+b 0.5
+adaptive False
+shear 100.0
+l_sep 0.1
+dimk0_on 10.0
+dimk0_off 5.0
+sig 100.0
+sig_ts 99.9
+one_side True
+check_bonds True
+
+done
