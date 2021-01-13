@@ -36,7 +36,13 @@ def extract_data(expt_names):
     data_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/data/')
     data = []
     for expt in expt_names:
-        data.append(np.load(data_dir + expt + '.npz'))
+        with np.load(data_dir + expt + '.npz') as data_file:
+            data_dict = {
+                't': data_file['t'], 'x': data_file['x'], 'y': data_file['y'],
+                'z': data_file['z'], 'r_matrices': data_file['r_matrices'],
+                'bond_array': data_file['bond_array'], 'num': expt[-3:]
+            }
+        data.append(data_dict)
     return data
 
 
@@ -58,14 +64,24 @@ def plot_trajectories(data_list, runner, save_plots=False):
 def plot_trajectory_subset(data_list, filename, save_plots=False):
     plot_dir = 'plots/'
     fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(5, 9))
+    ax_tw = ax[0].twinx()
+    lw = 0.7
     for data in data_list:
-        ax[0].plot(data['t'], data['z'])
-        ax[1].plot(data['t'], data['r_matrices'][2, 0, :])
+        t, z = data['t'], data['z']
+        e_mz = data['r_matrices'][2, 0, :]
+        z_velocities = (z[1:] - z[:-1]) / (t[1:] - t[:-1])
+
+        ax[0].plot(t, z, label=data['num'])
+        ax_tw.plot(t[1:], z_velocities, linestyle='--', linewidth=lw)
+        ax[1].plot(t, e_mz)
 
         # Count bonds and plot counts
         bond_counts = count_bonds(data)
-        ax[2].plot(data['t'], bond_counts)
+        ax[2].plot(t, bond_counts)
+    ax_tw.set_ybound(upper=185)
     ax[0].set_ylabel('Downstream displacement ($\\mu m$)')
+    ax[0].legend()
+    ax_tw.set_ylabel('$z$ velocities ($\\mu m / s$)')
     ax[1].set_ylabel('Orientation (z-cmp of $e_m$)')
     ax[2].set_ylabel('# of bonds')
     ax[2].set_xlabel('Time (s)')
@@ -110,6 +126,7 @@ def get_bound_at_end(data_list):
 
 def main():
     save_plots = True
+    plot_dir = 'plots/'
     runners = ['bd_runner03', 'bd_runner02', 'bd_runner01', 'bd_runner04']
     # runners = ['bd_runner03']
     steps_list = []
@@ -119,6 +136,7 @@ def main():
         expt_names = extract_run_files(runner)
         data = extract_data(expt_names)
         plot_trajectories(data, runner, save_plots=save_plots)
+        # plot_velocities(data, runner, save_plots=save_plots)
 
         avg_v_list.append(get_average_vels(data))
         proportion_bound = get_proportion_bound(data)
@@ -133,20 +151,35 @@ def main():
         print('Finished with {}'.format(runner))
 
     labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
-    plt.hist(avg_v_list)
+    plt.hist(avg_v_list, density=True)
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)
-    plt.show()
+    if save_plots:
+        plt.savefig(plot_dir + 'avg_vels', bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
 
-    plt.hist(steps_list)
+    plt.hist(steps_list, density=True)
     plt.xlabel('Step size ($\\mu m$)')
     plt.legend(labels)
-    plt.show()
+    if save_plots:
+        plt.savefig(plot_dir + 'steps', bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
 
-    plt.hist(dwell_list)
+    plt.hist(dwell_list, density=True)
     plt.xlabel('Pause time ($s$)')
     plt.legend(labels)
-    plt.show()
+    if save_plots:
+        plt.savefig(plot_dir + 'dwells', bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
     # print(expt_names)
     # print(proportion_bound)
     # print(bound_at_end)
