@@ -1,0 +1,10 @@
+distance, 1.5
+e0, (1.0, 0.0, 0.0)
+order, 2nd
+steps, 400
+stop, 50.0
+exact solution, False
+coarse counter, 800
+coarse time, 9480.75996709
+fine counter, 800
+fine time, 70288.521523
