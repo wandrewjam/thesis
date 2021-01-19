@@ -33,6 +33,7 @@ shek-pres/*
 dissertation/thesis-templates/
 figures/
 dissertation/phd-thesis/*.bib
+oral-exam/oral-doc/*.bib
 *.stripped
 first-binding-model/*.dat
 jump-velocity/npz-files/*
