@@ -32,6 +32,6 @@ cat par-files/bd_runner04.txt | parallel --results outdir4 \
 -j $TPN python binding_expt.py
 
 export duration=$(( SECONDS - start ))
-echo "Completed in $duration seconds'
+echo "Completed in $duration seconds"
 
 wait
