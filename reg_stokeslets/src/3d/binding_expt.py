@@ -8,7 +8,7 @@ from scipy.io import savemat
 
 
 def parse_file(filename):
-    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
+    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     parlist = [('filename', filename)]
     with open(txt_dir + filename + '.txt', 'r') as f:
         while True:
@@ -31,8 +31,7 @@ def parse_file(filename):
 def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
               adaptive, shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts,
               one_side, check_bonds):
-    import os
-    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
+    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     with open(txt_dir + filename + '.txt', 'w') as f:
         expt_info = ['seed {}\n'.format(seed),
                      't_start {}\n'.format(t_start),
@@ -67,8 +66,8 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
          t_end=50., num_steps=250, seed=None, n_nodes=8, adaptive=False, a=1.5,
          b=.5, shear=100., l_sep=0.1, dimk0_on=10., dimk0_off=5., sig=1e4,
          sig_ts=9.99e3, one_side=False, check_bonds=False):
-    save_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/data/')
-    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
+    save_dir = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
+    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     # Read in previous file names
     file_i = [int(f[7:10]) for f in os.listdir(save_dir) if f[:7] == 'bd_expt']
     if expt_num is None:
@@ -154,7 +153,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
     nd_start, nd_end = t_start / t_sc, t_end / t_sc
 
     result = integrate_motion(
-        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain,
+        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order='radau',
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
         check_bonds=check_bonds, one_side=one_side)

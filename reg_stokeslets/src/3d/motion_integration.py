@@ -1,4 +1,6 @@
 import numpy as np
+from os import path
+from scipy.integrate import solve_ivp
 from resistance_matrix_test import generate_resistance_matrices
 from sphere_integration_utils import compute_helper_funs
 from dist_convergence_test import spheroid_surface_area
@@ -7,7 +9,7 @@ from timeit import default_timer as timer
 
 
 def read_parameter_file(filename):
-    txt_dir = 'par-files/'
+    txt_dir = path.expanduser('~/thesis/reg_stokeslets/par-files/')
     parlist = [('filename', filename)]
 
     with open(txt_dir + filename + '.txt') as f:
@@ -236,12 +238,33 @@ def correct_matrix(r_matrix):
     return np.dot(u, np.dot(new_s, vh))
 
 
+def angles_to_matrix(angles):
+    s1, s2, s3 = np.sin(angles)
+    c1, c2, c3 = np.cos(angles)
+
+    rotation_matrix = np.array([
+        [c1 * c2, s1 * s2 - c1 * c3 * s2, c3 * s1 + c1 * s2 * s3],
+        [s2, c2 * c3, -c2 * s3],
+        [-c2 * s1, c1 * s3 + c3 * s1 * s2, c1 * c3 - s1 * s2 * s3]
+    ])
+
+    return rotation_matrix
+
+
+def matrix_to_angles(r):
+    alpha = -np.arctan2(r[2, 0], r[0, 0])
+    beta = np.arcsin(r[1, 0])
+    gamma = -np.arctan2(r[1, 2], r[1, 1])
+    return np.array([alpha, beta, gamma])
+
+
 def repulsive_force(com_dist, e_m):
     sep, point = find_min_separation(com_dist, e_m, loc=True)
     f0 = 1.25e9
     tau = 2000.
-    rep_force = (f0 * (tau * np.exp(-tau * sep))
-                 / (1 - np.exp(-tau * sep)))
+    with np.errstate(under='ignore'):
+        rep_force = (f0 * (tau * np.exp(-tau * sep))
+                     / (1 - np.exp(-tau * sep)))
     return point, rep_force
 
 
@@ -544,6 +567,59 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             if save_quad_matrix_info:
                 s_matrices += half_step2[-1]
 
+    elif order == 'radau':
+        assert not save_quad_matrix_info
+        r_hat = np.array([[0, 1, 0], [0, 0, -1], [-1, 0, 0]])
+        b_matrix = np.dot(r_matrix, r_hat.T)
+        angles = matrix_to_angles(r_hat)
+
+        def fun(t, y):
+            func_center = y[:3]
+            fun_angles = y[3:]
+
+            r_hat_tmp = angles_to_matrix(fun_angles)
+            rmat_temp = np.dot(b_matrix, r_hat_tmp)
+            func_forces, func_torques = find_bond_forces(receptors, bonds, func_center, rmat_temp, kappa, lam, one_side=True)
+            func_point, func_rep_force = repulsive_force(func_center[0], rmat_temp[:, 0])
+            func_forces += np.array([func_rep_force, 0, 0])
+            func_torques += np.cross(
+                [func_point[0] - func_center[0], func_point[1], func_point[2]],
+                [func_rep_force, 0, 0])
+            func_result = evaluate_motion_equations(
+                func_center[0], rmat_temp[:, 0], func_forces, func_torques, exact_vels, a=a, b=b, n_nodes=n_nodes,
+                domain=domain, proc=proc)
+            d_rmat = np.cross(func_result[3:6], rmat_temp, axisb=0, axisc=0)
+            d_rm_hat = np.linalg.solve(b_matrix, d_rmat)
+            s1, s2, s3 = np.sin(fun_angles)
+            c1, c2, c3 = np.cos(fun_angles)
+            d_beta = d_rm_hat[1, 0] / c2
+            d_alpha = (d_rm_hat[0, 0] + c1 * s2 * d_beta) / (-s1 * c2)
+            d_gamma = (d_rm_hat[1, 1] + s2 * c2 * d_beta) / (-c2 * s3)
+            dy = np.concatenate((func_result[:3], [d_alpha], [d_beta], [d_gamma]))
+            return dy
+
+        t_span = (0, dt)
+        y0 = np.concatenate((center, angles))
+
+        if len(bonds) > 0:
+            method = 'Radau'
+        else:
+            method = 'RK23'
+
+        sol = solve_ivp(fun, t_span, y0, method=method, rtol=1e-2)
+        new_x1, new_x2, new_x3 = [[el] for el in sol.y[:3, -1]]
+        rmat_hat = angles_to_matrix(sol.y[3:, -1])
+        new_rmat = np.dot(b_matrix, rmat_hat)
+        new_rmat = [correct_matrix(new_rmat)]
+
+        if receptors is not None:
+            new_bonds = [update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off, eta, eta_ts, lam)]
+        else:
+            new_bonds = None
+
+        velocity_errors = np.zeros((6,))
+        dt_list = [dt]
+        rand_states = [np.random.get_state()]
     else:
         print('order is not valid')
         raise ValueError()
@@ -569,6 +645,7 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
     np.seterr(all='raise')
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
+    np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
 
     # x1, x2, x3 = np.zeros(shape=(3, num_steps+1))
     # r_matrices = np.zeros(shape=(3, 3, num_steps+1))
@@ -675,7 +752,7 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
     except (AssertionError, OverflowError, ValueError, np.linalg.LinAlgError):
         print('Encountered an error while integrating. Halting and '
               'outputting computation results so far.')
-        pass
+        raise
 
     # assert np.abs(t[-1] - t_span[1]) < 1e-10
 

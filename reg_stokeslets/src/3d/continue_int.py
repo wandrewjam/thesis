@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from os import path
 import pickle as pkl
 from binding_expt import parse_file, save_info, save_rng
 from motion_integration import integrate_motion, nondimensionalize, get_bond_lengths, find_min_separation, repulsive_force
@@ -7,12 +8,18 @@ from scipy.io import savemat
 
 
 def continue_integration(filename, t_end, i_start=-1):
-    import os
-    data_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/data/')
+    data_dir = path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     pars = parse_file(filename)
 
-    with open(data_dir + filename + '.pkl', 'rb') as f:
-        rng_history = pkl.load(f)
+    try:
+        with open(data_dir + filename + '.pkl', 'rb') as f:
+            rng_history = pkl.load(f)
+    except UnicodeDecodeError as e:
+        with open(data_dir + filename + '.pkl', 'rb') as f:
+            rng_history = pkl.load(f, encoding='latin1')
+    except Exception as e:
+        print('Unable to load data ', filename, ':', e)
+        raise
 
     with np.load(data_dir + filename + '.npz') as data:
         x = data['x']
@@ -23,16 +30,16 @@ def continue_integration(filename, t_end, i_start=-1):
         receptors = data['receptors']
         bond_array = data['bond_array']
 
-    if t_end < t[-1]:
-        while True:
-            response = raw_input('Data will be lost. Continue? ')
-            if response.lower() == 'y':
-                break
-            elif response.lower() == 'n':
-                print('Exiting')
-                return -1
-            else:
-                print('Please enter y or n')
+    # if t_end < t[-1]:
+    #     while True:
+    #         response = input('Data will be lost. Continue? ')
+    #         if response.lower() == 'y':
+    #             break
+    #         elif response.lower() == 'n':
+    #             print('Exiting')
+    #             return -1
+    #         else:
+    #             print('Please enter y or n')
 
     assert t_end > t[i_start]
 
@@ -107,17 +114,17 @@ def continue_integration(filename, t_end, i_start=-1):
     new_bond_array =  np.concatenate((old_padded, bond_array), axis=-1)
     new_rng = old_rng + rng_states
 
-    np.savez(data_dir + filename, new_t, new_x, new_y, new_z, new_rmat,
-             new_bond_array, receptors, t=new_t, x=new_x, y=new_y, z=new_z,
-             r_matrices=new_rmat, bond_array=new_bond_array,
-             receptors=receptors)
-    savemat(data_dir + filename,
-            {'t': new_t, 'x': new_x, 'y': new_y, 'z': new_z, 'R': new_rmat,
-             'bond_array': new_bond_array, 'receptors': receptors})
-    save_info(filename, pars['seed'], pars['t_start'], pars['t_end'], num_steps, n_nodes, a, b,
-              adaptive, shear, l_sep, dimk0_on, dimk0_off,
-              sig, sig_ts, one_side, check_bonds)
-    save_rng(filename, rng_states)
+    # np.savez(data_dir + filename, new_t, new_x, new_y, new_z, new_rmat,
+    #          new_bond_array, receptors, t=new_t, x=new_x, y=new_y, z=new_z,
+    #          r_matrices=new_rmat, bond_array=new_bond_array,
+    #          receptors=receptors)
+    # savemat(data_dir + filename,
+    #         {'t': new_t, 'x': new_x, 'y': new_y, 'z': new_z, 'R': new_rmat,
+    #          'bond_array': new_bond_array, 'receptors': receptors})
+    # save_info(filename, pars['seed'], pars['t_start'], pars['t_end'], num_steps, n_nodes, a, b,
+    #           adaptive, shear, l_sep, dimk0_on, dimk0_off,
+    #           sig, sig_ts, one_side, check_bonds)
+    # save_rng(filename, rng_states)
 
     # t = new_t
     # x = new_x
