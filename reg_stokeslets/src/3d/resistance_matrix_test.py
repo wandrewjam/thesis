@@ -32,8 +32,8 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
                                  distance=0., theta=0., phi=0., shear_vec=True,
                                  proc=1, precompute_array=None,
                                  save_quad_matrix=False):
-    print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
-        eps, n_nodes))
+    # print('Assembling quadrature matrix for eps = {}, nodes = {}'.format(
+    #     eps, n_nodes))
     s_matrix, weights, nodes = assemble_quad_matrix(
         eps=eps, n_nodes=n_nodes, a=a, b=b, domain=domain, distance=distance,
         theta=theta, phi=phi, proc=proc, precompute_array=precompute_array
@@ -42,7 +42,7 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
     # print('Assembling rhs for eps = {}, nodes = {}'.format(eps, n_nodes))
     rhs = assemble_vel_cases(nodes, distance=distance, shear_vec=shear_vec)
     rhs_cases = rhs.shape[1]
-    print('Solving for forces for eps = {}, nodes = {}'.format(eps, n_nodes))
+    # print('Solving for forces for eps = {}, nodes = {}'.format(eps, n_nodes))
     intermediate_solve = solve(
         s_matrix, rhs, overwrite_a=True, overwrite_b=True,
         check_finite=False, assume_a='pos'
@@ -72,7 +72,7 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
                                    tmp_matrix1[:, 6:])
     pt_matrix, r_matrix, shear_t = (tmp_matrix2[:, :3], tmp_matrix2[:, 3:6],
                                     tmp_matrix2[:, 6:])
-    print('Finished eps={}, n_nodes={}'.format(eps, n_nodes))
+    # print('Finished eps={}, n_nodes={}'.format(eps, n_nodes))
     if save_quad_matrix:
         return (t_matrix, p_matrix, pt_matrix, r_matrix, shear_f, shear_t,
                 s_matrix)
