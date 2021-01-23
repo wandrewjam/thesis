@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 def get_steps_dwells(data_list):
@@ -22,8 +23,7 @@ def get_steps_dwells(data_list):
 
 
 def extract_run_files(runner):
-    import os
-    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/par-files/')
+    txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     expt_names = []
     with open(txt_dir + runner + '.txt', 'r') as f:
         for line in f:
@@ -32,8 +32,7 @@ def extract_run_files(runner):
 
 
 def extract_data(expt_names):
-    import os
-    data_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/data/')
+    data_dir = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     data = []
     for expt in expt_names:
         with np.load(data_dir + expt + '.npz') as data_file:
@@ -62,7 +61,7 @@ def plot_trajectories(data_list, runner, save_plots=False):
 
 
 def plot_trajectory_subset(data_list, filename, save_plots=False):
-    plot_dir = 'plots/'
+    plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
     fig, ax = plt.subplots(nrows=3, sharex='all', figsize=(5, 9))
     ax_tw = ax[0].twinx()
     lw = 0.7
@@ -126,9 +125,9 @@ def get_bound_at_end(data_list):
 
 def main():
     save_plots = True
-    plot_dir = 'plots/'
-    runners = ['bd_runner03', 'bd_runner02', 'bd_runner01', 'bd_runner04']
-    # runners = ['bd_runner03']
+    plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
+    # runners = ['bd_runner03', 'bd_runner02', 'bd_runner01', 'bd_runner04']
+    runners = ['bd_runner03', 'bd_runner02', 'bd_runner01']
     steps_list = []
     dwell_list = []
     avg_v_list = []
@@ -150,7 +149,8 @@ def main():
         dwell_list.append(np.concatenate(dwells))
         print('Finished with {}'.format(runner))
 
-    labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
+    # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
+    labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
     plt.hist(avg_v_list, density=True)
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)

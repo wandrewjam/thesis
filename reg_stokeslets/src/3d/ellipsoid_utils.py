@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 
 # This script computes the exact resistance matrices for an oblate

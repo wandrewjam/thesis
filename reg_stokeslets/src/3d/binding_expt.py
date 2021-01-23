@@ -1,10 +1,11 @@
 import numpy as np
 from motion_integration import (integrate_motion, nondimensionalize,
-                                eps_picker, get_bond_lengths)
+                                eps_picker, get_bond_lengths, evaluate_motion_equations)
 from resistance_matrix_test import generate_resistance_matrices
 import matplotlib.pyplot as plt
 import os
 from scipy.io import savemat
+from timeit import default_timer as timer
 
 
 def parse_file(filename):
@@ -151,12 +152,16 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         dimk0_off=dimk0_off, sig=sig, sig_ts=sig_ts, temp=310.)
 
     nd_start, nd_end = t_start / t_sc, t_end / t_sc
-
+    start = timer()
     result = integrate_motion(
         [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order='2nd',
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
         check_bonds=check_bonds, one_side=one_side)
+    end = timer()
+
+    print('Integration took {} seconds'.format(end - start))
+    print('RHS Evaluations: {}'.format(evaluate_motion_equations.counter))
 
     t = result[9] * t_sc
     # t = np.linspace(t_span[0], t_span[1], num=num_steps+1) * t_sc

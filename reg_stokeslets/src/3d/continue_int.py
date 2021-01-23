@@ -227,4 +227,4 @@ def continue_integration(filename, t_end, i_start=-1):
 
 
 if __name__ == '__main__':
-    continue_integration('test_expt', 0.2)
+    continue_integration('bd_run044', 0.6)

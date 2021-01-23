@@ -2,11 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from motion_integration import (get_bond_lengths, find_min_separation,
                                 repulsive_force)
+from os import path
 
 
 def main(filename):
-    load_dir = 'data/'
-    plot_dir = 'plots/'
+    load_dir = path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
+    plot_dir = path.expanduser('~/thesis/reg_stokeslets/plots/')
     # file_fmt = 'bd_expt{:03d}'.format(expt_num)
 
     load_data = np.load(load_dir + filename + '.npz')

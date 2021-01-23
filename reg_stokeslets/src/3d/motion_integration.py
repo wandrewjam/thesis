@@ -243,7 +243,7 @@ def angles_to_matrix(angles):
     c1, c2, c3 = np.cos(angles)
 
     rotation_matrix = np.array([
-        [c1 * c2, s1 * s2 - c1 * c3 * s2, c3 * s1 + c1 * s2 * s3],
+        [c1 * c2, s1 * s3 - c1 * c3 * s2, c3 * s1 + c1 * s2 * s3],
         [s2, c2 * c3, -c2 * s3],
         [-c2 * s1, c1 * s3 + c3 * s1 * s2, c1 * c3 - s1 * s2 * s3]
     ])
@@ -579,12 +579,16 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
 
             r_hat_tmp = angles_to_matrix(fun_angles)
             rmat_temp = np.dot(b_matrix, r_hat_tmp)
-            func_forces, func_torques = find_bond_forces(receptors, bonds, func_center, rmat_temp, kappa, lam, one_side=True)
-            func_point, func_rep_force = repulsive_force(func_center[0], rmat_temp[:, 0])
-            func_forces += np.array([func_rep_force, 0, 0])
-            func_torques += np.cross(
-                [func_point[0] - func_center[0], func_point[1], func_point[2]],
-                [func_rep_force, 0, 0])
+            if bonds is not None:
+                func_forces, func_torques = find_bond_forces(receptors, bonds, func_center, rmat_temp, kappa, lam, one_side=True)
+            else:
+                func_forces, func_torques = np.zeros((3,)), np.zeros((3,))
+            # func_point, func_rep_force = repulsive_force(func_center[0], rmat_temp[:, 0])
+            # func_forces += np.array([func_rep_force, 0, 0])
+            # func_torques += np.cross(
+            #     [func_point[0] - func_center[0], func_point[1], func_point[2]],
+            #     [func_rep_force, 0, 0])
+
             func_result = evaluate_motion_equations(
                 func_center[0], rmat_temp[:, 0], func_forces, func_torques, exact_vels, a=a, b=b, n_nodes=n_nodes,
                 domain=domain, proc=proc)
@@ -598,15 +602,29 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             dy = np.concatenate((func_result[:3], [d_alpha], [d_beta], [d_gamma]))
             return dy
 
+        center = np.array([x1, x2, x3])
         t_span = (0, dt)
         y0 = np.concatenate((center, angles))
 
-        if len(bonds) > 0:
-            method = 'Radau'
+        if bonds is not None:
+            if len(bonds) > 0:
+                method = 'Radau'
+                fstep = None
+            else:
+                method = 'RK23'
+                if np.abs(r_matrix[2, 0]) > 0.85:
+                    fstep = None
+                else:
+                    fstep = dt
         else:
             method = 'RK23'
+            if np.abs(r_matrix[2, 0]) > 0.85:
+                fstep = None
+            else:
+                fstep = dt
 
-        sol = solve_ivp(fun, t_span, y0, method=method, rtol=1e-2)
+        sol = solve_ivp(fun, t_span, y0, method=method, first_step=fstep)
+        print(sol.nfev, sol.njev, len(sol.t), method)
         new_x1, new_x2, new_x3 = [[el] for el in sol.y[:3, -1]]
         rmat_hat = angles_to_matrix(sol.y[3:, -1])
         new_rmat = np.dot(b_matrix, rmat_hat)
@@ -615,7 +633,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
         if receptors is not None:
             new_bonds = [update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off, eta, eta_ts, lam)]
         else:
-            new_bonds = None
+            new_bonds = [None]
 
         velocity_errors = np.zeros((6,))
         dt_list = [dt]
