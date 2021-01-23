@@ -3,6 +3,7 @@
 # User-specified ignores
 ########################
 # Documents
+
 *.pdf
 *.pages
 *.numbers
@@ -43,7 +44,7 @@ jump-velocity/dat-files/distributions/*
 jump-velocity/dat-files/ml-estimates/*
 jump-velocity/dat-files/ml-trials/*
 meeting-notes/summer-19/intro-to-prob/
-reg_stokeslets/data/*
+reg_stokeslets/data/*/*
 vlado-data/*
 *core.*
 
