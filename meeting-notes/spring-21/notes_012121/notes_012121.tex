@@ -1,0 +1,159 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+% \graphicspath{{/Users/andrewwork/thesis/reg_stokeslets/3d/plots}}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\input{/Users/andrewwork/thesis/model-defs}
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+% \begin{center}
+%   {\Large Meeting Notes (\today)}
+% \end{center}
+
+% \begin{itemize}
+% \item 
+% \end{itemize}
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{bd_runner03_plot5.png}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{bd_runner03_plot3}
+  \end{subfigure}
+  \caption{Platelet trajectories with $k_\tn{on} = 1 \ s$. 15.6\% of
+    platelets bound at some point, and 12.5\% were bound at the end of
+    the simulation.}
+  \label{fig:traj03}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{bd_runner02_plot1}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{bd_runner02_plot13}
+  \end{subfigure}  
+  \caption{Platelet trajectories with $k_\tn{on} = 5 \ s$. 79.7\% of
+    platelets bound at some point, and 43.0\% were bound at the end of
+  the simulation.}
+  \label{fig:traj02}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{bd_runner01_plot2}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{bd_runner01_plot10}
+  \end{subfigure}  
+  \caption{Platelet trajectories with $k_\tn{on} = 10 \ s$. 93.8\% of
+    platelets bound at some point, and 51.6\% were bound at the end of
+    the simulation.}
+  \label{fig:traj14}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{steps}
+  \end{subfigure}
+  \hfill
+ \begin{subfigure}{0.49\textwidth}
+   \includegraphics[width=\textwidth]{dwells}
+ \end{subfigure}
+ \\
+ \begin{subfigure}{0.49\textwidth}
+   \includegraphics[width=\textwidth]{avg_vels}
+ \end{subfigure}
+  \caption{Density histograms of step sizes, dwell times, and average
+    velocities. The $x$-axis ticks aren't too informative; each group
+    of 4 bars show the densities for each of the 4 $k_\tn{on}$ levels
+    within the same range of values.} 
+  \label{fig:other-data}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{rk_plot}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{rk_plot2}
+  \end{subfigure}
+  \caption{Sample platelet trajectories integrated with a Runge-Kutta
+    integrator, and updating bonds at intervals of 0.002}
+  \label{fig:traj03}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
