@@ -752,7 +752,7 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
     except (AssertionError, OverflowError, ValueError, np.linalg.LinAlgError):
         print('Encountered an error while integrating. Halting and '
               'outputting computation results so far.')
-        raise
+        pass
 
     # assert np.abs(t[-1] - t_span[1]) < 1e-10
 

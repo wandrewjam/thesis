@@ -57,7 +57,7 @@ def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
 
 def save_rng(filename, rng_states):
     import pickle
-    save_dir = os.path.expanduser('~/thesis/reg_stokeslets/3d/data/')
+    save_dir = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     with open(save_dir + filename + '.pkl', 'wb') as f:
         pickle.dump(rng_states, f)
 
@@ -133,7 +133,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         receptors = np.array([[0., 1.5, 0.]])
     elif expt == 3:
         init = np.array([1.2, 0, 0, 1., 0, 0])
-        receptors = np.load('Xb_0.26.npy')
+        receptors = np.load(os.path.expanduser('~/thesis/reg_stokeslets/src/3d/Xb_0.26.npy'))
         bonds = np.zeros(shape=(0, 3), dtype='float')
         # bonds = np.array([[np.argmax(receptors[:, 1]), 0., 0.]])
     else:
@@ -153,7 +153,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
     nd_start, nd_end = t_start / t_sc, t_end / t_sc
 
     result = integrate_motion(
-        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order='radau',
+        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order='2nd',
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
         check_bonds=check_bonds, one_side=one_side)
@@ -224,7 +224,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         np.savez(save_dir + filename, t, x, y, z, r_matrices, bond_array,
                  receptors, t=t, x=x, y=y, z=z, r_matrices=r_matrices,
                  bond_array=bond_array, receptors=receptors)
-        savemat(save_dir + filename,
+        savemat(save_dir + filename + '.mat',
                 {'t': t, 'x': x, 'y': y, 'z': z, 'R': r_matrices,
                  'bond_array': bond_array, 'receptors': receptors})
         save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
