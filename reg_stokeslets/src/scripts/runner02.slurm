@@ -20,15 +20,15 @@ echo "$TPN"
 echo "$PPN"
 echo "$OMP_NUM_THREADS"
 
-cd $HOME/thesis/reg_stokeslets/3d/
+cd $HOME/thesis/reg_stokeslets/
 
 module unload miniconda3/latest
 module load miniconda3/latest
 conda activate rolling
 
 export start=$SECONDS
-cat par-files/bd_runner02.txt | parallel --results outdir2 \
--j $TPN python binding_expt.py
+cat par-files/bd_runner02.txt | parallel --results output/outdir2 \
+-j $TPN python src/3d/binding_expt.py
 
 export duration=$(( SECONDS - start ))
 echo "Completed in $duration seconds"

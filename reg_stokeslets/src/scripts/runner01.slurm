@@ -1,9 +1,10 @@
 #!/bin/bash
-#SBATCH --time=08:00:00
+#SBATCH --time=12:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=32
-#SBATCH --account=notchpeak-shared-short
-#SBATCH --partition=notchpeak-shared-short
+#SBATCH --ntasks=20
+#SBATCH --account=fogelson
+#SBATCH --partition=kingspeak
+#SBATCH -C "c20"
 #SBATCH -o runner01.out
 #SBATCH -e runner01.err
 
@@ -20,15 +21,15 @@ echo "$TPN"
 echo "$PPN"
 echo "$OMP_NUM_THREADS"
 
-cd $HOME/thesis/reg_stokeslets/3d/
+cd $HOME/thesis/reg_stokeslets/
 
 module unload miniconda3/latest
 module load miniconda3/latest
 conda activate rolling
 
 export start=$SECONDS
-cat par-files/bd_runner01.txt | parallel --results outdir \
--j $TPN python binding_expt.py
+cat par-files/bd_runner01.txt | parallel --results output/outdir \
+-j $TPN python src/3d/binding_expt.py
 
 export duration=$(( SECONDS - start ))
 echo "Completed in $duration seconds"
