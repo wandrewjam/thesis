@@ -24,6 +24,8 @@ def parse_file(filename):
                 parlist.append((key, int(value)))
             elif key in ['adaptive', 'one_side', 'check_bonds']:
                 parlist.append((key, 'True' == value))
+            elif key == 'order':
+                parlist.append((key, value))
             else:
                 parlist.append((key, float(value)))
     return dict(parlist)
@@ -31,7 +33,7 @@ def parse_file(filename):
 
 def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
               adaptive, shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts,
-              one_side, check_bonds):
+              one_side, check_bonds, x1=1.2, x2=0., x3=0., emx=1., emy=.0, emz=0., order='2nd'):
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     with open(txt_dir + filename + '.txt', 'w') as f:
         expt_info = ['seed {}\n'.format(seed),
@@ -39,17 +41,24 @@ def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
                      't_end {}\n'.format(t_end),
                      'num_steps {}\n'.format(num_steps),
                      'n_nodes {}\n'.format(n_nodes),
+                     'order {}\n'.format(order),
+                     'adaptive {}\n'.format(adaptive),
+                     'one_side {}\n'.format(one_side),
+                     'check_bonds {}\n'.format(check_bonds),
                      'a {}\n'.format(a),
                      'b {}\n'.format(b),
-                     'adaptive {}\n'.format(adaptive),
+                     'x1 {}\n'.format(x1),
+                     'x2 {}\n'.format(x2),
+                     'x3 {}\n'.format(x3),
+                     'emx {}\n'.format(emx),
+                     'emy {}\n'.format(emy),
+                     'emz {}\n'.format(emz),
                      'shear {}\n'.format(shear),
                      'l_sep {}\n'.format(l_sep),
                      'dimk0_on {}\n'.format(dimk0_on),
                      'dimk0_off {}\n'.format(dimk0_off),
                      'sig {}\n'.format(sig),
                      'sig_ts {}\n'.format(sig_ts),
-                     'one_side {}\n'.format(one_side),
-                     'check_bonds {}\n'.format(check_bonds),
                      '\n', 'done\n'
                      ]
 
@@ -66,7 +75,8 @@ def save_rng(filename, rng_states):
 def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
          t_end=50., num_steps=250, seed=None, n_nodes=8, adaptive=False, a=1.5,
          b=.5, shear=100., l_sep=0.1, dimk0_on=10., dimk0_off=5., sig=1e4,
-         sig_ts=9.99e3, one_side=False, check_bonds=False):
+         sig_ts=9.99e3, one_side=False, check_bonds=False, x1=1.2, x2=0.,
+         x3=0., emx=1., emy=0., emz=0, order='2nd'):
     save_dir = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     # Read in previous file names
@@ -133,7 +143,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         init = np.array([1.55, 0, 0, 0, 0, -1.])
         receptors = np.array([[0., 1.5, 0.]])
     elif expt == 3:
-        init = np.array([1.2, 0, 0, 1., 0, 0])
+        init = np.array([x1, x2, x3, emx, emy, emz])
         receptors = np.load(os.path.expanduser('~/thesis/reg_stokeslets/src/3d/Xb_0.26.npy'))
         bonds = np.zeros(shape=(0, 3), dtype='float')
         # bonds = np.array([[np.argmax(receptors[:, 1]), 0., 0.]])
@@ -154,7 +164,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
     nd_start, nd_end = t_start / t_sc, t_end / t_sc
     start = timer()
     result = integrate_motion(
-        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order='2nd',
+        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order=order,
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
         check_bonds=check_bonds, one_side=one_side)
