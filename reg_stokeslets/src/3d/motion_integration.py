@@ -660,7 +660,6 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
 def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b=1.0, domain='free', order='2nd',
                      adaptive=True, proc=1, forces=None, torques=None, save_quad_matrix_info=False, receptors=None,
                      bonds=None, eta=1, eta_ts=1, kappa=1, lam=0, k0_on=1, k0_off=1, check_bonds=True, one_side=True, precompute=True):
-    np.seterr(all='raise')
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
     np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
@@ -767,9 +766,10 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
                 new_t = np.cumsum(res[7]) + t[-1]
                 t = np.append(t, new_t)
                 rand_states += res[8]
-    except (AssertionError, OverflowError, ValueError, np.linalg.LinAlgError):
+    except Exception as e:
         print('Encountered an error while integrating. Halting and '
               'outputting computation results so far.')
+        print(e)
         pass
 
     # assert np.abs(t[-1] - t_span[1]) < 1e-10

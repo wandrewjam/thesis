@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.linalg import solve
+from scipy.linalg import solve, lstsq
 from force_test import assemble_quad_matrix
 from sphere_integration_utils import sphere_integrate
 import multiprocessing as mp
@@ -43,10 +43,15 @@ def generate_resistance_matrices(eps, n_nodes, a=1., b=1., domain='free',
     rhs = assemble_vel_cases(nodes, distance=distance, shear_vec=shear_vec)
     rhs_cases = rhs.shape[1]
     # print('Solving for forces for eps = {}, nodes = {}'.format(eps, n_nodes))
-    intermediate_solve = solve(
-        s_matrix, rhs, overwrite_a=True, overwrite_b=True,
-        check_finite=False, assume_a='pos'
-    )
+    try:
+        intermediate_solve = solve(
+            s_matrix, rhs, overwrite_a=True, overwrite_b=True,
+            check_finite=False, assume_a='pos'
+        )
+    except np.linalg.LinAlgError:
+        full_matrix = s_matrix + np.triu(s_matrix, k=1).T
+        intermediate_solve = lstsq(full_matrix, rhs, overwrite_a=True,
+                                   overwrite_b=True, check_finite=False)[0]
     pt_forces = (intermediate_solve.T / np.repeat(weights, repeats=3)).T
 
     # For each velocity case, integrate velocities to get body force and
