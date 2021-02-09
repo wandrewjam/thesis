@@ -150,6 +150,7 @@ def main():
     avg_dwell_list = []
     step_err_list = []
     dwell_err_list = []
+
     avg_v_list = []
     for runner in runners:
         expt_names = extract_run_files(runner)
