@@ -59,7 +59,7 @@ def main(num_expts, filename, runner, random_initial=False, order='2nd', start_n
             pars['emx'], pars['emy'], pars['emz'] = e_m
 
         pars['order'] = order
-        # save_info(**pars)
+        save_info(**pars)
         
     with open(txt_dir + runner + '.txt', 'w') as f:
         f.writelines(all_filenames)
