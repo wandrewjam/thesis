@@ -1,0 +1,6 @@
+max recursions reached in time_step
+Encountered an error while integrating. Halting and outputting computation results so far.
+bd_run864:
+Integration took 53.37476301100105 seconds
+RHS Evaluations: 110
+

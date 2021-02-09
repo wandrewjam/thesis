@@ -1,0 +1,18 @@
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+10 0 3 RK23
+4 0 2 RK23
+10 0 3 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+23 1 4 Radau
+Encountered an error while integrating. Halting and outputting computation results so far.
+bd_run1958:
+Integration took 53.9834998131264 seconds
+RHS Evaluations: 141
+

@@ -1,0 +1,40 @@
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+4 0 2 RK23
+10 0 3 RK23
+10 0 3 RK23
+110 6 13 Radau
+115 5 15 Radau
+Encountered an error while integrating. Halting and outputting computation results so far.
+bd_run1982:
+Integration took 201.2924649589695 seconds
+RHS Evaluations: 519
+

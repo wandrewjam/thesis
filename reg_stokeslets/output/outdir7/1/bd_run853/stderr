@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "src/3d/binding_expt.py", line 268, in <module>
+    main(**pars)
+  File "src/3d/binding_expt.py", line 173, in main
+    t = result[9] * t_sc
+TypeError: can't multiply sequence by non-int of type 'float'
