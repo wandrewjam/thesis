@@ -1,0 +1,140 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+% \graphicspath{{/Users/andrewwork/thesis/reg_stokeslets/3d/plots}}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\input{/Users/andrewwork/thesis/model-defs}
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Finding \& fixing bugs}:
+  \begin{itemize}
+  \item Singular Stokeslets matrix: this ended up being a sneaky bug
+    where I wasn't checking that the orientation of the platelet was
+    valid (i.e. not contacting the wall). I check the platelet
+    orientation at the beginning and end of a time step, but this
+    error showed up in the 2nd stage of the RK method, but the
+    platelet had a valid orientation at the beginning and end of the
+    time steps.
+  \item Max recursion/minimum step errors: it looked like this was due
+    to (particularly) large bond forces, and reducing the minimum time
+    step fixed this error
+  \item Errors in using SciPy's RK integrator: as far as I can tell,
+    the routine is trying an invalid orientation at some point. I
+    haven't been able to think of a clever way to prevent this from
+    occurring, so my plan is just to catch the error and restart the
+    integrator (and maybe tell it to take a smaller time step).
+  \end{itemize}
+\item \textbf{Tests on a free-flowing platelet}:
+  \begin{itemize}
+  \item Want to verify the RK time-stepper is working as expected
+  \item Testing out a different approach for using SciPy's built-in
+    integrator. 
+  \item Currently, I set $\delta t = .002 s$ and use the integrator to
+    find the platelet position at intervals of $\delta t$. At the end
+    of each interval, I pick random numbers for bond
+    formation/breaking, and then restart the solver for the next
+    interval. 
+  \item I am setting the first step of the solver to prevent the
+    solver from taking unnecessarily small steps, however this appoach
+    is still slower than the old method when the platelet is unbound.
+  \item I am testing the speed of the solver when I don't reset the
+    integrator at intervals of $\delta t$
+  \item If the new approach is significantly faster, then it is
+    probably worth exploring something like poisson thinning for
+    estimating the time of the next reaction
+  \item I plotted results of free rolling near a wall in Figure
+    \ref{fig:free-results}. RK version 1 is the slowest, the old
+    method is nearly twice as fast as RK version 1, and RK version 2
+    is nearly twice as fast again.
+  \item I am working on setting up a similar test where I take the
+    platelet position and bonds immediately after the formation of a
+    bond and run each method until the platelet reaches its rest
+    configuration (with all reactions turned off).
+  \end{itemize}
+\end{itemize}
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{x_position.png}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{xz_cmps.png}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{y_cmps.png}
+  \end{subfigure}
+  \label{fig:free-results}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
