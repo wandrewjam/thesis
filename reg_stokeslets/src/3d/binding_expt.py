@@ -170,9 +170,6 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         check_bonds=check_bonds, one_side=one_side)
     end = timer()
 
-    print('Integration took {} seconds'.format(end - start))
-    print('RHS Evaluations: {}'.format(evaluate_motion_equations.counter))
-
     t = result[9] * t_sc
     # t = np.linspace(t_span[0], t_span[1], num=num_steps+1) * t_sc
     mask = result[0] > 0
@@ -248,16 +245,20 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         save_rng(filename, rng_states)
 
     bond_num = [bond.shape[0] for bond in result[8]]
-    print(bond_num)
+    # print(bond_num)
     theta = np.arctan2(result[3][2, 0, mask][-1], result[3][1, 0, mask][-1])
     phi = np.arccos(result[3][0, 0, mask][-1])
     eps = eps_picker(n_nodes, a=a, b=b)
     shear_f, shear_t = generate_resistance_matrices(
         eps, n_nodes, a=a, b=b, domain=domain, distance=center[0, mask][-1],
         theta=theta, phi=phi)[-2:]
-    print(np.stack([shear_f, shear_t]))
-    print('Seed = ' + str(seed))
-    print('Done!')
+    print(filename + ':')
+    print('Integration took {} seconds'.format(end - start))
+    print('RHS Evaluations: {}'.format(evaluate_motion_equations.counter))
+    print()
+    # print(np.stack([shear_f, shear_t]))
+    # print('Seed = ' + str(seed))
+    # print('Done!')
 
 
 if __name__ == '__main__':

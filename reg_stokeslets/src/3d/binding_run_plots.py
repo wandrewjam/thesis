@@ -35,6 +35,9 @@ def extract_data(expt_names):
     data_dir = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     data = []
     for expt in expt_names:
+        if expt in ['bd_run853', 'bd_run943', 'bd_run950']:
+            continue
+
         with np.load(data_dir + expt + '.npz') as data_file:
             data_dict = {
                 't': data_file['t'], 'x': data_file['x'], 'y': data_file['y'],
@@ -53,7 +56,7 @@ def count_bonds(data):
 
 def plot_trajectories(data_list, runner, save_plots=False):
     subsets = 8
-    assert len(data_list) % subsets == 0
+    # assert len(data_list) % subsets == 0
     for i in range(len(data_list) // subsets):
         data_subset = data_list[subsets * i:subsets * (i + 1)]
         filename = runner + '_plot' + str(i)
@@ -125,11 +128,28 @@ def get_bound_at_end(data_list):
 
 def main():
     save_plots = True
+    expt_num = '1'
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
-    # runners = ['bd_runner03', 'bd_runner02', 'bd_runner01', 'bd_runner04']
-    runners = ['bd_runner03', 'bd_runner02', 'bd_runner01']
-    steps_list = []
-    dwell_list = []
+
+    if expt_num == '1':
+        runners = ['bd_runner03', 'bd_runner02', 'bd_runner01', 'bd_runner04']
+    elif expt_num == '2':
+        runners = ['bd_runner05', 'bd_runner06', 'bd_runner07', 'bd_runner08']
+    elif expt_num == '3':
+        runners = ['bd_runner09', 'bd_runner10', 'bd_runner11', 'bd_runner12']
+    elif expt_num == '4':
+        runners = ['bd_runner13', 'bd_runner14', 'bd_runner15', 'bd_runner16']
+    else:
+        raise ValueError('expt_num is invalid')
+    # runners = ['bd_runner03', 'bd_runner02', 'bd_runner01']
+    flattened_steps_list = []
+    flattened_dwell_list = []
+    step_count_list = []
+    dwell_count_list = []
+    avg_step_list = []
+    avg_dwell_list = []
+    step_err_list = []
+    dwell_err_list = []
     avg_v_list = []
     for runner in runners:
         expt_names = extract_run_files(runner)
@@ -145,37 +165,98 @@ def main():
         print('{} bound at end: {}'.format(runner, bound_at_end))
 
         steps, dwells = get_steps_dwells(data)
-        steps_list.append(np.concatenate(steps))
-        dwell_list.append(np.concatenate(dwells))
+        flattened_steps_list.append(np.concatenate(steps))
+        flattened_dwell_list.append(np.concatenate(dwells))
+
+        step_count_list.append([len(trial) for trial in steps])
+        dwell_count_list.append([len(trial) for trial in dwells])
+
+        avg_step_list.append(np.mean(flattened_steps_list[-1]))
+        avg_dwell_list.append(np.mean(flattened_dwell_list[-1]))
+
+        step_err_list.append(np.std(flattened_steps_list[-1]) / np.sqrt(flattened_steps_list[-1].shape[0]))
+        dwell_err_list.append(np.std(flattened_dwell_list[-1]) / np.sqrt(flattened_dwell_list[-1].shape[0]))
         print('Finished with {}'.format(runner))
 
-    # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
-    labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
+    labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
+    # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
     plt.hist(avg_v_list, density=True)
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)
     if save_plots:
-        plt.savefig(plot_dir + 'avg_vels', bbox_inches='tight')
+        plt.savefig(plot_dir + 'avg_vels_' + expt_num, bbox_inches='tight')
         plt.close()
     else:
         plt.tight_layout()
         plt.show()
 
-    plt.hist(steps_list, density=True)
+    plt.hist(flattened_steps_list, density=True)
     plt.xlabel('Step size ($\\mu m$)')
     plt.legend(labels)
     if save_plots:
-        plt.savefig(plot_dir + 'steps', bbox_inches='tight')
+        plt.savefig(plot_dir + 'steps_' + expt_num, bbox_inches='tight')
         plt.close()
     else:
         plt.tight_layout()
         plt.show()
 
-    plt.hist(dwell_list, density=True)
+    plt.hist(flattened_dwell_list, density=True)
     plt.xlabel('Pause time ($s$)')
     plt.legend(labels)
     if save_plots:
-        plt.savefig(plot_dir + 'dwells', bbox_inches='tight')
+        plt.savefig(plot_dir + 'dwells_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    max_step_count = np.amax(np.ravel(step_count_list))
+    step_counts = [np.bincount(count, minlength=max_step_count+1) for count in step_count_list]
+    width = 0.1
+    x = np.arange(max_step_count+1)
+    for i, counts in enumerate(step_counts):
+        j = 2 * i - 3
+        plt.bar(x + j*width/2, counts, width, label=labels[i])
+    plt.xticks(x)
+    plt.xlabel('Number of steps')
+    plt.legend()
+    if save_plots:
+        plt.savefig(plot_dir + 'step_count_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    max_dwell_count = np.amax(np.ravel(dwell_count_list))
+    dwell_counts = [np.bincount(count, minlength=max_dwell_count + 1) for count in dwell_count_list]
+    width = 0.1
+    x = np.arange(max_dwell_count + 1)
+    for i, counts in enumerate(dwell_counts):
+        j = 2 * i - 3
+        plt.bar(x + j * width / 2, counts, width, label=labels[i])
+    plt.xticks(x)
+    plt.xlabel('Number of dwells')
+    plt.legend()
+    if save_plots:
+        plt.savefig(plot_dir + 'dwell_count_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    plt.bar(np.arange(len(avg_step_list)), avg_step_list, yerr=step_err_list, tick_label=labels)
+    plt.ylabel('Average step size ($\\mu m$)')
+    if save_plots:
+        plt.savefig(plot_dir + 'step_avg_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    plt.bar(np.arange(len(avg_dwell_list)), avg_dwell_list, yerr=dwell_err_list, tick_label=labels)
+    plt.ylabel('Average dwell time ($s$)')
+    if save_plots:
+        plt.savefig(plot_dir + 'dwell_avg_' + expt_num, bbox_inches='tight')
         plt.close()
     else:
         plt.tight_layout()
