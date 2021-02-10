@@ -1,1 +1,4 @@
-Encountered an error while integrating. Halting and outputting computation results so far.
+bd_run044:
+Integration took 1331.7527787159197 seconds
+RHS Evaluations: 4823
+
