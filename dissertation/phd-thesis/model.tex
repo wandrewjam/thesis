@@ -1,7 +1,10 @@
 %%% -*-LaTeX-*-
 
-\chapter{Mathematical Rolling Model}
-\label{cha:model}
+\chapter{Two-Dimensional Model of Platelet Rolling}
+\label{cha:two-dimens-roll}
+
+\section{The model}
+\label{sec:model}
 
 This chapter presents a new model of cell rolling which is similar to
 the adhesive dynamics models in that it models bond chemistry as a
@@ -18,7 +21,7 @@ rolling, analogous to the reaction rate equation in chemical kinetics
 deterministic model, with the exception that it tracks bonds as
 discrete entities which form and break randomly.
 
-\section{Problem description}
+\subsection{Problem description}
 \label{sec:problem-description}
 
 Below I describe the set of assumptions that we use to model a
@@ -40,7 +43,7 @@ fluid viscosity appear in the model.
   \label{fig:model-geometry}
 \end{figure}
 
-\subsection{Geometry and physics}
+\subsubsection{Geometry and physics}
 \label{sec:geometry-physics}
 
 A sketch of the problem geometry is given in Figure
@@ -137,7 +140,7 @@ given by the equation
   \separation)^2 + (\radius\sin\recAngle - \wallDist)^2.
 \end{equation}
 
-\subsection{Biology}
+\subsubsection{Biology}
 \label{sec:biology}
 
 The platelet surface is covered with receptors at an angular density
@@ -185,7 +188,7 @@ the somewhat more complicated
   \wallDist)\cos\recAngle).
 \end{equation}
 
-\section{Deterministic PDE model}
+\subsection{Deterministic PDE model}
 \label{sec:determ-pde-model}
 
 If we assume that there is a continuous distribution of bonds between
@@ -298,7 +301,7 @@ A complete list of the nondimensional coordinates, functions, and
 parameters with their definitions are given in Table
 \ref{tab:nd-vars}.
 
-\section{Stochastic model}
+\subsection{Stochastic model}
 \label{sec:stochastic-model}
 
 An assumption that is implicit in the deterministic model is that cell
@@ -321,7 +324,7 @@ order to fully and accurately describe platelet rolling, we must model
 bond formation and breaking as a stochastic process, and consequently
 the rolling velocity of the platelet is a stochastic process.
 
-\subsection{Assumptions in the stochastic model}
+\subsubsection{Assumptions in the stochastic model}
 \label{sec:assumpt-stoch-model}
 
 For the stochastic model---like the deterministic model---assume that
@@ -386,7 +389,7 @@ the platelet surface (see Figure \ref{fig:plt-bins}).
   \label{fig:plt-bins}
 \end{figure}
 
-\subsection{A modified Gillespie algorithm}
+\subsubsection{A modified Gillespie algorithm}
 \label{sec:modif-gill-algor}
 
 In order to simulate the random bond breaking and formation, we have
@@ -432,7 +435,7 @@ calculated, and new velocities $\ndVelocity$ and $\ndRotation$ are
 found. This process then repeats until the end of the simulation is
 reached.
 
-\subsubsection{Bond formation}
+\paragraph{Bond formation}
 \label{sec:bond-formation}
 
 As mentioned above, the propensity of bond formation from a point
@@ -476,7 +479,7 @@ values. While there is no practical need to do this, it ensures
 consistency with the deterministic algorithm where extending the
 domain of $\ndWallDist$ to $\reals$ is not possible.
 
-\subsection{Some implementation details}
+\subsubsection{Some implementation details}
 \label{sec:some-impl-deta}
 
 The stochastic simulation algorithm is described in detail in Appendix
@@ -537,26 +540,497 @@ Key features of the algorithm are as follows:
   \end{enumerate}
 \end{enumerate}
 
-\section{Summary}
-\label{sec:summary-model}
+\section{Results and Analysis}
+\label{sec:results}
 
-Our platelet rolling model consists of a simple stochastic rolling
-model similar to the adhesive dynamics models for simulating rolling
-of a single cell, and a deterministic model integro-PDE model which
-gives the mean behavior of a population of cells. The geometry of the
-model is reduced to 2D by assuming that motion perpendicular to flow
-and parallel to the vessel wall is negligible, and by approximating
-the reactive region of the rolling sphere with a cylinder. The
-nonspecific colloidal forces included in the adhesive dynamics models
-\cite{Hammer2014} are assumed to balance with the bond forces
-perpendicular to the wall. Therefore cell motion in the model is
-completely described by two quantities: the translational velocity in
-the direction of flow $\ndVelocity$ and the angular velocity
-$\ndRotation$. The next chapter shows that this model reproduces
-reasonable rolling behavior for biologically realistic parameter
-values, and is sensitive to changes in parameters associated with
-platelet activation. 
+The model described above is a fairly simple model of platelet
+rolling. The geometry of a platelet is greatly idealized, the
+hydrodynamic and chemical forces between the platelet and surface are
+simplified, and platelet activation is not considered in the
+model. All of these will be discussed in greater detail in Section
+\ref{cha:future-work}, but we first want to verify that this model can
+reproduce rolling behavior that is qualitatively similar to
+experimental observations and results from previously published
+rolling models. The results presented below show that the model can
+produce realistic rolling behavior for biologically realistic
+parameter values. In addition, the behavior of the model is sensitive
+to the on rate $\ndOnConst$ and the density of receptors on the
+surface of the cell $\receptorDensity$; both of which are parameters
+that may change when a platelet undergoes activation.
 
+\subsection{Behavior of the model at steady state}
+\label{sec:behav-model-steady}
+
+The first set of experiments show the behavior of the deterministic
+model at steady state. Results at steady state are relatively quick to
+generate, making it possible to look at the average behavior of
+platelets over a large range of parameter values. 
+
+The steady solution (of the nondimensional system) is given by solving
+equations \eqref{eq:nd-bond-density}--\eqref{eq:nd-torque-balance}
+with $\Pder{\ndBondDensity}{\ndTime} \equiv 0$ in
+\eqref{eq:nd-bond-density}. This can be viewed as a 2D nonlinear
+rootfinding problem
+\begin{align}
+  \label{eq:2D-ss-translation}
+  0 &= \ndVelFriction (\ndAppliedVel - \ndVelocity) +
+      \ndHorzTotalForce(\ndVelocity, \ndRotation) \\
+  \label{eq:2D-ss-rotation}
+  0 &= \ndRotFriction (\ndAppliedRot - \ndRotation) +
+      \ndTotalTorque(\ndVelocity, \ndRotation)
+\end{align}
+where evaluating the functions $\ndTotalTorque$ and
+$\ndHorzTotalForce$ requires solving the steady state PDE for
+$\ndBondDensity$ and then integrating the result. In general, the
+translation velocity $\ndVelocity$ and rotation rate $\ndRotation$ of
+the platelet at steady state are both functions of the applied
+velocity $\ndAppliedVel$ and applied rotation $\ndAppliedRot$, meaning
+that finding the relation between $(\ndAppliedVel, \ndAppliedRot)$ and
+$(\ndVelocity, \ndRotation)$ requires sweeping over a 2D space of
+applied velocities. This problem is still too computationally
+intensive to explore platelet rolling behavior over a wide range of
+parameter, so assume further that the rolling platelet is in direct
+contact with the surface and there is no slip between the surfaces of
+the platelet and vessel wall.
+
+If we assume that a cell is sitting directly on top of the surface
+(i.e. $\ndSeparation = 0$), and the cell is only rolling, but not
+sliding
+($\velocity = \radius\rotation \implies \ndVelocity = \ndRotation$),
+then solving the steady state problem reduces to a 1D rootfinding
+problem. One can solve equation \eqref{eq:2D-ss-rotation} to find the
+steady state value(s) of $\ndRotation$ for a given $\ndAppliedRot$. It
+is also possible to use equation \eqref{eq:2D-ss-translation} to find
+$\ndVelocity$ for a given $\ndAppliedVel$, and in general this will
+give a different value of $\ndVelocity$ than if you solved for
+$\ndRotation$ first and then set $\ndVelocity = \ndRotation$.
+
+In practice, it is computationally difficult to find the steady state
+bond distribution $\ndBondDensity$ and rotation rate $\ndRotation$ for
+a given applied rotation rate $\ndAppliedRot$. Solving this
+problem requires solving a nonlinear integro-PDE:
+\begin{align}
+  \label{eq:ndim-ss}
+  0 &= \ndRotation
+      \left(\frac{\partial\ndBondDensity}{\partial\ndWallDist} +
+      \frac{\partial \ndBondDensity}{\partial\recAngle}\right) +
+      \ndOnConst\exp\left(-\frac{\onForceScale}{2} \ndLength^2 \right)
+      \left(1 - \Int{\ndBondDensity(\ndWallDist, \recAngle)}
+      {\ndWallDist} {-\infty} {\infty} \right) - \exp \left(
+      \offForceScale \ndLength \right) \ndBondDensity, \\
+  \label{eq:ndim-torbal}
+  0 &= \ndRotFriction(\ndAppliedRot - \ndRotation) + \ndTotalTorque.
+\end{align}
+It is easier to solve this problem in the reverse order. That is,
+with a specified $\ndRotation$ equation (\ref{eq:ndim-ss}) is a linear
+PDE which can be solved to find the steady state bond distribution,
+$\ndBondDensity$. Then the integral to find the total torque in
+equation (\ref{eq:ndim-torbal}) can simply be evaluated, and
+$\ndAppliedRot$ is given by
+$\ndRotation - \ndTotalTorque / \ndRotFriction$. Therefore, in order
+to find steady state values of $\ndRotation$ for a range of
+$\ndAppliedRot$s, we generate a bunch of
+$(\ndAppliedRot, \ndRotation)$ pairs that solve the steady state
+problem. Then we can use interpolation to find a steady state angular
+velocity $\ndRotation$ for an unknown $\ndAppliedRot$.
+
+\subsubsection{Parameter sweeps}
+\label{sec:parameter-sweeps}
+
+One feature we expect to find is a small number of bonds between the
+platelet and the surface. Experimental and modeling work has shown
+that stochasticity is an important feature in cell rolling, and
+significant stochasticity can only exist if rolling is mediated by a
+small number of bonds. Therefore, we searched through
+$(\ndOnConst,\onForceScale,\offForceScale,\ndRotation)$ parameter
+space to look for regions where the total number of bonds
+$\Int{\Int{\ndBondDensity}{\ndWallDist}{}{}}{\recAngle}{}{}$ was in
+the range $10^{-4}$--$10^{-2}$. Based on the estimate
+$\receptorDensity \approx 10^3 \, \tn{receptors/radian}$ from Table
+\ref{tab:dim_pars}, this corresponds to a range of $\pi \times
+10^{-1}$--$\pi \times 10^1$ bonds between the platelet and surface on
+average. 
+
+The fact that we are looking for regions of parameter space where the
+number of bonds is small suggests one more simplification. If
+$\Int{\Int{\ndBondDensity}{\ndWallDist}{}{}}{\recAngle}{}{}$ is small,
+it is reasonable to expect that receptor saturation does not play a
+significant role in equation (\ref{eq:ndim-ss}). Therefore we assume
+that $\Int{\ndBondDensity}{\ndWallDist}{-\infty}{\infty} << 1$ and
+solve the following PDE for a range of $\ndOnConst$, $\onForceScale$,
+$\offForceScale$, and $\ndRotation$ values:
+\begin{equation}
+  \label{eq:ndim-ss-nosat}
+  0 = \ndRotation
+  \left(\frac{\partial\ndBondDensity}{\partial\ndWallDist} +
+    \frac{\partial \ndBondDensity}{\partial\recAngle}\right) +
+  \ndOnConst\exp\left(-\frac{\onForceScale}{2} \ndLength^2 \right) -
+  \exp \left(\offForceScale \ndLength \right) \ndBondDensity.
+\end{equation}
+It turns out it is convenient to define a modified $\ndOnConst$
+parameter to more clearly separate the \emph{overall} binding rate
+from the length-dependence of the binding rate captured in the
+Gaussian term of equation (\ref{eq:ndim-ss-nosat}). The overall bond
+formation rate per receptor is the integral of
+$\ndOnConst \exp(-\onForceScale \ndLength^2/2)$ over $\ndWallDist$,
+which as written depends on both $\ndOnConst$ and
+$\onForceScale$. Therefore define a new parameter
+$\ndOnConst = \newOnConst \sqrt{\onForceScale/(2\pi)}$, so that
+$\newOnConst$ controls the overall binding rate independent of
+$\onForceScale$.
+
+For each parameter quadruple, we calculate the total number of bonds:
+\begin{equation}
+  \label{eq:m-tot}
+  \ndBondDensity_\tn{tot}(\newOnConst, \onForceScale, \offForceScale,
+  \ndRotation) = \Int{\Int{ \ndBondDensity(\ndWallDist, \recAngle)}
+    {\ndWallDist} {-\infty} {\infty}} {\recAngle} {-\pi/2} {\pi/2},
+\end{equation}
+and then compare $\ndBondDensity_\tn{tot}$ to the desired range. This
+defines some region in 4D parameter space where stochasticity is
+important. This region is then visualized by looking at 2D
+heatmaps, shown in Figure \ref{fig:parameter-sweeps}. For a given
+heatmap, each pixel is colored according the fraction of parameters in
+the other 2 dimensions that yielded an $\ndBondDensity_\tn{tot}$
+within the desired range. More precisely, the $(\newOnConst,
+\ndRotation)$ heatmap (for example), visualizes the function
+\begin{equation}
+  \label{eq:kap-om-heatmap}
+  (N_\onForceScale N_\offForceScale)\inv \sum_{i=1}^{N_\onForceScale}
+  \sum_{j=1}^{N_\offForceScale}
+  \left[\ndBondDensity_\tn{tot}(\newOnConst, \onForceScale_i,
+    \offForceScale_j, \omega) \in [10^{-4}, 10^{-2}] \right],
+\end{equation}
+where $N_\onForceScale$ is the number of values of $\onForceScale$
+tested, $N_\offForceScale$ is the number of values of $\offForceScale$
+tested, and $\left[ \ndBondDensity_\tn{tot} \in I \right]$ is an
+indicator function:
+\begin{equation}
+  \label{eq:indicator}
+  \left[ \ndBondDensity_\tn{tot} \in I \right] =
+  \begin{cases}
+    1 & \tn{if} \quad \ndBondDensity_\tn{tot} \in I \\
+    0 & \tn{if} \quad \ndBondDensity_\tn{tot} \notin I
+  \end{cases}
+\end{equation}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\textwidth]{parameter_sweep_heatmaps.png}
+  \caption[2D heatmaps of regions where stochasticity may be
+  relevant.]{2D heatmaps showing the fraction of tested parameter
+    values where the total number of bonds at steady state is within
+    the desired range for stochasticity. The total scanned parameter
+    space is 4-dimensional, so for each 2D heatmap the averages
+    displayed are carried out over the other two dimensions.}
+  \label{fig:parameter-sweeps}
+\end{figure}
+
+From Figure \ref{fig:parameter-sweeps}, $\newOnConst$ is the most
+important parameter in controlling whether or not the number of bonds
+at steady state is within the desired range. There is a large strip in
+$(\newOnConst, \ndRotation)$ space where every tested value of
+$\onForceScale$ and $\offForceScale$ resulted in an
+$\ndBondDensity_\tn{tot}$ value in the interval $[10^{-4}, 10^{-2}]$,
+and conversely there are large regions where every tested value of
+$\onForceScale$ and $\offForceScale$ resulted in a total bond number
+outside that interval. Compare this to the heatmaps in
+$(\onForceScale, \ndRotation)$ and $(\offForceScale, \ndRotation)$
+space, which are essentially uniform. Put another way, for any choice
+of $\onForceScale$ and $\offForceScale$ there is a region of
+$\newOnConst$ in which stochasticity is important.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\textwidth]{kappa_omega_sweep}
+  \caption[Filled contour plot of $\ndBondDensity_\tn{tot}$ for
+  $\onForceScale = 10^4$ and $\offForceScale = 16$.]{Filled contour
+    plot of $\ndBondDensity_\tn{tot}$ for $\onForceScale = 10^4$ and
+    $\offForceScale = 16$. The region where stochasticity is likely to
+    be significant is when
+    $10^{-4} < \ndBondDensity_\tn{tot} < 10^{-2}$.}
+  \label{fig:kappa-omega-sweep}
+\end{figure}
+
+This analysis provides one way to estimate the on rate
+$\newOnConst$. The on rate is difficult to measure experimentally. For
+example, Hammer et. al. \cite{Hammer1992a} give a possible range of 5
+orders of magnitude for $\ndOnConst$! Figure
+\ref{fig:kappa-omega-sweep} shows values of $\ndBondDensity_\tn{tot}$
+for a range of $\newOnConst$ and $\ndRotation$, with $\onForceScale$
+and $\offForceScale$ values estimated from the literature in Table
+\ref{tab:nd-params}. The applied rotation rate $\ndAppliedRot$ has a
+significant influence on the $\newOnConst$ values that produce a small
+number of total bonds. 
+
+Figures \ref{fig:parameter-sweeps} and \ref{fig:kappa-omega-sweep}
+treat $\ndRotation$ as a parameter that can be varied externally by
+the modeler, but in the full nonlinear rolling model $\ndRotation$ is
+calculated by balancing drag forces with bond forces. Therefore, these
+figures cannot be used to choose values of $\onConst$ for specified
+applied rotation rates. For example, larger values of $\newOnConst$
+allow more bonds to form, which decreases $\ndRotation$ further which
+allows even more bonds to form. There is some positive feedback in
+this system between $\newOnConst$ and $\ndRotation$, and there may be
+a threshold in which $\newOnConst$ triggers a switch from a regime
+where there are many bonds with the surface, to one in which there are
+few bonds. In the next section, we look directly at the relationship
+between the applied rotation rate $\ndAppliedRot$ and actual rotation
+rate $\ndRotation$ for a range of $\kappa$ values.
+
+\subsubsection{Steady rotation rate as a function of applied rotation}
+\label{sec:rotation-vs-applied}
+
+In order to relate the platelet rotation rate $\ndRotation$ to the
+applied rotation rate $\ndAppliedRot$, first choose a set of
+$\ndRotation$ values. Then find the steady state bond distribution for
+those $\ndRotation_i$ using (\ref{eq:ndim-ss-nosat}) and find the
+torque generated by that distribution of bonds. The $\ndAppliedRot$
+necessary to drive the platelet at rotation rate $\ndRotation$ is
+found by solving the torque balance equation:
+(\ref{eq:ndim-torbal}). This gives a set of
+$(\ndAppliedRot, \ndRotation)$ pairs that can be interpolated.
+
+Because Figure \ref{fig:kappa-omega-sweep} suggests that there are a
+range of $\newOnConst$ values that may result in a small number of
+bonds, we find the relationship between applied rotation rate and
+platelet rotation for a range of different $\newOnConst$s in Figure
+\ref{fig:steady-states}. Through some trial and error, a range of
+$[.1, 2]$ was found to give interesting behavior. If $\newOnConst <
+0.1$, bonds form too infrequently to affect the platelet's motion, and
+if $\newOnConst > 2$ then many bonds form with the surface and the
+platelet remains firmly bound for realistic values of $\ndAppliedRot$.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{kappa-sweeps}
+  \caption[Relation between $\ndRotation$ vs. $\ndTotalTorque$ and
+  $\ndAppliedRot$ vs. $\ndRotation$ for varying
+  $\newOnConst$.]{Relation between $\ndRotation$ vs. $\ndTotalTorque$
+    (left) and $\ndAppliedRot$ vs. $\ndRotation$ (right) for
+    $\newOnConst = 0.1, 0.5, 1, 2$ (top to bottom). The values of the
+    other parameters are $\onForceScale = 10^4$,
+    $\offForceScale = 16$, and $\ndRotFriction = 10^{-5}$.}
+  \label{fig:steady-states}
+\end{figure}
+
+Figure \ref{fig:steady-states} demonstrates that there is a range of
+$\newOnConst$ for which multiple steady state values of $\ndRotation$
+are possible for a single $\ndAppliedRot$. The biological
+interpretation of Figure \ref{fig:steady-states} is that for low
+applied angular velocity (i.e. low shear rate) the only stable
+behavior is for platelets to adhere to the surface and move very
+slowly with respect to the fluid velocity. At some medium shear rate,
+a second stable behavior arises where platelets roll along the surface
+substantially faster than the adhered platelets. Finally, at a high
+shear rate, all platelets are moving at a speed close to the fluid
+velocity and none are adhered to the surface: the torque generated by
+the fluid on the platelet is too large. While I have referred to
+stable and unstable branches in Figure \ref{fig:steady-states}, it is
+worth noting that this analysis doesn't show which solution branches
+are stable and which are unstable.
+
+Putting this aside, I will nonetheless refer to this region as the
+bistable region for convenience. One final thing that Figure
+\ref{fig:steady-states} shows is that the location and width of the
+bistable region changes as $\newOnConst$ changes. In particular, as
+$\newOnConst$ increases, the bistable region shifts to a higher applied
+rotation rate and the region widens. This result agrees with
+intuition, in that we would expect the lower branch (where the
+platelet is firmly bound to the surface and moving very slowly) to
+extend to larger $\ndAppliedRot$ values. It also makes sense that the
+upper branch (where the platelet is rolling at a rate close to that
+applied by the fluid) loses its stability for lower values of
+$\ndAppliedRot$.
+
+\subsubsection{Effects of activation on stable rolling behavior}
+\label{sec:effects-activation}
+
+While platelet activation isn't included in this model, it is still
+possible to crudely examine the effect of activation on platelet
+rolling by looking at how rolling behavior changes as you vary
+parameters that can change with activation. Two parameters that could
+change with platelet activation are $\receptorDensity$ and
+$\onConst$.
+
+The nondimensional bond formation rate constant, $\ndOnConst$ varies
+proportionally with $\onConst$. With priming we would expect on rates
+to increase, yielding an increase in $\ndOnConst$. This should result
+in a higher density of bonds at steady state, generating larger
+torques at the same rotation rate $\ndRotation$. As shown in Figure
+\ref{fig:steady-states}, the torque magnitudes increase with
+increasing $\newOnConst$. This change in the torque magnitude acts to
+shift the region of bistability to larger values of $\ndAppliedRot$.
+
+Another platelet response to activation is the recruitment of
+additional adhesion mole\-cules to the surface of the cell. In the
+model, this is represented as an increase in $\receptorDensity$. As
+discussed in Appendix \ref{app:nondim}, $\ndRotFriction$ and
+$\ndVelFriction$ are inversely proportional to $\receptorDensity$
+(also in Table \ref{tab:nd-vars}). In the rolling only case,
+$\ndRotFriction$ is the only parameter of these two that matters, and
+the effect of changing its value can be seen by examining equations
+(\ref{eq:ndim-ss}) and (\ref{eq:ndim-torbal}). First,
+$\receptorDensity$ does not appear in any parameters in the
+(\ref{eq:ndim-ss}), and so it does not affect the nondimensional bond
+density, it only affects how much the rolling velocity $\ndRotation$
+depends on $\totalTorque$. Increasing $\receptorDensity$ gives a
+proportional decrease in $\ndRotFriction$, which in turn increases the
+magnitude of the term $\ndTotalTorque/\ndRotFriction$ in the equation
+above. As shown in Figure \ref{fig:steady-states}, this lengthens the
+interval in $\ndAppliedRot$ in which bistability occurs, and the
+interval is centered on higher $\ndAppliedRot$ as $\ndRotFriction$
+decreases.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\textwidth]{variable-receptors}
+  \caption[Steady state rotation rates for 4 different
+  $\ndRotFriction$ values.]{Steady state rotation rates for
+    $\ndRotFriction = 5 \times 10^{-6}, 10^{-5}, 2 \times 10^{-5}, 5
+    \times 10^{-5}$. $\onForceScale$ and $\offForceScale$ are the same
+    as in Figure \ref{fig:steady-states}, and $\newOnConst = 1$.}
+  \label{fig:variable-receptors}
+\end{figure}
+
+According to this analysis, either increasing the bond formation rate
+or increasing the number of receptors on the surface results in the
+platelet firmly binding to the surface at higher applied rotation
+rates which agrees with intuition. However, the above plots also show
+there is switching behavior as $\onConst$ or $\receptorDensity$ is
+changed.
+
+\subsection{Time-dependent experiments}
+\label{sec:time-dep-exp}
+
+Next we look at the time-dependent dynamics of the deterministic and
+stochastic models. Figures
+\ref{fig:small-kappa-trials}--\ref{fig:large-kappa-trials} show
+results from running the deterministic and stochastic simulations at
+$\ndOnConst = 1, \, 10, \, 50$ (with
+$\onForceScale = 2.3 \times 10^4$, this corresponds to
+$\newOnConst = 0.016, \, 0.16, \, 0.83$). There is a switch in rolling
+behavior between Figure \ref{fig:small-kappa-trials} and Figure
+\ref{fig:med-kappa-trials} in which most of the platelets go from
+moving at the fluid velocity to being mostly bound to the surface. In
+each of these figures, the left column shows the solution of the
+deterministic algorithm in red, and the mean plus/minus 2 standard
+errors of the mean from 1000 stochastic simulations. In the right
+column, the solution of the deterministic algorithm is shown in red
+and a single stochastic simulation is shown in blue.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{small-kappa-trials}
+  \caption[Deterministic and stochastic solutions with
+  $\ndOnConst = 1$.]{Deterministic (red) and stochastic solutions
+    (blue) with $\ndOnConst = 1$. The plots on the left compare the
+    solution of the deterministic model with the mean (thick blue
+    line) and mean $\pm$ $2\,\tn{SEM}$ (thin blue lines, SEM: standard
+    error of the mean). The plots on the right show an individual run
+    of the stochastic algorithm in blue. All other parameters are
+    taken from Table \ref{tab:nd-params}.}
+  \label{fig:small-kappa-trials}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{med-kappa-trials}
+  \caption[Deterministic and stochastic solutions with
+  $\ndOnConst = 10$]{Deterministic (red) and stochastic solutions
+    (blue) with $\ndOnConst = 10$. All other parameters are taken from
+    Table \ref{tab:nd-params}.}
+  \label{fig:med-kappa-trials}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{large-kappa-trials}
+  \caption[Deterministic and stochastic solutions with
+  $\ndOnConst = 50$.]{Deterministic (red) and stochastic (blue)
+    solutions with $\ndOnConst = 50$. All other parameters are taken
+    from Table \ref{tab:nd-params}.}
+  \label{fig:large-kappa-trials}
+\end{figure}
+
+The average number of bonds over 1000 stochastic trials tracks well
+with the deterministic simulation in Figures
+\ref{fig:med-kappa-trials} and \ref{fig:large-kappa-trials}. The
+average translation velocity and rotation rate is also in good
+agreement with the deterministic model in Figure
+\ref{fig:large-kappa-trials}. However, there is a discrepancy in the
+rolling velocities in Figures \ref{fig:med-kappa-trials} and
+\ref{fig:small-kappa-trials}. I suspect this is because the population
+velocity distribution is heavily skewed: right skewed in Figure
+\ref{fig:small-kappa-trials}, and left skewed in Figure
+\ref{fig:med-kappa-trials}.
+
+The example stochastic runs plotted in each of the three figures give
+an explanation for this. Because $\ndRotFriction$ is so small, a
+single bond between the platelet and surface is enough to halt a
+platelet, therefore a platelet can essentially exist in one of two
+states: either completely unbound from the wall and moving with the
+fluid, or bound to the wall and stationary. There is only a brief
+transition period after an unbound platelet forms a bond with the wall
+in which the bond stretches until the spring force exerted by the bond
+equilibrates with the stationary drag force on the platelet. Clearly
+none of this can be captured in the deterministic model, and so there
+is a discrepancy between it and the stochastic simulations.
+
+This leaping behavior exhibited by the stochastic model is
+seen experimentally, and is called \emph{saltatory
+  motion}. The stochastic trials plotted in Figures
+\ref{fig:small-kappa-trials}--\ref{fig:large-kappa-trials} indicate
+there are really two types of jumps:
+\begin{enumerate}
+\item jumps where the platelet releases from surface entirely and
+  moves with the fluid until a new bond forms, and
+\item jumps where the platelet has multiple bonds with the surface,
+  and a load-bearing bond breaks resulting in the platelet quickly
+  accelerating and decelerating again as another bond is put under load.
+\end{enumerate}
+It isn't clear if this distinction is important, but jumps of the 2nd
+type can only be a fraction of a platelet radius whereas a platelet
+can travel much farther if it is completely released into the flow.
+
+\section{Discussion}
+\label{sec:discussion}
+
+%% From model summary
+The platelet rolling model presented in this chapter consists of a
+simple stochastic rolling model similar to the adhesive dynamics
+models for simulating rolling of a single cell, and a deterministic
+integro-PDE model which gives the mean behavior of a population of
+cells. The geometry of the model is reduced to 2D by assuming that
+motion perpendicular to flow and parallel to the vessel wall is
+negligible, and by approximating the reactive region of the rolling
+sphere with a cylinder. The nonspecific colloidal forces included in
+the adhesive dynamics models \cite{Hammer2014} are assumed to balance
+with the bond forces perpendicular to the wall. Therefore cell motion
+in the model is completely described by two quantities: the
+translational velocity in the direction of flow $\ndVelocity$ and the
+angular velocity $\ndRotation$.
+
+By simplifying the geometry of a platelet moving along a wall, and the
+biology and physics of binding and unbinding this model is simple
+enough to explore parameter space. However, it still describes some of
+the processes involved in platelet rolling in a realistic way.
+
+
+%% From results chapter
+A steady state analysis of a reduced version of the deterministic
+model shows that the model predicts a small number of bonds
+($\sim$0.1--10) for realistic values of $\onForceScale$ and
+$\offForceScale$, and for values of $\ndOnConst$ restricted to a range
+of a couple of orders of magnitude. The on rate $\ndOnConst$ is hard
+to estimate experimentally, and the values of $\ndOnConst$ that
+produce a small number of bonds are plausible. Steady state analysis
+also shows that there are multiple steady state rolling behaviors for
+a range of $\ndAppliedRot$, suggesting the presence of switch-like
+behavior in platelet rolling as $\ndAppliedRot$, $\ndOnConst$, or
+$\receptorDensity$ are varied. Finally, the full stochastic and
+deterministic models produce rolling behavior that is qualitatively
+similar to experimental observation.
 
 % Local Variables:
 % TeX-master: "phd-thesis.ltx"
