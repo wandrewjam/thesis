@@ -1,0 +1,149 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+\graphicspath{{/Users/andrewwork/thesis/reg_stokeslets/plots/}}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\input{/Users/andrewwork/thesis/model-defs}
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Power/Sample size analysis}:
+  \begin{itemize}
+  \item First, we need to specify precisely \emph{what} quantity we
+    are estimating, and are testing for differences in. For our tests,
+    we are looking at average velocities, steps, and dwells. We are
+    looking at a number of different statistics of these quantities,
+    but the easiest one to estimate the power for is the mean.
+  \item In statistical jargon, assume we have two sets of samples from
+    two experiments with a different $k_\tn{on}$. (For the sake of
+    this analysis) we are testing against the null hypothesis $H_0:
+    \mu_1 = \mu_2$, and the alternative hypothesis is $H_1: \mu_1 \neq
+    \mu_2$.
+  \item $\beta$ is the probability of accepting $H_0$ when $H_1$ is
+    true, and $1-\beta$ is the power of the statistic. (This is like
+    the converse of $\alpha$, which is the more familiar error of
+    rejecting $H_0$ when it is true).
+  \item According to the book I was working from, conventional choices
+    for the power are $80\%$ or $90\%$
+  \item $\Delta$ is the difference between the two means $\Delta =
+    \mu_1 - \mu_2$. For a fixed sample size, the power of a
+    statistical test decreases as $\Delta$ decreases. And to achieve
+    certain power, you need more samples as $\Delta$ decreases
+  \item The analysis simplifies a lot in the limit $n\rightarrow
+    \infty$, so I used this approximation when computing statistical
+    power. Under this assumption, the number of samples required is
+    given by the formula: $$n = \frac{(z_{\alpha/2} +
+        z_\beta)\sigma^2}{\epsilon^2}$$
+  \item In order to choose a reasonable $\epsilon$, I found the means
+    (and standard deviations) of the average velocities, step sizes,
+    and dwell times from my previous simulations (figure on next page).
+  \item For average velocities, the means differed by roughly $20 \mu
+    m / s$, with standard deviations between 20 and 30.
+  \item For step sizes, the means differed by roughly $3 \mu m$ with
+    standard deviations of about 10 to 15
+  \item For dwell times, the means differed by roughly 10--20 ms, with
+    standard deviations of about 100 ms
+  \item Plugging these in to the formula above gave me about $n=30$
+    for average velocities, $n=80$ for step sizes, and $n=80$ for
+    dwell times.
+  \item For comparing the average velocities, it seems like we already have
+    more than enough samples. However, the steps and dwells are a
+    little tougher. Most simulations don't produce a step: in the sets
+    of 128 runs, the number of steps ranged from 2 to 24 for the
+    entire set of experiments, depending on $k_\tn{on}$. For dwells,
+    the experiments produced between 6 to 79 dwells for a set of
+    experiments.
+  \item This suggests that 500--1000 runs are needed to spot
+    differences in the mean step size across experiments. Running this
+    many experiments with the largest $k_\tn{on}$ value I'm currently
+    using would take 500--1000 core-hours
+  \end{itemize}
+\end{itemize}
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{avel_avg_1.png}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{step_avg_1.png}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{dwell_avg_1.png}
+  \end{subfigure}
+  \label{fig:stats}
+  \caption{Means of average velocity (top left), step size (top
+    right), and dwell time (bottom) for 4 different $k_\tn{on}$
+    values.}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
