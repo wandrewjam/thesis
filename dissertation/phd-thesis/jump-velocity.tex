@@ -1,0 +1,62 @@
+%%% -*-LaTeX-*-
+
+\chapter{Jump-Velocity Model}
+\label{cha:jump-velocity-model}
+
+\section{The model}
+\label{sec:jv-model}
+
+While the previous model can be used for some explorations of
+parameter space, it is not feasible to use it for rigorous parameter
+estimation. (Estimate of time involved?)
+
+Suppose we model platelets as particles translating at a constant
+velocity along a wall coated with an immobilized agonist
+(e.g. collagen or vWF). Platelets have two types of receptors that can
+bind to these immobilized agonists. One type are the receptors which
+are constitutively active, and have fast binding and unbinding
+kinetics. The other type are receptors which are constitutively
+inactive, and become activated as the platelet activates. {\color{red}
+  This sentence should be reworked}
+
+Initially, assume that unprimed platelets can exist in two states:
+unbound ($\stateUnbound$), and bound to the wall by fast receptors
+($\stateBoundF$). Assume the platelet cannot be bound by slow
+receptors, because they are not active in unprimed
+platelets. Platelets in the unbound state advect at a velocity $v$ in
+the fluid, and platelets in the fast-bound state are
+stationary. Platelets in the fluid can bind through fast receptors at
+a constant rate $\jvOnFast$, and platelets bound through fast
+receptors can unbind at a constant rate $\jvOffFast$. The rates
+$\jvOnFast$ and $\jvOffFast$ are effective on and off rates for the
+entire platelet, and \emph{not} on/off rates for individual receptors.
+
+For primed platelets, assume that they can exist in four possible
+states: unbound ($\stateUnbound$), fast-bound ($\stateBoundF$),
+slow-bound ($\stateBoundS$), and both fast- and slow-bound
+($\stateBoundFS$).
+
+\begin{figure}[h]
+  \centering
+  \schemestart
+  $\stateUnboundOld$ \arrow(u1--vv){<=>[$\jvOnFast$][$\jvOffFast$]}
+  $\stateBoundF$ \arrow(--u0){<-[*{0}$\jvOnFast$]}[90]
+  $\stateUnboundNew$
+  \schemestop 
+  \caption[Possible states with one receptor]{An unprimed platelet can
+    exist in three distinct states: ($\stateUnboundNew$) platelets
+    which haven't interacted with the surface, ($\stateUnboundOld$)
+    platelets which have interacted with the surface and are advecting
+    in the fluid, or ($\stateBoundF$) bound to vWF on the surface and
+    unmoving. Transitions between these states occur at constant rates
+    $\jvOnFast$ and $\jvOffFast$. Platelets can only transition out of
+    the $\stateUnboundNew$ state.}
+  \label{fig:unprimed-states}
+\end{figure}
+
+% Where and how do we want to address the connection between receptor
+% on/off rates and effective on/off rates?
+
+% Local Variables:
+% TeX-master: "phd-thesis.ltx"
+% End:

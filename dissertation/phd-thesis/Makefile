@@ -145,7 +145,7 @@ TEXFILES        = abstract.tex			\
 		  notation.tex			\
 		  intro.tex			\
 		  model.tex			\
-		  results.tex			\
+		  jump-velocity.tex		\
 		  future.tex			\
 		  nondim.tex			\
 		  scheme.tex			\

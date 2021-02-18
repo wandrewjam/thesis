@@ -3,6 +3,10 @@
 %%% Define symbols for model parameters here so that it is
 %%% straightforward to change notation if necessary.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Notation for 2D Rolling Model %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% Coordinates
 \newcommand{\wallDist}{x}
 \newcommand{\ndWallDist}{z}
@@ -82,3 +86,22 @@
 
 %% Bin Midpoint
 \newcommand{\binMidpoint}[1]{\theta^*_{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Notation for Jump-Velocity Model %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% State definitions
+\newcommand{\stateUnbound}{U}
+\newcommand{\stateUnboundNew}{U^0}
+\newcommand{\stateUnboundOld}{U^1}
+\newcommand{\stateBoundF}{V}
+\newcommand{\stateBoundS}{F}
+\newcommand{\stateBoundFS}{VF}
+
+%% Parameter definitions
+\newcommand{\jvOnFast}{k_\textnormal{on}}
+\newcommand{\jvOffFast}{k_\textnormal{off}}
+\newcommand{\jvOnSlow}{k^F_\textnormal{on}}
+\newcommand{\jvOffSlow}{k^F_\textnormal{off}}
+
