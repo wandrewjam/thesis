@@ -35,16 +35,16 @@ def extract_data(expt_names):
     data_dir = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     data = []
     for expt in expt_names:
-        if expt in ['bd_run853', 'bd_run943', 'bd_run950']:
+        try:
+            with np.load(data_dir + expt + '.npz') as data_file:
+                data_dict = {
+                    't': data_file['t'], 'x': data_file['x'], 'y': data_file['y'],
+                    'z': data_file['z'], 'r_matrices': data_file['r_matrices'],
+                    'bond_array': data_file['bond_array'], 'num': expt[-3:]
+                }
+            data.append(data_dict)
+        except FileNotFoundError:
             continue
-
-        with np.load(data_dir + expt + '.npz') as data_file:
-            data_dict = {
-                't': data_file['t'], 'x': data_file['x'], 'y': data_file['y'],
-                'z': data_file['z'], 'r_matrices': data_file['r_matrices'],
-                'bond_array': data_file['bond_array'], 'num': expt[-3:]
-            }
-        data.append(data_dict)
     return data
 
 
@@ -139,6 +139,9 @@ def main():
         runners = ['bd_runner09', 'bd_runner10', 'bd_runner11', 'bd_runner12']
     elif expt_num == '4':
         runners = ['bd_runner13', 'bd_runner14', 'bd_runner15', 'bd_runner16']
+    elif expt_num == '5':
+        runners = ['bd_runner1101', 'bd_runner1102', 'bd_runner1103',
+                   'bd_runner1104']
     else:
         raise ValueError('expt_num is invalid')
     # runners = ['bd_runner03', 'bd_runner02', 'bd_runner01']
