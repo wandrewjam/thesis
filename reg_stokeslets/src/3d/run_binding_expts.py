@@ -10,6 +10,9 @@ def main(num_expts, filename, runner, random_initial=False, order='2nd', start_n
 
     all_filenames = []
 
+    t_end = 3.
+    num_steps = 1500
+
     for i in range(num_expts):
         assert type(start_numbering) is int
         if start_numbering == -1:
@@ -37,10 +40,13 @@ def main(num_expts, filename, runner, random_initial=False, order='2nd', start_n
             assert start_numbering > -1
 
             k = start_numbering + i - 1
-        filename = 'bd_run{:06d}'.format(k+1)
+        
+        runner_num = runner[-4:]
+        filename = 'bd_run{}{:03d}'.format(runner_num, k+1)
         all_filenames.append(filename + '\n')
         seed = np.random.randint(2**32)
-        pars.update([('seed', seed), ('filename', filename)])
+        pars.update([('seed', seed), ('filename', filename), 
+                     ('t_end', t_end), ('num_steps', num_steps)])
         if random_initial:
             while True:
                 height = np.random.uniform(0.7, 1.4)
