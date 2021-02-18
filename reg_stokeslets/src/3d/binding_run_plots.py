@@ -128,7 +128,7 @@ def get_bound_at_end(data_list):
 
 def main():
     save_plots = True
-    expt_num = '1'
+    expt_num = '2'
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
 
     if expt_num == '1':
@@ -182,6 +182,7 @@ def main():
     labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
     # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
     plt.hist(avg_v_list, density=True)
+    
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)
     if save_plots:
@@ -245,6 +246,15 @@ def main():
         plt.tight_layout()
         plt.show()
 
+    plt.bar(np.arange(len(avg_v_list)), np.mean(avg_v_list, axis=1), yerr=np.std(avg_v_list, axis=1) / np.sqrt(128), tick_label=labels)
+    plt.ylabel('Mean of Average Velocity ($\\mu m / s$)')
+    if save_plots:
+        plt.savefig(plot_dir + 'avel_avg_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+        
     plt.bar(np.arange(len(avg_step_list)), avg_step_list, yerr=step_err_list, tick_label=labels)
     plt.ylabel('Average step size ($\\mu m$)')
     if save_plots:
