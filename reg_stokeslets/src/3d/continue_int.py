@@ -7,7 +7,7 @@ from motion_integration import integrate_motion, nondimensionalize, get_bond_len
 from scipy.io import savemat
 
 
-def continue_integration(filename, t_end, i_start=-1):
+def continue_integration(filename, t_end, i_start=-1, debug=False, save_data=True):
     data_dir = path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     pars = parse_file(filename)
 
@@ -80,6 +80,10 @@ def continue_integration(filename, t_end, i_start=-1):
     def exact_vels(em):
         return np.zeros(6)
 
+    if debug:
+        import pdb
+        pdb.set_trace()
+
     result = integrate_motion(
         [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain,
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
@@ -111,20 +115,22 @@ def continue_integration(filename, t_end, i_start=-1):
     new_y = np.concatenate((old_y, y))
     new_z = np.concatenate((old_z, z))
     new_rmat = np.concatenate((old_rmat, r_matrices), axis=-1)
-    new_bond_array =  np.concatenate((old_padded, bond_array), axis=-1)
+    new_bond_array = np.concatenate((old_padded, bond_array), axis=-1)
     new_rng = old_rng + rng_states
 
-    # np.savez(data_dir + filename, new_t, new_x, new_y, new_z, new_rmat,
-    #          new_bond_array, receptors, t=new_t, x=new_x, y=new_y, z=new_z,
-    #          r_matrices=new_rmat, bond_array=new_bond_array,
-    #          receptors=receptors)
-    # savemat(data_dir + filename,
-    #         {'t': new_t, 'x': new_x, 'y': new_y, 'z': new_z, 'R': new_rmat,
-    #          'bond_array': new_bond_array, 'receptors': receptors})
-    # save_info(filename, pars['seed'], pars['t_start'], pars['t_end'], num_steps, n_nodes, a, b,
-    #           adaptive, shear, l_sep, dimk0_on, dimk0_off,
-    #           sig, sig_ts, one_side, check_bonds)
-    # save_rng(filename, rng_states)
+    if save_data:
+        new_filename = filename + '_cont'
+        np.savez(data_dir + new_filename, new_t, new_x, new_y, new_z, new_rmat,
+                 new_bond_array, receptors, t=new_t, x=new_x, y=new_y, z=new_z,
+                 r_matrices=new_rmat, bond_array=new_bond_array,
+                 receptors=receptors)
+        savemat(data_dir + new_filename,
+                {'t': new_t, 'x': new_x, 'y': new_y, 'z': new_z, 'R': new_rmat,
+                 'bond_array': new_bond_array, 'receptors': receptors})
+        save_info(new_filename, pars['seed'], pars['t_start'], pars['t_end'], num_steps, n_nodes, a, b,
+                  adaptive, shear, l_sep, dimk0_on, dimk0_off,
+                  sig, sig_ts, one_side, check_bonds)
+        save_rng(new_filename, new_rng)
 
     # t = new_t
     # x = new_x
@@ -227,4 +233,7 @@ def continue_integration(filename, t_end, i_start=-1):
 
 
 if __name__ == '__main__':
-    continue_integration('bd_run044', 0.6)
+    import sys
+
+    filename = sys.argv[1]
+    continue_integration(filename, 0.462)
