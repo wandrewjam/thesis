@@ -4,6 +4,7 @@
 ########################
 # Documents
 
+*.icloud
 *.pdf
 *.pages
 *.numbers
