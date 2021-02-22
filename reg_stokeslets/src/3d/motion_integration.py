@@ -99,7 +99,7 @@ def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta, eta
         k_on *= 1 - np.bincount(bonds[:, 0].astype('int'),
                                 minlength=true_receptors.shape[0])
     elif lam > 0:
-        l = np.linspace(-.2, .2, num=21)
+        l = np.linspace(-2*lam, 2*lam, num=101)
         ligands = (np.stack([np.zeros(shape=2*l.shape)]
                             + np.meshgrid(l, l), axis=-1).reshape(-1, 3)
                    + np.array([[0, x2, x3]]))

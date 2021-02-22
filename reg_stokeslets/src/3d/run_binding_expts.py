@@ -1,9 +1,27 @@
 import numpy as np
+from scipy.stats import beta
 from binding_expt import parse_file, save_info
 from motion_integration import find_min_separation
 
 
-def main(num_expts, filename, runner, random_initial=False, order='2nd', start_numbering=-1):
+def pick_random_height():
+    a = 1.5
+    b = (a - 1) / 0.43 - a + 2
+    loc = 0.55
+    scale = 3.45
+
+    while True:
+        r = beta.rvs(a=a, b=b, loc=loc, scale=scale)
+        assert 0.55 < r < 4.
+
+        if r < 1.65:
+            break
+
+    return np.random.uniform(0.7, 1.4)
+
+
+def main(num_expts, filename, runner, random_initial=False, order='2nd',
+         start_numbering=-1, rest_length=0.1):
     import os
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     pars = parse_file(filename)
@@ -46,10 +64,11 @@ def main(num_expts, filename, runner, random_initial=False, order='2nd', start_n
         all_filenames.append(filename + '\n')
         seed = np.random.randint(2**32)
         pars.update([('seed', seed), ('filename', filename), 
-                     ('t_end', t_end), ('num_steps', num_steps)])
+                     ('t_end', t_end), ('num_steps', num_steps),
+                     ('l_sep', rest_length)])
         if random_initial:
+            height = pick_random_height()
             while True:
-                height = np.random.uniform(0.7, 1.4)
                 theta = np.random.uniform(-np.pi, np.pi)
                 phi = np.random.uniform(0, np.pi)
 
@@ -82,10 +101,12 @@ if __name__ == '__main__':
     parser.add_argument('--order', default='2nd',
                         choices=['radau', '1st', '2nd', '4th'])
     parser.add_argument('-s', '--start_numbering', default=-1, type=int)
+    parser.add_argument('-l', '--rest_length', default=0.1, type=float)
 
     args = parser.parse_args()
 
-    main(args.num_expts, args.filename, args.runner, args.randomize, args.order, args.start_numbering)
+    main(args.num_expts, args.filename, args.runner, args.randomize,
+         args.order, args.start_numbering, args.rest_length)
     # try:
     #     main(int(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4])
     # except IndexError:
