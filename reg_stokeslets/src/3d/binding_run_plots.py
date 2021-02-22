@@ -128,7 +128,7 @@ def get_bound_at_end(data_list):
 
 def main():
     save_plots = True
-    expt_num = '2'
+    expt_num = '5'
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
 
     if expt_num == '1':
@@ -215,7 +215,7 @@ def main():
         plt.tight_layout()
         plt.show()
 
-    max_step_count = np.amax(np.ravel(step_count_list))
+    max_step_count = np.amax(np.concatenate(step_count_list))
     step_counts = [np.bincount(count, minlength=max_step_count+1) for count in step_count_list]
     width = 0.1
     x = np.arange(max_step_count+1)
@@ -232,7 +232,7 @@ def main():
         plt.tight_layout()
         plt.show()
 
-    max_dwell_count = np.amax(np.ravel(dwell_count_list))
+    max_dwell_count = np.amax(np.concatenate(dwell_count_list))
     dwell_counts = [np.bincount(count, minlength=max_dwell_count + 1) for count in dwell_count_list]
     width = 0.1
     x = np.arange(max_dwell_count + 1)
@@ -249,7 +249,9 @@ def main():
         plt.tight_layout()
         plt.show()
 
-    plt.bar(np.arange(len(avg_v_list)), np.mean(avg_v_list, axis=1), yerr=np.std(avg_v_list, axis=1) / np.sqrt(128), tick_label=labels)
+    # import pdb; pdb.set_trace()
+
+    plt.bar(np.arange(len(avg_v_list)), [np.mean(el) for el in avg_v_list], yerr=[np.std(el) / np.sqrt(128) for el in avg_v_list], tick_label=labels)
     plt.ylabel('Mean of Average Velocity ($\\mu m / s$)')
     if save_plots:
         plt.savefig(plot_dir + 'avel_avg_' + expt_num, bbox_inches='tight')
