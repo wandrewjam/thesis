@@ -8,7 +8,7 @@
 
 While the previous model can be used for some explorations of
 parameter space, it is not feasible to use it for rigorous parameter
-estimation. (Estimate of time involved?)
+estimation. {\color{red} (Estimate of time involved?)}
 
 Suppose we model platelets as particles translating at a constant
 velocity along a wall coated with an immobilized agonist
@@ -23,26 +23,46 @@ Initially, assume that unprimed platelets can exist in two states:
 unbound ($\stateUnbound$), and bound to the wall by fast receptors
 ($\stateBoundF$). Assume the platelet cannot be bound by slow
 receptors, because they are not active in unprimed
-platelets. Platelets in the unbound state advect at a velocity $v$ in
-the fluid, and platelets in the fast-bound state are
+platelets. Platelets in the unbound state advect at a velocity
+$\jvVel$ in the fluid, and platelets in the fast-bound state are
 stationary. Platelets in the fluid can bind through fast receptors at
 a constant rate $\jvOnFast$, and platelets bound through fast
 receptors can unbind at a constant rate $\jvOffFast$. The rates
 $\jvOnFast$ and $\jvOffFast$ are effective on and off rates for the
 entire platelet, and \emph{not} on/off rates for individual receptors.
 
+It is useful to track the unbound platelets that have never been bound
+to the wall (which we'll call $\stateUnboundNew$) separately from the
+platelets that are unbound, but have previously been bound in the
+experiment (which we'll call $\stateUnboundOld$). This can be added to
+the model described above with only a slight modification: platelets
+in either the $\stateUnboundNew$ or $\stateUnboundOld$ states can enter
+the $\stateBoundF$ state at the constant on rate $\jvOnFast$, but
+platelets in the $\stateBoundF$ state can only enter the
+$\stateUnboundOld$ state at the off rate $\jvOffFast$. The state diagram
+describing this situation is shown in Figure
+\ref{fig:unprimed-states}.
+
 For primed platelets, assume that they can exist in four possible
 states: unbound ($\stateUnbound$), fast-bound ($\stateBoundF$),
 slow-bound ($\stateBoundS$), and both fast- and slow-bound
-($\stateBoundFS$).
+($\stateBoundFS$). Again, split $\stateUnbound$ into the
+$\stateUnboundNew$ and $\stateUnboundOld$ states. The $\stateUnbound$
+and $\stateBoundF$ states are the same as for the unprimed platelets,
+however in addition both the $\stateUnbound$ and $\stateBoundF$ states
+can form bonds mediated by slow-acting receptors to transition to the
+$\stateBoundS$ and $\stateBoundFS$ states (Figure
+\ref{fig:primed-states}). 
 
-\begin{figure}[h]
+\begin{figure}
   \centering
+  
   \schemestart
   $\stateUnboundOld$ \arrow(u1--vv){<=>[$\jvOnFast$][$\jvOffFast$]}
   $\stateBoundF$ \arrow(--u0){<-[*{0}$\jvOnFast$]}[90]
   $\stateUnboundNew$
-  \schemestop 
+  \schemestop
+  
   \caption[Possible states with one receptor]{An unprimed platelet can
     exist in three distinct states: ($\stateUnboundNew$) platelets
     which haven't interacted with the surface, ($\stateUnboundOld$)
@@ -54,8 +74,136 @@ slow-bound ($\stateBoundS$), and both fast- and slow-bound
   \label{fig:unprimed-states}
 \end{figure}
 
+\begin{figure}
+  \centering
+
+  \schemestart
+  $\stateUnboundOld$ \arrow(u1--vv){<=>[$\jvOnFast$][$\jvOffFast$]} $\stateBoundF$
+  \arrow(@u1--ff){<=>[*{0}$\jvOnSlow$][*{0}$\jvOffSlow$]}[-90] $\stateBoundS$
+  \arrow(--vf){<=>[$\jvOnFast$][$\jvOffFast$]} $\stateBoundFS$
+  \arrow(@vv--@vf){<=>[*{0}$\jvOnSlow$][*{0}$\jvOffSlow$]}
+  \arrow(@vv--u01){<-[$\jvOnFast$]} $\stateUnboundNew$
+  \arrow(@ff--u02){<-[$\jvOnFast$]}[180] $\stateUnboundNew$
+  \schemestop
+
+  \caption[Possible states of primed platelets]{A primed platelet can
+    exist in five states: ($\stateUnbound$) unbound from the surface
+    and advecting in the fluid (further split into the two categories
+    defined above), ($\stateBoundF$) bound to vWF on the surface,
+    ($\stateBoundS$) bound to fibrinogen on the surface, or
+    ($\stateBoundFS$) bound to both vWF and fibrinogen. In all three
+    bound states, the platelet is immobilized on the surface.}
+  \label{fig:primed-states}
+\end{figure}
+
 % Where and how do we want to address the connection between receptor
 % on/off rates and effective on/off rates?
+
+These models describe a jump-velocity process, where a particle is
+transitioning randomly between discrete states, which each move with a
+different deterministic motion.
+
+% We want to derive the distributions of
+% three quantities of interest from the model:
+% \begin{enumerate}
+% \item dwell time---the time that a platelet spends bound to the
+%   surface before unbinding, 
+% \item step size---the distance a platelet travels in between
+%   successive binding events, and
+% \item average velocity---the time-averaged velocity over an experiment
+%   of a single platelet.
+% \end{enumerate}
+
+The Fokker-Planck equation for these processes are given by the
+following system of linear advection equations:
+\begin{equation}
+  \label{eq:fp-system}
+  \Pder{}{t}
+  \underbrace{
+    \begin{pmatrix}
+      p_{\stateUnboundNew} \\ p_{\stateUnboundOld} \\ p_\stateBoundF
+      \\ p_\stateBoundS \\ p_\stateBoundFS
+    \end{pmatrix}}_{\equiv \mathbf{p}}
+  =
+  -\Pder{}{x}
+  \begin{pmatrix}
+    \jvVel p_{\stateUnboundNew} \\ \jvVel p_{\stateUnboundNew} \\ 0 \\
+    0 \\ 0
+  \end{pmatrix}
+  +
+  \underbrace{
+    \begin{pmatrix}
+      -(\jvOnFast + \jvOnSlow) & 0 & 0 & 0 & 0 \\
+      0 & -(\jvOnFast + \jvOnSlow) & \jvOffFast & \jvOffSlow & 0 \\
+      \jvOnFast & \jvOnFast & -(\jvOffFast + \jvOnSlow) & 0 & \jvOffSlow \\
+      \jvOnSlow & \jvOnSlow & 0 & -(\jvOnFast + \jvOffSlow) & \jvOffFast \\
+      0 & 0 & \jvOnSlow & \jvOnFast & -(\jvOffFast + \jvOffSlow)
+  \end{pmatrix}}_{\equiv A}
+  \begin{pmatrix}
+    p_{\stateUnboundNew} \\ p_{\stateUnboundOld} \\ p_\stateBoundF \\
+    p_\stateBoundS \\ p_\stateBoundFS
+  \end{pmatrix}
+\end{equation}
+where $p_i = p_i(x, t \mid x_0, j, 0)$ is the probability the platelet
+is in state $i$ and position $x$ at time $t$ given it was previously
+in position $z$ and state $j$ at time $0$. If the platelets are
+not primed, then the only difference is $\jvOnSlow = \jvOffSlow =
+0$.
+
+The goal is to find the probability density function of the average
+velocity across a segment of length $L$, so take the initial condition
+of the PDE system (\ref{eq:fp-system}) to be
+$\mathbf{p}(x, 0) = (\delta(x), 0, 0, 0, 0)^T$. That is, all platelets
+enter in never-bound state $\stateUnboundNew$. The probability
+density of the time it takes a platelet to cross the interval $[0, L]$
+is $\jvVel (p_{\stateUnboundNew}(L, t) +
+p_{\stateUnboundOld}(L,t))$. The average velocity associated with a
+crossing time $t^*$ is just $v^* = L/t^*$, and the probability density
+function of $v^*$ is given by $f(v^*) = (L/v^*)^2 p_U(L, L/v^*)$
+
+\subsection{Nondimensionalization}
+\label{sec:nondim}
+
+Define the nondimensional variables $s$ and $y$ so that $t = Ts$ and
+$x = Xy$. Let's scale $x$ by the domain length, so $X = L$, and scale
+$t$ by the velocity, so that $X/T = \jvVel \implies T =
+L/\jvVel$. That is, $T$ is the shortest possible crossing time of a
+platelet. Finally, define the nondimensional parameter
+$\epsilon_1 = 1/(T(\jvOnFast + \jvOffFast))$ and
+$\epsilon_2 = 1/(T(\jvOnSlow + \jvOffSlow))$. If the sum of the
+relevant reaction rates is much larger than $1/T$, then $\epsilon$
+is a small parameter. After the nondimensionalization, equation
+(\ref{eq:fp-system}) becomes
+\begin{equation}
+  \label{eq:nd-system}
+  \Pder{\mathbf{q}}{s} = -\Pder{}{y}
+  \begin{pmatrix}
+    q_{\stateUnboundNew} \\ q_{\stateUnboundOld} \\ 0 \\ 0 \\ 0
+  \end{pmatrix}
+  + \left[\left(\frac{1}{\epsilon_1}\right) 
+  \begin{pmatrix}
+    - b & 0 & 0 & 0 & 0 \\
+    0 & - b & a & 0 & 0 \\
+    b & b & - a & 0 & 0 \\
+    0 & 0 & 0 & - b & a \\
+    0 & 0 & 0 & b & - a
+  \end{pmatrix}
+  + \left(\frac{1}{\epsilon_2}\right)
+  \begin{pmatrix}
+    - d & 0 & 0 & 0 & 0 \\
+    0 & - d & 0 & c & 0 \\
+    0 & 0 & - d & 0 & c \\
+    d & d & 0 & - c & 0 \\
+    0 & 0 & d & 0 & - c
+  \end{pmatrix}\right]
+  \mathbf{q},
+\end{equation}
+where $a = \jvOffFast/(\jvOffFast + \jvOnFast)$,
+$b = \jvOnFast/(\jvOffFast + \jvOnFast)$,
+$c = \jvOffSlow/(\jvOffSlow + \jvOnSlow)$, and
+$d = \jvOnSlow/(\jvOffSlow + \jvOnSlow)$. When
+$\jvOnSlow = \jvOffSlow = 0$, this reduces to the example in
+Dr. Keener's notes.
 
 % Local Variables:
 % TeX-master: "phd-thesis.ltx"
