@@ -27,26 +27,27 @@ ss*.txt
 *.mat
 
 # Folders
-literature_repository/*
-rolling-model/data/*
-rolling-model/plots/*
-_data/*
-shek-pres/*
+literature_repository
+rolling-model/data
+rolling-model/plots
+_data
+shek-pres
 dissertation/thesis-templates/
 figures/
 dissertation/phd-thesis/*.bib
 oral-exam/oral-doc/*.bib
 *.stripped
 first-binding-model/*.dat
-jump-velocity/npz-files/*
-jump-velocity/dat-files/bootstrap/*
-jump-velocity/dat-files/data/*
-jump-velocity/dat-files/distributions/*
-jump-velocity/dat-files/ml-estimates/*
-jump-velocity/dat-files/ml-trials/*
+jump-velocity/npz-files
+jump-velocity/dat-files/bootstrap
+jump-velocity/dat-files/data
+jump-velocity/dat-files/distributions
+jump-velocity/dat-files/ml-estimates
+jump-velocity/dat-files/ml-trials
 meeting-notes/summer-19/intro-to-prob/
-reg_stokeslets/data/*/*
-vlado-data/*
+reg_stokeslets/data
+reg_stokeslets/src/junk_scripts
+vlado-data
 *core.*
 
 # Copied from github/gitignore/Python.gitignore

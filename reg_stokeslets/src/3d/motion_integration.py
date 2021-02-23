@@ -86,7 +86,8 @@ def get_bond_lengths(bonds, receptors):
     return lengths
 
 
-def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta, eta_ts, lam, one_side=False):
+def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta,
+                 eta_ts, lam, one_side=False):
     # Given an array of receptors, compute the binding rates
     # eta is the nondimensional sigma
     # what about receptors already involved in binding?
@@ -190,7 +191,8 @@ def nondimensionalize(l_scale, shear, mu, l_sep, dimk0_on, dimk0_off, sig,
 def evaluate_motion_equations(h, e_m, forces, torques, exact_vels, a=1.0,
                               b=1.0, n_nodes=8, domain='free', proc=1,
                               save_quad_matrix=False, precompute_array=None):
-    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m, distance=h, a=a, b=b))
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+                                                  distance=h, a=a, b=b))
     eps = eps_picker(n_nodes, a, b)
     theta = np.arctan2(e_m[2], e_m[1])
     phi = np.arccos(e_m[0])
@@ -269,7 +271,8 @@ def repulsive_force(com_dist, e_m):
     return point, rep_force
 
 
-def valid_forces(old_center, old_rmat, new_center, new_rmat, receptors, bonds, kappa, lam, one_side, check_bonds=True, domain='free'):
+def valid_forces(old_center, old_rmat, new_center, new_rmat, receptors, bonds,
+                 kappa, lam, one_side, check_bonds=True, domain='free'):
     if domain == 'wall':
         old_rep_force = repulsive_force(old_center[0], old_rmat[:, 0])[1]
         new_rep_force = repulsive_force(new_center[0], new_rmat[:, 0])[1]
@@ -279,19 +282,22 @@ def valid_forces(old_center, old_rmat, new_center, new_rmat, receptors, bonds, k
         elif new_rep_force < 1e-16:
             valid_rep_force = False
         else:
-            valid_rep_force = np.abs(np.log10(old_rep_force / new_rep_force)) < 1
+            valid_rep_force = np.abs(np.log10(old_rep_force
+                                              / new_rep_force)) < 1
     else:
         valid_rep_force = True
 
     if receptors is not None:
-        old_forces, old_torques = find_bond_forces(receptors, bonds, old_center,
-                                                   old_rmat, kappa, lam, one_side)
-        new_forces, new_torques = find_bond_forces(receptors, bonds, new_center,
-                                                   new_rmat, kappa, lam, one_side)
+        old_forces, old_torques = find_bond_forces(
+            receptors, bonds, old_center, old_rmat, kappa, lam, one_side)
+
+        new_forces, new_torques = find_bond_forces(
+            receptors, bonds, new_center, new_rmat, kappa, lam, one_side)
 
         if check_bonds:
-            valid_bond_force = (np.linalg.norm(new_forces - old_forces) < 10.
-                                and np.linalg.norm(new_torques - old_torques) < 10.)
+            valid_bond_force = (
+                    np.linalg.norm(new_forces - old_forces) < 10.
+                    and np.linalg.norm(new_torques - old_torques) < 10.)
         else:
             valid_bond_force = True
     else:
@@ -300,9 +306,12 @@ def valid_forces(old_center, old_rmat, new_center, new_rmat, receptors, bonds, k
     return valid_rep_force and valid_bond_force
 
 
-def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, a=1.0, b=1.0, domain='free',
-              order='2nd', proc=1, save_quad_matrix_info=False, receptors=None, bonds=None, eta=1, eta_ts=1, kappa=1,
-              lam=0, k0_on=1, k0_off=1, precompute_array=None, level=0, check_bonds=True, one_side=True):
+def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
+              a=1.0, b=1.0, domain='free', order='2nd', proc=1,
+              save_quad_matrix_info=False, receptors=None, bonds=None, eta=1,
+              eta_ts=1, kappa=1, lam=0, k0_on=1, k0_off=1,
+              precompute_array=None, level=0, check_bonds=True, one_side=True,
+              rk_solver=None):
     valid_test_nodes = 48
 
     if level >= 24:
@@ -325,7 +334,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
         result = evaluate_motion_equations(
             x1, r_matrix[:, 0], forces, torques, exact_vels, a=a, b=b,
             n_nodes=n_nodes, domain=domain, proc=proc,
-            save_quad_matrix=save_quad_matrix_info, precompute_array=precompute_array)
+            save_quad_matrix=save_quad_matrix_info,
+            precompute_array=precompute_array)
 
         if save_quad_matrix_info:
             dx1, dx2, dx3, om1, om2, om3, velocity_errors, s_matrix = result
@@ -346,10 +356,12 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
                 and domain == 'wall'):
             s_matrices = tuple()
             # Then take 2 half time-steps
-            result1 = time_step(dt / 2, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes, a, b, domain, order,
-                                proc, save_quad_matrix_info, receptors, bonds, eta, eta_ts, kappa, lam=lam, k0_on=k0_on,
-                                k0_off=k0_off, precompute_array=precompute_array, level=level + 1,
-                                check_bonds=check_bonds, one_side=one_side)[:-1]
+            result1 = time_step(
+                dt / 2, x1, x2, x3, r_matrix, forces, torques, exact_vels,
+                n_nodes, a, b, domain, order, proc, save_quad_matrix_info,
+                receptors, bonds, eta, eta_ts, kappa, lam=lam, k0_on=k0_on,
+                k0_off=k0_off, precompute_array=precompute_array,
+                level=level+1, check_bonds=check_bonds, one_side=one_side)[:-1]
             tmp_x1, tmp_x2, tmp_x3, tmp_rmat = result1[:4]
             bonds = result1[6]
             dt_list = result1[7]
@@ -358,11 +370,17 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             if save_quad_matrix_info:
                 s_matrices += result1[-1]
 
-            half_step2 = time_step(dt / 2, tmp_x1[-1], tmp_x2[-1], tmp_x3[-1], tmp_rmat[-1], forces, torques,
-                                   exact_vels, n_nodes, a, b, domain, order, proc, save_quad_matrix_info, receptors,
-                                   bonds, eta, eta_ts, kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
-                                   precompute_array=precompute_array, level=level + 1, check_bonds=check_bonds, one_side=one_side)
-            tmp2_x1, tmp2_x2, tmp2_x3, tmp2_rmat, velocity_errors = half_step2[:5]
+            half_step2 = time_step(
+                dt / 2, tmp_x1[-1], tmp_x2[-1], tmp_x3[-1], tmp_rmat[-1],
+                forces, torques, exact_vels, n_nodes, a, b, domain, order,
+                proc, save_quad_matrix_info, receptors, bonds, eta, eta_ts,
+                kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
+                precompute_array=precompute_array, level=level + 1,
+                check_bonds=check_bonds, one_side=one_side)
+
+            (tmp2_x1, tmp2_x2, tmp2_x3, tmp2_rmat,
+             velocity_errors) = half_step2[:5]
+
             new_x1 = tmp_x1 + tmp2_x1
             new_x2 = tmp_x2 + tmp2_x2
             new_x3 = tmp_x3 + tmp2_x3
@@ -375,7 +393,9 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
                 s_matrices += half_step2[-1]
         else:
             if receptors is not None:
-                new_bonds = update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off, eta, eta_ts, lam)
+                new_bonds = update_bonds(
+                    receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off,
+                    eta, eta_ts, lam)
             else:
                 new_bonds = None
             dt_list = [dt]
@@ -432,13 +452,17 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             if ((not valid_orientation(valid_test_nodes, new_rmat[-1][:, 0],
                                        distance=new_x1[-1], a=a, b=b)
                     and domain == 'wall') or
-                    (not valid_forces(center, r_matrix, new_center, new_rmat[-1], receptors, bonds, kappa, lam,
-                                      one_side, check_bonds, domain))):
+                    (not valid_forces(center, r_matrix, new_center,
+                                      new_rmat[-1], receptors, bonds, kappa,
+                                      lam, one_side, check_bonds, domain))):
                 raise AssertionError('next step will not be valid')
 
             # We can only get to this code if the end position is valid
             if receptors is not None:
-                new_bonds = [update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off, eta, eta_ts, lam)]
+                new_bonds = [
+                    update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt,
+                                 k0_on, k0_off, eta, eta_ts, lam)
+                ]
             else:
                 new_bonds = [None]
             dt_list = [dt]
@@ -447,9 +471,12 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
         except AssertionError:
             # If we get an invalid orientation, then take 2 half-steps
             s_matrices = tuple()
-            result1 = time_step(dt / 2, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes, a, b, domain, order,
-                                proc, save_quad_matrix_info, receptors, bonds, eta, eta_ts, kappa, lam, k0_on, k0_off,
-                                precompute_array=precompute_array, level=level + 1, check_bonds=check_bonds, one_side=one_side)
+            result1 = time_step(
+                dt / 2, x1, x2, x3, r_matrix, forces, torques, exact_vels,
+                n_nodes, a, b, domain, order, proc, save_quad_matrix_info,
+                receptors, bonds, eta, eta_ts, kappa, lam, k0_on, k0_off,
+                precompute_array=precompute_array, level=level + 1,
+                check_bonds=check_bonds, one_side=one_side)
 
             tmp_x1, tmp_x2, tmp_x3, tmp_rmat = result1[:4]
             new_bonds = result1[6]
@@ -459,12 +486,17 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             if save_quad_matrix_info:
                 s_matrices += result1[-1]
 
-            half_step2 = time_step(dt / 2, tmp_x1[-1], tmp_x2[-1], tmp_x3[-1], tmp_rmat[-1], forces, torques,
-                                   exact_vels, n_nodes, a, b, domain, order, proc, save_quad_matrix_info, receptors,
-                                   new_bonds[-1], eta, eta_ts, kappa, lam, k0_on, k0_off,
-                                   precompute_array=precompute_array, level=level + 1, check_bonds=check_bonds, one_side=one_side)
+            half_step2 = time_step(
+                dt / 2, tmp_x1[-1], tmp_x2[-1], tmp_x3[-1], tmp_rmat[-1],
+                forces, torques, exact_vels, n_nodes, a, b, domain, order,
+                proc, save_quad_matrix_info, receptors, new_bonds[-1], eta,
+                eta_ts, kappa, lam, k0_on, k0_off,
+                precompute_array=precompute_array, level=level + 1,
+                check_bonds=check_bonds, one_side=one_side)
 
-            tmp2_x1, tmp2_x2, tmp2_x3, tmp2_rmat, velocity_errors = half_step2[:5]
+            (tmp2_x1, tmp2_x2, tmp2_x3, tmp2_rmat,
+             velocity_errors) = half_step2[:5]
+
             new_x1 = tmp_x1 + tmp2_x1
             new_x2 = tmp_x2 + tmp2_x2
             new_x3 = tmp_x3 + tmp2_x3
@@ -535,7 +567,9 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
 
             # We can only get to this code if the end position is valid
             if receptors is not None:
-                new_bonds = update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off, eta, eta_ts, lam)
+                new_bonds = update_bonds(
+                    receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off,
+                    eta, eta_ts, lam)
             else:
                 new_bonds = None
             dt_list = [dt]
@@ -545,10 +579,13 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             # Take two half-steps
             s_matrices = tuple()
 
-            half_step1 = time_step(dt / 2, x1, x2, x3, r_matrix[:, 0], forces, torques, exact_vels, n_nodes, a, b,
-                                   domain, order, proc, save_quad_matrix_info, receptors, bonds, eta, eta_ts, kappa,
-                                   lam=lam, k0_on=k0_on, k0_off=k0_off, precompute_array=precompute_array,
-                                   level=level + 1, check_bonds=check_bonds, one_side=one_side)
+            half_step1 = time_step(
+                dt / 2, x1, x2, x3, r_matrix[:, 0], forces, torques,
+                exact_vels, n_nodes, a, b, domain, order, proc,
+                save_quad_matrix_info, receptors, bonds, eta, eta_ts, kappa,
+                lam=lam, k0_on=k0_on, k0_off=k0_off,
+                precompute_array=precompute_array, level=level + 1,
+                check_bonds=check_bonds, one_side=one_side)
 
             tmp_x1, tmp_x2, tmp_x3, tmp_rmat = half_step1[:4]
             bonds = half_step1[6]
@@ -558,12 +595,17 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             if save_quad_matrix_info:
                 s_matrices += half_step1[-1]
 
-            half_step2 = time_step(dt / 2, tmp_x1[-1], tmp_x2[-1], tmp_x3[-1], tmp_rmat[-1], forces, torques,
-                                   exact_vels, n_nodes, a, b, domain, order, proc, save_quad_matrix_info, receptors,
-                                   bonds, eta, eta_ts, kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
-                                   precompute_array=precompute_array, level=level + 1, check_bonds=check_bonds, one_side=one_side)
+            half_step2 = time_step(
+                dt / 2, tmp_x1[-1], tmp_x2[-1], tmp_x3[-1], tmp_rmat[-1],
+                forces, torques, exact_vels, n_nodes, a, b, domain, order,
+                proc, save_quad_matrix_info, receptors, bonds, eta, eta_ts,
+                kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
+                precompute_array=precompute_array, level=level + 1,
+                check_bonds=check_bonds, one_side=one_side)
 
-            tmp2_x1, tmp2_x2, tmp2_x3, tmp2_rmat, velocity_errors = half_step2[:5]
+            (tmp2_x1, tmp2_x2, tmp2_x3, tmp2_rmat,
+             velocity_errors) = half_step2[:5]
+
             new_x1 = tmp_x1 + tmp2_x1
             new_x2 = tmp_x2 + tmp2_x2
             new_x3 = tmp_x3 + tmp2_x3
@@ -588,7 +630,9 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             r_hat_tmp = angles_to_matrix(fun_angles)
             rmat_temp = np.dot(b_matrix, r_hat_tmp)
             if bonds is not None:
-                func_forces, func_torques = find_bond_forces(receptors, bonds, func_center, rmat_temp, kappa, lam, one_side=True)
+                func_forces, func_torques = find_bond_forces(
+                    receptors, bonds, func_center, rmat_temp, kappa, lam,
+                    one_side=True)
             else:
                 func_forces, func_torques = np.zeros((3,)), np.zeros((3,))
             # func_point, func_rep_force = repulsive_force(func_center[0], rmat_temp[:, 0])
@@ -598,8 +642,10 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             #     [func_rep_force, 0, 0])
 
             func_result = evaluate_motion_equations(
-                func_center[0], rmat_temp[:, 0], func_forces, func_torques, exact_vels, a=a, b=b, n_nodes=n_nodes,
-                domain=domain, proc=proc)
+                func_center[0], rmat_temp[:, 0], func_forces, func_torques,
+                exact_vels, a=a, b=b, n_nodes=n_nodes, domain=domain, proc=proc
+            )
+
             d_rmat = np.cross(func_result[3:6], rmat_temp, axisb=0, axisc=0)
             d_rm_hat = np.linalg.solve(b_matrix, d_rmat)
             s1, s2, s3 = np.sin(fun_angles)
@@ -607,7 +653,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
             d_beta = d_rm_hat[1, 0] / c2
             d_alpha = (d_rm_hat[0, 0] + c1 * s2 * d_beta) / (-s1 * c2)
             d_gamma = (d_rm_hat[1, 1] + s2 * c2 * d_beta) / (-c2 * s3)
-            dy = np.concatenate((func_result[:3], [d_alpha], [d_beta], [d_gamma]))
+            dy = np.concatenate((func_result[:3], [d_alpha],
+                                 [d_beta], [d_gamma]))
             return dy
 
         center = np.array([x1, x2, x3])
@@ -639,7 +686,10 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
         new_rmat = [correct_matrix(new_rmat)]
 
         if receptors is not None:
-            new_bonds = [update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off, eta, eta_ts, lam)]
+            new_bonds = [
+                update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on,
+                             k0_off, eta, eta_ts, lam)
+            ]
         else:
             new_bonds = [None]
 
@@ -665,9 +715,12 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8, 
     #             receptors, new_bonds)
 
 
-def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b=1.0, domain='free', order='2nd',
-                     adaptive=True, proc=1, forces=None, torques=None, save_quad_matrix_info=False, receptors=None,
-                     bonds=None, eta=1, eta_ts=1, kappa=1, lam=0, k0_on=1, k0_off=1, check_bonds=True, one_side=True, precompute=True):
+def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
+                     b=1.0, domain='free', order='2nd', adaptive=True, proc=1,
+                     forces=None, torques=None, save_quad_matrix_info=False,
+                     receptors=None, bonds=None, eta=1, eta_ts=1, kappa=1,
+                     lam=0, k0_on=1, k0_off=1, check_bonds=True, one_side=True,
+                     precompute=True):
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
     np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
@@ -739,10 +792,15 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0, b
             #     save_quad_matrix_info=save_quad_matrix_info,
             #     receptors=receptors, bonds=bonds, eta=eta, eta_ts=eta_ts,
             #     kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off)
-            res = time_step(dt, x1[-1], x2[-1], x3[-1], r_matrices[-1], forces, torques, exact_vels, n_nodes=n_nodes,
-                            a=a, b=b, domain=domain, order=order, proc=proc,
-                            save_quad_matrix_info=save_quad_matrix_info, receptors=receptors, bonds=bonds, eta=eta,
-                            eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off, check_bonds=check_bonds, one_side=one_side)
+            res = time_step(
+                dt, x1[-1], x2[-1], x3[-1], r_matrices[-1], forces, torques,
+                exact_vels, n_nodes=n_nodes, a=a, b=b, domain=domain,
+                order=order, proc=proc,
+                save_quad_matrix_info=save_quad_matrix_info,
+                receptors=receptors, bonds=bonds, eta=eta, eta_ts=eta_ts,
+                kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
+                check_bonds=check_bonds, one_side=one_side)
+
             if save_quad_matrix_info:
                 # (x1[i+1], x2[i+1], x3[i+1], r_matrices[:, :, i+1],
                 #  errs[:, i+1]) = res[:5]
@@ -1071,11 +1129,15 @@ def main(plot_num, server='mac', proc=1):
 
         # Run the fine simulations
         if plot_num < 80:
-            fine_result = integrate_motion([0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b, domain='wall',
-                                           order=order, adaptive=False, proc=proc)
+            fine_result = integrate_motion(
+                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
+                domain='wall', order=order, adaptive=False, proc=proc
+            )
         else:
-            fine_result = integrate_motion([0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b, domain='free',
-                                           order=order, adaptive=False, proc=proc)
+            fine_result = integrate_motion(
+                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
+                domain='free', order=order, adaptive=False, proc=proc
+            )
         x1_fine, x2_fine, x3_fine, em_fine = fine_result[:4]
 
         ## # Save the end state after the fine simulations
@@ -1104,8 +1166,10 @@ def main(plot_num, server='mac', proc=1):
         adapt_start = timer()
 
         # Run the adaptive simulations
-        adapt_result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=domain,
-                                        order=order, adaptive=adaptive, proc=proc)
+        adapt_result = integrate_motion(
+            [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
+            domain=domain, order=order, adaptive=adaptive, proc=proc
+        )
         (x1_adapt, x2_adapt, x3_adapt, em_adapt, errs_adapt, node_array,
          sep_array) = adapt_result
 
@@ -1114,20 +1178,23 @@ def main(plot_num, server='mac', proc=1):
         adapt_counter = evaluate_motion_equations.counter
 
         e1_adapt, e2_adapt, e3_adapt = em_adapt
-        np.savez(data_dir + 'adapt' + str(plot_num) + '_' + order, x1_adapt, x2_adapt,
-                 x3_adapt, e1_adapt, e2_adapt, e3_adapt, t, errs_adapt,
-                 node_array, sep_array, x1_adapt=x1_adapt, x2_adapt=x2_adapt,
-                 x3_adapt=x3_adapt, e1_adapt=e1_adapt, e2_adapt=e2_adapt,
-                 e3_adapt=e3_adapt, t=t, errs_adapt=errs_adapt,
-                 node_array=node_array, sep_array=sep_array)
+        np.savez(data_dir + 'adapt' + str(plot_num) + '_' + order, x1_adapt,
+                 x2_adapt, x3_adapt, e1_adapt, e2_adapt, e3_adapt, t,
+                 errs_adapt, node_array, sep_array, x1_adapt=x1_adapt,
+                 x2_adapt=x2_adapt, x3_adapt=x3_adapt, e1_adapt=e1_adapt,
+                 e2_adapt=e2_adapt, e3_adapt=e3_adapt, t=t,
+                 errs_adapt=errs_adapt, node_array=node_array,
+                 sep_array=sep_array)
 
     # Initialize counter and timer for coarse simulation
     start = timer()
     evaluate_motion_equations.counter = 0
 
     # Run the coarse simulations
-    coarse_result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=domain,
-                                     order=order, adaptive=False, proc=proc)
+    coarse_result = integrate_motion(
+        [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
+        domain=domain, order=order, adaptive=False, proc=proc
+    )
     x1, x2, x3, e_m, errs, node_array, sep_array = coarse_result[:7]
 
     # Save the end state after the coarse simulations
@@ -1135,9 +1202,9 @@ def main(plot_num, server='mac', proc=1):
     coarse_counter = evaluate_motion_equations.counter
 
     e1, e2, e3 = e_m
-    np.savez(data_dir + 'coarse' + str(plot_num) + '_' + order, x1, x2, x3, e1, e2, e3, t,
-             errs, node_array, sep_array, x1=x1, x2=x2, x3=x3, e1=e1, e2=e2,
-             e3=e3, t=t, errs=errs, node_array=node_array,
+    np.savez(data_dir + 'coarse' + str(plot_num) + '_' + order, x1, x2, x3, e1,
+             e2, e3, t, errs, node_array, sep_array, x1=x1, x2=x2, x3=x3,
+             e1=e1, e2=e2, e3=e3, t=t, errs=errs, node_array=node_array,
              sep_array=sep_array)
 
     try:
@@ -1156,7 +1223,9 @@ def main(plot_num, server='mac', proc=1):
           .format(end - start, coarse_counter))
 
     # Save info from the experiments
-    with open(data_dir + 'info' + str(plot_num) + '_' + order + '.txt', 'w') as f:
+    with open(data_dir + 'info' + str(plot_num) + '_'
+              + order + '.txt', 'w') as f:
+
         expt_info = ['distance, {}\n'.format(distance),
                      'e0, ({}, {}, {})\n'.format(ex0, ey0, ez0),
                      'order, {}\n'.format(order),
@@ -1166,6 +1235,7 @@ def main(plot_num, server='mac', proc=1):
                      'exact solution, {}\n'.format(exact_solution),
                      'coarse counter, {}\n'.format(coarse_counter),
                      'coarse time, {}\n'.format(end - start)]
+        
         try:
             expt_info += ['fine counter, {}\n'.format(fine_counter),
                           'fine time, {}\n'.format(fine_end - fine_start)]
