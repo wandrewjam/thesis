@@ -72,7 +72,7 @@ def save_rng(filename, rng_states):
         pickle.dump(rng_states, f)
 
 
-def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
+def main(filename, expt_num=None, save_data=False, plot_data=True, t_start=0.,
          t_end=50., num_steps=250, seed=None, n_nodes=8, adaptive=False, a=1.5,
          b=.5, shear=100., l_sep=0.1, dimk0_on=10., dimk0_off=5., sig=1e4,
          sig_ts=9.99e3, one_side=False, check_bonds=False, x1=1.2, x2=0.,
@@ -89,9 +89,9 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
     else:
         if expt_num in file_i:
             while True:
-                cont = raw_input('Do you want to overwrite file {}?: (Y or N) '
-                                 .format(save_dir + 'bd_expt{:03d}.npz'
-                                         .format(expt_num)))
+                cont = input('Do you want to overwrite file {}?: (Y or N) '
+                             .format(save_dir + 'bd_expt{:03d}.npz'
+                                     .format(expt_num)))
                 if cont == 'Y':
                     break
                 elif cont == 'N':
@@ -245,7 +245,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         save_rng(filename, rng_states)
 
     bond_num = [bond.shape[0] for bond in result[8]]
-    # print(bond_num)
+    print(bond_num)
     theta = np.arctan2(result[3][2, 0, mask][-1], result[3][1, 0, mask][-1])
     phi = np.arccos(result[3][0, 0, mask][-1])
     eps = eps_picker(n_nodes, a=a, b=b)
