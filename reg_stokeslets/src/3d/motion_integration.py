@@ -643,60 +643,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
 
         if initialize_flag:
             # then re-initialize the solver
-            r_hat = np.array([[0, 1, 0], [0, 0, -1], [-1, 0, 0]])
-            b_matrix = np.dot(r_matrix, r_hat.T)
-            angles = matrix_to_angles(r_hat)
-
-            def fun(t, y):
-                func_center = y[:3]
-                fun_angles = y[3:]
-
-                r_hat_tmp = angles_to_matrix(fun_angles)
-                rmat_temp = np.dot(b_matrix, r_hat_tmp)
-                if bonds is not None:
-                    func_forces, func_torques = find_bond_forces(
-                        receptors, bonds, func_center, rmat_temp, kappa, lam,
-                        one_side=True)
-                else:
-                    func_forces, func_torques = np.zeros((3,)), np.zeros((3,))
-
-                func_point, func_rep_force = repulsive_force(func_center[0],
-                                                             rmat_temp[:, 0])
-                func_forces += np.array([func_rep_force, 0, 0])
-                func_torques += np.cross(
-                    [func_point[0] - func_center[0], func_point[1],
-                     func_point[2]], [func_rep_force, 0, 0])
-
-                func_result = evaluate_motion_equations(
-                    func_center[0], rmat_temp[:, 0], func_forces, func_torques,
-                    exact_vels, a=a, b=b, n_nodes=n_nodes, domain=domain,
-                    proc=proc
-                )
-
-                d_rmat = np.cross(func_result[3:6], rmat_temp,
-                                  axisb=0, axisc=0)
-                d_rm_hat = np.linalg.solve(b_matrix, d_rmat)
-                s1, s2, s3 = np.sin(fun_angles)
-                c1, c2, c3 = np.cos(fun_angles)
-                d_beta = d_rm_hat[1, 0] / c2
-                d_alpha = (d_rm_hat[0, 0] + c1 * s2 * d_beta) / (-s1 * c2)
-                d_gamma = (d_rm_hat[1, 1] + s2 * c2 * d_beta) / (-c2 * s3)
-                dy = np.concatenate((func_result[:3], [d_alpha],
-                                     [d_beta], [d_gamma]))
-                return dy
-
-            center = np.array([x1, x2, x3])
-            y0 = np.concatenate((center, angles))
-
-            if bonds is not None:
-                if len(bonds) > 0:
-                    rk_solver = Radau(fun, t0=0, y0=y0, t_bound=np.inf,
-                                      rtol=.01, atol=1e-4)
-                else:
-                    rk_solver = RK45(fun, t0=0, y0=y0, t_bound=np.inf,
-                                     rtol=.01, atol=1e-4)
-                rk_solver.last_evaluated = 0.
-                rk_solver.b_matrix = b_matrix
+            rk_solver = initialize_rk_solver(bonds, r_matrix, rk_solver,
+                                             x1, x2, x3)
 
         # Now I need to step through the solver
         rk_solver.my_status = 0
@@ -708,6 +656,13 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
             try:
                 message = rk_solver.step()
                 print(rk_solver.t)
+
+                if rk_solver.t - rk_solver.t_old < 1e-5:
+                    rk_solver = initialize_rk_solver(bonds, r_matrix,
+                                                     rk_solver, x1, x2, x3)
+                    rk_solver.my_status = 0
+                    print('Solver is taking tiny steps. Try re-initializing')
+
                 if rk_solver.t > rk_solver.last_evaluated + dt:
                     rk_solver.my_status = 1
 
@@ -767,6 +722,61 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
     # else:
     #     return (new_x1, new_x2, new_x3, new_rmat, velocity_errors,
     #             receptors, new_bonds)
+
+
+def initialize_rk_solver(bonds, r_matrix, rk_solver, x1, x2, x3):
+    r_hat = np.array([[0, 1, 0], [0, 0, -1], [-1, 0, 0]])
+    b_matrix = np.dot(r_matrix, r_hat.T)
+    angles = matrix_to_angles(r_hat)
+
+    def fun(t, y):
+        func_center = y[:3]
+        fun_angles = y[3:]
+
+        r_hat_tmp = angles_to_matrix(fun_angles)
+        rmat_temp = np.dot(b_matrix, r_hat_tmp)
+        if bonds is not None:
+            func_forces, func_torques = find_bond_forces(
+                receptors, bonds, func_center, rmat_temp, kappa, lam,
+                one_side=True)
+        else:
+            func_forces, func_torques = np.zeros((3,)), np.zeros((3,))
+
+        func_point, func_rep_force = repulsive_force(func_center[0],
+                                                     rmat_temp[:, 0])
+        func_forces += np.array([func_rep_force, 0, 0])
+        func_torques += np.cross(
+            [func_point[0] - func_center[0], func_point[1],
+             func_point[2]], [func_rep_force, 0, 0])
+
+        func_result = evaluate_motion_equations(
+            func_center[0], rmat_temp[:, 0], func_forces, func_torques,
+            exact_vels, a=a, b=b, n_nodes=n_nodes, domain=domain,
+            proc=proc
+        )
+
+        d_rmat = np.cross(func_result[3:6], rmat_temp,
+                          axisb=0, axisc=0)
+        d_rm_hat = np.linalg.solve(b_matrix, d_rmat)
+        s1, s2, s3 = np.sin(fun_angles)
+        c1, c2, c3 = np.cos(fun_angles)
+        d_beta = d_rm_hat[1, 0] / c2
+        d_alpha = (d_rm_hat[0, 0] + c1 * s2 * d_beta) / (-s1 * c2)
+        d_gamma = (d_rm_hat[1, 1] + s2 * c2 * d_beta) / (-c2 * s3)
+        dy = np.concatenate((func_result[:3], [d_alpha],
+                             [d_beta], [d_gamma]))
+        return dy
+
+    center = np.array([x1, x2, x3])
+    y0 = np.concatenate((center, angles))
+    if bonds is not None:
+        if len(bonds) > 0:
+            rk_solver = Radau(fun, t0=0, y0=y0, t_bound=np.inf)
+        else:
+            rk_solver = RK45(fun, t0=0, y0=y0, t_bound=np.inf)
+        rk_solver.last_evaluated = 0.
+        rk_solver.b_matrix = b_matrix
+    return rk_solver
 
 
 def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
