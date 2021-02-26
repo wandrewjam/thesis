@@ -72,7 +72,7 @@ def save_rng(filename, rng_states):
         pickle.dump(rng_states, f)
 
 
-def main(filename, expt_num=None, save_data=False, plot_data=True, t_start=0.,
+def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
          t_end=50., num_steps=250, seed=None, n_nodes=8, adaptive=False, a=1.5,
          b=.5, shear=100., l_sep=0.1, dimk0_on=10., dimk0_off=5., sig=1e4,
          sig_ts=9.99e3, one_side=False, check_bonds=False, x1=1.2, x2=0.,

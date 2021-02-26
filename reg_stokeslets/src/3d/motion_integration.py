@@ -7,6 +7,7 @@ from sphere_integration_utils import compute_helper_funs
 from dist_convergence_test import spheroid_surface_area
 from sphere_integration_utils import generate_grid
 from timeit import default_timer as timer
+import pdb
 
 
 def read_parameter_file(filename):
@@ -838,6 +839,8 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                             d2_pre, h1p_pre, h2p_pre]
 
     rk_solver = None
+
+    pdb.set_trace()
 
     try:
         for i in range(num_steps):
