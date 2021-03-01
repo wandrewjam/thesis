@@ -102,7 +102,8 @@ def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta,
         k_on *= 1 - np.bincount(bonds[:, 0].astype('int'),
                                 minlength=true_receptors.shape[0])
     elif lam > 0:
-        l = np.linspace(-2*lam, 2*lam, num=21)
+        nl = 200 * lam + 1
+        l = np.linspace(-2*lam, 2*lam, num=nl)
         ligands = (np.stack([np.zeros(shape=2*l.shape)]
                             + np.meshgrid(l, l), axis=-1).reshape(-1, 3)
                    + np.array([[0, x2, x3]]))
@@ -111,6 +112,9 @@ def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta,
         rl_dev = pw_lengths - lam
         if one_side:
             rl_dev *= rl_dev > 0
+
+        correction = 400 * (4 * lam)**2 / (0.16 * (nl-1)**2)
+        assert correction == 1.
         pw_rates = k0_on * np.exp(-eta_ts * rl_dev ** 2)
         k_on = np.sum(pw_rates, axis=1)
         k_on *= 1 - np.bincount(bonds[:, 0].astype('int'),
@@ -646,8 +650,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
             # then re-initialize the solver
             rk_solver = initialize_solver(
                 bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa, lam,
-                exact_vels, a, b, n_nodes, domain, proc
-            )
+                exact_vels, a, b, n_nodes, domain, proc, False)
 
         # Now I need to step through the solver
         rk_solver.my_status = 0
@@ -661,19 +664,18 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
                 print(rk_solver.t)
                 if rk_solver.t > rk_solver.last_evaluated + dt:
                     rk_solver.my_status = 1
+                elif rk_solver.t - rk_solver.t_old < 1e-6:
+                    rk_solver = initialize_solver(
+                        bonds, receptors, r_matrix, rk_solver, x1, x2, x3,
+                        kappa, lam, exact_vels, a, b, n_nodes, domain, proc,
+                        True)
 
             except AssertionError as e:
                 # Reset the solver with a smaller next step
                 rk_solver = deepcopy(saved_solver)
                 rk_solver.h_abs = saved_solver.h_abs / 2
                 rk_solver.my_status = 0
-            except RuntimeError as e:
-                # Try re-initializing the solver?
-                rk_solver = initialize_solver(
-                    bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa,
-                    lam, exact_vels, a, b, n_nodes, domain, proc
-                )
-                
+
         y_new = rk_solver.dense_output()(rk_solver.last_evaluated + dt)
         rk_solver.last_evaluated += dt
         new_x1, new_x2, new_x3 = [[el] for el in y_new[:3]]
@@ -727,7 +729,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
 
 
 def initialize_solver(bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa,
-                      lam, exact_vels, a, b, n_nodes, domain, proc):
+                      lam, exact_vels, a, b, n_nodes, domain, proc, force_explicit):
     r_hat = np.array([[0, 1, 0], [0, 0, -1], [-1, 0, 0]])
     b_matrix = np.dot(r_matrix, r_hat.T)
     angles = matrix_to_angles(r_hat)
@@ -773,12 +775,15 @@ def initialize_solver(bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa,
     center = np.array([x1, x2, x3])
     y0 = np.concatenate((center, angles))
     if bonds is not None:
-        if len(bonds) > 0:
+        if len(bonds) > 0 and not force_explicit:
             rk_solver = Radau(fun, t0=0, y0=y0, t_bound=np.inf)
         else:
             rk_solver = RK45(fun, t0=0, y0=y0, t_bound=np.inf)
-        rk_solver.last_evaluated = 0.
-        rk_solver.b_matrix = b_matrix
+
+    else:
+        rk_solver = RK45(fun, t0=0, y0=y0, t_bound=np.inf)
+    rk_solver.last_evaluated = 0.
+    rk_solver.b_matrix = b_matrix
     return rk_solver
 
 
@@ -905,7 +910,7 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                 t = np.append(t, new_t)
                 rand_states += res[8]
                 rk_solver = res[9]
-    except ValueError as e:
+    except ValueError or RuntimeError as e:
         print('Encountered an error while integrating. Halting and '
               'outputting computation results so far.')
         print(e)
