@@ -643,8 +643,10 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
 
         if initialize_flag:
             # then re-initialize the solver
-            rk_solver = initialize_rk_solver(bonds, r_matrix, rk_solver,
-                                             x1, x2, x3)
+            rk_solver = initialize_solver(
+                bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa, lam,
+                exact_vels, a, b, n_nodes, domain, proc
+            )
 
         # Now I need to step through the solver
         rk_solver.my_status = 0
@@ -656,13 +658,6 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
             try:
                 message = rk_solver.step()
                 print(rk_solver.t)
-
-                if rk_solver.t - rk_solver.t_old < 1e-5:
-                    rk_solver = initialize_rk_solver(bonds, r_matrix,
-                                                     rk_solver, x1, x2, x3)
-                    rk_solver.my_status = 0
-                    print('Solver is taking tiny steps. Try re-initializing')
-
                 if rk_solver.t > rk_solver.last_evaluated + dt:
                     rk_solver.my_status = 1
 
@@ -671,7 +666,13 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
                 rk_solver = deepcopy(saved_solver)
                 rk_solver.h_abs = saved_solver.h_abs / 2
                 rk_solver.my_status = 0
-
+            except RuntimeError as e:
+                # Try re-initializing the solver?
+                rk_solver = initialize_solver(
+                    bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa,
+                    lam, exact_vels, a, b, n_nodes, domain, proc
+                )
+                
         y_new = rk_solver.dense_output()(rk_solver.last_evaluated + dt)
         rk_solver.last_evaluated += dt
         new_x1, new_x2, new_x3 = [[el] for el in y_new[:3]]
@@ -724,7 +725,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
     #             receptors, new_bonds)
 
 
-def initialize_rk_solver(bonds, r_matrix, rk_solver, x1, x2, x3):
+def initialize_solver(bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa,
+                      lam, exact_vels, a, b, n_nodes, domain, proc):
     r_hat = np.array([[0, 1, 0], [0, 0, -1], [-1, 0, 0]])
     b_matrix = np.dot(r_matrix, r_hat.T)
     angles = matrix_to_angles(r_hat)
