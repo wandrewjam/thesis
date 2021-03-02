@@ -696,6 +696,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
         # new_rmat = np.dot(b_matrix, rmat_hat)
         # new_rmat = [correct_matrix(new_rmat)]
 
+        if rk_solver.forced:
+            rk_solver.my_status = 2
         if receptors is not None:
             new_bonds = [
                 update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on,
@@ -784,6 +786,7 @@ def initialize_solver(bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa,
         rk_solver = RK45(fun, t0=0, y0=y0, t_bound=np.inf)
     rk_solver.last_evaluated = 0.
     rk_solver.b_matrix = b_matrix
+    rk_solver.forced = force_explicit
     return rk_solver
 
 
