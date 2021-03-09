@@ -1,13 +1,13 @@
 import numpy as np
 from os import path
-from scipy.integrate import solve_ivp, Radau, RK45
+from scipy.integrate import solve_ivp, Radau, RK45, RK23
 from copy import deepcopy
 from resistance_matrix_test import generate_resistance_matrices
 from sphere_integration_utils import compute_helper_funs
 from dist_convergence_test import spheroid_surface_area
 from sphere_integration_utils import generate_grid
 from timeit import default_timer as timer
-import pdb
+# import pdb
 
 
 def read_parameter_file(filename):
@@ -102,7 +102,7 @@ def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta,
         k_on *= 1 - np.bincount(bonds[:, 0].astype('int'),
                                 minlength=true_receptors.shape[0])
     elif lam > 0:
-        nl = 200 * lam + 1
+        nl = int(200 * lam + 1)
         l = np.linspace(-2*lam, 2*lam, num=nl)
         ligands = (np.stack([np.zeros(shape=2*l.shape)]
                             + np.meshgrid(l, l), axis=-1).reshape(-1, 3)
@@ -114,7 +114,8 @@ def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta,
             rl_dev *= rl_dev > 0
 
         correction = 400 * (4 * lam)**2 / (0.16 * (nl-1)**2)
-        assert correction == 1.
+        # pdb.set_trace()
+        assert (correction - 1.) < 1e-12
         pw_rates = k0_on * np.exp(-eta_ts * rl_dev ** 2)
         k_on = np.sum(pw_rates, axis=1)
         k_on *= 1 - np.bincount(bonds[:, 0].astype('int'),
@@ -780,10 +781,10 @@ def initialize_solver(bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa,
         if len(bonds) > 0 and not force_explicit:
             rk_solver = Radau(fun, t0=0, y0=y0, t_bound=np.inf)
         else:
-            rk_solver = RK45(fun, t0=0, y0=y0, t_bound=np.inf)
+            rk_solver = RK23(fun, t0=0, y0=y0, t_bound=np.inf)
 
     else:
-        rk_solver = RK45(fun, t0=0, y0=y0, t_bound=np.inf)
+        rk_solver = RK23(fun, t0=0, y0=y0, t_bound=np.inf)
     rk_solver.last_evaluated = 0.
     rk_solver.b_matrix = b_matrix
     rk_solver.forced = force_explicit
@@ -847,8 +848,6 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                             d2_pre, h1p_pre, h2p_pre]
 
     rk_solver = None
-
-    pdb.set_trace()
 
     try:
         for i in range(num_steps):
