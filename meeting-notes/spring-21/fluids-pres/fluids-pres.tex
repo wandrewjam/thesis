@@ -1,0 +1,278 @@
+\documentclass[10pt]{beamer}
+% \setbeameroption{show only notes}
+
+\usetheme[progressbar=foot]{metropolis}
+\makeatletter
+\usepackage[caption=false]{subfig}
+\usepackage{float}
+\usepackage{textgreek}
+\usepackage{amsmath}
+\newlength\beamerleftmargin
+\setlength\beamerleftmargin{\Gm@lmargin}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{appendixnumberbeamer}
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}[subsections numbered]
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\definecolor{utred}{RGB}{204,0,0}
+\definecolor{utgray}{RGB}{128,128,128}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\usepackage{caption}
+\newcommand{\vect}[1]{#1}
+\newcommand{\tn}{\textnormal}
+
+\captionsetup[figure]{labelformat=empty}
+\setbeamertemplate{subsectionin toc}
+{\leavevmode\leftskip=2em
+  \rlap{
+    \hskip-2em$\quad$\inserttocsectionnumber.\inserttocsubsectionnumber
+  }
+  $\quad$\inserttocsubsection\par}
+%%%%%%
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\title{Platelet Rolling: Pole Vaulting and Surfing}
+\date{\today}
+\author{Andrew Watson}
+\institute{University of Utah}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+\setbeamercolor{progress bar in head/foot}{fg=utred,bg=utgray}
+\setbeamercolor{progress bar in section page}{fg=utred,bg=utgray}
+\setbeamercolor{progress bar in title separator}{fg=utgray,bg=black}
+\setbeamercolor{frametitle}{bg=utred, fg=white}
+\setbeamercolor{block title alerted}{fg=utred}
+\setbeamercolor{alerted text}{fg = utred}
+\setlength{\metropolis@titleseparator@linewidth}{1.5pt}
+\setlength{\metropolis@progressonsectionpage@linewidth}{1.5pt}
+\setlength{\metropolis@progressinheadfoot@linewidth}{3pt}
+\setlength{\metropolis@progressonsectionpage@linewidth}{1.5pt}
+
+\setbeamerfont{bibliography item}{size=\scriptsize}
+\setbeamerfont{bibliography entry author}{size=\scriptsize}
+\setbeamerfont{bibliography entry title}{size=\scriptsize}
+\setbeamerfont{bibliography entry location}{size=\scriptsize}
+\setbeamerfont{bibliography entry note}{size=\scriptsize}
+
+\setlength{\fboxsep}{0pt}
+\setlength{\fboxrule}{.25pt}
+
+
+\begin{document}
+
+\maketitle
+
+\addtobeamertemplate{frametitle}{}{%
+\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north east,yshift=2pt] at (current page.north east)
+  {\includegraphics[height=0.7cm]{ulogo@2x.png}};
+\end{tikzpicture}}
+
+% \section{Biological Motivation \& Current Project}
+
+\begin{frame}{Immobilized agonists mediate platelet rolling}
+  \begin{center}
+    \includegraphics[width=.9\textwidth]{platelet-overview}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Upstream agonists ``prime'' platelets}
+  \begin{figure}
+    \centering
+    \setlength{\fboxsep}{0pt}
+    \setlength{\fboxrule}{.25pt}
+    \fbox{\includegraphics[width=.75\textwidth]{expt-sideview}}
+    \caption{Side view of the priming microfluidic
+      chambers. Eichinger, Ph.D. dissertation, 2016}
+    \label{fig:flow-chambers}
+  \end{figure}
+
+  \begin{itemize}
+  \item Platelets can transiently bind to agonists without firmly
+    adhering, and be primed for full downstream activation
+  \item More primed platelets adhere in the capture region than
+    unprimed platelets, and display higher levels of markers of
+    activation 
+  \item Trajectories are recorded (i.e., platelet position as a
+    function of time). Only the position in the flow direction is
+    considered
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Data extracted from trajectories}
+  \begin{center}
+    \fbox{\includegraphics[width=0.9\textwidth]{steps-pauses}} 
+  \end{center}
+\end{frame}
+
+\begin{frame}{Adhesive dynamics models}
+  \note[item] {Rolling specifically refers to the combined physical and
+  chemical process of platelet motion in blood near a vessel wall, and
+  binding kinetics of platelet receptors with immobilized agonists}
+\begin{columns}
+  \begin{column}{.5\textwidth}
+    \begin{itemize}
+    \item Components of Adhesive Dynamics models:
+      \begin{itemize}
+      \item Random bond formation and breaking (tracking individual
+        receptors and bonds)
+      \item FSI: Stokes flow around a rigid body (spheres in
+        traditional AD, ellipsoids in platelet AD)
+      \end{itemize}
+    \item Bond-level kinetics $\rightarrow$ cell-level behavior
+    \end{itemize}
+  \end{column}
+
+  \begin{column}{.5\textwidth}
+    \begin{figure}
+      \centering
+      \fbox{\includegraphics[width=\textwidth]{hammer92scr}}
+      \caption{Geometry of a leukocyte AD model. From Hammer \&
+        Apte, 1992}
+      \label{fig:hammer-diagram}
+    \end{figure}
+  \end{column}
+\end{columns}
+\note[item] {We want to find parameters that give realistic rolling
+  behavior in the 3D model, and tweak binding parameters to model the
+  effects of priming on rolling behavior}
+\end{frame}
+
+\begin{frame}{Definitions and domain}
+  \begin{columns}
+    \begin{column}{.5\textwidth}
+      \begin{itemize}
+      \item Fluid domain is the upper half space where $x > 0$
+      \item Wall is the plane at $x = 0$
+      \item Background flow: $\vect{v}^\infty = \gamma x \vect{e}_z$
+      \item Platelet: ellipsoid with axes $1.5 \times 1.5 \times 0.5$,
+        center of mass at $\vect{x}_c$, orientation vector
+        $\vect{e}_m$
+        \note[item] {$\vect{e}_m$ is a unit vector in the direction of
+          the minor axis. This is sufficient to define the
+          orientation, since the platelet is rotationally symmetric
+          about the minor axis} 
+      \item Steady Stokes, no-slip BCs on the wall and platelet
+        surface:
+        \begin{align*}
+          &\Delta \vect{v} = \nabla P, \, \nabla \cdot
+            \vect{v} = 0 \\
+          &\vect{v}(\vect{x})|_{\partial P} = \vect{U} +
+            \vect{\Omega} \times \vect{x} \\
+          &\vect{v}|_{x = 0} = 0, \, \vect{v}(\vect{x})|_{\|\vect{x}\|
+            \rightarrow \infty} \rightarrow \vect{v}^\infty(\vect{x}) 
+        \end{align*}
+        \note[item] {$\vect{U}$ is the translational velocity of the
+          platelet, and $\vect{\Omega}$ is the angular velocity of the
+          platelet. Next, talk about platelet motion.}
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{.4\textwidth}
+      \begin{figure}
+        \centering
+        \subfloat{\fbox{\includegraphics[width=\textwidth]{axes}}} \\
+        \subfloat{\fbox{\includegraphics[width=\textwidth]{reference}}} 
+        \caption{Sketch of the axes and orientation of the ellipsoid}
+        \label{fig:orient-sketch}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{There are two types of free platelet motion}
+  
+\end{frame}
+
+\begin{frame}{Platelet motion}
+  \begin{itemize}
+  \item Equations of rigid body motion:
+    \begin{equation*}
+      \frac{d\vect{x}_c}{dt} = \vect{U}(\vect{x}_c, \vect{e}_m), \,
+      \frac{d\vect{e}_m}{dt} = \vect{\Omega}(\vect{x}_c, \vect{e}_m)
+      \times \vect{e}_m
+    \end{equation*}
+  \item $\vect{U}$ and $\vect{\Omega}$ are found by balancing forces
+    and torques on the platelet body.
+  \item Forces acting on the platelet:
+    \begin{itemize}
+    \item $\vect{F}^h$---hydrodynamic forces/torques
+    \item $\vect{F}^o$---all other forces/torques
+    \end{itemize}
+    \note[item] {Most significantly bond forces, however past adhesive
+      dynamics simulations have included other chemical forces acting
+      on the platelet as well.}
+  \item Given a velocity field $\vect{v}$ (and with
+    $\underline{\underline{\sigma}} = -p \underline{\underline{I}} +
+    \mu \left(\nabla \vect{v} + \left(\nabla \vect{v}\right)^T\right)$, then
+    \begin{align*}
+      \left[\vect{F}^h\right]_{1:3}
+      &= \int_{\partial P} \underline{\underline{\sigma}} \cdot
+        \vect{n} ds(\vect{x}) \\
+      \left[\vect{F}^h\right]_{4:6}
+      &= \int_{\partial P} (\vect{x} - \vect{x}_c) \times
+        \underline{\underline{\sigma}} \cdot \vect{n} ds(\vect{x}) 
+    \end{align*}
+    \note[item] {$\sigma$ is the stress tensor of $\vect{v}$}
+  \item If we assume $\vect{F}^o$ and $\vect{T}^o$ are known given a
+    position and orientation, then we ``just'' need to find $\vect{U}$
+    and $\vect{\Omega}$ such that $\vect{F}^h + \vect{F}^o = 0$
+    \note[item] {This is hard because we need $\vect{U}$ and
+      $\vect{\Omega}$ to solve Stokes' equations, but these are
+      unknown at the start of a time step.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Solving for $\vect{U}$ and $\vect{\Omega}$}
+  \begin{itemize}
+  \item Decompose $\vect{F}^h$:
+    \begin{itemize}
+    \item $\vect{F}^d$---drag force/torque on a moving platelet in a
+      stationary flow 
+    \item $\vect{F}^s$---drag force on a stationary platelet in a
+      background shear flow 
+    \end{itemize}
+  \item Because of the linearity of Stokes flow, there is a linear
+    relationship between $\vect{F}^d$ and $\vect{U}$: $\vect{F}^d =
+    \underline{\underline{R}} \vect{U}$
+  \item The resistance matrix depends only on the shape of the body, its
+    position, and orientation
+  \item To find $\underline{\underline{R}}$, solve 6 Stokes flow
+    problems with BCs:
+    \begin{align*}
+      \vect{v}_i|_{\partial P} &= \delta_{ij} \vect{e}_j \tn{ for } i
+                                 = 1, 2, 3 \tn{, and} \\
+      \vect{v}_i|_{\partial P} &= \delta_{i-3, j} \vect{e}_j \tn{ for
+                                 } i = 4, 5, 6
+    \end{align*}
+  \item (with no-slip on the wall, and $\vect{v}_i \rightarrow
+    \vect{0}$ as $\|\vect{x}\| \rightarrow \infty$)
+  \item $\vect{F}^s$ is found with the 7th solve, with BCs
+    $\vect{v}_7|_{\partial P} = \vect{0}$ and $\vect{v}_7 \rightarrow
+    \gamma x \vect{e}_z$ as $\|x\| \rightarrow \infty$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Possible Extension: Adding an RBC?}
+  
+\end{frame}
+
+% \begin{frame}{Current and Near-Future Work}
+%   \begin{itemize}
+%   \item I am working on adding stochastic binding and unbinding to the
+%     model
+%   \item Find parameter values that give reasonable rolling behavior
+%     \note[item] {These experiments are likely too expensive to do true
+%     parameter fitting; just want behavior that is close to observations}
+%   \item Run experiments with ``unprimed'' and ``primed'' (through
+%     changing binding parameters) platelets and assemble statistics
+%   \end{itemize}
+% \end{frame}
+
+\end{document}

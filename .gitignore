@@ -16,6 +16,7 @@
 *.jpg
 *.jpeg
 *.sty
+*.eps
 ss*.txt
 *.ai
 *.mp4
