@@ -123,6 +123,9 @@ FIGFILES	= hammer92scr.jpg		\
 		  small-kappa-trials.png	\
 		  transient-binding.png		\
 		  variable-receptors.png	\
+		  ccp-step-cmp.png		\
+		  ccp-vel-cmp.png		\
+		  avg_free_vel_col.png		\
 
 PDFFILES	= 
 
