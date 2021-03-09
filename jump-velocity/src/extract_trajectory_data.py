@@ -170,7 +170,7 @@ def main():
     # experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
     experiments = load_trajectories(['hfp', 'ffp', 'hfw', 'ffw', 'hfe', 'ffe'])
     # experiments = load_trajectories(['hvp', 'vvp'])
-    expt = 'ffe'
+    expt = 'hfw'
     steps_combined = list()
     pre_dwell_steps_combined = list()
     post_dwell_steps_combined = list()
@@ -199,7 +199,7 @@ def main():
             extract_state_data(t_save, y_save))
 
         steps_combined.append(steps)
-        dwells_combined.append(steps)
+        dwells_combined.append(dwells)
         vels_combined.append(vels)
         free_vels_combined.append(free_vels)
         avg_free_vels_combined.append(avg_free_vels)
