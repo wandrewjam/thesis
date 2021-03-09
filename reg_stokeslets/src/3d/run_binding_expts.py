@@ -20,18 +20,16 @@ def pick_random_height():
     return np.random.uniform(0.7, 1.4)
 
 
-def main(num_expts, filename, runner, random_initial=False, order='2nd',
-         start_numbering=-1, rest_length=0.1):
+def main(num_expts, runner, random_initial=False, start_numbering=-1,
+         **pars):
     import os
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
-    pars = parse_file(filename)
+    defaults = parse_file('defaults')
 
     all_filenames = []
 
-    t_end = 3.
-    num_steps = 1500
-
     for i in range(num_expts):
+        par_dict = defaults.copy()
         assert type(start_numbering) is int
         if start_numbering == -1:
             file_i = []
@@ -63,9 +61,9 @@ def main(num_expts, filename, runner, random_initial=False, order='2nd',
         filename = 'bd_run{}{:03d}'.format(runner_num, k+1)
         all_filenames.append(filename + '\n')
         seed = np.random.randint(2**32)
-        pars.update([('seed', seed), ('filename', filename), 
-                     ('t_end', t_end), ('num_steps', num_steps),
-                     ('l_sep', rest_length)])
+        par_dict.update([
+            ('seed', seed), ('filename', filename)])
+        par_dict.update(pars)
         if random_initial:
             height = pick_random_height()
             while True:
@@ -80,11 +78,10 @@ def main(num_expts, filename, runner, random_initial=False, order='2nd',
                 if sep > 0.0154:
                     break
 
-            pars['x1'] = height
-            pars['emx'], pars['emy'], pars['emz'] = e_m
+            par_dict['x1'] = height
+            par_dict['emx'], par_dict['emy'], par_dict['emz'] = e_m
 
-        pars['order'] = order
-        save_info(**pars)
+        save_info(filename, **par_dict)
         
     with open(txt_dir + runner + '.txt', 'w') as f:
         f.writelines(all_filenames)
@@ -105,8 +102,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    main(args.num_expts, args.filename, args.runner, args.randomize,
-         args.order, args.start_numbering, args.rest_length)
+    main(args.num_expts, args.runner, args.randomize, args.start_numbering,
+         order=args.order, l_sep=args.rest_length)
     # try:
     #     main(int(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4])
     # except IndexError:
