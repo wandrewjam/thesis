@@ -3,7 +3,7 @@ close all
 
 expt_num = input('Enter experiment number: ');
 
-loadfile = sprintf('data/bd_expt%03u.mat', expt_num);
+loadfile = sprintf('/Users/andrewwork/thesis/reg_stokeslets/data/bd_run/bd_run%03u.mat', expt_num);
 load(loadfile)
 
 [x_wall, xp_ref, y_wall, yp_ref, z_wall, zp_ref] = define_parametric_vars();
@@ -79,7 +79,7 @@ title_obj = title(titlestr, 'Interpreter', 'latex');
 view([95, 2])
 % s.EdgeColor = 'blue';
 
-v = VideoWriter(sprintf('data/be_video_%03u.avi', expt_num));
+v = VideoWriter(sprintf('/Users/andrewwork/thesis/reg_stokeslets/data/videos/be_video_%03u.avi', expt_num));
 v.FrameRate = 40;
 open(v)
 
@@ -99,7 +99,7 @@ writeVideo(v, frame)
 
         x_mark.XData = ycom; x_mark.YData = zcom - 2; x_mark.ZData = xcom;
         
-        existing_bond_i = bond_array(bond_array(:, 1, k) >= 0, 1, k);
+        existing_bond_i = bond_array(bond_array(:, 1, k) >= 0, 1, k) + 1;
         num_bonds = length(existing_bond_i);
         x_bond = [true_receptors(existing_bond_i, 1, ii), zeros(num_bonds, 1)]';
         y_bond = [true_receptors(existing_bond_i, 2, ii), bond_array(bond_array(:, 1, k) >= 0, 2, k)]';
@@ -125,16 +125,3 @@ writeVideo(v, frame)
 
 %     pause(1)
 % end
-
-function [x_wall, xp, y_wall, yp, z_wall, zp] = define_parametric_vars()
-    u = linspace(0, 2*pi, 100);
-    v = linspace(0, pi, 100);
-
-    x_wall = zeros(2, 2);
-    y_wall = [-2, 2; -2, 2];
-    z_wall = [-2, -2; 2, 2];
-
-    xp = .5 * ones(size(u')) * cos(v);
-    yp = 1.5 * cos(u') * sin(v);
-    zp = 1.5 * sin(u') * sin(v);
-end

@@ -4,12 +4,12 @@ close all
 global plt_num
 plt_num = input('Enter plot number: ');
 
-loadfile = sprintf('data/fine%u.mat', plt_num);
+loadfile = sprintf('data/ub_expt/fine%u.mat', plt_num);
 load(loadfile)
 
 [x_wall, xp_ref, y_wall, yp_ref, z_wall, zp_ref] = define_parametric_vars();
 
-gap = 5;
+gap = 1;
 slice = 1:gap:length(t);
 new_length = length(slice);
 if mod(length(t) - 1, gap) ~= 0
@@ -55,9 +55,15 @@ y = y + y1r;
 z = z + z1r;
 
 C1 = acos(xp_ref);
+C2 = repmat(reshape([.5 .5 .5], 1, 1, 3), ...
+    size(x_wall, 1), size(x_wall, 2), 1);
 
-figure
+figure('Position', [418 1 764 977])
+plt_ax = subplot('Position', [0.13 0.54 0.775 0.42]);
 s = surf(y(:, :, 1), z(:, :, 1), x(:, :, 1), C1);
+s.EdgeAlpha = 0.4;
+hold on
+w = surf(y_wall, z_wall, x_wall, C2);
 axis([-2, 2, -2, 2, 0, 3.2])
 
 titlestr = sprintf('$t = %.2f$', t(1));
@@ -65,11 +71,23 @@ xlabel('$y$', 'Interpreter', 'latex')
 ylabel('$z$', 'Interpreter', 'latex')
 zlabel('$x$', 'Interpreter', 'latex')
 title_obj = title(titlestr, 'Interpreter', 'latex');
+set(gca, 'TickLabelInterpreter', 'latex');
 
-view([105, 15])
+view([95, 2])
 % s.EdgeColor = 'blue';
 
-v = VideoWriter(sprintf('data/video_%u.avi', plt_num));
+subplot('Position', [0.13,0.3,0.775,0.17])
+l1 = plot(t(1), x1(1));
+axis([-.4 50.4 1. 1.6])
+
+subplot('Position', [0.13,0.07,0.775,0.17])
+l2 = plot(t(1), e3(1));
+axis([-.4 50.4 -1.1 1.1])
+
+axes(plt_ax)
+set(gca, 'DataAspectRatio', [1 1 1], 'Projection', 'perspective')
+
+v = VideoWriter(sprintf('data/videos/video_%u.avi', plt_num));
 v.FrameRate = 40;
 open(v)
 
@@ -82,11 +100,21 @@ writeVideo(v, frame)
         s.YData = z(:, :, ii);
         s.ZData = x(:, :, ii);
         xcom = x1(slice(ii)); ycom = x2(slice(ii)); zcom = x3(slice(ii));
+        
+        w.XData = y_wall + ycom;
+        w.YData = z_wall + zcom;
+        
+        l1.XData = t(1:slice(ii));
+        l1.YData = x1(1:slice(ii));
+        
+        l2.XData = t(1:slice(ii));
+        l2.YData = e3(1:slice(ii));
 
         x_mark.XData = ycom; x_mark.YData = zcom - 2; x_mark.ZData = xcom;
 
         axis([-2 + ycom, 2 + ycom, -2 + zcom, 2 + zcom, 0, 3.2])
         title_obj.String = sprintf('$t = %.2f$', t(slice(ii)));
+        set(gca, 'TickLabelInterpreter', 'latex')
 
         pause(0.01 * gap)
 
