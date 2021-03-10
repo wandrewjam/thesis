@@ -3,6 +3,39 @@
 \chapter{Jump-Velocity Model}
 \label{cha:jump-velocity-model}
 
+\setcounter{section}{-1}
+\section{Outline}
+\label{sec:outline}
+
+\begin{enumerate}
+\item Intro and Motivation
+  \begin{enumerate}
+  \item Fast parameter estimation
+  \item Uses effective platelet binding parameters: more intuitive
+    connection to the type of data collected, however a less intuitive
+    relationship with biological parameters
+  \item Describe the data collected from experiments, present some
+    data justifying why we want to exclude the steps before the first
+    pause, and after the last pause (platelets take much longer steps,
+    and travel much faster).
+  \end{enumerate}
+\item Model and Methods
+  \begin{enumerate}
+  \item Describe the 4-state model
+  \item Adiabatic reduction
+  \item Adding an escape term to the 4-state model
+  \item Numerics and Parameter Estimation
+  \end{enumerate}
+\item Results
+  \begin{enumerate}
+  \item Parameter estimates of un/binding rates
+  \item Uncertainty analysis of these estimates
+  \item Goodness-of-fit (velocities, step times, dwell times, number
+    of dwells)
+  \end{enumerate}
+\item Discussion
+\end{enumerate}
+
 \section{The model}
 \label{sec:jv-model}
 
@@ -310,9 +343,202 @@ limit of fast switching between states. The main difference in this
 four-state system is presence of slow bond dynamics which remain
 unchanged.
 
-%% I need to talk about fitting parameters and put in some(?) figures
+\subsection{Parameter estimation}
+\label{sec:parameter-estimation}
 
-\section{Step sizes and ``free velocities'' in the trajectory data}
+\note{Not sure how much of this section to include. It gets pretty
+  detailed}
+
+We have a stochastic model of a jump-velocity process, which is used
+to derive a Fokker-Planck equation for platelet position as a function
+of time. From the Fokker-Planck equation we derive a probability
+distribution for the average velocity of a platelet rolling across
+some domain. Basically the average velocity of a platelet (or
+equivalently, the time it takes a platelet to cross) is a random
+variable. The Fokker-Planck equation defines a probability
+distribution for this random variable as a function of model
+parameters, and average velocities from individual platelet
+trajectories are realizations of this random variable. We want to fit
+the probability distribution defined by model parameters to the set of
+realizations in the experimental data.
+
+We chose to use a maximum-likelihood estimate for parameters in the
+model. Let $\{v_i\}_{i=1}^N$ be a set of observations of average
+velocities, and define $f(v;a, \epsilon)$ to be the probability
+distribution of velocities given parameters $a$ and $\epsilon$ (for
+simplicity, assume we're working with the two-state model). Define the
+likelihood function
+\begin{equation}
+  \label{eq:likelihood}
+  L(a, \epsilon) = \prod_{i=1}^N f(v_i; a, \epsilon),
+\end{equation}
+and then the maximum likelihood estimates for $a$ and $\epsilon$ are
+those that maximize $L$. Define the log-likelihood function:
+$\tilde{\ell}(a, \epsilon) = \log(L(a, \epsilon))$, and then
+maximizing $\tilde{\ell}$ is equivalent to maximizing $L$.
+
+We found $f(v; a, \epsilon)$ above in terms of the solution of the
+Fokker-Planck equation: $f(v; a, \epsilon) = 1/v^2 q_{U^1}(1, 1/v; a,
+\epsilon)$ where $q_{U^1}(x, t; a, \epsilon)$ is part of the solution
+of the Fokker-Planck equation with parameters $a$ and $\epsilon$. Then
+we can write $\tilde{\ell}$ in terms of $q_{U^1}$:
+$\tilde{\ell} = \sum_{i=1}^N \log(f(v_i; a, \epsilon)) = \sum_{i=1}^N
+\log(q_{U^1}(1, 1/v_i; a, \epsilon)) - 2\sum_{i=1}^N \log(v_i)$. The
+second term is a constant factor with respect to $a$ and $\epsilon$,
+and so can be excluded from the optimization. Therefore we can
+maximize the modified log-likelihood function
+\begin{equation}
+  \label{eq:mod-log-like}
+  \ell(a, \epsilon) = \sum_{i=1}^N \log(q_{U^1}(1, 1/v_i; a, \epsilon)).
+\end{equation}
+
+\subsubsection{Numerical Optimization}
+\label{sec:numer-optim}
+
+The modified log-likelihood function $\ell(a, \epsilon)$ must be
+maximized iteratively. We haven't even found an analytical solution
+for $q_{U^1}$. Therefore, the Fokker-Planck equation must be re-solved
+each time the parameters $a$ and $\epsilon$ are changed. Fortunately
+the PDE only needs to be solved once for each evaluation of
+$\ell(a, \epsilon)$. We have to find $q_{U^1}(1, t)$ up to time
+$t = 1/\min(v_i)$, but then to evaluate the probability density at
+each time $1/v_i$, we only need to interpolate the solution.
+
+Another consideration is that the model parameters $a$ and $\epsilon$
+have bounds, in particular $a \in (0, 1)$ and $\epsilon > 0$. One
+possiblility for staying within these constraints is to use a
+numerical optimization algorithm that optimizes within a bounded
+domain. However, near the boundaries of the domain $\ell(a, \epsilon)$
+diverges and in some cases can cause the minimization to
+fail. Instead, I have achieved good results in practice by
+transforming the model parameters $a$ and $\epsilon$ to a pair of new
+parameters $a'$ and $\epsilon'$ which can vary over all $\reals$. The
+transformations for these parameters are:
+\begin{align}
+  \label{eq:a-fwd-trns}
+  a' &= \frac{2a + 1}{2a(a + 1)} \\
+  \label{eq:e-fwd-trns}
+  \epsilon' &= \log \epsilon.
+\end{align}
+Note that $a'$ is defined so that $a'=0$ at $a=1/2$,
+$a' \rightarrow -\infty$ as $a \rightarrow 0$, and
+$a' \rightarrow \infty$ as $a \rightarrow 1$. With the fitting
+parameters, the optimization problem becomes an unconstrained
+optimization in $\reals^2$. To actually carry out the optimization I
+use SciPy's \verb|minimize| function \cite{Virtanen2020}, which
+implements the BFGS algorithm \note{citations}.
+
+An iterative algorithm needs an intial guess, which at least in the
+two-state model, can be chosen as an estimate of $a$ and $\epsilon$
+from the adiabatic reduction. Equation (\ref{eq:vel-dens}) gives the
+pdf of velocities from the adiabatic reduction, and can be used to
+derive the mean $\mu(a, \epsilon)$ and variance $\sigma^2(a,
+\epsilon)$ as functions of $a$ and $\epsilon$. These moments have
+simple analytical expressions: 
+\begin{align}
+  \label{eq:mean-ar}
+  \mu(a, \epsilon) &= a(1 + \epsilon - a \epsilon) \\
+  \label{eq:var-ar}
+  \sigma^2(a, \epsilon) &= a^2 \epsilon (1 - a) (2 + 5(1 - a) \epsilon).
+\end{align}
+
+Then we can equate $\mu$ and $\sigma^2$ to the first two sample
+moments ($\bar{v}$ and $s^2$) of the data to estimate $a$ and
+$\epsilon$. This is called the method of moments. We can find exact
+analytical expressions for $a$ and $\epsilon$ in terms of $\mu$ and
+$\sigma^2$, but the formulas are messy. Note that
+$\sigma^2 = O(\epsilon)$ and $\epsilon \ll 1$, so we can use an
+asymptotic approximation instead of the full formulas. The estimate is
+only being used to initialize the optimization algorithm, so there is
+no need to be exact. Therefore up to $O(\sigma^2)$, the method of
+moments gives the following estimates for $a$ and $\epsilon$ based on
+a data set with sample mean $\bar{v}$ and sample variance $s^2$:
+\begin{align}
+  \label{eq:mean-est}
+  a &= \bar{v} - \frac{s^2}{2\bar{v}} \\
+  \label{eq:var-est}
+  \epsilon &= \frac{s^2}{2(1 - \bar{v})(\bar{v})^2}.
+\end{align}
+
+In figure \ref{fig:model-fits}, a histogram of 1000 sample velocities
+is shown along with the PDEs generated by the reduced and full models
+with maximum likelihood parameter estimates. The CDFs of the models
+are also compared with the ECDF of the data. Visually these models fit
+well (as they should), and provide parameter estimates with less than
+10\% relative error.
+
+\subsubsection{Bootstrapping}
+\label{sec:bootstrapping}
+
+The maximum likelihood estimator only gives a point estimate of the
+parameters $a$ and $\epsilon$. In order to get confidence intervals,
+we can use a bootstrapping approach. The basic idea is that for a set
+of data $\{V_i\}_{i=1}^N$, a ``new'' data set can be generated by
+randomly picking $N$ samples from the $\{V_i\}$ with replacement. Then
+the MLE for the new data can be found, and in this way we get a bunch
+of $\hat{a}$ and $\hat{\epsilon}$ estimates. After generating many of
+these estimates, we can come up with an estimate of a 95\% confidence
+interval for each parameter. If we assume that the ML estimates are
+distributed sufficiently normally, then
+$\hat{\theta} \pm 1.96 \sigma_{\hat{\theta}}$ approximates a 95\%
+confidence interval well. But it seems like using the $2.5$th and
+$97.5$th percentiles also provides a good estimate for the confidence
+interval, and doesn't rely on assuming the parameter estimate is
+distributed normally.
+
+Figure \ref{fig:bootstraps} summarizes results from 64 bootstrap
+trials on the sample data. In each case, the distribution of estimated
+parameters looks symmetrical, and the two methods of estimating a 95\%
+confidence interval described above give similar results (Table
+\ref{tab:conf-int}).
+
+While the MLE of $a$ looks unbiased (i.e. it is near the center of the
+distribution of $a$s shown in figure \ref{fig:bootstraps}), the MLE of
+$\epsilon$ is clearly biased to the upper end of the distribution of
+$\epsilon$ estimates from the bootstrap procedure. Part of this may be
+because I haven't filtered out platelets that didn't pause on the
+surface, but it is still something to look out for. 
+
+\subsubsection{Goodness-of-fit}
+\label{sec:goodness-fit}
+
+Finally, we want to find the goodness-of-fit of the model. Chapter 13
+in \textit{Introduction to Probability and Mathematical Statistics} by
+Bain and Engelhardt suggests two approaches. One approach is to group
+the data into bins, and then compare the observed observations in each
+bin to the expected number of observations in each bin. In particular,
+\begin{equation}
+  \label{eq:chi2}
+  \chi^2 = \sum_{j=1}^c \frac{(o_j - \hat{e}_j)^2}{\hat{e}_j} \sim
+  \chi^2(c - 1 - k)
+\end{equation}
+where $c$ is the number of bins, $k$ is the number of estimated
+parameters, $o_j$ is the number of data points in bin $j$, and
+$\hat{e}_j$ is the expected number of data points in bin $j$. Here
+$\hat{e}_j = N \hat{p}_j$ where $N$ is the total number of data
+points, and $\hat{p}_j$ is the model probability of picking a data
+point from bin $j$. A weakness of this approach is that information is
+lost by grouping the data, and there are other tests that depend
+directly on the individual observations.
+
+One of these tests is the Kolmogorov-Smirnov test, which essentially
+uses the maximum difference between the predicted CDF and the
+ECDF. The KS statistic is $D = \max(D^+, D^-)$ where
+$D^+ = \max_i(i/N - F(x_{i:N}))$ and
+$D^- = \max_i(F(x_{i:N}) - (i - 1)/N)$. A small value of $D$ indicates
+a good fit (though precisely what value of $D$ means the fit is
+``good'' depends on $N$). The weakness of this approach is that the
+distribution of the KS statistic is derived assuming no parameters
+have been estimated, which is obviously not true in our case. The
+Kolmogorov-Smirnov test returned a $p$-value of 0.46 for the reduced
+model, and 0.66 for the full model, indicating a good fit of these
+models to the data (obviously, because the data were derived from the
+jump-velocity model).
+
+\section{Results}
+\label{sec:results-jump-velocity}
+
+\subsection{Step sizes and ``free velocities'' in the trajectory data}
 \label{sec:step-sizes-free}
 
 %% Quotation marks in a section title?
@@ -368,7 +594,7 @@ model (equation (\ref{eq:vel-dens})) (Figure \ref{fig:avg-free-vel-col}).
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.6\textwidth]{ccp-vel-cmp.png}
+  \includegraphics[width=0.8\textwidth]{ccp-vel-cmp.png}
   \caption{Comparison of intermediate free velocities with the first
     and last steps of the experiment. Again, the data shown is from
     the collagen-collagen PRP experiment, but the others are similar.}
@@ -377,7 +603,7 @@ model (equation (\ref{eq:vel-dens})) (Figure \ref{fig:avg-free-vel-col}).
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.6\textwidth]{avg_free_vel_col.png}
+  \includegraphics[width=\textwidth]{avg_free_vel_col.png}
   \caption{Comparison of the average free velocity in the four collagen
     experimental conditions. The effective binding parameters found by
     fitting the model to velocity data are $k_\tn{on}=34.6/s$ and
