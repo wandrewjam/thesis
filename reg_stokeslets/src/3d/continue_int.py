@@ -127,9 +127,11 @@ def continue_integration(filename, t_end, i_start=-1, debug=False, save_data=Tru
         savemat(data_dir + new_filename,
                 {'t': new_t, 'x': new_x, 'y': new_y, 'z': new_z, 'R': new_rmat,
                  'bond_array': new_bond_array, 'receptors': receptors})
-        save_info(new_filename, pars['seed'], pars['t_start'], pars['t_end'], num_steps, n_nodes, a, b,
-                  adaptive, shear, l_sep, dimk0_on, dimk0_off,
-                  sig, sig_ts, one_side, check_bonds)
+        save_info(new_filename, seed=pars['seed'], t_start=pars['t_start'],
+                  t_end=pars['t_end'], num_steps=num_steps, n_nodes=n_nodes,
+                  a=a, b=b, adaptive=adaptive, shear=shear, l_sep=l_sep,
+                  dimk0_on=dimk0_on, dimk0_off=dimk0_off, sig=sig,
+                  sig_ts=sig_ts, one_side=one_side, check_bonds=check_bonds)
         save_rng(new_filename, new_rng)
 
     # t = new_t

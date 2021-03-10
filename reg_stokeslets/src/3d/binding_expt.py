@@ -31,37 +31,20 @@ def parse_file(filename):
     return dict(parlist)
 
 
-def save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
-              adaptive, shear, l_sep, dimk0_on, dimk0_off, sig, sig_ts,
-              one_side, check_bonds, x1=1.2, x2=0., x3=0., emx=1., emy=.0, emz=0., order='2nd'):
+def save_info(filename, **pars):
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
-    with open(txt_dir + filename + '.txt', 'w') as f:
-        expt_info = ['seed {}\n'.format(seed),
-                     't_start {}\n'.format(t_start),
-                     't_end {}\n'.format(t_end),
-                     'num_steps {}\n'.format(num_steps),
-                     'n_nodes {}\n'.format(n_nodes),
-                     'order {}\n'.format(order),
-                     'adaptive {}\n'.format(adaptive),
-                     'one_side {}\n'.format(one_side),
-                     'check_bonds {}\n'.format(check_bonds),
-                     'a {}\n'.format(a),
-                     'b {}\n'.format(b),
-                     'x1 {}\n'.format(x1),
-                     'x2 {}\n'.format(x2),
-                     'x3 {}\n'.format(x3),
-                     'emx {}\n'.format(emx),
-                     'emy {}\n'.format(emy),
-                     'emz {}\n'.format(emz),
-                     'shear {}\n'.format(shear),
-                     'l_sep {}\n'.format(l_sep),
-                     'dimk0_on {}\n'.format(dimk0_on),
-                     'dimk0_off {}\n'.format(dimk0_off),
-                     'sig {}\n'.format(sig),
-                     'sig_ts {}\n'.format(sig_ts),
-                     '\n', 'done\n'
-                     ]
 
+    defaults = parse_file('default')
+    defaults.update(pars)
+    del defaults['filename']
+
+    expt_info = []
+    for key, value in defaults.items():
+        expt_info.append('{0} {1}\n'.format(key, value))
+
+    expt_info += ['\n', 'done\n']
+
+    with open(txt_dir + filename + '.txt', 'w') as f:
         f.writelines(expt_info)
 
 
@@ -239,9 +222,11 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         savemat(save_dir + filename + '.mat',
                 {'t': t, 'x': x, 'y': y, 'z': z, 'R': r_matrices,
                  'bond_array': bond_array, 'receptors': receptors})
-        save_info(filename, seed, t_start, t_end, num_steps, n_nodes, a, b,
-                  adaptive, shear, l_sep, dimk0_on, dimk0_off,
-                  sig, sig_ts, one_side, check_bonds)
+        save_info(filename, seed=seed, t_start=t_start, t_end=t_end,
+                  num_steps=num_steps, n_nodes=n_nodes, a=a, b=b,
+                  adaptive=adaptive, shear=shear, l_sep=l_sep,
+                  dimk0_on=dimk0_on, dimk0_off=dimk0_off, sig=sig,
+                  sig_ts=sig_ts, one_side=one_side, check_bonds=check_bonds)
         save_rng(filename, rng_states)
 
     bond_num = [bond.shape[0] for bond in result[8]]
