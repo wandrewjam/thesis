@@ -99,11 +99,12 @@ if __name__ == '__main__':
                         choices=['radau', '1st', '2nd', '4th'])
     parser.add_argument('-s', '--start_numbering', default=-1, type=int)
     parser.add_argument('-l', '--rest_length', default=0.1, type=float)
+    parser.add_argument('-n', '--k_on', default=5.0, type=float)
 
     args = parser.parse_args()
 
     main(args.num_expts, args.runner, args.randomize, args.start_numbering,
-         order=args.order, l_sep=args.rest_length)
+         order=args.order, l_sep=args.rest_length, dimk0on=args.k_on)
     # try:
     #     main(int(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4])
     # except IndexError:
