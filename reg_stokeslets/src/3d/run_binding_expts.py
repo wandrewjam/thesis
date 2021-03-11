@@ -61,9 +61,11 @@ def main(num_expts, runner, random_initial=False, start_numbering=-1,
         filename = 'bd_run{}{:03d}'.format(runner_num, k+1)
         all_filenames.append(filename + '\n')
         seed = np.random.randint(2**32)
+
         par_dict.update([
             ('seed', seed), ('filename', filename)])
         par_dict.update(pars)
+
         if random_initial:
             height = pick_random_height()
             while True:
@@ -99,12 +101,14 @@ if __name__ == '__main__':
                         choices=['radau', '1st', '2nd', '4th'])
     parser.add_argument('-s', '--start_numbering', default=-1, type=int)
     parser.add_argument('-l', '--rest_length', default=0.1, type=float)
+
     parser.add_argument('-n', '--k_on', default=5.0, type=float)
 
     args = parser.parse_args()
 
     main(args.num_expts, args.runner, args.randomize, args.start_numbering,
          order=args.order, l_sep=args.rest_length, dimk0on=args.k_on)
+
     # try:
     #     main(int(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4])
     # except IndexError:
