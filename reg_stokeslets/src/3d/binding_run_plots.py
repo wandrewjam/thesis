@@ -6,20 +6,28 @@ import os
 def get_steps_dwells(data_list):
     steps = []
     dwell = []
+    dwell_maxes = []
     for data in data_list:
         state = []
+        bond_counts = count_bonds(data)
         for i in range(len(data['t'])):
             state.append(np.any(data['bond_array'][:, 0, i] > -1))
+
         state = np.array(state)
         trans = state[1:] != state[:-1]
         trans = np.append([False], trans)
+        i_trans = np.nonzero(trans)[0]
+
+        split_counts = np.split(bond_counts, i_trans)
+        bond_maxes = [np.amax(count) for count in split_counts]
 
         z_temp = data['z'][trans]
         t_temp = data['t'][trans]
         steps.append(z_temp[2::2] - z_temp[:-2:2])
         dwell.append(t_temp[1::2] - t_temp[:-1:2])
+        dwell_maxes.append(bond_maxes)
 
-    return steps, dwell
+    return steps, dwell, dwell_maxes
 
 
 def extract_run_files(runner):
@@ -128,7 +136,7 @@ def get_bound_at_end(data_list):
 
 def main():
     save_plots = True
-    expt_num = '5'
+    expt_num = '1'
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
 
     if expt_num == '1':
@@ -153,8 +161,9 @@ def main():
     avg_dwell_list = []
     step_err_list = []
     dwell_err_list = []
-
     avg_v_list = []
+    flattened_maxes_list = []
+
     for runner in runners:
         expt_names = extract_run_files(runner)
         data = extract_data(expt_names)
@@ -168,9 +177,10 @@ def main():
         print('{} proportion bound: {}'.format(runner, proportion_bound))
         print('{} bound at end: {}'.format(runner, bound_at_end))
 
-        steps, dwells = get_steps_dwells(data)
+        steps, dwells, dwell_maxes = get_steps_dwells(data)
         flattened_steps_list.append(np.concatenate(steps))
         flattened_dwell_list.append(np.concatenate(dwells))
+        flattened_maxes_list.append(np.concatenate(dwell_maxes))
 
         step_count_list.append([len(trial) for trial in steps])
         dwell_count_list.append([len(trial) for trial in dwells])
@@ -280,6 +290,9 @@ def main():
     # print(expt_names)
     # print(proportion_bound)
     # print(bound_at_end)
+
+    plt.scatter(flattened_dwell_list, flattened_maxes_list)
+    plt.show()
 
 
 if __name__ == '__main__':
