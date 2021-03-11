@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+# import pdb
 
 
 def get_steps_dwells(data_list):
@@ -114,7 +115,8 @@ def filter_traj(data_list):
 def get_average_vels(data_list):
     average_vels = []
     for data in data_list:
-        average_vels.append(data['z'][-1] / data['t'][-1])
+        if data['bond_array'].shape[0] > 0:
+            average_vels.append(data['z'][-1] / data['t'][-1])
     return average_vels
 
 
@@ -136,9 +138,10 @@ def get_bound_at_end(data_list):
 
 def main():
     save_plots = True
-    expt_num = '1'
+    expt_num = '7'
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
 
+    # pdb.set_trace()
     if expt_num == '1':
         runners = ['bd_runner03', 'bd_runner02', 'bd_runner01', 'bd_runner04']
     elif expt_num == '2':
@@ -150,6 +153,11 @@ def main():
     elif expt_num == '5':
         runners = ['bd_runner1101', 'bd_runner1102', 'bd_runner1103',
                    'bd_runner1104']
+    elif expt_num == '6':
+        runners = ['bd_runner1109', 'bd_runner1111']
+    elif expt_num == '7':
+        runners = ['bd_runner2106', 'bd_runner2105', 'bd_runner2107', 
+                   'bd_runner2101', 'bd_runner2102']
     else:
         raise ValueError('expt_num is invalid')
     # runners = ['bd_runner03', 'bd_runner02', 'bd_runner01']
@@ -192,8 +200,12 @@ def main():
         dwell_err_list.append(np.std(flattened_dwell_list[-1]) / np.sqrt(flattened_dwell_list[-1].shape[0]))
         print('Finished with {}'.format(runner))
 
-    labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
+    # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
     # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
+    # labels = ['$k_{on} = 1$', '$k_{on} = 10$']
+    # labels = ['$k_{on} = 1$', '$k_{on} = 5$']
+    labels = ['$k_{on} = 0.05', '$k_{on} = 0.1', '$k_{on} = 0.5', 
+              '$k_{on} = 1$', '$k_{on} = 5$']
     plt.hist(avg_v_list, density=True)
     
     plt.xlabel('Average velocity ($\\mu m / s$)')
@@ -258,8 +270,6 @@ def main():
     else:
         plt.tight_layout()
         plt.show()
-
-    # import pdb; pdb.set_trace()
 
     plt.bar(np.arange(len(avg_v_list)), [np.mean(el) for el in avg_v_list], yerr=[np.std(el) / np.sqrt(128) for el in avg_v_list], tick_label=labels)
     plt.ylabel('Mean of Average Velocity ($\\mu m / s$)')
