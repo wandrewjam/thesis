@@ -1,0 +1,25 @@
+seed 111672472
+t_start 0.0
+t_end 3.0
+num_steps 1500
+n_nodes 8
+order 2nd
+adaptive False
+one_side True
+check_bonds True
+a 1.5
+b 0.5
+x1 0.8111885323047826
+x2 0.0
+x3 0.0
+emx 0.9240155770893638
+emy 0.25220581574545275
+emz 0.2873803051713544
+shear 100.0
+l_sep 0.2
+dimk0_on 0.1
+dimk0_off 5.0
+sig 10000.0
+sig_ts 9999.0
+
+done
