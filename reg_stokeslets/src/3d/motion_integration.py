@@ -114,8 +114,10 @@ def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta,
             rl_dev *= rl_dev > 0
 
         correction = 400 * (4 * lam)**2 / (0.16 * (nl-1)**2)
+
         # pdb.set_trace()
-        assert (correction - 1.) < 1e-12
+        assert np.abs(correction - 1.) < 1e-12
+
         pw_rates = k0_on * np.exp(-eta_ts * rl_dev ** 2)
         k_on = np.sum(pw_rates, axis=1)
         k_on *= 1 - np.bincount(bonds[:, 0].astype('int'),
@@ -666,10 +668,12 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
                 if rk_solver.t > rk_solver.last_evaluated + dt:
                     rk_solver.my_status = 1
                 elif rk_solver.t - rk_solver.t_old < 1e-6:
+                    # pdb.set_trace()
                     rk_solver = initialize_solver(
                         bonds, receptors, r_matrix, rk_solver, x1, x2, x3,
                         kappa, lam, exact_vels, a, b, n_nodes, domain, proc,
                         True)
+                    rk_solver.my_status = 0
 
             except AssertionError as e:
                 # Reset the solver with a smaller next step
@@ -779,7 +783,7 @@ def initialize_solver(bonds, receptors, r_matrix, rk_solver, x1, x2, x3, kappa,
     y0 = np.concatenate((center, angles))
     if bonds is not None:
         if len(bonds) > 0 and not force_explicit:
-            rk_solver = Radau(fun, t0=0, y0=y0, t_bound=np.inf)
+            rk_solver = Radau(fun, t0=0, y0=y0, t_bound=np.inf, atol=1e-4, rtol=1e-2)
         else:
             rk_solver = RK23(fun, t0=0, y0=y0, t_bound=np.inf)
 
