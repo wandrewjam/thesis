@@ -222,11 +222,13 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         savemat(save_dir + filename + '.mat',
                 {'t': t, 'x': x, 'y': y, 'z': z, 'R': r_matrices,
                  'bond_array': bond_array, 'receptors': receptors})
-        save_info(filename, seed=seed, t_start=t_start, t_end=t_end,
-                  num_steps=num_steps, n_nodes=n_nodes, a=a, b=b,
-                  adaptive=adaptive, shear=shear, l_sep=l_sep,
-                  dimk0_on=dimk0_on, dimk0_off=dimk0_off, sig=sig,
-                  sig_ts=sig_ts, one_side=one_side, check_bonds=check_bonds)
+
+        # save_info(filename, seed=seed, t_start=t_start, t_end=t_end,
+        #           num_steps=num_steps, n_nodes=n_nodes, a=a, b=b,
+        #           adaptive=adaptive, shear=shear, l_sep=l_sep,
+        #           dimk0_on=dimk0_on, dimk0_off=dimk0_off, sig=sig,
+        #           sig_ts=sig_ts, one_side=one_side, check_bonds=check_bonds)
+
         save_rng(filename, rng_states)
 
     bond_num = [bond.shape[0] for bond in result[8]]
