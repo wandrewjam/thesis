@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-# import pdb
+import pdb
 
 
 def get_steps_dwells(data_list):
@@ -19,6 +19,7 @@ def get_steps_dwells(data_list):
         trans = np.append([False], trans)
         i_trans = np.nonzero(trans)[0]
 
+        # pdb.set_trace()
         split_counts = np.split(bond_counts, i_trans)
         bond_maxes = [np.amax(count) for count in split_counts]
 
@@ -26,7 +27,7 @@ def get_steps_dwells(data_list):
         t_temp = data['t'][trans]
         steps.append(z_temp[2::2] - z_temp[:-2:2])
         dwell.append(t_temp[1::2] - t_temp[:-1:2])
-        dwell_maxes.append(bond_maxes)
+        dwell_maxes.append(bond_maxes[1:-1:2])
 
     return steps, dwell, dwell_maxes
 
@@ -141,7 +142,6 @@ def main():
     expt_num = '7'
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
 
-    # pdb.set_trace()
     if expt_num == '1':
         runners = ['bd_runner03', 'bd_runner02', 'bd_runner01', 'bd_runner04']
     elif expt_num == '2':
@@ -156,11 +156,12 @@ def main():
     elif expt_num == '6':
         runners = ['bd_runner1109', 'bd_runner1111']
     elif expt_num == '7':
-        runners = ['bd_runner2106', 'bd_runner2105', 'bd_runner2107', 
-                   'bd_runner2101', 'bd_runner2102']
+        # runners = ['bd_runner2106', 'bd_runner2105', 'bd_runner2107', 
+        #            'bd_runner2101', 'bd_runner2102']
+        runners = ['bd_runner2106', 'bd_runner2105']
     else:
         raise ValueError('expt_num is invalid')
-    # runners = ['bd_runner03', 'bd_runner02', 'bd_runner01']
+
     flattened_steps_list = []
     flattened_dwell_list = []
     step_count_list = []
@@ -200,14 +201,18 @@ def main():
         dwell_err_list.append(np.std(flattened_dwell_list[-1]) / np.sqrt(flattened_dwell_list[-1].shape[0]))
         print('Finished with {}'.format(runner))
 
-    # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$', '$k_{on} = 25$']
-    # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
+    if expt_num in ['1', '2', '3', '4', '5'] :
+        labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$',
+        '$k_{on} = 25$']
+        # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
     # labels = ['$k_{on} = 1$', '$k_{on} = 10$']
-    # labels = ['$k_{on} = 1$', '$k_{on} = 5$']
-    labels = ['$k_{on} = 0.05', '$k_{on} = 0.1', '$k_{on} = 0.5', 
-              '$k_{on} = 1$', '$k_{on} = 5$']
+    elif expt_num == '6':
+        labels = ['$k_{on} = 1$', '$k_{on} = 5$']
+    elif expt_num == '7':
+        # labels = ['$k_{on} = 0.05$', '$k_{on} = 0.1$',
+        #           '$k_{on} = 0.5$', '$k_{on} = 1$', '$k_{on} = 5$']
+        labels = ['$k_{on} = 0.05$', '$k_{on} = 0.1$']
     plt.hist(avg_v_list, density=True)
-    
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)
     if save_plots:
@@ -271,7 +276,12 @@ def main():
         plt.tight_layout()
         plt.show()
 
-    plt.bar(np.arange(len(avg_v_list)), [np.mean(el) for el in avg_v_list], yerr=[np.std(el) / np.sqrt(128) for el in avg_v_list], tick_label=labels)
+    plt.bar(np.arange(len(avg_v_list)), 
+            [np.mean(el) for el in avg_v_list], 
+            yerr=[
+                np.std(el) / np.sqrt(128) for el in avg_v_list
+            ], 
+            tick_label=labels) 
     plt.ylabel('Mean of Average Velocity ($\\mu m / s$)')
     if save_plots:
         plt.savefig(plot_dir + 'avel_avg_' + expt_num, bbox_inches='tight')
@@ -280,7 +290,10 @@ def main():
         plt.tight_layout()
         plt.show()
         
-    plt.bar(np.arange(len(avg_step_list)), avg_step_list, yerr=step_err_list, tick_label=labels)
+    plt.bar(np.arange(len(avg_step_list)), 
+            avg_step_list, 
+            yerr=step_err_list, 
+            tick_label=labels)
     plt.ylabel('Average step size ($\\mu m$)')
     if save_plots:
         plt.savefig(plot_dir + 'step_avg_' + expt_num, bbox_inches='tight')
@@ -289,7 +302,10 @@ def main():
         plt.tight_layout()
         plt.show()
 
-    plt.bar(np.arange(len(avg_dwell_list)), avg_dwell_list, yerr=dwell_err_list, tick_label=labels)
+    plt.bar(np.arange(len(avg_dwell_list)), 
+            avg_dwell_list, 
+            yerr=dwell_err_list, 
+            tick_label=labels)
     plt.ylabel('Average dwell time ($s$)')
     if save_plots:
         plt.savefig(plot_dir + 'dwell_avg_' + expt_num, bbox_inches='tight')
@@ -301,8 +317,18 @@ def main():
     # print(proportion_bound)
     # print(bound_at_end)
 
-    plt.scatter(flattened_dwell_list, flattened_maxes_list)
-    plt.show()
+    # pdb.set_trace()
+    for dwells, maxes in zip(flattened_dwell_list, flattened_maxes_list):
+        plt.plot(dwells, maxes, 'o')
+    plt.xlabel('Dwell time (s)')
+    plt.ylabel('Maximum bond count')
+    plt.legend(labels)
+    if save_plots:
+        plt.savefig(plot_dir + 'dwell_corrs_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
 
 
 if __name__ == '__main__':
