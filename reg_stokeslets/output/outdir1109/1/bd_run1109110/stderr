@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "src/3d/binding_expt.py", line 268, in <module>
+    main(**pars)
+  File "src/3d/binding_expt.py", line 166, in main
+    result = integrate_motion(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 873, in integrate_motion
+    res = time_step(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 663, in time_step
+    message = rk_solver.step()
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/scipy/integrate/_ivp/base.py", line 181, in step
+    success, message = self._step_impl()
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/scipy/integrate/_ivp/radau.py", line 447, in _step_impl
+    converged, n_iter, Z, rate = solve_collocation_system(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/scipy/integrate/_ivp/radau.py", line 103, in solve_collocation_system
+    F[i] = fun(t + ch[i], y + Z[i])
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/scipy/integrate/_ivp/base.py", line 138, in fun
+    return self.fun_single(t, y)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/scipy/integrate/_ivp/base.py", line 20, in fun_wrapped
+    return np.asarray(fun(t, y), dtype=dtype)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 761, in fun
+    func_result = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 206, in evaluate_motion_equations
+    result = generate_resistance_matrices(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/resistance_matrix_test.py", line 56, in generate_resistance_matrices
+    intermediate_solve = solve(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/scipy/linalg/basic.py", line 248, in solve
+    _solve_check(n, info)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/scipy/linalg/basic.py", line 29, in _solve_check
+    raise LinAlgError('Matrix is singular.')
+numpy.linalg.LinAlgError: Matrix is singular.
