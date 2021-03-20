@@ -36,6 +36,10 @@
 \item Discussion
 \end{enumerate}
 
+\section{Introduction and Motivation}
+\label{sec:intr-motiv}
+
+
 \section{The model}
 \label{sec:jv-model}
 
@@ -62,47 +66,41 @@ through fast receptors at a constant rate $\jvOnFast$, and platelets
 bound through fast receptors can unbind at a constant rate
 $\jvOffFast$. The rates $\jvOnFast$ and $\jvOffFast$ are effective on
 and off rates for the entire platelet, and \emph{not} on/off rates for
-individual receptors.
+individual receptors (Figure \ref{fig:unprimed-states}).
 
-It is useful to track the unbound platelets that have never been bound
-to the wall (which we'll call $\stateUnboundNew$) separately from the
-platelets that are unbound, but have previously been bound in the
-experiment (which we'll call $\stateUnboundOld$). This can be added to
-the model described above with only a slight modification: platelets in
-either the $\stateUnboundNew$ or $\stateUnboundOld$ states can enter the
-$\stateBoundF$ state at the constant on rate $\jvOnFast$, but platelets
-in the $\stateBoundF$ state can only enter the $\stateUnboundOld$ state
-at the off rate $\jvOffFast$. The state diagram describing this
-situation is shown in Figure \ref{fig:unprimed-states}.
+% It is useful to track the unbound platelets that have never been bound
+% to the wall (which we'll call $\stateUnboundNew$) separately from the
+% platelets that are unbound, but have previously been bound in the
+% experiment (which we'll call $\stateUnboundOld$). This can be added to
+% the model described above with only a slight modification: platelets in
+% either the $\stateUnboundNew$ or $\stateUnboundOld$ states can enter the
+% $\stateBoundF$ state at the constant on rate $\jvOnFast$, but platelets
+% in the $\stateBoundF$ state can only enter the $\stateUnboundOld$ state
+% at the off rate $\jvOffFast$. The state diagram describing this
+% situation is shown in Figure \ref{fig:unprimed-states}.
 
 For primed platelets, assume that they can exist in four possible
 states: unbound ($\stateUnbound$), fast-bound ($\stateBoundF$),
 slow-bound ($\stateBoundS$), and both fast- and slow-bound
-($\stateBoundFS$). Again, split $\stateUnbound$ into the
-$\stateUnboundNew$ and $\stateUnboundOld$ states. The $\stateUnbound$
-and $\stateBoundF$ states are the same as for the unprimed platelets,
-however in addition both the $\stateUnbound$ and $\stateBoundF$ states
-can form bonds mediated by slow-acting receptors to transition to the
-$\stateBoundS$ and $\stateBoundFS$ states (Figure
-\ref{fig:primed-states}).
+($\stateBoundFS$). The $\stateUnbound$ and $\stateBoundF$ states are
+the same as for the unprimed platelets, however in addition both the
+$\stateUnbound$ and $\stateBoundF$ states can form bonds mediated by
+slow-acting receptors to transition to the $\stateBoundS$ and
+$\stateBoundFS$ states (Figure \ref{fig:primed-states}).
 
 \begin{figure}
   \centering
   
   \schemestart
-  $\stateUnboundOld$ \arrow(u1--vv){<=>[$\jvOnFast$][$\jvOffFast$]}
-  $\stateBoundF$ \arrow(--u0){<-[*{0}$\jvOnFast$]}[90]
-  $\stateUnboundNew$
+  $\stateUnbound$ \arrow(uu--vv){<=>[$\jvOnFast$][$\jvOffFast$]}
+  $\stateBoundF$
   \schemestop
   
   \caption[Possible states with one receptor]{An unprimed platelet can
-    exist in three distinct states: ($\stateUnboundNew$) platelets which
-    haven't interacted with the surface, ($\stateUnboundOld$) platelets
-    which have interacted with the surface and are advecting in the
-    fluid, or ($\stateBoundF$) bound to vWF on the surface and
-    unmoving. Transitions between these states occur at constant rates
-    $\jvOnFast$ and $\jvOffFast$. Platelets can only transition out of
-    the $\stateUnboundNew$ state.}
+    exist in two distinct states: ($\stateUnbound$) platelets which
+    are unbound and advecting in the fluid, or ($\stateBoundF$) bound
+    to vWF on the surface and unmoving. Transitions between these
+    states occur at constant rates $\jvOnFast$ and $\jvOffFast$.}
   \label{fig:unprimed-states}
 \end{figure}
 
@@ -110,30 +108,28 @@ $\stateBoundS$ and $\stateBoundFS$ states (Figure
   \centering
 
   \schemestart
-  $\stateUnboundOld$ \arrow(u1--vv){<=>[$\jvOnFast$][$\jvOffFast$]} $\stateBoundF$
-  \arrow(@u1--ff){<=>[*{0}$\jvOnSlow$][*{0}$\jvOffSlow$]}[-90] $\stateBoundS$
+  $\stateUnbound$ \arrow(uu--vv){<=>[$\jvOnFast$][$\jvOffFast$]} $\stateBoundF$
+  \arrow(@uu--ff){<=>[*{0}$\jvOnSlow$][*{0}$\jvOffSlow$]}[-90] $\stateBoundS$
   \arrow(--vf){<=>[$\jvOnFast$][$\jvOffFast$]} $\stateBoundFS$
   \arrow(@vv--@vf){<=>[*{0}$\jvOnSlow$][*{0}$\jvOffSlow$]}
-  \arrow(@vv--u01){<-[$\jvOnFast$]} $\stateUnboundNew$
-  \arrow(@ff--u02){<-[$\jvOnFast$]}[180] $\stateUnboundNew$
   \schemestop
 
   \caption[Possible states of primed platelets]{A primed platelet can
-    exist in five states: ($\stateUnbound$) unbound from the surface and
-    advecting in the fluid (further split into the two categories
-    defined above), ($\stateBoundF$) bound to vWF on the surface,
-    ($\stateBoundS$) bound to fibrinogen on the surface, or
-    ($\stateBoundFS$) bound to both vWF and fibrinogen. In all three
-    bound states, the platelet is immobilized on the surface.}
+    exist in four states: ($\stateUnbound$) unbound from the surface
+    and advecting in the fluid, ($\stateBoundF$) bound through
+    fast-bonds to the surface, ($\stateBoundS$) bound to slow-bonds to
+    the surface, or ($\stateBoundFS$) bound through both fast and slow
+    bonds. In all three bound states, the platelet is immobilized on
+    the surface.}
   \label{fig:primed-states}
 \end{figure}
 
 % Where and how do we want to address the connection between receptor
 % on/off rates and effective on/off rates?
 
-These models describe a jump-velocity process, where a particle is
-transitioning randomly between discrete states, which each move with a
-different deterministic motion.
+Both of these models describe a jump-velocity process, where a
+particle is transitioning randomly between discrete states, which each
+move with a different deterministic motion.
 
 % We want to derive the distributions of
 % three quantities of interest from the model:
@@ -153,46 +149,44 @@ following system of linear advection equations:
   \Pder{}{t}
   \underbrace{
     \begin{pmatrix}
-      p_{\stateUnboundNew} \\ p_{\stateUnboundOld} \\ p_\stateBoundF \\
-      p_\stateBoundS \\ p_\stateBoundFS
+      p_{\stateUnbound} \\  p_\stateBoundF \\ p_\stateBoundS \\
+      p_\stateBoundFS
     \end{pmatrix}}_{\equiv \mathbf{p}}
   =
   -\Pder{}{x}
   \begin{pmatrix}
-    \jvVel p_{\stateUnboundNew} \\ \jvVel p_{\stateUnboundOld} \\ 0 \\
-    0 \\ 0
+    \jvVel p_{\stateUnbound} \\ 0 \\ 0 \\ 0
   \end{pmatrix}
   + \\
   \underbrace{
     \begin{pmatrix}
-      -(\jvOnFast + \jvOnSlow) & 0 & 0 & 0 & 0 \\
-      0 & -(\jvOnFast + \jvOnSlow) & \jvOffFast & \jvOffSlow & 0 \\
-      \jvOnFast & \jvOnFast & -(\jvOffFast + \jvOnSlow) & 0 & \jvOffSlow \\
-      \jvOnSlow & \jvOnSlow & 0 & -(\jvOnFast + \jvOffSlow) & \jvOffFast \\
-      0 & 0 & \jvOnSlow & \jvOnFast & -(\jvOffFast + \jvOffSlow)
+      -(\jvOnFast + \jvOnSlow) & \jvOffFast & \jvOffSlow & 0 \\
+      \jvOnFast & -(\jvOffFast + \jvOnSlow) & 0 & \jvOffSlow \\
+      \jvOnSlow & 0 & -(\jvOnFast + \jvOffSlow) & \jvOffFast \\
+      0 & \jvOnSlow & \jvOnFast & -(\jvOffFast + \jvOffSlow)
   \end{pmatrix}}_{\equiv A}
   \begin{pmatrix}
-    p_{\stateUnboundNew} \\ p_{\stateUnboundOld} \\ p_\stateBoundF \\
-    p_\stateBoundS \\ p_\stateBoundFS
+    p_{\stateUnbound} \\ p_\stateBoundF \\ p_\stateBoundS \\
+    p_\stateBoundFS
   \end{pmatrix}
 \end{multline}
 where $p_i = p_i(x, t \mid x_0, j, 0)$ is the probability the platelet
 is in state $i$ and position $x$ at time $t$ given it was previously in
-position $z$ and state $j$ at time $0$. If the platelets are not primed,
+position $x_0$ and state $j$ at time $0$. If the platelets are not primed,
 then the only difference is $\jvOnSlow = \jvOffSlow = 0$.
 
 The Fokker-Planck equation can be used to find the probability density
 function of the average velocity across a segment of length
 $L$. Assuming all platelets enter the domain unbouned, we take the
 initial condition of the PDE system (\ref{eq:fp-system}) to be
-$\mathbf{p}(x, 0) = (\delta(x), 0, 0, 0, 0)^T$. That is, all platelets
-enter in never-bound state $\stateUnboundNew$. The probability density
+$\mathbf{p}(x, 0) = (\delta(x), 0, 0, 0)^T$. The probability density
 of the time it takes a platelet to cross the interval $[0, L]$ is
-$\jvVel (p_{\stateUnboundNew}(L, t) + p_{\stateUnboundOld}(L,t))$. The
-average velocity associated with a crossing time $t^*$ is just
-$v^* = L/t^*$, and the probability density function of $v^*$ is given by
-$f(v^*) = (L/v^*)^2 p_U(L, L/v^*)$. \note{I can put in more
-  justification here if necessary}
+$\jvVel (p_{\stateUnbound}(L,t))$ (because the platelet is immobile in
+the other 3 states, it \emph{must} be in the $\stateUnbound$ state
+when it leaves the domain). The average velocity associated with a
+crossing time $t^*$ is just $v^* = L/t^*$, and the probability density
+function of $v^*$ is given by $f(v^*) = (L/v^*)^2 p_U(L,
+L/v^*)$. \note{I can put in more justification here if necessary}
 
 \subsection{Nondimensionalization}
 \label{sec:nondim}
@@ -211,24 +205,22 @@ parameter. After the nondimensionalization, equation
   \label{eq:nd-system}
   \Pder{\mathbf{q}}{s} = -\Pder{}{y}
   \begin{pmatrix}
-    q_{\stateUnboundNew} \\ q_{\stateUnboundOld} \\ 0 \\ 0 \\ 0
+    q_{\stateUnbound} \\ 0 \\ 0 \\ 0
   \end{pmatrix}
   + \left[\left(\frac{1}{\epsilon_1}\right) 
   \begin{pmatrix}
-    - b & 0 & 0 & 0 & 0 \\
-    0 & - b & a & 0 & 0 \\
-    b & b & - a & 0 & 0 \\
-    0 & 0 & 0 & - b & a \\
-    0 & 0 & 0 & b & - a
+    - b & a & 0 & 0 \\
+    b & - a & 0 & 0 \\
+    0 & 0 & - b & a \\
+    0 & 0 & b & - a
   \end{pmatrix} \right.
   \\
   \left. + \left(\frac{1}{\epsilon_2}\right)
   \begin{pmatrix}
-    - d & 0 & 0 & 0 & 0 \\
-    0 & - d & 0 & c & 0 \\
-    0 & 0 & - d & 0 & c \\
-    d & d & 0 & - c & 0 \\
-    0 & 0 & d & 0 & - c
+    - d & 0 & c & 0 \\
+    0 & - d & 0 & c \\
+    d & 0 & - c & 0 \\
+    0 & d & 0 & - c
   \end{pmatrix}\right]
   \mathbf{q},
 \end{multline}
@@ -237,22 +229,22 @@ $b = \jvOnFast/(\jvOffFast + \jvOnFast)$,
 $c = \jvOffSlow/(\jvOffSlow + \jvOnSlow)$, and
 $d = \jvOnSlow/(\jvOffSlow + \jvOnSlow)$. Note that when
 $\jvOnSlow = \jvOffSlow = 0$, the second matrix is the zero matrix, and
-the system effectively reduces to a system of three equations.
+the system effectively reduces to a system of two equations.
 
 In the nondimensional system, the probability density function for the
-average velocity is given by
-$f(v^*) = ({v^*})^{-2} q_{\stateUnboundOld} \left(1, 1/v^*\right)$
+average velocity across a domain of length $L$ is 
+$f(v^*) = ({v^*})^{-2} q_{\stateUnbound} \left(1, 1/v^*\right)$
 
 \subsection{Adiabatic Reduction}
 \label{sec:adiabatic-reduction}
 
-Biologically, platelet interaction with a surface in the bloodstream is
-mediated by fast and slow bonds, which suggests there may be a
-quasi-steady-state reduction in the Fokker-Planck system. As mentioned
-above, the relevant time scales to consider are $T = L/v$ (the time it
-takes an unbound platelet to cross the domain), and
-$\jvOnFast + \jvOffFast$. \note{Comment on the validity of
-  assuming $\epsilon_1$ is small}
+Biologically, platelet interaction with a surface in the bloodstream
+is mediated by fast and slow bonds, which suggests there may be a fast
+time scale in the Fokker-Planck system. As mentioned above, the
+relevant time scales to consider are $T = L/v$ (the time it takes an
+unbound platelet to cross the domain), and $\jvOnFast +
+\jvOffFast$. \note{Comment on the validity of assuming $\epsilon_1$ is
+  small.}
 
 If we define the first and second matrices from equation
 (\ref{eq:nd-system}) as $\underline{\underline{A}}$ and
@@ -268,34 +260,47 @@ $\underline{\underline{B}}$ respectively, then we can rewrite equation
 The fast reactions are those captured in matrix
 $\underline{\underline{A}}$, so this matrix defines the separation of
 the system into fast and slow subsystems. In linear algebra terms, the
-left 0-eigenvectors of $\underline{\underline{A}}$ define the projection
-onto the slow manifold, and the orthogonal projection projects onto the
-fast manifold, but I think it makes more sense to refer to the reaction
-diagram to see the fast-slow separation.
+left 0-eigenvectors of $\underline{\underline{A}}$ define the
+projection onto the slow manifold, and the orthogonal projection
+projects onto the fast manifold, but I think it makes more sense to
+refer to the reaction diagram to see the fast-slow
+separation.
 
-\begin{center}
+\begin{figure}
+  \centering
+  
   \schemestart
-  \stateUnbound \arrow{<=>[$b/\epsilon_1$][$a/\epsilon_1$]}
-  \stateBoundF \arrow{<=>[*{0}$d/\epsilon_2$][*{0}$c/\epsilon_2$]}[270]
-  \stateBoundFS \arrow{<=>[$b/\epsilon_1$][$a/\epsilon_1$]}[180]
-  \stateBoundS \arrow{<=>[*{0}$d/\epsilon_2$][*{0}$c/\epsilon_2$]}[90]
-  \schemestop\par
-\end{center}
+  $\stateUnbound$ \arrow{<=>[$b/\epsilon_1$][$a/\epsilon_1$]}
+  $\stateBoundF$
+  \arrow{<=>[*{0}$d/\epsilon_2$][*{0}$c/\epsilon_2$]}[270]
+  $\stateBoundFS$ \arrow{<=>[$b/\epsilon_1$][$a/\epsilon_1$]}[180]
+  $\stateBoundS$
+  \arrow{<=>[*{0}$d/\epsilon_2$][*{0}$c/\epsilon_2$]}[90]
+  \schemestop
+  
+  \caption[Nondimensional reaction diagram]{Reaction diagram for the
+    nondimensional, four-state jump-velocity system.}
+  \label{fig:nd-primed-states}
+\end{figure}
 
-The fast reactions are represented by the two horizontal reaction lines
-in the diagram, and so the U and V states define one subsystem where the
-reactions within that system are fast, and transitions into or out of
-that system are slow, and F and VF define the other such subsystem. Thus
-we define two slow variables: $v_1 = q_\stateUnbound + q_\stateBoundF$
-and $v_2 = q_\stateBoundS + q_\stateBoundFS$.
+The fast reactions are represented by the two horizontal reaction
+lines in the diagram, and so the $\stateUnbound$ and $\stateBoundF$
+states define one subsystem where the reactions within that system are
+fast, and transitions into or out of that system are slow, and
+$\stateBoundS$ and $\stateBoundFS$ define the other such
+subsystem. Thus we define two slow variables:
+$v_1 = q_\stateUnbound + q_\stateBoundF$ and
+$v_2 = q_\stateBoundS + q_\stateBoundFS$.
 
-The two fast variables are harder to intuit, but they end up being
+The two fast variables are harder to intuit, but we can define them in
+the following way:
 $w_1 = b q_\stateUnbound - a q_\stateBoundF$ and
 $w_2 = b q_\stateBoundS - a q_\stateBoundFS$. These two fast variables
 basically represent the net formation of fast bonds (or the net
-transition rate of U to V and F to VF) within the two fast subsystems.
+transition rate of $\stateUnbound$ to $\stateBoundF$ and
+$\stateBoundS$ to $\stateBoundFS$) within the two fast subsystems.
 
-Then after changing variables in equation (\ref{eq:4-par-ad-fp}), we
+Then after changing variables in equation (\ref{eq:nd-system}), we
 get
 \begin{align}
   \Pder{v_1}{t} &= -\Pder{}{y}(a v_1 + w_1) - \frac{d}{\epsilon_2} v_1
@@ -321,10 +326,11 @@ we get the following QSS equations for $w_1$ and $w_2$:
   w_2 &= 0 + \mathcal{O}(\epsilon_1^2).
 \end{align}
 
-Thus at least to first order in $\epsilon_1$, the fast dynamics between
-F and VF don't affect the average velocity of platelets. Then
-substituting $w_1$ into equation (\ref{eq:v1}) gives us the following
-system defining the evolution of the slow dynamics:
+Thus at least to first order in $\epsilon_1$, the fast dynamics
+between $\stateBoundS$ and $\stateBoundFS$ don't affect the average
+velocity of platelets. Then substituting $w_1$ into equation
+(\ref{eq:v1}) gives us the following system defining the evolution of
+the slow dynamics:
 \begin{align}
   \label{eq:v1-reduced}
   \Pder{v_1}{t} &= -a \Pder{v_1}{y} + \epsilon_1 a b \frac{\partial^2
@@ -334,14 +340,183 @@ system defining the evolution of the slow dynamics:
   \Pder{v_2}{t} &= \frac{d}{\epsilon_2} v_1 - \frac{c}{\epsilon_2} v_2.
 \end{align}
 
+% It makes sense that if $\jvSlowOn = \jvSlowOff = 0$ (that is, $1/\epsilon_2 =
+% 0$), then equation (\ref{eq:v1-reduced}) is identical to the adiabatic
+% reduction for a 2-state jump-velocity process.
+
 So the slow system evolves like its own jump-velocity process, except
 that now the advecting quantity also has a small diffusion
-component. This result is very similar to the result from the adiabatic
-reduction of a two-state jump velocity process, where the same small
-diffusive component in the evolution of the slow variable appears in the
-limit of fast switching between states. The main difference in this
-four-state system is presence of slow bond dynamics which remain
-unchanged.
+component. This result is very similar to the result from the
+adiabatic reduction of a two-state jump-velocity process, where the
+same small diffusive component in the evolution of the slow variable
+appears in the limit of fast switching between states. The main
+difference in this four-state system is presence of slow bond dynamics
+which remain unchanged. In fact, if slow bond formation is turned off
+(i.e. $1/\epsilon_2 = 0$), then equation (\ref{eq:v1-reduced}) becomes
+exactly the adiabatic reduction for a two-state jump-velocity
+process. Equivalently, when a platelet is not bound through a
+slow-acting bond to the surface (i.e. it is on the slow $v_1$
+manifold), it should behave like the adiabatic reduction of a
+two-state jump-velocity system.
+
+\subsubsection{Summary of the two-state adiabatic reduction}
+\label{sec:summary-two-state}
+
+We will use the adiabatic reduction of a two-state jump-velocity
+system later, so I will summarize the reduction and quote the final
+result here. Suppose we have a two-state system with fast switching
+between the two states, as in Figure \ref{fig:two-state-jv}. The
+parameters $a$ and $b$ are nondimensional reaction rates where $a + b
+= 1$, and $\epsilon$ is a time scaling. We assume that switching
+happens quickly, so $a/\epsilon$ and $b\epsilon$ are both $\gg 1$, and
+therefore $\epsilon \ll 1$.
+
+\begin{figure}
+  \centering
+  \schemestart
+  $S_0$ \arrow(s0--s1){<=>[$b/\epsilon$][$a/\epsilon$]} $S_1$
+  \schemestop
+  \caption[Two-state jump-velocity process]{General two-state jump
+    velocity process with fast switching.}
+  \label{fig:two-state-jv}
+\end{figure}
+
+The Fokker-Planck equation for this system is given by the pair of
+PDEs
+\begin{align}
+  \label{eq:two-state-eq1}
+  \Pder{q_0}{s} &= -\Pder{q_0}{y} - \frac{1}{\epsilon} \left(b q_0 - a
+                  q_1\right) \\
+  \label{eq:two-state-eq2}
+  \Pder{q_1}{s} &= \left(b q_0 - a q_1\right).
+\end{align}
+
+Define the slow variable to be $v = q_0 + q_1$ and the fast variable
+to be $w = b q_0 - a q_1$. Then one can perform a change of variables
+in Equations (\ref{eq:two-state-eq1}) and (\ref{eq:two-state-eq2}),
+and after taking $w$ to be in quasi-steady state, the equation for $w$
+is
+\begin{equation}
+  \label{eq:w}
+  w = -\epsilon a b \Pder{v}{y}.
+\end{equation}
+This can then be used to derive an
+advection-diffusion equation for $v$ that only depends on parameters
+$a$, $b$, and $\epsilon$:
+\begin{equation}
+  \label{eq:v}
+  \Pder{v}{s} = -a \Pder{v}{y} + \epsilon a b \frac{\partial^2
+    v}{\partial y^2}.
+\end{equation}
+
+With the initial condition $v(y, 0) = \delta(y)$, equation
+(\ref{eq:v}) can be solved analytically:
+\begin{equation}
+  \label{eq:v-soln}
+  v(y, t) = \frac{1}{\sqrt{4 \pi \epsilon a b t}} \exp \left[ \frac{-(y
+      - at)^2}{4 \epsilon a b t} \right],
+\end{equation}
+and then using equation (\ref{eq:w}) to find $w$,
+\begin{equation}
+  \label{eq:w-soln}
+  w(y, t) = \frac{y - at}{4t\sqrt{\pi \epsilon a b t}} \exp \left[ \frac{-(y
+      - at)^2}{4 \epsilon a b t} \right].
+\end{equation}
+
+A change of variables back to $q_0$ and $q_1$ gives explicit equations
+for these two quantities, which can then be used to find the following
+probability density function of average velocities for the two-state
+jump-velocity process:
+\begin{equation}
+  \label{eq:1}
+  f\left(v^*\right) = \sqrt{\frac{1}{4\pi \epsilon a b
+      \left(v^*\right)^3}} \left(a + \frac{v^* - a}{2}\right)
+  \exp\left[\frac{-\left(v^* - a\right)^2}{4\epsilon a b v^*}\right].
+\end{equation}
+
+\subsubsection{An examination of experimental trajectories}
+\label{sec:an-exam-exper}
+
+One of the key assumptions of the jump-velocity model is that
+platelets in an unbound state advect at a constant velocity. This is
+an assumption that can be checked directly against experimental
+trajectory data. Specifically, I split the experimental platelet
+trajectories into a segment leading up to the first pause events,
+steps in between two pause events, and a segment following the last
+pause (if there was one). 
+
+Boxplots of each of these populations of steps are shown in Figure
+\ref{fig:ccp-step-cmp}. The steps that occur in between dwells are
+much smaller than those at the beginning and end, therefore the
+assumption in the jump-velocity model that the beginning and ending
+steps are the same is violated. Similarly, the velocity of the
+platelet within a step is different depending on whether the step is
+in between dwells, or at the beginning or end of a trajectory (Figure
+\ref{fig:ccp-vel-cmp}).
+
+\note{Estimates of capture rates?}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{ccp-step-cmp.png}
+  \caption{Comparison of intermediate step sizes with the first and
+    last steps of the experiment. Data shown is from the
+    collagen-collagen PRP experiment, but other experiments have
+    qualitatively similar results.}
+  \label{fig:ccp-step-cmp}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{ccp-vel-cmp.png}
+  \caption{Comparison of intermediate free velocities with the first
+    and last steps of the experiment. Again, the data shown is from
+    the collagen-collagen PRP experiment, but the others are similar.}
+  \label{fig:ccp-vel-cmp}
+\end{figure}
+
+Furthermore the velocities are not constant, and in the case of the
+velocities between pauses, the velocities are several times lower than
+we would expect from a totally free-flowing platelet in a 100/s shear
+flow. The velocities within the steps before the first pause, and
+after the last pause, are much more consistent with the expected
+velocity of a free-flowing platelet. Using the Goldman, Cox, and
+Brenner approximations for the velocity of a free-flowing sphere in a
+shear flow near a wall, we would expect the velocity of a platelet
+that is separated from the wall by 50--100 nm to move at velocities in
+the range of 67--84 $\mu$m/s \cite{Goldman1967a,Goldman1967b}. This is
+still on the high end of the range of velocities observed in Figure
+\ref{fig:ccp-vel-cmp}, but one of the assumptions in this
+approximation is that platelets are spherical. In reality, platelets
+are oblate spheroids, and in a shear flow undergo more complex motions
+than spheres \cite{Mody2005}, and in some orientations will travel
+more slowly than spheres.
+
+There are a couple of possible explanations for the observation that
+the velocities in steps between two pauses are much lower than those
+before or after the final pauses. One possibility is that when a
+platelet is released following a pause, it is released in an
+orientation where the free-flowing velocity is much lower than it was
+before the pause. In other words, there may be some hydrodynamic
+reason the platelet is traveling more slowly. The physics in this
+model is far too simplified to explore this hypothesis.
+
+Another possible explanation is that there is fast binding and
+unbinding ocurring on a scale too fast to observe the individual
+events. This hypothesis can be tested and incorporated in the context
+of the jump-velocity model by using the above quasi-steady state
+reduction to fit the fast binding parameters to the inter-pause
+velocities.
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{ccp-vel-interdwell.png}
+%   \caption{Comparison of simulated velocities with observed average
+%     velocities measured from the start of the first dwell to the end
+%     of the last dwell. Data shown is for the collagen-collagen PRP
+%     experiment.}
+%   \label{fig:ccp-vel-interdwell}
+% \end{figure}
 
 \subsection{Parameter estimation}
 \label{sec:parameter-estimation}
@@ -425,12 +600,12 @@ $a' \rightarrow -\infty$ as $a \rightarrow 0$, and
 $a' \rightarrow \infty$ as $a \rightarrow 1$. With the fitting
 parameters, the optimization problem becomes an unconstrained
 optimization in $\reals^2$. To actually carry out the optimization I
-use SciPy's \verb|minimize| function \cite{Virtanen2020}, which
+use SciPy's \cite{Virtanen2020} \verb|minimize| function, which
 implements the BFGS algorithm \note{citations}.
 
 An iterative algorithm needs an intial guess, which at least in the
 two-state model, can be chosen as an estimate of $a$ and $\epsilon$
-from the adiabatic reduction. Equation (\ref{eq:vel-dens}) gives the
+from the adiabatic reduction. Equation  gives the
 pdf of velocities from the adiabatic reduction, and can be used to
 derive the mean $\mu(a, \epsilon)$ and variance $\sigma^2(a,
 \epsilon)$ as functions of $a$ and $\epsilon$. These moments have
@@ -460,7 +635,7 @@ a data set with sample mean $\bar{v}$ and sample variance $s^2$:
   \epsilon &= \frac{s^2}{2(1 - \bar{v})(\bar{v})^2}.
 \end{align}
 
-In figure \ref{fig:model-fits}, a histogram of 1000 sample velocities
+In Figure \ref{fig:model-fits}, a histogram of 1000 sample velocities
 is shown along with the PDEs generated by the reduced and full models
 with maximum likelihood parameter estimates. The CDFs of the models
 are also compared with the ECDF of the data. Visually these models fit
@@ -538,80 +713,108 @@ jump-velocity model).
 \section{Results}
 \label{sec:results-jump-velocity}
 
-\subsection{Step sizes and ``free velocities'' in the trajectory data}
-\label{sec:step-sizes-free}
+\subsection{Estimating fast binding parameters by fitting the free
+  velocities}
+\label{sec:estim-fast-bind}
 
-%% Quotation marks in a section title?
+In order to fit the inter-pause velocities from the experimental data,
+I processed the experimental trajectories by removing dwells from the
+experiments and ``stacking'' the steps on top of each other. The
+probability distributions of the average velocities of these processed
+trajectories on collagen and fibrinogen are shown in Figure ?? and
+Figure ??. The fast effective binding parameters predicted by each
+model fit are given in the captions below each figure.
 
-The adiabatic reduction of the 4-state model is motivated by an
-observation that the ``free velocities'' of observed platelets is much
-lower than expected free-flowing velocities. The experiments are run
-with a wall shear rate of 100/s, and so the fluid velocity $1 \mu\tn{m}$
-off the wall is about $100 \mu\tn{m}/s$. However the observed free
-velocities (i.e. during a dwell) are much lower than this (see Figure
-\ref{fig:ccp-vel-cmp}). We have also observed that the velocity of a
-platelet before its first dwell, and after its last dwell, is much
-higher than velocity in between dwells. Similarly, the initial and final
-steps of a platelet (i.e. as it enters and leaves the field of view) are
-much longer than the lengths of intermediate steps.
+% What about fitting to individual dwells? This might make it easier
+% to bootstrap uncertainty estimates of the parameters. This would
+% probably also be a more convincing analysis that the free velocities
+% don't change between experiments than an ANOVA
 
-Boxplots of each of the populations of step sizes are shown in Figure
-\ref{fig:ccp-step-cmp}. The steps that occur in between dwells are much
-smaller than those at the beginning and end, therefore our assumption in
-the jump-velocity model that the beginning and ending steps are the same
-is violated. Similarly, the velocity of the platelet within a step is
-different depending on whether the step is in between dwells, or at the
-beginning or end of a trajectory (Figure \ref{fig:ccp-vel-cmp}). Another
-thing to note in Figure \ref{fig:ccp-vel-cmp} is that velocities within
-steps is not constant, or even particularly close to constant.
+\subsection{Estimating slow binding parameters and escape}
+\label{sec:estim-slow-bind}
 
-One possible explanation of this is that there are brief contacts
-between the platelet and the wall which slow the platelet down to well
-below the free-flowing velocity, but these binding dynamics occur too
-quickly to be detected individually. These bonds are likely
-GPVI-collagen bonds because they occur on a relatively fast time
-scale. Then the observed pauses may be due to integrin-collagen binding.
+One prediction from the jump-velocity model with escape is that the
+number of dwells in a trajectory should be geometrically
+distributed. The probability that a platelet re-binds after unbinding
+is $a = \frac{\jvSlowOn}{\jvSlowOn + \jvEscape}$, and so the number of
+binding events that occur before the platelet escapes is a geometric
+distribution, and the probability mass function for the number of
+binding events $n$ is $p(n) = (1 - a) a^{n - 1}$, where $n >= 1$.
 
-An analysis of the platelet velocities in between steps provides one
-possible check of this hypothesis. As shown in the adiabatic reduction
-of the previous section, the sum of $\stateUnbound$ and $\stateBoundF$
-platelets should advect and diffuse in a way that is well modeled by
-equation (\ref{eq:v1-reduced}). I processed the experimental
-trajectories by removing the observed dwells, and then comparing the
-resulting distribution of average free velocities to the distribution of
-average velocities predicted by the adiabatic reduction of the 2 state
-model (equation (\ref{eq:vel-dens})) (Figure \ref{fig:avg-free-vel-col}).
+% \subsection{Step sizes and ``free velocities'' in the trajectory data}
+% \label{sec:step-sizes-free}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{ccp-step-cmp.png}
-  \caption{Comparison of intermediate step sizes with the first and
-    last steps of the experiment. Data shown is from the
-    collagen-collagen PRP experiment, but other experiments have
-    qualitatively similar results.}
-  \label{fig:ccp-step-cmp}
-\end{figure}
+% %% Quotation marks in a section title?
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{ccp-vel-cmp.png}
-  \caption{Comparison of intermediate free velocities with the first
-    and last steps of the experiment. Again, the data shown is from
-    the collagen-collagen PRP experiment, but the others are similar.}
-  \label{fig:ccp-vel-cmp}
-\end{figure}
+% The adiabatic reduction of the 4-state model is motivated by an
+% observation that the ``free velocities'' of observed platelets is much
+% lower than expected free-flowing velocities. The experiments are run
+% with a wall shear rate of 100/s, and so the fluid velocity $1 \mu\tn{m}$
+% off the wall is about $100 \mu\tn{m}/s$. However the observed free
+% velocities (i.e. during a dwell) are much lower than this (see Figure
+% \ref{fig:ccp-vel-cmp}). We have also observed that the velocity of a
+% platelet before its first dwell, and after its last dwell, is much
+% higher than velocity in between dwells. Similarly, the initial and final
+% steps of a platelet (i.e. as it enters and leaves the field of view) are
+% much longer than the lengths of intermediate steps.
 
-\begin{figure}
-  \centering
-  \includegraphics[width=\textwidth]{avg_free_vel_col.png}
-  \caption{Comparison of the average free velocity in the four collagen
-    experimental conditions. The effective binding parameters found by
-    fitting the model to velocity data are $k_\tn{on}=34.6/s$ and
-    $k_\tn{off} = 5.18/s$. An ANOVA test didn't find any significant
-    difference in the average velocities among the 4 experiments, and so
-    I fit the model to all the data simultaneously.}
-  \label{fig:avg-free-vel-col}
-\end{figure}
+% Boxplots of each of the populations of step sizes are shown in Figure
+% \ref{fig:ccp-step-cmp}. The steps that occur in between dwells are much
+% smaller than those at the beginning and end, therefore our assumption in
+% the jump-velocity model that the beginning and ending steps are the same
+% is violated. Similarly, the velocity of the platelet within a step is
+% different depending on whether the step is in between dwells, or at the
+% beginning or end of a trajectory (Figure \ref{fig:ccp-vel-cmp}). Another
+% thing to note in Figure \ref{fig:ccp-vel-cmp} is that velocities within
+% steps is not constant, or even particularly close to constant.
+
+% One possible explanation of this is that there are brief contacts
+% between the platelet and the wall which slow the platelet down to well
+% below the free-flowing velocity, but these binding dynamics occur too
+% quickly to be detected individually. These bonds are likely
+% GPVI-collagen bonds because they occur on a relatively fast time
+% scale. Then the observed pauses may be due to integrin-collagen binding.
+
+% An analysis of the platelet velocities in between steps provides one
+% possible check of this hypothesis. As shown in the adiabatic reduction
+% of the previous section, the sum of $\stateUnbound$ and $\stateBoundF$
+% platelets should advect and diffuse in a way that is well modeled by
+% equation (\ref{eq:v1-reduced}). I processed the experimental
+% trajectories by removing the observed dwells, and then comparing the
+% resulting distribution of average free velocities to the distribution of
+% average velocities predicted by the adiabatic reduction of the 2 state
+% model (equation (\ref{eq:vel-dens})) (Figure \ref{fig:avg-free-vel-col}).
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=0.8\textwidth]{ccp-step-cmp.png}
+%   \caption{Comparison of intermediate step sizes with the first and
+%     last steps of the experiment. Data shown is from the
+%     collagen-collagen PRP experiment, but other experiments have
+%     qualitatively similar results.}
+%   \label{fig:ccp-step-cmp}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=0.8\textwidth]{ccp-vel-cmp.png}
+%   \caption{Comparison of intermediate free velocities with the first
+%     and last steps of the experiment. Again, the data shown is from
+%     the collagen-collagen PRP experiment, but the others are similar.}
+%   \label{fig:ccp-vel-cmp}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{avg_free_vel_col.png}
+%   \caption{Comparison of the average free velocity in the four collagen
+%     experimental conditions. The effective binding parameters found by
+%     fitting the model to velocity data are $k_\tn{on}=34.6/s$ and
+%     $k_\tn{off} = 5.18/s$. An ANOVA test didn't find any significant
+%     difference in the average velocities among the 4 experiments, and so
+%     I fit the model to all the data simultaneously.}
+%   \label{fig:avg-free-vel-col}
+% \end{figure}
 
 % Local Variables:
 % TeX-master: "phd-thesis.ltx"
