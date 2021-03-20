@@ -20,7 +20,7 @@ def parse_file(filename):
                 break
 
             key, value = command
-            if key in ['seed', 'num_steps', 'n_nodes']:
+            if key in ['seed', 'num_steps', 'n_nodes', 'receptor_multiplier']:
                 parlist.append((key, int(value)))
             elif key in ['adaptive', 'one_side', 'check_bonds']:
                 parlist.append((key, 'True' == value))
@@ -59,7 +59,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
          t_end=50., num_steps=250, seed=None, n_nodes=8, adaptive=False, a=1.5,
          b=.5, shear=100., l_sep=0.1, dimk0_on=10., dimk0_off=5., sig=1e4,
          sig_ts=9.99e3, one_side=False, check_bonds=False, x1=1.2, x2=0.,
-         x3=0., emx=1., emy=0., emz=0, order='2nd'):
+         x3=0., emx=1., emy=0., emz=0, order='2nd', receptor_multiplier=1):
     save_dir = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     # Read in previous file names
@@ -127,7 +127,9 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         receptors = np.array([[0., 1.5, 0.]])
     elif expt == 3:
         init = np.array([x1, x2, x3, emx, emy, emz])
-        receptors = np.load(os.path.expanduser('~/thesis/reg_stokeslets/src/3d/Xb_0.26.npy'))
+        receptors = np.load(os.path.expanduser(
+            '~/thesis/reg_stokeslets/src/3d/Xb_0.26.npy'))
+        receptors = np.repeat(receptors, repeats=receptor_multiplier, axis=0)
         bonds = np.zeros(shape=(0, 3), dtype='float')
         # bonds = np.array([[np.argmax(receptors[:, 1]), 0., 0.]])
     else:

@@ -15,5 +15,6 @@ sig_ts 9999.0
 one_side True
 check_bonds True
 order 2nd
+receptor_multiplier 1
 
 done

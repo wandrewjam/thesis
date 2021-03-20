@@ -20,11 +20,10 @@ def pick_random_height():
     return np.random.uniform(0.7, 1.4)
 
 
-def main(num_expts, runner, random_initial=False, start_numbering=-1,
-         **pars):
+def main(num_expts, runner, random_initial=False, start_numbering=-1, **pars):
     import os
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
-    defaults = parse_file('defaults')
+    defaults = parse_file('default')
 
     all_filenames = []
 
@@ -83,6 +82,7 @@ def main(num_expts, runner, random_initial=False, start_numbering=-1,
             par_dict['x1'] = height
             par_dict['emx'], par_dict['emy'], par_dict['emz'] = e_m
 
+        filename = par_dict.pop('filename')
         save_info(filename, **par_dict)
         
     with open(txt_dir + runner + '.txt', 'w') as f:
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('num_expts', type=int)
-    parser.add_argument('filename')
+    # parser.add_argument('filename')
     parser.add_argument('runner')
     parser.add_argument('-r', '--randomize', action='store_true')
     parser.add_argument('--order', default='2nd',
@@ -103,11 +103,14 @@ if __name__ == '__main__':
     parser.add_argument('-l', '--rest_length', default=0.1, type=float)
 
     parser.add_argument('-n', '--k_on', default=5.0, type=float)
+    parser.add_argument('-f', '--k_off', default=5.0, type=float)
+    parser.add_argument('-m', '--receptor_multiplier', default=1, type=int)
 
     args = parser.parse_args()
 
     main(args.num_expts, args.runner, args.randomize, args.start_numbering,
-         order=args.order, l_sep=args.rest_length, dimk0on=args.k_on)
+         receptor_multiplier=args.receptor_multiplier, order=args.order,
+         l_sep=args.rest_length, dimk0_on=args.k_on, dimk0_off=args.k_off)
 
     # try:
     #     main(int(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4])
