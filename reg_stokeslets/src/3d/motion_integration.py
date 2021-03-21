@@ -7,6 +7,7 @@ from sphere_integration_utils import compute_helper_funs
 from dist_convergence_test import spheroid_surface_area
 from sphere_integration_utils import generate_grid
 from timeit import default_timer as timer
+import pickle
 # import pdb
 
 
@@ -800,7 +801,7 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                      forces=None, torques=None, save_quad_matrix_info=False,
                      receptors=None, bonds=None, eta=1, eta_ts=1, kappa=1,
                      lam=0, k0_on=1, k0_off=1, check_bonds=True, one_side=True,
-                     precompute=True):
+                     precompute=True, save_file=None):
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
     np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
@@ -916,6 +917,27 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                 t = np.append(t, new_t)
                 rand_states += res[8]
                 rk_solver = res[9]
+
+            if save_file is not None:
+                # Save the data
+                save_dir = path.expanduser(
+                    '~/thesis/reg_stokeslets/data/bd_run/')
+                max_bonds = len(max(*bond_history, key=len))
+                padded_bonds = [np.pad(bd,
+                                       pad_width=((0, max_bonds - bd.shape[0]),
+                                                  (0, 0)),
+                                       mode='constant', constant_values=-1)
+                                for bd in bond_history]
+                bond_array = np.stack(padded_bonds, axis=-1)
+
+                np.savez(save_dir + save_file, t, x1, x2, x3, r_matrices,
+                         bond_array, receptors, t=t, x=x1, y=x2, z=x3,
+                         r_matrices=r_matrices, bond_array=bond_array,
+                         receptors=receptors)
+
+                # Save the rng states
+                with open(save_dir + save_file + '.pkl', 'wb') as f:
+                    pickle.dump(rand_states, f)
     except ValueError or RuntimeError as e:
         print('Encountered an error while integrating. Halting and '
               'outputting computation results so far.')
@@ -1213,15 +1235,11 @@ def main(plot_num, server='mac', proc=1):
 
         # Run the fine simulations
         if plot_num < 80:
-            fine_result = integrate_motion(
-                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
-                domain='wall', order=order, adaptive=False, proc=proc
-            )
+            fine_result = integrate_motion([0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b, domain='wall',
+                                           order=order, adaptive=False, proc=proc)
         else:
-            fine_result = integrate_motion(
-                [0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b,
-                domain='free', order=order, adaptive=False, proc=proc
-            )
+            fine_result = integrate_motion([0., stop], t_steps, init, exact_vels, fine_nodes, a=a, b=b, domain='free',
+                                           order=order, adaptive=False, proc=proc)
         x1_fine, x2_fine, x3_fine, em_fine = fine_result[:4]
 
         ## # Save the end state after the fine simulations
@@ -1250,10 +1268,8 @@ def main(plot_num, server='mac', proc=1):
         adapt_start = timer()
 
         # Run the adaptive simulations
-        adapt_result = integrate_motion(
-            [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
-            domain=domain, order=order, adaptive=adaptive, proc=proc
-        )
+        adapt_result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=domain,
+                                        order=order, adaptive=adaptive, proc=proc)
         (x1_adapt, x2_adapt, x3_adapt, em_adapt, errs_adapt, node_array,
          sep_array) = adapt_result
 
@@ -1275,10 +1291,8 @@ def main(plot_num, server='mac', proc=1):
     evaluate_motion_equations.counter = 0
 
     # Run the coarse simulations
-    coarse_result = integrate_motion(
-        [0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b,
-        domain=domain, order=order, adaptive=False, proc=proc
-    )
+    coarse_result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=domain,
+                                     order=order, adaptive=False, proc=proc)
     x1, x2, x3, e_m, errs, node_array, sep_array = coarse_result[:7]
 
     # Save the end state after the coarse simulations
