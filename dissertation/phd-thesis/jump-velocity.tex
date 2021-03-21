@@ -340,7 +340,7 @@ the slow dynamics:
   \Pder{v_2}{t} &= \frac{d}{\epsilon_2} v_1 - \frac{c}{\epsilon_2} v_2.
 \end{align}
 
-% It makes sense that if $\jvSlowOn = \jvSlowOff = 0$ (that is, $1/\epsilon_2 =
+% It makes sense that if $\jvOnSlow = \jvSlowOff = 0$ (that is, $1/\epsilon_2 =
 % 0$), then equation (\ref{eq:v1-reduced}) is identical to the adiabatic
 % reduction for a 2-state jump-velocity process.
 
@@ -443,7 +443,9 @@ an assumption that can be checked directly against experimental
 trajectory data. Specifically, I split the experimental platelet
 trajectories into a segment leading up to the first pause events,
 steps in between two pause events, and a segment following the last
-pause (if there was one). 
+pause (if there was one). \note{I should put in plots of Vlado's data;
+  maybe one plot in this chapter as an example, and the others in an
+  appendix} 
 
 Boxplots of each of these populations of steps are shown in Figure
 \ref{fig:ccp-step-cmp}. The steps that occur in between dwells are
@@ -506,7 +508,46 @@ unbinding ocurring on a scale too fast to observe the individual
 events. This hypothesis can be tested and incorporated in the context
 of the jump-velocity model by using the above quasi-steady state
 reduction to fit the fast binding parameters to the inter-pause
-velocities.
+velocities. To test this, we want to ignore the steps that
+occurs before the first pause and after the last pause in the platelet
+trajectories, because the platelet behavior is very different in these
+steps compared to the behavior in steps between pauses.
+
+\subsection{Adding an escape term}
+\label{sec:adding-an-escape}
+
+If we are only trying to model the behavior of platelets within the
+portion of the trajectory between the first and last pause, then we
+cannot assume that trajectories are some fixed length $L$. Instead, we
+assume that there is some escape rate $\jvEscape$, which represents
+the rate that platelets escape the rolling regime, and re-enter the
+bulk flow. For convenience in the adiabatic reduction, assume that
+platelets can escape when they are in either the unbound state
+$\stateUnbound$ or the fast-bound state $\stateBoundF$ (Figure
+\ref{fig:jv-model-escape}). This modification makes a small change to
+equation (\ref{eq:v1-reduced}); there is an additional
+$- \frac{\jvEscape}{T} v_1$ term in the equation. Everything else
+remains the same.
+
+\begin{figure}
+  \centering
+  \schemestart
+  $\stateUnbound$ \arrow(u1--vv){<=>[$\jvOnFast$][$\jvOffFast$]}
+  $\stateBoundF$ 
+  \arrow(@u1--ff){<=>[*{0}$\jvOnSlow$][*{0}$\jvOffSlow$]}[-90]
+  $\stateBoundS$ 
+  \arrow(--vf){<=>[$\jvOnFast$][$\jvOffFast$]} $\stateBoundFS$
+  \arrow(@vv--@vf){<=>[*{0}$\jvOnSlow$][*{0}$\jvOffSlow$]}
+  \arrow(@u1--ww){->[*{0}$\jvEscape$]}[90]
+  \arrow(@vv--vw){->[*{0}$\jvEscape$]}[90]
+  \schemestop
+  \caption[Jump velocity model with escape]{Jump velocity model with
+    escape} 
+  \label{fig:jv-model-escape}
+\end{figure}
+
+% AAAh stress. Does anyone care about any of this?? What is the point
+% of this jump-velocity project?
 
 % \begin{figure}
 %   \centering
@@ -735,11 +776,61 @@ model fit are given in the captions below each figure.
 
 One prediction from the jump-velocity model with escape is that the
 number of dwells in a trajectory should be geometrically
-distributed. The probability that a platelet re-binds after unbinding
-is $a = \frac{\jvSlowOn}{\jvSlowOn + \jvEscape}$, and so the number of
-binding events that occur before the platelet escapes is a geometric
-distribution, and the probability mass function for the number of
-binding events $n$ is $p(n) = (1 - a) a^{n - 1}$, where $n >= 1$.
+distributed. When a platelet is in a step, one can think of the
+platelet's next state as a Bernoulli trial. One possibile result of
+the Bernoulli trial is the platelet pauses after the step, which
+occurs with probability
+$a = \frac{\jvOnSlow}{\jvOnSlow + \jvEscape}$. The other possible
+result is the platelet escapes, and this occurs with probability $1 -
+a = \frac{\jvEscape}{\jvOnSlow + \jvEscape}$.
+
+Therefore the number of binding events that occur before the platelet
+escapes is a geometric distribution, and the probability mass function
+for the number of binding events $n$ is $p(n) = (1 - a) a^{n - 1}$,
+where $n >= 1$. Therefore the mean number of pauses platelets have
+before escaping can be used to find $a$: $\mu_\textnormal{dwell num.}
+= (1 - a)\inv$. Figure \ref{fig:ndwells} shows the number of dwells per
+trajectory in two experiments.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_num_dwells}
+  \caption{Number of dwells per trajectory in experiments and
+    predicted by a geometric distribution.}
+  \label{fig:ndwells}
+\end{figure}
+
+We need another estimate in order to uniquely find $\jvOnSlow$ and
+$\jvEscape$. \note{Think about how to succinctly justify the
+  following} It turns out that the distribution of step times is an
+exponential distribution with rate $\jvTot$, and so we can estimate
+$\jvTot$ with the average step time: $\mu_\tn{step time} = 1/\jvTot =
+1/(\jvOnSlow + \jvEscape)$. With these estimates for $\jvOnSlow$ and
+$\jvEscape$, along with the estimate of $\jvOffSlow$ from the pause
+times, we get the following estimates for the primed and unprimed
+experiments. \note{This thought is unfinished}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \node (step) {Step};
+    \node (escape) [right=of step] {Escape};
+    \draw[-Stealth] (step.east)
+    --node[above]{$\frac{e}{\jvTot}$} (escape.west); 
+    %  {$\frac{e}{\jvTot}$}
+    \draw[-Stealth] (step.north east)
+    to[to path={
+      .. controls +(60:1.5) and +(120:1.5) .. (\tikztotarget)
+      \tikztonodes}
+    ] node[above]{$\frac{d/\epsilon_2}{\jvTot}$} (step.north west); 
+  \end{tikzpicture}
+  \caption[Possible fates of an unbound platelet]{A platelet that is
+    not bound to the surface has two possible fates: it can either
+    re-bind with probability $a$ (in which case it must unbind at some
+    point again and return to the same state), or it can escape with
+    probability $1 - a$}
+  \label{fig:unbd-plt-fates}
+\end{figure}
 
 % \subsection{Step sizes and ``free velocities'' in the trajectory data}
 % \label{sec:step-sizes-free}
