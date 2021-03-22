@@ -1,6 +1,6 @@
 seed 0
 t_start 0.
-t_end .5
+t_end 3.
 num_steps 250
 n_nodes 8
 a 1.5
