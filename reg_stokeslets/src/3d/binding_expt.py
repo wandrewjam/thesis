@@ -152,7 +152,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order=order,
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
-        check_bonds=check_bonds, one_side=one_side)
+        check_bonds=check_bonds, one_side=one_side, save_file=filename)
     end = timer()
 
     t = result[9] * t_sc
