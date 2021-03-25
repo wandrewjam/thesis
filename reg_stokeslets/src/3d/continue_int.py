@@ -26,7 +26,11 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
         y = data['y']
         z = data['z']
         t = data['t']
+        if t[-1] > 3.0001:
+            t *= .01
         r_matrices = data['r_matrices']
+        if r_matrices.shape[-1] == 3:
+            r_matrices = r_matrices.transpose(1, 2, 0)
         receptors = data['receptors']
         bond_array = data['bond_array']
 
@@ -43,12 +47,16 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
 
     if t_end is None:
         t_end = pars['t_end']
-
+        
     if np.abs(t_end - t[i_start]) < 1e-12:
         print('Simulation {} already completed'.format(filename))
         return
 
     assert t_end > t[i_start]
+
+    if debug:
+        import pdb
+        pdb.set_trace()
 
     np.random.set_state(rng_history[i_start])
 
@@ -87,15 +95,13 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
     def exact_vels(em):
         return np.zeros(6)
 
-    if debug:
-        import pdb
-        pdb.set_trace()
+    print('Running simulation {}'.format(filename))
 
     result = integrate_motion(
         [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain,
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
-        check_bonds=check_bonds, one_side=one_side)
+        check_bonds=check_bonds, one_side=one_side, save_file=filename+'_cont', t_sc=t_sc)
 
     t = result[9] * t_sc
     center = np.stack(result[:3])

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import os
 from scipy.io import savemat
 from timeit import default_timer as timer
+# import pdb
 
 
 def parse_file(filename):
@@ -148,11 +149,12 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
 
     nd_start, nd_end = t_start / t_sc, t_end / t_sc
     start = timer()
+    # pdb.set_trace();
     result = integrate_motion(
         [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order=order,
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
-        check_bonds=check_bonds, one_side=one_side, save_file=filename)
+        check_bonds=check_bonds, one_side=one_side, save_file=filename, t_sc=t_sc)
     end = timer()
 
     t = result[9] * t_sc

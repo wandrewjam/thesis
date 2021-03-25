@@ -326,7 +326,7 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
               rk_solver=None):
     valid_test_nodes = 48
 
-    if level >= 24:
+    if level >= 48:
         print('max recursions reached in time_step')
         raise OverflowError()
 
@@ -801,7 +801,7 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                      forces=None, torques=None, save_quad_matrix_info=False,
                      receptors=None, bonds=None, eta=1, eta_ts=1, kappa=1,
                      lam=0, k0_on=1, k0_off=1, check_bonds=True, one_side=True,
-                     precompute=True, save_file=None):
+                     precompute=True, save_file=None, t_sc=None):
     # Check that we have a valid combination of n_nodes and adaptive
     assert n_nodes > 0 or adaptive
     np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
@@ -930,9 +930,12 @@ def integrate_motion(t_span, num_steps, init, exact_vels, n_nodes=None, a=1.0,
                                 for bd in bond_history]
                 bond_array = np.stack(padded_bonds, axis=-1)
 
-                np.savez(save_dir + save_file, t, x1, x2, x3, r_matrices,
-                         bond_array, receptors, t=t, x=x1, y=x2, z=x3,
-                         r_matrices=r_matrices, bond_array=bond_array,
+                save_r = np.stack(r_matrices, axis=-1)
+                dim_t = t * t_sc
+
+                np.savez(save_dir + save_file, dim_t, x1, x2, x3, save_r,
+                         bond_array, receptors, t=dim_t, x=x1, y=x2, z=x3,
+                         r_matrices=save_r, bond_array=bond_array,
                          receptors=receptors)
 
                 # Save the rng states

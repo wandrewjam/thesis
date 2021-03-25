@@ -20,7 +20,6 @@ def get_steps_dwells(data_list):
         trans = np.append([False], trans)
         i_trans = np.nonzero(trans)[0]
 
-        # pdb.set_trace()
         split_counts = np.split(bond_counts, i_trans)
         bond_maxes = [np.amax(count) for count in split_counts]
 
@@ -54,6 +53,8 @@ def extract_data(expt_names):
                     'bond_array': data_file['bond_array'], 'num': expt[-3:],
                     'receptors': data_file['receptors']
                 }
+                if data_dict['t'][-1] > 3.0001:
+                    data_dict['t'] *= .01
             data.append(data_dict)
         except FileNotFoundError:
             continue
@@ -82,7 +83,10 @@ def plot_trajectory_subset(data_list, filename, save_plots=False):
     lw = 0.7
     for data in data_list:
         t, z = data['t'], data['z']
-        e_mz = data['r_matrices'][2, 0, :]
+        if data['r_matrices'].shape[-1] == 3:
+            e_mz = data['r_matrices'][:, 2, 0]
+        else:
+            e_mz = data['r_matrices'][2, 0, :]
         z_velocities = (z[1:] - z[:-1]) / (t[1:] - t[:-1])
 
         ax[0].plot(t, z, label=data['num'])
@@ -92,7 +96,7 @@ def plot_trajectory_subset(data_list, filename, save_plots=False):
         # Count bonds and plot counts
         bond_counts = count_bonds(data)
         ax[2].plot(t, bond_counts)
-    ax_tw.set_ybound(upper=185)
+    ax_tw.set_ybound(upper=185, lower=-50)
     ax[0].set_ylabel('Downstream displacement ($\\mu m$)')
     ax[0].legend()
     ax_tw.set_ylabel('$z$ velocities ($\\mu m / s$)')
@@ -196,8 +200,10 @@ def extract_bond_information(data_list):
 
 
 def main():
-    save_plots = True
-    expt_num = '5'
+    # pdb.set_trace();
+    save_plots = False
+    expt_num = '8'
+
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
 
     if expt_num == '1':
@@ -217,6 +223,8 @@ def main():
         # runners = ['bd_runner2106', 'bd_runner2105', 'bd_runner2107', 
         #            'bd_runner2101', 'bd_runner2102']
         runners = ['bd_runner2106', 'bd_runner2105']
+    elif expt_num == '8':
+        runners = ['bd_runner3101', 'bd_runner3102', 'bd_runner3103'];
     else:
         raise ValueError('expt_num is invalid')
 
@@ -278,6 +286,9 @@ def main():
         # labels = ['$k_{on} = 0.05$', '$k_{on} = 0.1$',
         #           '$k_{on} = 0.5$', '$k_{on} = 1$', '$k_{on} = 5$']
         labels = ['$k_{on} = 0.05$', '$k_{on} = 0.1$']
+    elif expt_num == '8':
+        labels = ['$k_\text{off} = 1$', '$k_\text{off} = 2.5$',
+        '$k_\text{off} = 5$', '$k_\text{off} = 10$']
     plt.hist(avg_v_list, density=True)
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)
@@ -383,7 +394,6 @@ def main():
     # print(proportion_bound)
     # print(bound_at_end)
 
-    # pdb.set_trace()
     for dwells, maxes in zip(flattened_dwell_list, flattened_maxes_list):
         plt.plot(dwells, maxes, 'o')
     plt.xlabel('Dwell time (s)')
