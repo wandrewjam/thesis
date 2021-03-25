@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from motion_integration import get_bond_lengths
 import pdb
 
 
@@ -50,7 +51,8 @@ def extract_data(expt_names):
                 data_dict = {
                     't': data_file['t'], 'x': data_file['x'], 'y': data_file['y'],
                     'z': data_file['z'], 'r_matrices': data_file['r_matrices'],
-                    'bond_array': data_file['bond_array'], 'num': expt[-3:]
+                    'bond_array': data_file['bond_array'], 'num': expt[-3:],
+                    'receptors': data_file['receptors']
                 }
             data.append(data_dict)
         except FileNotFoundError:
@@ -137,9 +139,65 @@ def get_bound_at_end(data_list):
     return num_bound / len(data_list)
 
 
+def extract_bond_information(data_list):
+    lifetimes = []
+    length_at_fm = []
+    length_at_bk = []
+
+    for data in data_list:
+        formation_times = {}
+
+        bond_array = data['bond_array']
+        reaction_markers = np.nonzero(np.all(
+            bond_array[:, 0, 1:] != bond_array[:, 0, :-1], axis=0))
+        for time in reaction_markers[0]:
+            old_bonds = bond_array[bond_array[:, 0, time] > -1, 0, time]
+            new_bonds = bond_array[bond_array[:, 0, time+1] > -1, 0, time+1]
+            # Ignoring a corner case where a new bond immediately forms
+            # to the same receptor that was previously occupied
+
+            broken_recs = np.setdiff1d(old_bonds, new_bonds,
+                                       assume_unique=True)
+            bonds_broken = bond_array[np.isin(bond_array[:, 0, time],
+                                              broken_recs), :, time]
+
+            for bd in bonds_broken:
+                form_time = formation_times.pop(bd[0])
+                lifetimes = np.append(lifetimes, data['t'][time+1] - form_time)
+
+            formed_recs = np.setdiff1d(new_bonds, old_bonds,
+                                       assume_unique=True)
+            bonds_formed = bond_array[np.isin(bond_array[:, 0, time+1],
+                                              formed_recs), :, time+1]
+
+            for bd in bonds_formed:
+                formation_times.update([(bd[0], data['t'][time])])
+
+            # Check these bonds' lengths and add them to the lists
+            rmat = data['r_matrices'][:, :, time]
+            x1, x2, x3 = data['x'][time], data['y'][time], data['z'][time]
+            rmat_new = data['r_matrices'][:, :, time+1]
+            x1n, x2n, x3n = data['x'][time+1], data['y'][time+1], data['z'][time+1]
+
+            true_receptors = np.dot(data['receptors'], rmat.T)
+            true_receptors += np.array([[x1, x2, x3]])
+
+            true_receptors_new = np.dot(data['receptors'], rmat_new.T)
+            true_receptors_new += np.array([[x1n, x2n, x3n]])
+
+            broken_lengths = get_bond_lengths(bonds_broken,
+                                              receptors=true_receptors_new)
+            formed_lengths = get_bond_lengths(bonds_formed,
+                                              receptors=true_receptors)
+
+            length_at_fm = np.append(length_at_fm, formed_lengths)
+            length_at_bk = np.append(length_at_bk, broken_lengths)
+    return lifetimes, length_at_bk, length_at_fm
+
+
 def main():
     save_plots = True
-    expt_num = '7'
+    expt_num = '5'
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
 
     if expt_num == '1':
@@ -172,11 +230,14 @@ def main():
     dwell_err_list = []
     avg_v_list = []
     flattened_maxes_list = []
+    lifetimes_list = []
+    bk_length_list = []
+    fm_length_list = []
 
     for runner in runners:
         expt_names = extract_run_files(runner)
         data = extract_data(expt_names)
-        plot_trajectories(data, runner, save_plots=save_plots)
+        # plot_trajectories(data, runner, save_plots=save_plots)
         # plot_velocities(data, runner, save_plots=save_plots)
 
         avg_v_list.append(get_average_vels(data))
@@ -190,6 +251,11 @@ def main():
         flattened_steps_list.append(np.concatenate(steps))
         flattened_dwell_list.append(np.concatenate(dwells))
         flattened_maxes_list.append(np.concatenate(dwell_maxes))
+
+        lifetimes, length_at_bk, length_at_fm = extract_bond_information(data)
+        lifetimes_list.append(lifetimes)
+        bk_length_list.append(length_at_bk)
+        fm_length_list.append(length_at_fm)
 
         step_count_list.append([len(trial) for trial in steps])
         dwell_count_list.append([len(trial) for trial in dwells])
@@ -325,6 +391,36 @@ def main():
     plt.legend(labels)
     if save_plots:
         plt.savefig(plot_dir + 'dwell_corrs_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    plt.hist(bk_length_list, density=True)
+    plt.xlabel('Bond length at break ($\\mu m$)')
+    plt.legend(labels)
+    if save_plots:
+        plt.savefig(plot_dir + 'bdbk_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    plt.hist(fm_length_list, density=True)
+    plt.xlabel('Bond length at formation ($\\mu m$)')
+    plt.legend(labels)
+    if save_plots:
+        plt.savefig(plot_dir + 'bdfm_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    plt.hist(lifetimes_list, density=True)
+    plt.xlabel('Bond lifetimes ($s$)')
+    plt.legend(labels)
+    if save_plots:
+        plt.savefig(plot_dir + 'bdlf_' + expt_num, bbox_inches='tight')
         plt.close()
     else:
         plt.tight_layout()
