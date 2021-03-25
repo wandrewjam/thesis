@@ -7,7 +7,7 @@ from motion_integration import integrate_motion, nondimensionalize, get_bond_len
 from scipy.io import savemat
 
 
-def continue_integration(filename, t_end, i_start=-1, debug=False, save_data=True):
+def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_data=True):
     data_dir = path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     pars = parse_file(filename)
 
@@ -40,6 +40,13 @@ def continue_integration(filename, t_end, i_start=-1, debug=False, save_data=Tru
     #             return -1
     #         else:
     #             print('Please enter y or n')
+
+    if t_end is None:
+        t_end = pars['t_end']
+
+    if np.abs(t_end - t[i_start]) < 1e-12:
+        print('Simulation {} already completed'.format(filename))
+        return
 
     assert t_end > t[i_start]
 
@@ -238,4 +245,4 @@ if __name__ == '__main__':
     import sys
 
     filename = sys.argv[1]
-    continue_integration(filename, 0.462)
+    continue_integration(filename)
