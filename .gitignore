@@ -26,6 +26,7 @@ ss*.txt
 *.dep
 *.fig
 *.mat
+*.mov
 
 # Folders
 literature_repository
