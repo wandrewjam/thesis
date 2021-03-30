@@ -9,7 +9,8 @@ load(loadfile)
 
 [x_wall, xp_ref, y_wall, yp_ref, z_wall, zp_ref] = define_parametric_vars();
 
-gap = 1;
+t = t / 100;
+gap = 5;
 slice = 1:gap:length(t);
 new_length = length(slice);
 if mod(length(t) - 1, gap) ~= 0
@@ -65,24 +66,32 @@ s.EdgeAlpha = 0.4;
 hold on
 w = surf(y_wall, z_wall, x_wall, C2);
 axis([-2, 2, -2, 2, 0, 3.2])
+prop_names = {'TickLabelInterpreter', 'FontSize', 'XGrid', 'YGrid'}';
+prop_values = {'latex', 14,'on', 'on'};
 
-titlestr = sprintf('$t = %.2f$', t(1));
+titlestr = sprintf('$t = %.4f$', t(1));
 xlabel('$y$', 'Interpreter', 'latex')
 ylabel('$z$', 'Interpreter', 'latex')
 zlabel('$x$', 'Interpreter', 'latex')
 title_obj = title(titlestr, 'Interpreter', 'latex');
-set(gca, 'TickLabelInterpreter', 'latex');
+set(gca, prop_names, prop_values);
 
 view([95, 2])
 % s.EdgeColor = 'blue';
 
 subplot('Position', [0.13,0.3,0.775,0.17])
-l1 = plot(t(1), x1(1));
-axis([-.4 50.4 1. 1.6])
+l1 = plot(t(1), x1(1), 'LineWidth', 3.);
+axis([-.004 .504 0.5 1.6])
+xlabel('Time (s)', 'Interpreter', 'latex')
+ylabel('Height ($\mu$m)', 'Interpreter', 'latex')
+set(gca, prop_names, prop_values);
 
 subplot('Position', [0.13,0.07,0.775,0.17])
-l2 = plot(t(1), e3(1));
-axis([-.4 50.4 -1.1 1.1])
+l2 = plot(t(1), e3(1), 'LineWidth', 3.);
+axis([-.004 .504 -1.1 1.1])
+xlabel('Time (s)', 'Interpreter', 'latex')
+ylabel('$z$-cmp of minor axis', 'Interpreter', 'latex')
+set(gca, prop_names, prop_values);
 
 axes(plt_ax)
 set(gca, 'DataAspectRatio', [1 1 1], 'Projection', 'perspective')
@@ -113,7 +122,7 @@ writeVideo(v, frame)
         x_mark.XData = ycom; x_mark.YData = zcom - 2; x_mark.ZData = xcom;
 
         axis([-2 + ycom, 2 + ycom, -2 + zcom, 2 + zcom, 0, 3.2])
-        title_obj.String = sprintf('$t = %.2f$', t(slice(ii)));
+        title_obj.String = sprintf('$t = %.4f$', t(slice(ii)));
         set(gca, 'TickLabelInterpreter', 'latex')
 
         pause(0.01 * gap)
@@ -123,6 +132,24 @@ writeVideo(v, frame)
     end
 
     close(v)
+    
+    % Plot center of mass and orientation
+    figure('Position', [600, 40, 764, 500])
+    tiledlayout(2, 1)
+    
+    nexttile
+    plot(t, x1, 'LineWidth', 3.)
+    axis([-.004 .504 0.5 1.6])
+    xlabel('Time (s)', 'Interpreter', 'latex')
+    ylabel('Height ($\mu$m)', 'Interpreter', 'latex')
+    set(gca, prop_names, prop_values);
+    
+    nexttile
+    plot(t, e3, 'LineWidth', 3.)
+    axis([-.004 .504 -1.1 1.1])
+    xlabel('Time (s)', 'Interpreter', 'latex')
+    ylabel('$z$-cmp of minor axis', 'Interpreter', 'latex')
+    set(gca, prop_names, prop_values);
 
 %     pause(1)
 % end
