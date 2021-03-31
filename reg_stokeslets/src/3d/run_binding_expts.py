@@ -6,7 +6,7 @@ from motion_integration import find_min_separation
 
 def pick_random_height():
     a = 1.5
-    b = (a - 1) / 0.43 - a + 2
+    b = (a - 1) / 0.043 - a + 2
     loc = 0.55
     scale = 3.45
 
@@ -17,7 +17,7 @@ def pick_random_height():
         if r < 1.65:
             break
 
-    return np.random.uniform(0.7, 1.4)
+    return r
 
 
 def main(num_expts, runner, random_initial=False, start_numbering=-1, **pars):
@@ -26,6 +26,11 @@ def main(num_expts, runner, random_initial=False, start_numbering=-1, **pars):
     defaults = parse_file('default')
 
     all_filenames = []
+
+    if random_initial:
+        assert num_expts <= 512
+        saved_positions = np.load(os.path.expanduser(
+            '~/thesis/reg_stokeslets/src/3d/r_pos.npy'))
 
     for i in range(num_expts):
         par_dict = defaults.copy()
@@ -65,20 +70,25 @@ def main(num_expts, runner, random_initial=False, start_numbering=-1, **pars):
             ('seed', seed), ('filename', filename)])
         par_dict.update(pars)
 
+
+
+
+            # height = pick_random_height()
+            # while True:
+            #     theta = np.random.uniform(-np.pi, np.pi)
+            #     phi = np.random.uniform(0, np.pi)
+            #
+            #     cp, sp = np.cos(phi), np.sin(phi)
+            #     ct, st = np.cos(theta), np.sin(theta)
+            #     e_m = np.array([cp, ct * sp, st * sp])
+            #     sep = find_min_separation(height, e_m)
+            #
+            #     if sep > 0.0154:
+            #         break
+
         if random_initial:
-            height = pick_random_height()
-            while True:
-                theta = np.random.uniform(-np.pi, np.pi)
-                phi = np.random.uniform(0, np.pi)
-
-                cp, sp = np.cos(phi), np.sin(phi)
-                ct, st = np.cos(theta), np.sin(theta)
-                e_m = np.array([cp, ct * sp, st * sp])
-                sep = find_min_separation(height, e_m)
-                
-                if sep > 0.0154:
-                    break
-
+            height = saved_positions[i, 0]
+            e_m = saved_positions[i, 1:4]
             par_dict['x1'] = height
             par_dict['emx'], par_dict['emy'], par_dict['emz'] = e_m
 
