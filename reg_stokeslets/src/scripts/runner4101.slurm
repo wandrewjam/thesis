@@ -1,9 +1,10 @@
 #!/bin/bash
-#SBATCH --time=08:00:00
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=32
-#SBATCH --account=notchpeak-shared-short
-#SBATCH --partition=notchpeak-shared-short
+#SBATCH --ntasks=16
+#SBATCH -C "c16"
+#SBATCH --account=fogelson
+#SBATCH --partition=kingspeak
 #SBATCH -o runner4101.out
 #SBATCH -e runner4101.err
 
