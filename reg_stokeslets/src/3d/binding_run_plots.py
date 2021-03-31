@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from motion_integration import get_bond_lengths
-import pdb
+# import pdb
 
 
 def get_steps_dwells(data_list):
@@ -123,6 +123,7 @@ def get_average_vels(data_list):
     average_vels = []
     for data in data_list:
         if data['bond_array'].shape[0] > 0:
+            # pdb.set_trace()
             average_vels.append(data['z'][-1] / data['t'][-1])
     return average_vels
 
@@ -152,7 +153,7 @@ def extract_bond_information(data_list):
         formation_times = {}
 
         bond_array = data['bond_array']
-        reaction_markers = np.nonzero(np.all(
+        reaction_markers = np.nonzero(np.any(
             bond_array[:, 0, 1:] != bond_array[:, 0, :-1], axis=0))
         for time in reaction_markers[0]:
             old_bonds = bond_array[bond_array[:, 0, time] > -1, 0, time]
@@ -224,7 +225,7 @@ def main():
         #            'bd_runner2101', 'bd_runner2102']
         runners = ['bd_runner2106', 'bd_runner2105']
     elif expt_num == '8':
-        runners = ['bd_runner3101', 'bd_runner3102', 'bd_runner3103'];
+        runners = ['bd_runner3102', 'bd_runner3103'];
     else:
         raise ValueError('expt_num is invalid')
 
@@ -287,8 +288,9 @@ def main():
         #           '$k_{on} = 0.5$', '$k_{on} = 1$', '$k_{on} = 5$']
         labels = ['$k_{on} = 0.05$', '$k_{on} = 0.1$']
     elif expt_num == '8':
-        labels = ['$k_\text{off} = 1$', '$k_\text{off} = 2.5$',
-        '$k_\text{off} = 5$', '$k_\text{off} = 10$']
+        # labels = ['$k_{off} = 1$', '$k_{off} = 2.5$',
+        # '$k_{off} = 5$', '$k_{off} = 10$']
+        labels = ['$k_{off} = 2.5$', '$k_{off} = 10$']
     plt.hist(avg_v_list, density=True)
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)
