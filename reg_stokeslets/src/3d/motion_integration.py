@@ -405,9 +405,11 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
                 s_matrices += half_step2[-1]
         else:
             if receptors is not None:
-                new_bonds = update_bonds(
-                    receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off,
-                    eta, eta_ts, lam)
+                new_bonds = [
+                    update_bonds(receptors, bonds, new_x1[-1], new_x2[-1],
+                                 new_x3[-1], new_rmat[-1], dt, k0_on, k0_off,
+                                 eta, eta_ts, lam)
+                ]
             else:
                 new_bonds = None
             dt_list = [dt]
@@ -472,8 +474,9 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
             # We can only get to this code if the end position is valid
             if receptors is not None:
                 new_bonds = [
-                    update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt,
-                                 k0_on, k0_off, eta, eta_ts, lam)
+                    update_bonds(receptors, bonds, new_x1[-1], new_x2[-1],
+                                 new_x3[-1], new_rmat[-1], dt, k0_on, k0_off,
+                                 eta, eta_ts, lam)
                 ]
             else:
                 new_bonds = [None]
@@ -579,9 +582,11 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
 
             # We can only get to this code if the end position is valid
             if receptors is not None:
-                new_bonds = update_bonds(
-                    receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off,
-                    eta, eta_ts, lam)
+                new_bonds = [
+                    update_bonds(receptors, bonds, new_x1[-1], new_x2[-1],
+                                 new_x3[-1], new_rmat[-1], dt, k0_on, k0_off,
+                                 eta, eta_ts, lam)
+                ]
             else:
                 new_bonds = None
             dt_list = [dt]
@@ -706,8 +711,9 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
             rk_solver.my_status = 2
         if receptors is not None:
             new_bonds = [
-                update_bonds(receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on,
-                             k0_off, eta, eta_ts, lam)
+                update_bonds(receptors, bonds, new_x1[-1], new_x2[-1],
+                                 new_x3[-1], new_rmat[-1], dt, k0_on, k0_off,
+                                 eta, eta_ts, lam)
             ]
             if np.any(bonds != new_bonds[-1]) or len(bonds) != len(new_bonds[-1]):
                 rk_solver.my_status = 2
