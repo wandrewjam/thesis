@@ -1,0 +1,2 @@
+/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/resistance_matrix_test.py:56: LinAlgWarning: Ill-conditioned matrix (rcond=1.18127e-17): result may not be accurate.
+  intermediate_solve = solve(

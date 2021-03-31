@@ -1,0 +1,24 @@
+seed 3586593595
+t_start 0.0
+t_end 3.0
+num_steps 250
+n_nodes 8
+a 1.5
+b 0.5
+adaptive False
+shear 100.0
+l_sep 0.1
+dimk0_on 5.0
+dimk0_off 2.5
+sig 10000.0
+sig_ts 9999.0
+one_side True
+check_bonds True
+order 2nd
+receptor_multiplier 1
+x1 1.1023306201242518
+emx -0.7912913062857242
+emy -0.5220592584029757
+emz -0.31829577331841413
+
+done

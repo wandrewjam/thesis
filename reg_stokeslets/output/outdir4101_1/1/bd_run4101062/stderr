@@ -1,0 +1,203 @@
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 438, in time_step
+    half_step2 = evaluate_motion_equations(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 205, in evaluate_motion_equations
+    assert (domain == 'free' or valid_orientation(n_nodes=48, e_m=e_m,
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 470, in time_step
+    raise AssertionError('next step will not be valid')
+AssertionError: next step will not be valid
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "src/3d/binding_expt.py", line 257, in <module>
+    main(**pars)
+  File "src/3d/binding_expt.py", line 151, in main
+    result = integrate_motion(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 877, in integrate_motion
+    res = time_step(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 486, in time_step
+    result1 = time_step(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 486, in time_step
+    result1 = time_step(
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 486, in time_step
+    result1 = time_step(
+  [Previous line repeated 21 more times]
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/motion_integration.py", line 331, in time_step
+    raise OverflowError()
+OverflowError
