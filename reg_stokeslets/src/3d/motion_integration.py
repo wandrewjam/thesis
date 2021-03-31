@@ -127,11 +127,11 @@ def update_bonds(receptors, bonds, x1, x2, x3, rmat, dt, k0_on, k0_off, eta,
         raise ValueError('lam must be positive')
 
     probs = 1 - np.exp(-dt * k_on)
-    # r1 = rng.rand(probs[probs > 0].shape[0])
-    r1 = rng.rand(k_on.shape[0])
+    r1 = rng.rand(probs[probs > 0].shape[0])
+    # r1 = rng.rand(k_on.shape[0])
     draws = r1.size
-    # form_bonds = (probs[probs > 0] > r1)
-    form_bonds = (probs > r1)
+    form_bonds = (probs[probs > 0] > r1)
+    # form_bonds = (probs > r1)
 
     # Form bonds
     for i, el in zip(np.nonzero(probs > 0)[0], form_bonds):
