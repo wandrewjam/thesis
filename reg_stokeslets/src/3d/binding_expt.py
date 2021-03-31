@@ -108,7 +108,8 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
     #     seed = np.random.randint(int('1'*32, 2)+1)
     if seed is None:
         seed = np.random.randint(int('1'*32, 2)+1)
-    np.random.seed(seed)
+    rng = np.random.RandomState()
+    rng = np.random.seed(seed)
 
     def exact_vels(em):
         return np.zeros(6)
@@ -151,10 +152,11 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
     start = timer()
     # pdb.set_trace();
     result = integrate_motion(
-        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain, order=order,
-        adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
-        eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
-        check_bonds=check_bonds, one_side=one_side, save_file=filename, t_sc=t_sc)
+        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain,
+        order=order, adaptive=adaptive, receptors=receptors, bonds=bonds,
+        eta=eta, eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on,
+        k0_off=k0_off, check_bonds=check_bonds, one_side=one_side,
+        save_file=filename, rng=rng, t_sc=t_sc)
     end = timer()
 
     t = result[9] * t_sc
@@ -220,9 +222,9 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
                         for bd in bond_history]
         bond_array = np.stack(padded_bonds, axis=-1)
 
-        np.savez(save_dir + filename, t, x, y, z, r_matrices, bond_array,
-                 receptors, t=t, x=x, y=y, z=z, r_matrices=r_matrices,
-                 bond_array=bond_array, receptors=receptors)
+        np.savez(save_dir + filename, t=t, x=x, y=y, z=z,
+                 r_matrices=r_matrices, bond_array=bond_array,
+                 receptors=receptors)
         savemat(save_dir + filename + '.mat',
                 {'t': t, 'x': x, 'y': y, 'z': z, 'R': r_matrices,
                  'bond_array': bond_array, 'receptors': receptors})

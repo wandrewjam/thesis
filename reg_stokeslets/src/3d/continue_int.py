@@ -11,16 +11,6 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
     data_dir = path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     pars = parse_file(filename)
 
-    try:
-        with open(data_dir + filename + '.pkl', 'rb') as f:
-            rng_history = pkl.load(f)
-    except UnicodeDecodeError as e:
-        with open(data_dir + filename + '.pkl', 'rb') as f:
-            rng_history = pkl.load(f, encoding='latin1')
-    except Exception as e:
-        print('Unable to load data ', filename, ':', e)
-        raise
-
     with np.load(data_dir + filename + '.npz') as data:
         x = data['x']
         y = data['y']
@@ -33,6 +23,7 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
             r_matrices = r_matrices.transpose(1, 2, 0)
         receptors = data['receptors']
         bond_array = data['bond_array']
+        rng_draws = data['draws']
 
     # if t_end < t[-1]:
     #     while True:
@@ -58,17 +49,19 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
         import pdb
         pdb.set_trace()
 
-    np.random.set_state(rng_history[i_start])
+    rng = np.random.RandomState(pars['seed'])
+    rng.random(size=np.cumsum(rng_draws)[i_start])
 
     old_x, old_y, old_z = x[:i_start], y[:i_start], z[:i_start]
     old_t = t[:i_start]
     old_rmat = r_matrices[..., :i_start]
     old_bond_array = bond_array[..., :i_start]
-    old_rng = rng_history[:i_start]
+    old_draws = rng_draws[:i_start]
 
     # Define arguments to the integrate_motion function
-    dt = (pars['t_end'] - pars['t_start']) / pars['num_steps']
-    num_steps = np.ceil((t_end - t[i_start]) / dt - 1e-8).astype('int')
+    # dt = (pars['t_end'] - pars['t_start']) / pars['num_steps']
+    # num_steps = np.ceil((t_end - t[i_start]) / dt - 1e-8).astype('int')
+    num_steps = 10
 
     center = np.array([x[i_start], y[i_start], z[i_start]])
     init = np.concatenate((center, r_matrices[..., i_start].reshape((9,))))
@@ -101,14 +94,15 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
         [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain,
         adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
         eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
-        check_bonds=check_bonds, one_side=one_side, save_file=filename+'_cont', t_sc=t_sc)
+        check_bonds=check_bonds, one_side=one_side, save_file=filename+'_cont',
+    t_sc=t_sc, rng=rng)
 
     t = result[9] * t_sc
     center = np.stack(result[:3])
 
     x, y, z, r_matrices = result[:4]
     bond_history = result[8]
-    rng_states = result[10]
+    draws = result[10]
 
     max_bonds = len(max(*bond_history, key=len))
     max_bonds = max([max_bonds, old_bond_array.shape[0]])
@@ -129,23 +123,22 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
     new_z = np.concatenate((old_z, z))
     new_rmat = np.concatenate((old_rmat, r_matrices), axis=-1)
     new_bond_array = np.concatenate((old_padded, bond_array), axis=-1)
-    new_rng = old_rng + rng_states
+    new_draws = np.concatenate((old_draws, draws[1:]))
 
     if save_data:
         new_filename = filename + '_cont'
-        np.savez(data_dir + new_filename, new_t, new_x, new_y, new_z, new_rmat,
-                 new_bond_array, receptors, t=new_t, x=new_x, y=new_y, z=new_z,
+        np.savez(data_dir + new_filename, t=new_t, x=new_x, y=new_y, z=new_z,
                  r_matrices=new_rmat, bond_array=new_bond_array,
-                 receptors=receptors)
+                 receptors=receptors, draws=new_draws)
         savemat(data_dir + new_filename,
                 {'t': new_t, 'x': new_x, 'y': new_y, 'z': new_z, 'R': new_rmat,
-                 'bond_array': new_bond_array, 'receptors': receptors})
+                 'bond_array': new_bond_array, 'receptors': receptors,
+                 'draws': new_draws})
         save_info(new_filename, seed=pars['seed'], t_start=pars['t_start'],
                   t_end=pars['t_end'], num_steps=num_steps, n_nodes=n_nodes,
                   a=a, b=b, adaptive=adaptive, shear=shear, l_sep=l_sep,
                   dimk0_on=dimk0_on, dimk0_off=dimk0_off, sig=sig,
                   sig_ts=sig_ts, one_side=one_side, check_bonds=check_bonds)
-        save_rng(new_filename, new_rng)
 
     # t = new_t
     # x = new_x
@@ -251,4 +244,4 @@ if __name__ == '__main__':
     import sys
 
     filename = sys.argv[1]
-    continue_integration(filename)
+    continue_integration(filename, t_end=0.10400585937499995, i_start=56, save_data=False)
