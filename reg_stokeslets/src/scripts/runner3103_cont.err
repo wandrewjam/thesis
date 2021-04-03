@@ -1,60 +1,132 @@
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
-  File "src/3d/continue_int.py", line 15, in continue_integration
-    with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103006.pkl'
+  File "src/3d/continue_int.py", line 16, in continue_integration
+    rng_history = pkl.load(f)
+EOFError: Ran out of input
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103028.pkl'
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103107.pkl'
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103027.pkl'
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103108.pkl'
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103043.pkl'
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103109.pkl'
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103044.pkl'
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103110.pkl'
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103079.pkl'
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103111.pkl'
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103087.pkl'
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103112.pkl'
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103101.pkl'
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103113.pkl'
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103105.pkl'
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103114.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103115.pkl'
 Traceback (most recent call last):
   File "src/3d/continue_int.py", line 254, in <module>
     continue_integration(filename)
   File "src/3d/continue_int.py", line 15, in continue_integration
     with open(data_dir + filename + '.pkl', 'rb') as f:
 FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103116.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103117.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103118.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103119.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103120.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103121.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103122.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103123.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103124.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103125.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103126.pkl'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3103127.pkl'

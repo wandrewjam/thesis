@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=8:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
+#SBATCH --ntasks=32
 #SBATCH --account=notchpeak-shared-short
 #SBATCH --partition=notchpeak-shared-short
 #SBATCH -o runner3101_cont.out

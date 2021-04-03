@@ -1,9 +1,10 @@
 #!/bin/bash
-#SBATCH --time=8:00:00
+#SBATCH --time=72:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
-#SBATCH --account=notchpeak-shared-short
-#SBATCH --partition=notchpeak-shared-short
+#SBATCH --ntasks=32
+#SBATCH --account=owner-guest
+#SBATCH --partition=notchpeak-guest
+#SBATCH -C "[(rogersa|farmer|cabrera|gnosis|dtn|mansfield|oberg|yrao|chipman|anderegg|fiorella|facelli|uspcasw|pezzolesi|gompert|rutter)&(c32|c64)]"
 #SBATCH -o runner4101_cont.out
 #SBATCH -e runner4101_cont.err
 

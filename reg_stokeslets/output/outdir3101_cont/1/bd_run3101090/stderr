@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 15, in continue_integration
+    with open(data_dir + filename + '.pkl', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run3101090.pkl'

@@ -1,1 +1,664 @@
-slurmstepd: error: *** JOB 2319206 ON notch081 CANCELLED AT 2021-03-25T07:14:39 DUE TO TIME LIMIT ***
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101048.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101045.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101046.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101047.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101050.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101049.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101053.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101052.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101051.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101054.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101056.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101055.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101057.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101059.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101058.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101062.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101061.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101064.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101063.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101066.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101068.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101060.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101069.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101065.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101067.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101071.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101074.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101070.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101072.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101076.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101077.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101075.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101073.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101078.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101080.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101079.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101084.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101081.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101085.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101083.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101082.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101087.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101088.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101089.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101090.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101092.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101091.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101094.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101096.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101095.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101086.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101093.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101098.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101100.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101099.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101097.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101101.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101103.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101105.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101104.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101106.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101108.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101102.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101109.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101107.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101113.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101110.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101112.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101115.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101114.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101116.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101111.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101117.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101118.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101119.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101123.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101121.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101122.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101120.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101124.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101125.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101127.npz'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 254, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 24, in continue_integration
+    with np.load(data_dir + filename + '.npz') as data:
+  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101126.npz'
