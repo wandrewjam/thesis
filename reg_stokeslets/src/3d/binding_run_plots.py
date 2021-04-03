@@ -179,6 +179,8 @@ def extract_bond_information(data_list):
                 formation_times.update([(bd[0], data['t'][time])])
 
             # Check these bonds' lengths and add them to the lists
+            if data['r_matrices'].shape[-1] == 3:
+                data['r_matrices'] = data['r_matrices'].transpose(1, 2, 0)
             rmat = data['r_matrices'][:, :, time]
             x1, x2, x3 = data['x'][time], data['y'][time], data['z'][time]
             rmat_new = data['r_matrices'][:, :, time+1]
@@ -193,7 +195,7 @@ def extract_bond_information(data_list):
             broken_lengths = get_bond_lengths(bonds_broken,
                                               receptors=true_receptors_new)
             formed_lengths = get_bond_lengths(bonds_formed,
-                                              receptors=true_receptors)
+                                              receptors=true_receptors_new)
 
             length_at_fm = np.append(length_at_fm, formed_lengths)
             length_at_bk = np.append(length_at_bk, broken_lengths)
@@ -202,7 +204,7 @@ def extract_bond_information(data_list):
 
 def main():
     # pdb.set_trace();
-    save_plots = False
+    save_plots = True
     expt_num = '8'
 
     plot_dir = os.path.expanduser('~/thesis/reg_stokeslets/plots/')
@@ -225,7 +227,9 @@ def main():
         #            'bd_runner2101', 'bd_runner2102']
         runners = ['bd_runner2106', 'bd_runner2105']
     elif expt_num == '8':
-        runners = ['bd_runner3102', 'bd_runner3103'];
+        runners = ['bd_runner3101', 'bd_runner3102', 'bd_runner1106', 'bd_runner3103']
+    elif expt_num == '9':
+        runners = ['bd_runner1106', 'bd_runner4101']
     else:
         raise ValueError('expt_num is invalid')
 
@@ -246,7 +250,7 @@ def main():
     for runner in runners:
         expt_names = extract_run_files(runner)
         data = extract_data(expt_names)
-        # plot_trajectories(data, runner, save_plots=save_plots)
+        plot_trajectories(data, runner, save_plots=save_plots)
         # plot_velocities(data, runner, save_plots=save_plots)
 
         avg_v_list.append(get_average_vels(data))
@@ -288,9 +292,11 @@ def main():
         #           '$k_{on} = 0.5$', '$k_{on} = 1$', '$k_{on} = 5$']
         labels = ['$k_{on} = 0.05$', '$k_{on} = 0.1$']
     elif expt_num == '8':
-        # labels = ['$k_{off} = 1$', '$k_{off} = 2.5$',
-        # '$k_{off} = 5$', '$k_{off} = 10$']
-        labels = ['$k_{off} = 2.5$', '$k_{off} = 10$']
+        labels = ['$k_{off} = 1$', '$k_{off} = 2.5$',
+        '$k_{off} = 5$', '$k_{off} = 10$']
+        # labels = ['$k_{off} = 2.5$', '$k_{off} = 10$']
+    elif expt_num == '9':
+        labels = ['Normal receptors', 'Double receptors']
     plt.hist(avg_v_list, density=True)
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)
