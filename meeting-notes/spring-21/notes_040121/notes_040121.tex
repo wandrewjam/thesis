@@ -1,0 +1,124 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+\graphicspath{{/Users/andrewwork/thesis/reg_stokeslets/plots/}}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\input{/Users/andrewwork/thesis/model-defs}
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+\begin{itemize}
+% \item A couple of different things: random bond heights (samples and
+%   plot)
+% \item Results from re-done simulations of rolling
+% \item K_on values from papers
+\item I generated a fixed set of random heights to reuse for the
+  experiments with random initial conditions. Plots of the density
+  histogram of the chosen heights and the underlying distribution are
+  shown in Figure \ref{fig:plt-heights}. I restrict the starting
+  heights from 0.55 $\mu m$ to 1.65 $\mu m$, however the distribution
+  has nonzero values out to 4 $\mu m$. The sampled range contains more
+  than 97\% of the distribution.
+  \begin{itemize}
+  \item In the simulations generating this distribution, platelet
+    dimensions were $2.8 \times 2.8 \times 0.7$, at a hematocrit of
+    $20 \%$
+  \end{itemize}
+\item I had to change the way I'm saving info about the random number
+  generator in my simulations, because I was over my disk use quota on
+  the CHPC servers
+\item I re-ran simulations with $k_\tn{off}$ rates at 1, 2.5, 5, and
+  10 (with $k_\tn{on} = 5 / s$), and simulations with twice the number
+  of receptors, however the plots are still giving weird results, I
+  have some suspicions but haven't checked them yet
+\item Experimental estimates of $k_\tn{on}$ for $\alpha_{IIb}
+  \beta_{3}$--fbg:
+  \begin{itemize}
+  \item Litvinov et. al. (2012) report
+    $k_\tn{on, 1} = 1.4 \times 10^{-4} \frac{\mu m^2}{s}$ in a
+    low-affinity state, and
+    $k_\tn{on, 2} = 2.3 \times 10^{-4} \frac{\mu m^2}{s}$ in a
+    high-affinity state
+  \item According to Gillespie, a bimolecular reaction rate $c$
+    and a 2nd order kinetic rate constant $k$ are related such that $c
+    = k / \Omega$, where $\Omega$ is the system volume
+  \item Based on this relation, and a contact area of $450 nm^2$ in
+    Litvinov, this would give a bimolecular on-rate of $0.31 / s$
+  \item Do we believe this? It seems overly simple
+  \end{itemize}
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\textwidth]{height-dist.png}
+  \caption{Samples and distribution of initial platelet heights}
+  \label{fig:plt-heights}
+\end{figure}
+
+% \bibliographystyle{plain}
+% \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
