@@ -414,8 +414,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
         else:
             if receptors is not None:
                 bond_result = update_bonds(
-                    receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off,
-                    eta, eta_ts, lam, rng=rng)
+                    receptors, bonds, new_x1[-1], new_x2[-1], new_x3[-1],
+                    new_rmat[-1], dt, k0_on, k0_off, eta, eta_ts, lam, rng=rng)
                 new_bonds = [bond_result[0]]
                 draws_int = bond_result[1]
             else:
@@ -483,8 +483,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
             # We can only get to this code if the end position is valid
             if receptors is not None:
                 bond_result = update_bonds(
-                    receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off,
-                    eta, eta_ts, lam, rng=rng)
+                    receptors, bonds, new_x1[-1], new_x2[-1], new_x3[-1],
+                    new_rmat[-1], dt, k0_on, k0_off, eta, eta_ts, lam, rng=rng)
                 new_bonds = [bond_result[0]]
                 draws_int = bond_result[1]
             else:
@@ -593,8 +593,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
             # We can only get to this code if the end position is valid
             if receptors is not None:
                 bond_result = update_bonds(
-                    receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off,
-                    eta, eta_ts, lam, rng=rng)
+                    receptors, bonds, new_x1[-1], new_x2[-1], new_x3[-1],
+                    new_rmat[-1], dt, k0_on, k0_off, eta, eta_ts, lam, rng=rng)
                 new_bonds = [bond_result[0]]
                 draws_int = bond_result[1]
             else:
@@ -722,8 +722,8 @@ def time_step(dt, x1, x2, x3, r_matrix, forces, torques, exact_vels, n_nodes=8,
             rk_solver.my_status = 2
         if receptors is not None:
             bond_result = update_bonds(
-                receptors, bonds, x1, x2, x3, r_matrix, dt, k0_on, k0_off, eta,
-                eta_ts, lam, rng=rng)
+                receptors, bonds, new_x1[-1], new_x2[-1], new_x3[-1],
+                    new_rmat[-1], dt, k0_on, k0_off, eta, eta_ts, lam, rng=rng)
             new_bonds = [bond_result[0]]
             draws_int = bond_result[1]
             if np.any(bonds != new_bonds[-1]) or len(bonds) != len(new_bonds[-1]):
