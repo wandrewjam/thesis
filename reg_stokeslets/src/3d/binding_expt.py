@@ -212,7 +212,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
 
         x, y, z, r_matrices = result[:4]
         bond_history = result[8]
-        rng_states = result[10]
+        draws = result[10]
 
         max_bonds = len(max(*bond_history, key=len))
         padded_bonds = [np.pad(bd, pad_width=((0, max_bonds - bd.shape[0]),

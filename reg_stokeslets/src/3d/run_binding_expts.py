@@ -87,8 +87,8 @@ def main(num_expts, runner, random_initial=False, start_numbering=-1, **pars):
             #         break
 
         if random_initial:
-            height = saved_positions[i, 0]
-            e_m = saved_positions[i, 1:4]
+            height = saved_positions[i+128, 0]
+            e_m = saved_positions[i+128, 1:4]
             par_dict['x1'] = height
             par_dict['emx'], par_dict['emy'], par_dict['emz'] = e_m
 
