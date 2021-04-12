@@ -229,7 +229,9 @@ def main():
     elif expt_num == '8':
         runners = ['bd_runner3101', 'bd_runner3102', 'bd_runner1106', 'bd_runner3103']
     elif expt_num == '9':
-        runners = ['bd_runner1106', 'bd_runner4101']
+        runners = ['bd_runner1106', 'bd_runner4101', 'bd_runner1107']
+    elif expt_num == '10':
+        runners = ['bd_runner1105', 'bd_runner1106', 'bd_runner1107', 'bd_runner1108']
     else:
         raise ValueError('expt_num is invalid')
 
@@ -280,7 +282,7 @@ def main():
         dwell_err_list.append(np.std(flattened_dwell_list[-1]) / np.sqrt(flattened_dwell_list[-1].shape[0]))
         print('Finished with {}'.format(runner))
 
-    if expt_num in ['1', '2', '3', '4', '5'] :
+    if expt_num in ['1', '2', '3', '4', '5', '10'] :
         labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$',
         '$k_{on} = 25$']
         # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
@@ -296,7 +298,7 @@ def main():
         '$k_{off} = 5$', '$k_{off} = 10$']
         # labels = ['$k_{off} = 2.5$', '$k_{off} = 10$']
     elif expt_num == '9':
-        labels = ['Normal receptors', 'Double receptors']
+        labels = ['Normal receptors', 'Double receptors', 'Double on rate']
     plt.hist(avg_v_list, density=True)
     plt.xlabel('Average velocity ($\\mu m / s$)')
     plt.legend(labels)
