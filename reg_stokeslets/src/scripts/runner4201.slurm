@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --time=72:00:00
-#SBATCH --nodes=1
+#SBATCH --time=24:00:00
+#SBATCH --nodes=2
 #SBATCH --ntasks=32
-#SBATCH --account=owner-guest
-#SBATCH --partition=notchpeak-guest
-#SBATCH -C "[(rogersa|farmer|cabrera|gnosis|dtn|mansfield|oberg|yrao|chipman)&(c32|c64)]"
+#SBATCH -C "c16"
+#SBATCH --account=fogelson
+#SBATCH --partition=kingspeak
 #SBATCH -o runner4201.out
 #SBATCH -e runner4201.err
 

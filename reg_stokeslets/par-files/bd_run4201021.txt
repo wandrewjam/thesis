@@ -1,7 +1,7 @@
-seed 3001337028
+seed 2350409494
 t_start 0.0
 t_end 3.0
-num_steps 250
+num_steps 1500
 n_nodes 8
 a 1.5
 b 0.5
@@ -16,9 +16,9 @@ one_side True
 check_bonds True
 order 2nd
 receptor_multiplier 2
-x1 1.2312397348114696
-emx -0.6270657964488694
-emy -0.534130759865531
-emz -0.5670033670882524
+x1 0.9733261909501439
+emx -0.9947656758846442
+emy -0.09395011932592989
+emz -0.040182398639336724
 
 done

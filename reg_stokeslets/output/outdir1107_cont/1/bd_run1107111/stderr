@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 247, in <module>
+    continue_integration(filename, t_end=0.10400585937499995, i_start=56, save_data=False)
+  File "src/3d/continue_int.py", line 46, in continue_integration
+    assert t_end > t[i_start]
+AssertionError
