@@ -108,8 +108,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
     #     seed = np.random.randint(int('1'*32, 2)+1)
     if seed is None:
         seed = np.random.randint(int('1'*32, 2)+1)
-    rng = np.random.RandomState()
-    rng = np.random.seed(seed)
+    rng = np.random.RandomState(seed)
 
     def exact_vels(em):
         return np.zeros(6)
@@ -224,7 +223,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
 
         np.savez(save_dir + filename, t=t, x=x, y=y, z=z,
                  r_matrices=r_matrices, bond_array=bond_array,
-                 receptors=receptors)
+                 receptors=receptors, draws=draws)
         savemat(save_dir + filename + '.mat',
                 {'t': t, 'x': x, 'y': y, 'z': z, 'R': r_matrices,
                  'bond_array': bond_array, 'receptors': receptors})
@@ -235,7 +234,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         #           dimk0_on=dimk0_on, dimk0_off=dimk0_off, sig=sig,
         #           sig_ts=sig_ts, one_side=one_side, check_bonds=check_bonds)
 
-        save_rng(filename, rng_states)
+        # save_rng(filename, rng_states)
 
     bond_num = [bond.shape[0] for bond in result[8]]
     print(bond_num)
@@ -259,3 +258,6 @@ if __name__ == '__main__':
 
     pars = parse_file(sys.argv[1])
     main(**pars)
+
+    # main(filename='apr3_test', save_data=False, plot_data=True, t_end=.1,
+    #      num_steps=50, one_side=True, check_bonds=True)
