@@ -11,19 +11,43 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
     data_dir = path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     pars = parse_file(filename)
 
-    with np.load(data_dir + filename + '.npz') as data:
-        x = data['x']
-        y = data['y']
-        z = data['z']
-        t = data['t']
-        if t[-1] > 3.0001:
-            t *= .01
-        r_matrices = data['r_matrices']
-        if r_matrices.shape[-1] == 3:
-            r_matrices = r_matrices.transpose(1, 2, 0)
-        receptors = data['receptors']
-        bond_array = data['bond_array']
-        rng_draws = data['draws']
+    try:
+        with np.load(data_dir + filename + '.npz') as data:
+            x = data['x']
+            y = data['y']
+            z = data['z']
+            t = data['t']
+            if t[-1] > 3.0001:
+                t *= .01
+            r_matrices = data['r_matrices']
+            if r_matrices.shape[-1] == 3:
+                r_matrices = r_matrices.transpose(1, 2, 0)
+            receptors = data['receptors']
+            bond_array = data['bond_array']
+            rng_draws = data['draws']
+    except FileNotFoundError:
+        x = np.array([pars['x1']])
+        y = np.array([pars['x2']])
+        z = np.array([pars['x3']])
+        t = np.zeros(1)
+
+        theta = np.arctan2(pars['emz'], pars['emy'])
+        phi = np.arccos(pars['emx'])
+        ct, st, cp, sp = np.cos(theta), np.sin(theta), np.cos(phi), np.sin(phi)
+        r_matrix = np.array([[cp, -sp, 0],
+                             [ct * sp, ct * cp, -st],
+                             [st * sp, st * cp, ct]])
+        r_matrices = np.expand_dims(r_matrix, axis=-1)
+        receptors = np.load(path.expanduser(
+            '~/thesis/reg_stokeslets/src/3d/Xb_0.26.npy'))
+        try:
+            receptor_multiplier = pars['receptor_multiplier']
+        except KeyError:
+            receptor_multiplier = 1
+
+        receptors = np.repeat(receptors, repeats=receptor_multiplier, axis=0)
+        bond_array = np.zeros(shape=(0, 3, 1), dtype='float')
+        rng_draws = np.zeros(shape=(1,), dtype=int)
 
     # if t_end < t[-1]:
     #     while True:
@@ -59,9 +83,9 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
     old_draws = rng_draws[:i_start]
 
     # Define arguments to the integrate_motion function
-    # dt = (pars['t_end'] - pars['t_start']) / pars['num_steps']
-    # num_steps = np.ceil((t_end - t[i_start]) / dt - 1e-8).astype('int')
-    num_steps = 10
+    dt = (pars['t_end'] - pars['t_start']) / pars['num_steps']
+    num_steps = np.ceil((t_end - t[i_start]) / dt - 1e-8).astype('int')
+    # num_steps = 10
 
     center = np.array([x[i_start], y[i_start], z[i_start]])
     init = np.concatenate((center, r_matrices[..., i_start].reshape((9,))))
@@ -244,4 +268,4 @@ if __name__ == '__main__':
     import sys
 
     filename = sys.argv[1]
-    continue_integration(filename, t_end=0.10400585937499995, i_start=56, save_data=False)
+    continue_integration(filename)
