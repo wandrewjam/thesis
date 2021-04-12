@@ -11,18 +11,20 @@ from simulate import experiment
 
 def main():
     # collagen = ['hcp', 'ccp', 'hcw', 'ccw']
+    # collagen = ['hcw', 'ccw']
     # fibrinogen = ['hfp', 'ffp', 'hfw', 'ffw']
     fibrinogen = ['hfw', 'ffw']
     # vWF = ['hvp', 'vvp']
-    colors = {'hfp': 'b', 'ffp': 'k', 'hfw': 'g', 'ffw': 'r'}
-    # colors = {'hcp': 'b', 'ccp': 'k', 'hcw': 'g', 'ccw': 'r'}
+    colors = {'hfw': 'C1', 'ffw': 'C2'}
+    # colors = {'hcp': 'C1', 'ccp': 'C2', 'hcw': 'C3', 'ccw': 'C4'}
+    # colors = {'hcw': 'g', 'ccw': 'r'}
     experiments = load_trajectories(fibrinogen)
     result = get_free_velocities(experiments, absolute_pause_threshold=1.)
     (avg_free_vels_dict, distances_dict, times_dict, steps_dict, dwells_dict,
      ndwells_dict, vels_dict, escape_dict) = result
 
-    Vstar = 50
-    average_distance = 2.5
+    Vstar = 40.
+    average_distance = 5.
 
     k_off_dict = dict([(expt, 1./np.mean(dwell)) for expt, dwell
                        in dwells_dict.items()])
@@ -43,7 +45,7 @@ def main():
     for expt, distances in distances_dict.items():
         print('{}: {}'.format(expt, np.mean(distances)))
         print('{}: {}'.format(expt, np.median(distances)))
-    print(np.nanmedian(np.concatenate(distances_dict.values())))
+    print(np.nanmedian(np.concatenate(list(distances_dict.values()))))
     for expt, times in times_dict.items():
         print('{}: {}'.format(expt, np.mean(times)))
 
@@ -60,8 +62,8 @@ def main():
         print('{}: {} pm {}'.format(expt, k_es, 1.96 * k_es
                                     / np.sqrt(len(steps_dict[expt]))))
 
-    vels = np.concatenate(avg_free_vels_dict.values()) / Vstar
-    scaled_times = np.concatenate(times_dict.values()) * Vstar / average_distance
+    vels = np.concatenate(list(avg_free_vels_dict.values())) / Vstar
+    scaled_times = np.concatenate(list(times_dict.values())) * Vstar / average_distance
 
     a_fit, a_full, e_fit, e_full, reduced = fit_fast_binding_params(
         scaled_times, vels)
@@ -82,7 +84,8 @@ def main():
 
     k_off_fast = (Vstar * a_full) / (average_distance * e_full)
     k_on_fast = (Vstar * (1 - a_full)) / (average_distance * e_full)
-    print(k_off_fast, k_on_fast)
+    print('k_off_fast = {}'.format(k_off_fast))
+    print('k_on_fast = {}'.format(k_on_fast))
     plot_vels_and_fits(Vstar, a_fit, a_full, avg_free_vels_dict, e_fit, e_full, reduced, vels, colors)
     plot_vels_and_traj(experiments, sim_dict, vels_dict, vels_sim, k_on_dict, k_off_dict, average_distance, Vstar,
                        a_full, e_full, colors)
@@ -190,7 +193,7 @@ def fit_fast_binding_params(scaled_times, vels):
     def objective_two_variable(p, data):
         ap, epsp = p
         vels_temp, times_temp = data[:, 0], data[:, 1]
-        return -np.sum(np.log(q(times_temp, 1. / vels_temp, ap, epsp)))
+        return -np.sum(np.log(q(times_temp * vels_temp, times_temp, ap, epsp)))
 
     def q(y, s, a, eps):
         return (1 / np.sqrt(4 * np.pi * eps * a * (1 - a) * s)
@@ -275,7 +278,7 @@ def plot_avg_free_vels(avg_free_vels_dict, avg_free_vels_sim, colors):
 
 def plot_steps(steps_dict, steps_sim, k_on_dict, colors):
     fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
-    # s = ''
+    s = ''
     for expt, steps in steps_dict.items():
         ax[0].hist(steps,  density=True, label=expt, alpha=0.7, color=colors[expt])
         x_cdf_plot = np.append(0, np.sort(steps))
@@ -283,9 +286,9 @@ def plot_steps(steps_dict, steps_sim, k_on_dict, colors):
         ax[1].step(x_cdf_plot, y_cdf_plot, where='post', color=colors[expt])
 
         # Fit steps
-        # k_on = k_on_dict[expt]
-        # err = k_on * 1.96 / np.sqrt(steps.size)
-        # s += '{} k_on = {:.2f} $\\pm$ {:.2f} $1/s$\n'.format(expt, k_on, err)
+        k_on = k_on_dict[expt]
+        err = k_on * 1.96 / np.sqrt(steps.size)
+        s += '{} k_on = {:.2f} $\\pm$ {:.2f} $1/s$\n'.format(expt, k_on, err)
         # try:
         #     x_plot = np.linspace(0, np.amax(steps), num=200)
         #     y_plot = expon.pdf(x_plot, scale=1./k_on)
@@ -306,7 +309,7 @@ def plot_steps(steps_dict, steps_sim, k_on_dict, colors):
     ax[0].set_ylabel('Probability Density')
     ax[1].set_ylabel('CDF')
     ax[0].legend()
-    # ax[1].text(3, .4, s)
+    ax[1].text(1.5, .4, s)
     plt.tight_layout()
     plt.show()
 
@@ -541,7 +544,7 @@ def plot_vels_and_traj(experiments, simulations, vels_dict, vels_sim,
         a.set_xlabel('Time Averaged Velocity ($\\mu m / s$)')
     for a in ax2:
         a.set_xlabel('Time ($s$)')
-        a.set_ylabel('Displacement ($s$)')
+        a.set_ylabel('Displacement ($\\mu m$)')
     ax1[0].set_ylabel('Probability Density')
     ax1[1].set_ylabel('CDF')
     ax1[0].legend()

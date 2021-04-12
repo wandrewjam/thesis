@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import pearsonr, spearmanr, expon
+from scipy.stats import pearsonr, spearmanr, expon, chi2, anderson
 import glob
 
 
@@ -167,10 +167,10 @@ def extract_state_data(t_save, y_save):
 
 
 def main():
-    # experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
-    experiments = load_trajectories(['hfp', 'ffp', 'hfw', 'ffw', 'hfe', 'ffe'])
+    experiments = load_trajectories(['hcp', 'ccp', 'hcw', 'ccw'])
+    # experiments = load_trajectories(['hfp', 'ffp', 'hfw', 'ffw', 'hfe', 'ffe'])
     # experiments = load_trajectories(['hvp', 'vvp'])
-    expt = 'hfw'
+    expt = 'ccp'
     steps_combined = list()
     pre_dwell_steps_combined = list()
     post_dwell_steps_combined = list()
@@ -329,13 +329,19 @@ def main():
     # plt.show()
 
     mu = np.mean(pre_step_times_combined)
-    print('On rate before dwells is {}'.format(1/mu))
+    n = len(pre_step_times_combined)
+    ci_lower = 2 * n * mu / chi2.ppf(.975, df=2*n)
+    ci_upper = 2 * n * mu / chi2.ppf(.025, df=2*n)
+    print('On rate before dwells is {}, with 95% CI [{}, {}]'
+          .format(1 / mu, 1 / ci_upper, 1 / ci_lower))
+    res = anderson(pre_step_times_combined, dist='expon')
+    print(res)
     x_plot = np.linspace(0, np.amax(pre_step_times_combined), num=200)
     plt.hist(pre_step_times_combined, density=True)
     plt.plot(x_plot, expon.pdf(x_plot, scale=mu))
-    plt.title('Density of initial step times vs. a fitted exponential')
     plt.xlabel('Step time (s)')
     plt.ylabel('Probability density')
+    plt.tight_layout()
     plt.show()
 
     mu1 = np.mean(int_step_times_combined)
