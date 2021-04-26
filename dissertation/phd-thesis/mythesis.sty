@@ -34,6 +34,20 @@
 %%% Load package for subfloats
 \usepackage{subcaption}
 
+%%% Load PGFPlots
+\usepackage{pgfplots}
+\usepgfplotslibrary{colorbrewer, statistics}
+\pgfplotsset{
+  exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+    legend entries={PDF, CDF},},
+  every axis plot post/.append style={thick},
+  table/search
+  path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+  colormap/YlGnBu,
+  cycle list/Set1-5,
+  legend style={legend cell align=left,},
+}
+
 %%% Define shortcuts for often-used commands
 \newcommand{\tn}{\textnormal}
 \newcommand{\inv}{^{-1}}

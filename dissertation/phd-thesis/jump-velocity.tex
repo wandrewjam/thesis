@@ -36,14 +36,14 @@
 % \item Discussion
 % \end{enumerate}
 
-While the previous model can be used for some explorations of
-parameter space, it is too computationally expensive to use it for
-rigorous parameter estimation. Therefore, we want to derive a model
-that is fast enough to run to estimate binding parameters from the
-available data. Much of the complexity in the previous model comes
-from tracking individual receptors and bonds in the stochastic model,
-and tracking a spatially heterogeneous distribution of bonds in the
-continuous deterministic model.
+While the 2D rolling model presented above can be used for some
+explorations of parameter space, it is too computationally expensive
+to use it for rigorous parameter estimation. Therefore, we want to
+derive a model that is fast enough to run to estimate binding
+parameters from the available data. Much of the complexity in the
+previous model comes from tracking individual receptors and bonds in
+the stochastic model, and tracking a spatially heterogeneous
+distribution of bonds in the continuous deterministic model.
 
 Our goal in this chapter is to develop a model that simplifies the
 binding and physics of platelet rolling, while still capturing
@@ -73,8 +73,9 @@ or vWF). Platelets have two types of receptors that can bind to these
 immobilized agonists. One type are the receptors which are
 constitutively active, and have fast binding and unbinding kinetics. The
 other type are receptors which are constitutively inactive, and become
-activated as the platelet activates. \note{This sentence should
-  be reworked}
+activated as the platelet activates.
+% \note{This sentence should
+%   be reworked}
 
 Initially, assume that unprimed platelets can exist in two states:
 unbound ($\stateUnbound$), and bound to the wall by fast receptors
@@ -197,7 +198,7 @@ then the only difference is $\jvOnSlow = \jvOffSlow = 0$.
 
 The Fokker-Planck equation can be used to find the probability density
 function of the average velocity across a segment of length
-$L$. Assuming all platelets enter the domain unbouned, we take the
+$L$. Assuming all platelets enter the domain unbound, we take the
 initial condition of the PDE system (\ref{eq:fp-system}) to be
 $\mathbf{p}(x, 0) = (\delta(x), 0, 0, 0)^T$. The probability density
 of the time it takes a platelet to cross the interval $[0, L]$ is
@@ -205,8 +206,31 @@ $\jvVel (p_{\stateUnbound}(L,t))$ (because the platelet is immobile in
 the other 3 states, it \emph{must} be in the $\stateUnbound$ state
 when it leaves the domain). The average velocity associated with a
 crossing time $t^*$ is just $v^* = L/t^*$, and the probability density
-function of $v^*$ is given by $f(v^*) = (L/v^*)^2 p_U(L,
-L/v^*)$. \note{I can put in more justification here if necessary}
+function of $v^*$ is given by $f(v^*) = Lv/(v^*)^2 p_U(L,
+L/v^*)$.
+
+In order to find the probability density function $f$ of the average
+velocity, let $T$ be a random variable representing the time it takes
+a platelet to cross a domain of length $L$. Then $V = L/T$ is a random
+variable representing the average velocity of that platelet across the
+domain. Let $F(v^*) = \mathbb{P}[V \leq v^*]$ represent the cumulative
+distribution function, so that
+$f(v^*) = \left(F(v^*)\right)'$. Therefore
+\begin{multline*}
+  f(v^*) = \left(F(v^*)\right)' = \left(\mathbb{P}[V \leq v^*]\right)'
+  = \left(\mathbb{P}\left[\frac{L}{T} \leq v^*\right]\right)' =
+  \left(\mathbb{P}\left[T \geq \frac{L}{v^*} \right]\right)' \\
+  = \left(\Int{vp_U(L, \hat{t})}{\hat{t}}{L/v^*}{\infty}\right)' =
+  \left(-\Int{-\frac{Lv}{\hat{v}^2} p_U(L,
+      L/\hat{v})}{\hat{v}}{0}{v^*}\right)' = \frac{Lv}{(v^*)^2} p_U(L,
+  L/v^*).
+\end{multline*}
+
+To get the first expression on the second line, we express
+$\mathbb{P}[T \geq \frac{L}{v^*}]$ as an integral of the PDF of the
+crossing time (given above). Then to get the next expression, we use
+the change of variables $\hat{t} = L / \hat{v}$ in the integral and
+switch the resulting bounds of integration.
 
 \subsection{Nondimensionalization}
 \label{sec:nondim}
@@ -263,8 +287,89 @@ is mediated by fast and slow bonds, which suggests there may be a fast
 time scale in the Fokker-Planck system. As mentioned above, the
 relevant time scales to consider are $T = L/v$ (the time it takes an
 unbound platelet to cross the domain), and $\jvOnFast +
-\jvOffFast$. \note{Comment on the validity of assuming $\epsilon_1$ is
-  small.}
+\jvOffFast$.
+% \note{Comment on the validity of assuming $\epsilon_1$ is
+%   small.}
+
+\subsubsection{Summary of the two-state adiabatic reduction}
+\label{sec:summary-two-state}
+
+The adiabatic reduction of the four-state state model closely follows
+the adiabatic reduction of a two-state jump velocity process, so I
+will summarize the derivation and quote the result here.
+
+Suppose we have a two-state system with fast switching between the two
+states, as in Figure \ref{fig:two-state-jv}. The parameters $a$ and
+$b$ are nondimensional reaction rates where $a + b = 1$, and
+$\epsilon$ is a time scaling. We assume that switching happens
+quickly, so $a/\epsilon$ and $b\epsilon$ are both $\gg 1$, and
+therefore $\epsilon \ll 1$.
+
+\begin{figure}
+  \centering
+  \schemestart
+  $S_0$ \arrow(s0--s1){<=>[$b/\epsilon$][$a/\epsilon$]} $S_1$
+  \schemestop
+  \caption[Two-state jump-velocity process]{General two-state jump
+    velocity process with fast switching.}
+  \label{fig:two-state-jv}
+\end{figure}
+
+The Fokker-Planck equation for this system is given by the pair of
+PDEs
+\begin{align}
+  \label{eq:two-state-eq1}
+  \Pder{q_0}{s} &= -\Pder{q_0}{y} - \frac{1}{\epsilon} \left(b q_0 - a
+                  q_1\right) \\
+  \label{eq:two-state-eq2}
+  \Pder{q_1}{s} &= \left(b q_0 - a q_1\right).
+\end{align}
+
+Define the slow variable to be $v = q_0 + q_1$ and the fast variable
+to be $w = b q_0 - a q_1$. Then one can perform a change of variables
+in Equations (\ref{eq:two-state-eq1}) and (\ref{eq:two-state-eq2}),
+and after taking $w$ to be in quasi-steady state, the equation for $w$
+is
+\begin{equation}
+  \label{eq:w}
+  w = -\epsilon a b \Pder{v}{y}.
+\end{equation}
+This can then be used to derive an
+advection-diffusion equation for $v$ that only depends on parameters
+$a$, $b$, and $\epsilon$:
+\begin{equation}
+  \label{eq:v}
+  \Pder{v}{s} = -a \Pder{v}{y} + \epsilon a b \frac{\partial^2
+    v}{\partial y^2}.
+\end{equation}
+
+With the initial condition $v(y, 0) = \delta(y)$, equation
+(\ref{eq:v}) can be solved analytically:
+\begin{equation}
+  \label{eq:v-soln}
+  v(y, t) = \frac{1}{\sqrt{4 \pi \epsilon a b t}} \exp \left[ \frac{-(y
+      - at)^2}{4 \epsilon a b t} \right],
+\end{equation}
+and then using equation (\ref{eq:w}) to find $w$,
+\begin{equation}
+  \label{eq:w-soln}
+  w(y, t) = \frac{y - at}{4t\sqrt{\pi \epsilon a b t}} \exp \left[ \frac{-(y
+      - at)^2}{4 \epsilon a b t} \right].
+\end{equation}
+
+A change of variables back to $q_0$ and $q_1$ gives explicit equations
+for these two quantities, which can then be used to find the following
+probability density function of average velocities for the two-state
+jump-velocity process:
+\begin{equation}
+  \label{eq:avg-vel-pdf}
+  f\left(v^*\right) = \sqrt{\frac{1}{4\pi \epsilon a b
+      \left(v^*\right)^3}} \left(a + \frac{v^* - a}{2}\right)
+  \exp\left[\frac{-\left(v^* - a\right)^2}{4\epsilon a b v^*}\right].
+\end{equation}
+
+\subsubsection{Reduction of the four-state model}
+\label{sec:reduction-four-state}
 
 If we define the first and second matrices from equation
 (\ref{eq:nd-system}) as $\underline{\underline{A}}$ and
@@ -379,80 +484,7 @@ slow-acting bond to the surface (i.e. it is on the slow $v_1$
 manifold), it should behave like the adiabatic reduction of a
 two-state jump-velocity system.
 
-\subsubsection{Summary of the two-state adiabatic reduction}
-\label{sec:summary-two-state}
 
-We will use the adiabatic reduction of a two-state jump-velocity
-system later, so I will summarize the reduction and quote the final
-result here. Suppose we have a two-state system with fast switching
-between the two states, as in Figure \ref{fig:two-state-jv}. The
-parameters $a$ and $b$ are nondimensional reaction rates where $a + b
-= 1$, and $\epsilon$ is a time scaling. We assume that switching
-happens quickly, so $a/\epsilon$ and $b\epsilon$ are both $\gg 1$, and
-therefore $\epsilon \ll 1$.
-
-\begin{figure}
-  \centering
-  \schemestart
-  $S_0$ \arrow(s0--s1){<=>[$b/\epsilon$][$a/\epsilon$]} $S_1$
-  \schemestop
-  \caption[Two-state jump-velocity process]{General two-state jump
-    velocity process with fast switching.}
-  \label{fig:two-state-jv}
-\end{figure}
-
-The Fokker-Planck equation for this system is given by the pair of
-PDEs
-\begin{align}
-  \label{eq:two-state-eq1}
-  \Pder{q_0}{s} &= -\Pder{q_0}{y} - \frac{1}{\epsilon} \left(b q_0 - a
-                  q_1\right) \\
-  \label{eq:two-state-eq2}
-  \Pder{q_1}{s} &= \left(b q_0 - a q_1\right).
-\end{align}
-
-Define the slow variable to be $v = q_0 + q_1$ and the fast variable
-to be $w = b q_0 - a q_1$. Then one can perform a change of variables
-in Equations (\ref{eq:two-state-eq1}) and (\ref{eq:two-state-eq2}),
-and after taking $w$ to be in quasi-steady state, the equation for $w$
-is
-\begin{equation}
-  \label{eq:w}
-  w = -\epsilon a b \Pder{v}{y}.
-\end{equation}
-This can then be used to derive an
-advection-diffusion equation for $v$ that only depends on parameters
-$a$, $b$, and $\epsilon$:
-\begin{equation}
-  \label{eq:v}
-  \Pder{v}{s} = -a \Pder{v}{y} + \epsilon a b \frac{\partial^2
-    v}{\partial y^2}.
-\end{equation}
-
-With the initial condition $v(y, 0) = \delta(y)$, equation
-(\ref{eq:v}) can be solved analytically:
-\begin{equation}
-  \label{eq:v-soln}
-  v(y, t) = \frac{1}{\sqrt{4 \pi \epsilon a b t}} \exp \left[ \frac{-(y
-      - at)^2}{4 \epsilon a b t} \right],
-\end{equation}
-and then using equation (\ref{eq:w}) to find $w$,
-\begin{equation}
-  \label{eq:w-soln}
-  w(y, t) = \frac{y - at}{4t\sqrt{\pi \epsilon a b t}} \exp \left[ \frac{-(y
-      - at)^2}{4 \epsilon a b t} \right].
-\end{equation}
-
-A change of variables back to $q_0$ and $q_1$ gives explicit equations
-for these two quantities, which can then be used to find the following
-probability density function of average velocities for the two-state
-jump-velocity process:
-\begin{equation}
-  \label{eq:avg-vel-pdf}
-  f\left(v^*\right) = \sqrt{\frac{1}{4\pi \epsilon a b
-      \left(v^*\right)^3}} \left(a + \frac{v^* - a}{2}\right)
-  \exp\left[\frac{-\left(v^* - a\right)^2}{4\epsilon a b v^*}\right].
-\end{equation}
 
 \subsubsection{An examination of experimental trajectories}
 \label{sec:an-exam-exper}
@@ -463,9 +495,10 @@ an assumption that can be checked directly against experimental
 trajectory data. Specifically, I split the experimental platelet
 trajectories into a segment leading up to the first pause events,
 steps in between two pause events, and a segment following the last
-pause (if there was one). \note{I should put in plots of Vlado's data;
-  maybe one plot in this chapter as an example, and the others in an
-  appendix} 
+pause (if there was one).
+% \note{I should put in plots of Vlado's data;
+%   maybe one plot in this chapter as an example, and the others in an
+%   appendix} 
 
 Boxplots of each of these populations of steps are shown in Figure
 \ref{fig:ccp-step-cmp}. The steps that occur in between dwells are
@@ -476,7 +509,7 @@ platelet within a step is different depending on whether the step is
 in between dwells, or at the beginning or end of a trajectory (Figure
 \ref{fig:ccp-vel-cmp}).
 
-\note{Estimates of capture rates?}
+% \note{Estimates of capture rates?}
 
 \begin{figure}
   \centering
@@ -524,7 +557,7 @@ reason the platelet is traveling more slowly. The physics in this
 model is far too simplified to explore this hypothesis.
 
 Another possible explanation is that there is fast binding and
-unbinding ocurring on a scale too fast to observe the individual
+unbinding occurring on a scale too fast to observe the individual
 events. This hypothesis can be tested and incorporated in the context
 of the jump-velocity model by using the above quasi-steady state
 reduction to fit the fast binding parameters to the inter-pause
@@ -596,34 +629,35 @@ the probability distribution defined by model parameters to the set of
 realizations in the experimental data.
 
 We chose to use a maximum-likelihood estimate for parameters in the
-model. Let $\{(t_i, v_i)\}_{i=1}^N$ be a set of observations of pairs
-of average velocities and step times, and define
-$f(v; a, \epsilon_1, t_i)$ to be the probability distribution of
-velocities given parameters $a$ and $\epsilon_1$, and a step time of
-$t_i$. Define the likelihood function
+model. Let $\{v_i\}_{i=1}^N$ be a set of observations of average
+velocities, and define $f(v;a, \epsilon_1)$ to be the probability
+distribution of velocities given parameters $a$ and $\epsilon_1$. Define
+the likelihood function
+
 \begin{equation}
   \label{eq:likelihood}
-  L(a, \epsilon_1) = \prod_{i=1}^N f(v_i; a, \epsilon_1, t_i),
+  L(a, \epsilon) = \prod_{i=1}^N f(v_i; a, \epsilon),
 \end{equation}
 and then the maximum likelihood estimates for $a$ and $\epsilon_1$ are
 those that maximize $L$. Define the log-likelihood function:
 $\tilde{\ell}(a, \epsilon_1) = \log(L(a, \epsilon_1))$, and then
 maximizing $\tilde{\ell}$ is equivalent to maximizing $L$.
 
-We found $f(v; a, \epsilon_1, t_i)$ above in terms of the
-solution of the Fokker-Planck equation:
-$f(v; a, \epsilon_1, t_i) = t_i q_{U}(t_i v_i, t_i; a, \epsilon_1)$ where
-$q_{U}(x, t; a, \epsilon_1)$ is part of the solution of the
-Fokker-Planck equation with parameters $a$ and $\epsilon_1$. Then we can
-write $\tilde{\ell}$ in terms of $q_{U}$:
-$\tilde{\ell} = \sum_{i=1}^N \log(f(v_i; a, \epsilon_1, t_i)) = \sum_{i=1}^N
-\log(q_{U}(t_i v_i, t_i; a, \epsilon_1)) + \sum_{i=1}^N \log(t_i)$. The
-second term is a constant factor with respect to $a$ and $\epsilon_1$,
-and so can be excluded from the optimization. Therefore we can
-maximize the modified log-likelihood function
+We found $f(v; a, \epsilon_1)$ above in terms of the solution of the
+Fokker-Planck equation:
+$f(v; a, \epsilon_1) = 1/v^2 q_U(1, 1/v; a, \epsilon_1)$ where
+$q_U(x, t; a, \epsilon_1)$ is part of the solution of the
+Fokker-Planck equation with parameters $a$ and $\epsilon_1$. Then we
+can write $\tilde{\ell}$ in terms of $q_U$:
+$\tilde{\ell} = \sum_{i=1}^N \log(f(v_i; a, \epsilon_1)) =
+\sum_{i=1}^N \log(q_U(1, 1/v_i; a, \epsilon_1)) - 2\sum_{i=1}^N
+\log(v_i)$. The second term is a constant factor with respect to $a$
+and $\epsilon_1$, and so can be excluded from the
+optimization. Therefore we can maximize the modified log-likelihood
+function
 \begin{equation}
   \label{eq:mod-log-like}
-  \ell(a, \epsilon_1) = \sum_{i=1}^N \log(q_{U^1}(t_i v_i, t_i; a, \epsilon_1)).
+  \ell(a, \epsilon_1) = \sum_{i=1}^N \log(q_U(1, 1/v_i; a, \epsilon_1)). 
 \end{equation}
 
 \subsubsection{Numerical Optimization}
@@ -632,7 +666,7 @@ maximize the modified log-likelihood function
 The modified log-likelihood function $\ell(a, \epsilon_1)$ is maximized
 iteratively. One important consideration is that the model parameters
 $a$ and $\epsilon_1$ have bounds, in particular $a \in (0, 1)$ and
-$\epsilon_1 > 0$. One possiblility for staying within these constraints
+$\epsilon_1 > 0$. One possibility for staying within these constraints
 is to use a numerical optimization algorithm that optimizes within a
 bounded domain. However, near the boundaries of the domain
 $\ell(a, \epsilon_1)$ diverges and in some cases can cause the
@@ -642,7 +676,7 @@ pair of new parameters $a'$ and $\epsilon_1'$ which can vary over all
 $\reals$. The transformations for these parameters are:
 \begin{align}
   \label{eq:a-fwd-trns}
-  a' &= \frac{2a + 1}{2a(a + 1)} \\
+  a' &= \frac{2a - 1}{2a(1 - a)} \\
   \label{eq:e-fwd-trns}
   \epsilon' &= \log \epsilon_1.
 \end{align}
@@ -655,7 +689,7 @@ use SciPy's \cite{Virtanen2020} \verb|minimize| function, which
 implements the BFGS algorithm for unconstrained optimization
 \cite{Nocedal2006}.
 
-An iterative algorithm needs an intial guess, which can be chosen as
+An iterative algorithm needs an initial guess, which can be chosen as
 an estimate of $a$ and $\epsilon_1$ from the adiabatic
 reduction. Equation (\ref{eq:avg-vel-pdf}) gives the pdf of velocities
 from the adiabatic reduction, and can be used to derive the mean
@@ -694,6 +728,54 @@ are also compared with the ECDF of the data. Visually these models fit
 well (as they should), and provide parameter estimates with less than
 10\% relative error.
 
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.8\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        width=.9\textwidth,
+        legend entries={Simulated data, Reduced model, Full model},
+        xlabel=$v^*$,
+        ylabel={Probability density},
+        ]
+        \addplot+[hist=density, fill]
+        table[y index=0] {simulations/small-a-sim.dat};
+        \addplot table[x index=0, y index=1]
+        {ml-estimates/small-a-est.dat};
+        \addplot table[x index=0, y index=3]
+        {ml-estimates/small-a-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \\[24pt]
+  \begin{subfigure}{0.8\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[
+        width=.9\textwidth,
+        legend entries={Simulated data, Reduced model, Full model},
+        legend pos=south east,
+        xlabel=$v^*$,
+        ylabel={$P[V < v^*]$},
+        ]
+        \addplot+[const plot] table[x index=0, y expr=\coordindex/1024]
+        {simulations/small-a-sim.dat};
+        \addplot table[x index=0, y index=2]
+        {ml-estimates/small-a-est.dat};
+        \addplot table[x index=0, y index=4]
+        {ml-estimates/small-a-est.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[Model fits]{Results of the ML estimates for the reduced
+    (i.e. adiabatic reduction) and full models. For this simulated
+    data, the maximum likelihood parameters are $a = 0.2182$ and
+    $\epsilon_1 = 0.1185$ for the reduced model, and $a = 0.1995$ and
+    $\epsilon_1 = 0.1006$ for the full model. The true parameters are
+    $a = 0.2$ and $\epsilon_1 = 0.1$. Total number of simulated data
+    points: $N = 1024$}
+  \label{fig:model-fits}
+\end{figure}
+
 \subsubsection{Bootstrapping}
 \label{sec:bootstrapping}
 
@@ -703,28 +785,90 @@ we can use a bootstrapping approach. The basic idea is that for a set
 of data $\{V_i\}_{i=1}^N$, a ``new'' data set can be generated by
 randomly picking $N$ samples from the $\{V_i\}$ with replacement. Then
 the MLE for the new data can be found, and in this way we get a bunch
-of $\hat{a}$ and $\hat{\epsilon_1}$ estimates. After generating many of
-these estimates, we can come up with an estimate of a 95\% confidence
-interval for each parameter. If we assume that the ML estimates are
-distributed sufficiently normally, then
+of $\hat{a}$ and $\hat{\epsilon_1}$ estimates. After generating many
+of these estimates, we can come up with an estimate of a 95\%
+confidence interval for each parameter. If we assume that the ML
+estimates are distributed sufficiently normally, then
 $\hat{\theta} \pm 1.96 \sigma_{\hat{\theta}}$ approximates a 95\%
-confidence interval well. But it seems like using the $2.5$th and
-$97.5$th percentiles also provides a good estimate for the confidence
-interval, and doesn't rely on assuming the parameter estimate is
-distributed normally.
+confidence interval well. Table \ref{tab:conf-int} shows the maximum
+likelihood estimates with a 95\% confidence interval for $a$ and
+$\epsilon_1$. 
 
-Figure \ref{fig:bootstraps} summarizes results from 64 bootstrap
-trials on the sample data. In each case, the distribution of estimated
-parameters looks symmetrical, and the two methods of estimating a 95\%
-confidence interval described above give similar results (Table
-\ref{tab:conf-int}).
+\begin{table}
+  \centering
+  \begin{tabular}{cccc}
+    \toprule
+    & Reduced & Full \\
+    \midrule
+    $a$  & $0.2184 \pm 0.0062$ & $0.1995 \pm 0.0057$ \\
+    $\epsilon$ & $0.1185 \pm 0.0101$ & $0.1006 \pm 0.0075$ \\
+    \bottomrule
+  \end{tabular}
+  \caption[Parameter confidence intervals]{95\% confidence intervals
+    of model parameters estimated by bootstrapping}
+  \label{tab:conf-int}
+\end{table}
 
-While the MLE of $a$ looks unbiased (i.e. it is near the center of the
-distribution of $a$s shown in figure \ref{fig:bootstraps}), the MLE of
-$\epsilon_1$ is clearly biased to the upper end of the distribution of
-$\epsilon_1$ estimates from the bootstrap procedure. Part of this may be
-because I haven't filtered out platelets that didn't pause on the
-surface, but it is still something to look out for. 
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.54\textwidth}
+    \begin{tikzpicture}[baseline]
+      \begin{axis}[
+        width=186.5 pt,
+        ytick={1, 2},
+        yticklabels={Reduced model, Full model},
+        xticklabel style={/pgf/number format/precision=3,
+          /pgf/number format/fixed},
+        title={$a$ estimates},
+        ]
+        \draw[thin, dashed] ({axis cs:.2, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:.2, 0}|-{rel axis cs:0, 1});
+        \addplot+ [boxplot] table[y index=0]
+        {bootstrap/small-a-boot.dat};
+        \addplot+ [boxplot] table[y index=2]
+        {bootstrap/small-a-boot.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.43\textwidth}
+    \begin{tikzpicture}[baseline]
+      \begin{axis}[
+        width=186.5 pt,
+        ytick={1, 2},
+        yticklabels={},
+        xticklabel style={/pgf/number format/precision=3,
+          /pgf/number format/fixed},
+        title={$\epsilon_1$ estimates},
+        ]
+        \draw[thin, dashed] ({axis cs:.1, 0}|-{rel axis cs:0, 0})
+        -- ({axis cs:.1, 0}|-{rel axis cs:0, 1});
+        \addplot+ [boxplot] table[y index=1]
+        {bootstrap/small-a-boot.dat};
+        \addplot+ [boxplot] table[y index=3]
+        {bootstrap/small-a-boot.dat};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption[Boxplots of bootstap trials]{Boxplots of parameter
+    estimates from 64 bootstap trials. The left plot summarizes estimates
+    of $a$ and the right plot summarizes estimates of $\epsilon_1$. The
+    true parameter values are shown with a dashed vertical
+    line.} 
+  \label{fig:bootstraps}
+\end{figure}
+
+The estimates of $a$ and $\epsilon_1$ from the full model are well
+centered on the true parameter values, the confidence interval
+contains the true parameter value in both cases, and the maximum
+likelihood estimates from the original data set have a relative error
+less than $1\%$. The estimates from the reduced model are not as
+accurate as those from the full model, which we would expect given
+that the model used to estimate parameters is not the same as the
+model which generated the simulated data. Nonetheless, the parameter
+estimates using the reduced model are reasonably close to the true
+parameters (the relative error is $10$--$20\%$ for the two
+parameters). 
 
 % \subsubsection{Goodness-of-fit}
 % \label{sec:goodness-fit}
@@ -774,18 +918,27 @@ I processed the experimental trajectories by removing dwells from the
 experiments and ``stacking'' the steps on top of each other. The
 probability distributions of the average velocities of these processed
 trajectories on collagen and fibrinogen are shown in Figure
-\ref{fig:avg-free-vel-col} and Figure ??. The fast effective binding
-parameters predicted by each model fit are given in the captions below
-each figure.
+\ref{fig:col-vel-fit} and Figure \ref{fig:fbg-whl-vel-fit}. The fast
+effective binding parameters predicted by each model fit are given in
+the captions below each figure.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\textwidth]{avg_free_vel_col.png}
+  \includegraphics[width=\textwidth]{col_vel_fit}
   \caption{Comparison of the average free velocity in four
     experimental conditions. The two-state model was fit to all data
     simultaneously, and the fit parameters are $\jvOnFast = 14.82 / s$
     and $\jvOffFast = 2.98 / s$.}
-  \label{fig:avg-free-vel-col}
+  \label{fig:col-vel-fit}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_whl_vel_fit}
+  \caption{Comparison of the average free velocity in unprimed and
+    primed experimental conditions. The two-state model was fit to all
+    data simultaneously, and the fit parameters are }
+  \label{fig:fbg-whl-vel-fit}
 \end{figure}
 
 % What about fitting to individual dwells? This might make it easier
@@ -799,7 +952,7 @@ each figure.
 One prediction from the jump-velocity model with escape is that the
 number of dwells in a trajectory should be geometrically
 distributed. When a platelet is in a step, one can think of the
-platelet's next state as a Bernoulli trial. One possibile result of
+platelet's next state as a Bernoulli trial. One possible result of
 the Bernoulli trial is the platelet pauses after the step, which
 occurs with probability $a = \frac{\jvOnSlow}{\jvOnSlow +
   \jvEscape}$. The other possible result is the platelet escapes, and
@@ -834,8 +987,9 @@ escapes is a geometric distribution, and the probability mass function
 for the number of binding events $n$ is $p(n) = (1 - a) a^{n - 1}$,
 where $n >= 1$. Therefore the mean number of pauses platelets have
 before escaping can be used to find $a$:
-$\mu_\textnormal{dwell num.}  = (1 - a)\inv$. Figure \ref{fig:ndwells}
-shows the number of dwells per trajectory in two experiments.
+$\mu_\tn{dwell num.}  = (1 - a)\inv = (\jvOnSlow + \jvEscape) /
+\jvEscape$. Figure \ref{fig:ndwells} shows the number of dwells per
+trajectory in two experiments.
 
 \begin{figure}
   \centering
@@ -856,11 +1010,25 @@ minimum of these two exponentially-distributed firing times, the step
 times are also distributed exponentially, with rate
 $\jvOnSlow + \jvEscape \equiv \jvTot$. Therefore we can estimate
 $\jvTot$ with the average step time:
-$\mu_\tn{step time} = 1/\jvTot = 1/(\jvOnSlow + \jvEscape)$. With
-these estimates for $\jvOnSlow$ and $\jvEscape$, along with the
+$\mu_\tn{step time} = 1/\jvTot = 1/(\jvOnSlow + \jvEscape)$.
+
+These equalities can be simultaneously solved to get the following
+explicit expressions of $\jvOnSlow$ and $\jvEscape$ in terms of
+$\mu_\tn{dwell num.}$ and $\mu_\tn{step time}$:
+\begin{align}
+  \jvEscape &= \frac{1}{\mu_\tn{dwell num.} \mu_\tn{step time}} \\
+  \jvOnSlow &= \frac{\mu_\tn{dwell num.} - 1}{\mu_\tn{dwell num.}
+              \mu_\tn{step time}}.
+\end{align}
+With these estimates for $\jvOnSlow$ and $\jvEscape$, along with the
 estimate of $\jvOffSlow$ from the pause times, we get the following
 estimates for the primed and unprimed experiments (Table
-\ref{tab:par-est}). 
+\ref{tab:par-est}).
+
+The slow off rate---$\jvOffSlow$---is much simpler to
+estimate. Because we assume the pause time is exponentially
+distributed, $\jvOffSlow$ is estimated by taking the inverse of the
+mean pause time: $\jvOffSlow = 1/\mu_\tn{pause}$.
 
 \begin{table}
   \centering
@@ -887,18 +1055,58 @@ is possible to observe in a single trajectory.
 
 \begin{figure}
   \centering
+  \includegraphics[width=\textwidth]{col_step}
+  \caption[Step times on collagen]{Distributrion of step times in
+    experiments and simulations of rolling on collagen}
+  \label{fig:col-step}
+\end{figure}
+
+\begin{figure}
+  \centering
   \includegraphics[width=\textwidth]{fbg_whl_step}
   \caption{Distribution of step times in experiments and in
     simulations}
   \label{fig:fbg-whl-step}
 \end{figure}
 
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=\textwidth]{fbg_whl_esc}
+%   \caption{Escape time distributions in experiments (solid lines)
+%     and simulations (dashed lines)}
+%   \label{fig:fbg-whl-esc}
+% \end{figure}
+
 \begin{figure}
   \centering
-  \includegraphics[width=\textwidth]{fbg_whl_esc}
-  \caption{Escape time distributions in experiments (solid lines)
-    and simulations (dashed lines)}
-  \label{fig:fbg-whl-esc}
+  \includegraphics[width=\textwidth]{col_pause}
+  \caption[Pause times on collagen]{Distribution of pause times in
+    experiments and simulations of rolling on collagen}
+  \label{fig:col-pause}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{fbg_whl_pause}
+  \caption{Distribution of pause times in experiments and in
+    simulations}
+  \label{fig:fbg-whl-pause}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{col_prp_traj_sim}
+  \caption{Experimental and simulated platelet trajectories on
+    collagen in PRP}
+  \label{fig:col-traj-sim}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{col_whl_traj_sim}
+  \caption{Experimental and simulated platelet trajectories on
+    collagen in whole blood}
+  \label{fig:col-traj-sim}
 \end{figure}
 
 \begin{figure}
@@ -906,6 +1114,15 @@ is possible to observe in a single trajectory.
   \includegraphics[width=\textwidth]{fbg_whl_traj_sim}
   \caption{Experimental and simulated platelet trajectories}
   \label{fig:fbg-whl-traj-sim}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{col_vel_sim}
+  \caption[Average velocities on collagen]{Distribution of
+    time-averaged velocities in experiments and simulations of rolling
+    on collagen}
+  \label{fig:col-vel}
 \end{figure}
 
 \begin{figure}
@@ -920,7 +1137,7 @@ is possible to observe in a single trajectory.
 \label{sec:estim-plat-capt}
 
 The one part of the platelet trajectories that we have ignored so far
-is the intial step: the period of time between the platelet entering
+is the initial step: the period of time between the platelet entering
 the domain and the first pause event. As shown in Figures
 \ref{fig:ccp-step-cmp} and \ref{fig:ccp-vel-cmp}, and briefly
 discussed in section \ref{sec:an-exam-exper}, these steps are much
@@ -1016,10 +1233,10 @@ experiments. This matches our intuition of the biology, because GPVI
 receptors are constitutively active on platelets, and are not affected
 by platelet activation \note{sources}.
 
-On immobilized fibrinogen, the receptor(s) involved in fast-binding are
-not as well established. However, there is some evidence that GPVI
+On immobilized fibrinogen, the receptor(s) involved in fast-binding
+are not as well established. However, there is some evidence that GPVI
 receptors may also mediate platelet binding to fibrinogen
-\note{(Mangin, 2018)}. Therefore our estimates of $\jvOnFast$ and
+\cite{Mangin2018}. Therefore our estimates of $\jvOnFast$ and
 $\jvOffFast$ provide estimates of platelet association and
 dissociation with an agonist-coated surface mediated by GPVI-collagen
 and GPVI-fibrinogen bonds.
@@ -1028,14 +1245,14 @@ Next we used step times, pause times, and number of dwells per
 trajectory to estimate parameters for binding mediated by slow
 receptor-ligand binding. Parameter estimates from this data were
 consistent with our biological intuition here as well. We found that
-on fibrinogen, unprimed platelets had a small binding rate around $0.1
-/s$, but after activation the binding rate increases by a factor of
-nearly $50$ (Table \ref{tab:par-est}). The slow unbinding rate
+on fibrinogen, unprimed platelets had a small binding rate around
+$0.1 /s$, but after activation the binding rate increases by a factor
+of nearly $50$ (Table \ref{tab:par-est}). The slow unbinding rate
 remained around $0.1 /s$ for both the unprimed and primed
 experiments. The observation that the binding rate of
-\textalpha\textsubscript{IIb}\textbeta\textsubscript{3}-fibrinogen
-increases with integrin activation, while the unbinding rate remains
-unchanged, is consistent with the observations of \cite{Litvinov2012}.
+\ITA{IIb}\ITB{3}-fibrinogen increases with integrin activation, while
+the unbinding rate remains unchanged, is consistent with the
+observations of \cite{Litvinov2012}.
 
 Finally, we estimated the capture rates of platelets in each of the
 experiments. We would expect these capture rates to be influenced by
@@ -1049,13 +1266,28 @@ comparing the capture rates in experiments with platelet-rich plasma
 and \ref{fig:fbg-capture}). This difference is most likely due to the
 fact that platelets marginate in blood with red blood cells, that is
 most platelets get pushed into a thin layer of blood adjacent to the
-wall of the vessel and are mostly absent from the bulk of the flow
-\note{give citations for this?}.
+wall of the vessel and are mostly absent from the bulk of the flow.
 
 There are some discrepancies in our model with the available
 data. Perhaps most significantly, this model predicts slower
 velocities than are observed experimentally (Figure
-\ref{fig:fbg-whl-vel}). % Why is this?
+\ref{fig:fbg-whl-vel}). We still do not have a concrete explanation
+for this discrepancy. If the distributions of pause times, step times,
+and free velocities agree reasonably well between the model and the
+data, we would think that the average velocities should agree
+reasonably well also. One possible explanation is that the errors in
+the data correlate with each other in such a way to exacerbate the
+differences between the model and data of the average velocities.
+
+One possible extension of this model is to allow for multiple bonds to
+form, instead of just one bond of each type. This is a more accurate
+description of the biology than the model presented above, but still
+avoids the difficulty of modeling a spatial distribution of
+bonds. This would make it more difficult to estimate binding
+parameters from the data, but you could also interpret these
+parameters more directly as on/off rates for an individual receptor or
+bond. 
+% Why is this?
 
 % For Vlado, I should look into which of their experiments I am using,
 % and what the hct is for the whole blood

@@ -1,0 +1,413 @@
+%%% -*-LaTeX-*-
+
+\chapter{Three-Dimensional Rolling Model}
+\label{cha:three-dimens-roll}
+
+The previous models presented greatly simplify the physics and
+geometry of an ellipsoidal platelet rolling in a three-dimensional
+shear flow. In the 2D rolling model, the platelet is modeled as a
+sphere with a thin reactive strip around the circumference. Two axes
+of motion and two axes of rotation are completely discarded, along
+with the relevant forces and torques. In the jump-velocity model, all
+platelet geometry and all fluid forces are ignored completely, and the
+bond dynamics of many receptors and ligands are simplified to simple
+binding and unbinding rates.
+
+In this chapter, we develop a fully 3D adhesive dynamics model, and
+present results from this model. This model is too computationally
+intensive to use for true parameter estimation from experimental data,
+but of the three models presented here it is the most valuable for
+developing intuition of the complex forces and motions involved in the
+rolling dynamics of platelets.
+
+\section{Model Description}
+\label{sec:model-description}
+
+In general, adhesive dynamics (AD) models describe the motion of cells
+in a Stokes flow due to binding and unbinding with a ligand-coated
+wall. There are two major components in AD models:
+\begin{enumerate}
+\item Bond dynamics---individual receptors are modeled separately,
+  their positions are tracked, and they can bind and unbind
+  independently of other receptors, and
+\item Fluid-structure interaction---modeling the drag forces generated
+  by the moving fluid on an immersed body.
+\end{enumerate}
+Putting these components together, AD models give us a way to
+translate bond-level kinetics to cell-level behavior.
+
+In developing this model, we focus on the forces acting on the
+platelet. While there is some flow field around the platelet, we are
+not interested in what this flow field actually looks like; we are
+only interested in its effect on the platelet.
+
+We consider three generalized forces which act on the platelet and
+affect its motion:
+\begin{enumerate}
+\item $\hydrodynamicForces$---the hydrodynamic force on the cell, 
+\item $\bindingForces$---the force due to binding with ligands on the wall, and
+\item $\bodyForces$---various body forces acting on the cell
+  (e.g. electrostatic and steric forces).
+\end{enumerate}
+Because we assume the flow field is a Stokes flow (i.e., no inertia is
+present in the system), all of these forces balance:
+$\hydrodynamicForces + \bindingForces + \bodyForces = \vect{0}$.
+
+$\bindingForces$ depends on the location and orientation of bonds
+between the cell and wall at time $t$, and $\bodyForces$ depends on
+the location and orientation of the cell. The hydrodynamic forces
+$\hydrodynamicForces$ depend both on the location and orientation of
+the cell $\pltPosition$, and also the translational and angular
+velocities $\pltPosition'$. Therefore we can use this relation to find
+$\pltPosition'(t)$ at each time step, and update the position and
+orientation of the cell accordingly.
+
+\subsection{Definitions and Domain}
+\label{sec:definitions-domain}
+
+We want to model the motion of a platelet (i.e. an ellipsoid) near a
+plane wall, so the fluid domain we use is the upper half-space
+$\fluidDomain = \{(\rsX, \rsY, \rsZ) \in \reals \mid \rsX > 0\}$. The wall
+is represented by a plane at $\rsX = 0$. The background flow
+$\flowField^\infty$ is a linear shear flow with a shear rate of
+$\shear$: $\flowField^\infty = \shear \rsX \e{\rsZ}$.
+
+The platelet is modeled as an ellipsoid with axes lengths of
+$1.5 \mu m \times 1.5 \mu m \times 0.5 \mu m$, and the position of its
+center of mass is $\pltCOM$. There are a couple of different ways to
+represent the orientation of the platelet, however the simplest way to
+represent the platelet is as a unit vector pointing in the direction
+of the platelet's minor axis: $\e{m}$. This uniquely defines an
+orientation because the platelet is rotationally symmetric about its
+minor axis.
+
+Finally, as mentioned above we use Stokes equations to model the flow
+field, with no-slip boundary conditions on the platelet surface and
+the wall, and a far-field condition:
+\begin{align}
+  \Delta \flowField = \nabla \pressure, \quad \nabla \cdot \flowField
+  = 0 \label{eq:stokes-eqn} \\
+  \flowField(\arbLoc)|_{\partial\mathcal{P}} = \pltVelocity +
+  \pltRotation \times \arbLoc \label{eq:plt-bc} \\
+  \flowField(\arbLoc)|_{\rsX = 0} =
+  \vect{0} \label{eq:wall-bc} \\
+  \flowField(\arbLoc)|_{\|\arbLoc\| \rightarrow \infty}
+  \rightarrow \flowField^\infty. \label{eq:far-field}
+\end{align}
+
+\subsection{Equations of motion}
+\label{sec:equations-motion}
+
+Let us put aside the issue of solving equations
+(\ref{eq:stokes-eqn})---(\ref{eq:far-field}) for the moment, and focus
+on the main structure of the model. We are interested in the motion of
+the platelet, and this can be found by solving the following system of
+ODEs; the equations of rigid body motion for the platelet:
+\begin{align}
+  \Der{\pltCOM}{t} &= \pltVelocity(\pltCOM,
+                     \e{m}) \label{eq:plt-velocity} \\
+  \Der{\e{m}}{t} &= \pltRotation(\pltCOM,
+                   \e{m}). \label{eq:plt-rotation} 
+\end{align}
+
+We haven't defined the functions for the platelet's translational
+($\pltVelocity$) and angular ($\pltRotation$) velocities yet, and all
+of the numerical complexity in solving this model is wrapped up in
+these functions. These velocity functions are found by enforcing force
+balance on the platelet. For a given platelet position, orientation,
+and set of bonds, the body forces $\bodyForces$ and bond forces
+$\bindingForces$ are fixed. However the hydrodynamic forces
+$\hydrodynamicForces$ exerted by the fluid on the cell depend on
+$\pltVelocity$ and $\pltRotation$, as well as the position and
+orientation. Therefore, we will choose the values of $\pltVelocity$
+and $\pltRotation$ so that the hydrodynamic forces balance with the
+other forces acting on the cell: $\hydrodynamicForces + \bodyForces +
+\bindingForces = \vect{0}$.
+
+First, let us look at $\hydrodynamicForces$ more closely. For a given
+velocity field $\flowField$, the stress tensor is defined as
+$\stressTensor = -p \uu{I} + \viscosity \left(\nabla \flowField +
+  \left(\nabla \flowField\right)^T\right)$, and the body forces and
+torques can be found, respectively, as:
+\begin{align}
+  \left[\hydrodynamicForces\right]_{1:3} &= \Int{\stressTensor \cdot
+  \mathbf{n}}{s(\arbLoc)}{\pltSurf}{} \label{eq:body-force} \\
+  \left[\hydrodynamicForces\right]_{4:6} &= \Int{(\arbLoc - \pltCOM)
+  \times \stressTensor \cdot \mathbf{n}}{s(\arbLoc)}{\partial
+  P}{}. \label{eq:body-torque} 
+\end{align}
+
+As mentioned in Section \ref{sec:definitions-domain},
+$\hydrodynamicForces$ is generated by a background flow of
+$\flowField^\infty = \shear \rsX \e{\rsZ}$. Because of the linearity
+of Stokes' flow, we can decompose $\hydrodynamicForces$ into two
+pieces:
+\begin{itemize}
+\item $\dragForces$---the drag force and torque exerted on a moving
+  platelet in a stationary flow, and
+\item $\shearForces$---the drag force and torque exerted on a
+  stationary platelet in a background shear flow.
+\end{itemize}
+Again using linearity of Stokes' flow, there is a linear relation
+between $\dragForces$ and the generalized velocity $\genVelocity$ of
+the platelet (where
+$\genVelocity = (\pltVelocity, \pltRotation)^T \in \reals^6$):
+\begin{equation}
+  \label{eq:resistance-matrix}
+  \dragForces = \resMatrix \genVelocity.
+\end{equation}
+The matrix $\resMatrix$ is called the \emph{resistance tensor} and
+depends only on the position, orientation, and shape of the
+platelet. In order to find the resistance tensor, we need to solve 6
+Stokes' flow problems with the following boundary conditions on the
+platelet:
+\begin{align}
+  \flowField_i |_{\arbLoc \in \pltSurf} &= \delta_{ij} \e{j} \tn{
+  for } i = 1, 2, 3, \tn{ and} \label{eq:translation-stokes-bcs} \\
+  \flowField_i |_{\arbLoc \in \pltSurf} &= \delta_{i-3, j} \e{j}
+  \times \arbLoc \tn{ for } i = 4, 5,
+  6. \label{eq:rotation-stokes-bcs}
+\end{align}
+For the sake of completeness, the exact system being solved is the
+equations (\ref{eq:stokes-eqn}), (\ref{eq:wall-bc}), and
+\begin{equation}
+  \flowField_i |_{\|\arbLoc\| \rightarrow \infty} \rightarrow
+  \vect{0}. \label{eq:far-field-drag}
+\end{equation}
+with either (\ref{eq:translation-stokes-bcs}) or
+(\ref{eq:rotation-stokes-bcs}) depending on $i$.
+
+With the boundary conditions specified in equations
+(\ref{eq:translation-stokes-bcs}) and (\ref{eq:rotation-stokes-bcs}),
+we have six different generalized velocities: $\genVelocity_i = \e{i}$
+($\e{i}$ is the $i$th canonical basis vector in $\reals^6$). Therefore
+to construct $\resMatrix$, for each $\genVelocity_i$, we solve for
+$v_i$ and then compute the drag forces and torques (combined in the
+generalized force vector $\dragForce^i$) on the platelet using
+equations (\ref{eq:body-force}) and (\ref{eq:body-torque}). Because
+$\genVelocity_i = \e{i}$, the $i$ column of $\resMatrix$ is exactly
+$\dragForce^i$.
+
+The drag force $\shearForces$ due to the shear background flow is
+found with a 7th solve of Stokes' equations, with the boundary and
+far-field conditions
+\begin{align}
+  &\flowField_7 |_{\arbLoc \in \pltSurf} =
+  \vect{0} \label{eq:plt-bcs-shear} \\
+  &\flowField_7 |_{\|\arbLoc\| \rightarrow \infty} \rightarrow
+  \shear \rsX \e{\rsZ}. \label{eq:plt-far-field-shear}
+\end{align}
+
+Putting everything together and assuming for the moment that
+$\bindingForces$ and $\bodyForces$ are given, we require that
+$\hydrodynamicForces + \bindingForces + \bodyForces = 0$. We can
+express $\hydrodynamicForces$ as a sum of the stationary drag forces
+on the platelet and the drag from the background shear flow on the
+platelet: $\hydrodynamicForces = \dragForces + \shearForces =
+\resMatrix \genVelocity + \shearForces$. Therefore, $\resMatrix
+\genVelocity + \shearForces + \bindingForces + \bodyForces = 0$, and
+solving for $\genVelocity$ we get
+\begin{equation}
+  \label{eq:gen-velocity-equation}
+  \genVelocity = -\resMatrix\inv \left(\shearForces + \bindingForces +
+    \dragForces \right).
+\end{equation}
+
+\subsubsection{Numerical method for solving Stokes' equations}
+\label{sec:numer-meth-solv}
+
+We use the method of regularized Stokeslets to solve Stokes' equations
+for the different boundary conditions specified above. This is an
+approach developed by Ricardo Cortez to solve fluid-structure
+interaction problems in Stokes' flows which distributes regularized
+point forces over the surface of the structure being modeled in order
+to communicate forces between the fluid and the structure. Basically
+it is a regularized Green's function approach to solving Stokes' flow.
+
+Below, I will describe the method of regularized Stokeslets for an
+unbounded flow in three dimensions. This is a simpler case than
+solving Stokes' equations in the half-space with $\vect{0}$
+boundary conditions on the wall, but nonetheless it has many of the
+same features. This description closely follows the derivations laid
+out in \cite{Cortez2001} and \cite{Cortez2005}. %Give examples?
+
+Similar to a Green's function approach, the method of regularized
+Stokeslets relies on the linearity of Stokes' equations by exploiting
+the superposition principle for linear PDEs. In a true Green's
+function method (i.e., the method of Stokeslets), one would solve
+Stokes' equations with a singular point force:
+\begin{equation}
+  \label{eq:stokes-with-pt-force}
+  \Delta \flowField - \nabla \pressure = -\arbForce \delta(\arbLoc
+  - \evalLoc), \quad \nabla \cdot \flowField = \vect{0}.
+\end{equation}
+These equations have an exact solution---called the Stokeslet---and
+can be used to solve Stokes' equations for an arbitrary right-hand
+side.
+
+The equation that forms the basis of the method of regularized
+Stokeslets is very similar, but with the point force replaced by a
+regularized point force:
+\begin{equation}
+  \label{eq:stokes-with-reg-force}
+  \Delta \flowField - \nabla \pressure = -\arbForce
+  \blobFun{\blobPar}(\arbLoc - \evalLoc), \quad \nabla \cdot
+  \flowField = \vect{0}.
+\end{equation}
+The function $\blobFun{\blobPar}$ is usually called a ``blob
+function'' or ``cutoff function,'' and $\blobPar$ is the ``blob
+parameter.'' The blob function is a regularized approximation to the
+$\delta$ function, and satisfies three criteria:
+\begin{enumerate}
+\item $\blobFun{\blobPar}$ is radially symmetric and smooth, 
+\item $\Int{\blobFun{\blobPar}(\arbLoc)}{\arbLoc}{}{} = 1$ for all
+  $\blobPar$, and
+\item $\blobFun{\blobPar} \rightarrow \delta$ as $\blobPar \rightarrow
+  0$.
+\end{enumerate}
+There are of course many different possible functions which satisfy
+these criteria. The specific blob function we use is
+\begin{equation}
+  \label{eq:blob-function}
+  \blobFun{\blobPar}(\arbLoc) = \frac{15 \blobPar^4}{8 \pi
+    \left(\|\arbLoc\|^2 + \blobPar^2 \right)^{7/2}}.
+\end{equation}
+Then we can write the solution to equation
+(\ref{eq:stokes-with-reg-force}) as
+\begin{equation}
+  \label{eq:solution-to-reg-force}
+  \flowField(\arbLoc) = \frac{1}{8\pi \viscosity}
+  \regStokeslet{\blobPar} \arbForce
+\end{equation}
+where $\regStokeslet{\blobPar}$ is the regularized Stokeslet.
+
+It is possible to derive the following boundary integral equation for
+the solution of Stokes' equations around a body $\pltBody$
+\cite{Cortez2005}:
+\begin{equation}
+  \label{eq:boundary-integral-equation}
+  \Int{\flowField(\arbLoc) \blobFun{\blobPar}(\arbLoc -
+    \evalLoc)}{V(\arbLoc)}{\reals^3}{} = \frac{1}{8\pi \viscosity}
+  \Int{\regStokeslet{\blobPar} \arbForce}{s(\arbLoc)}{\pltSurf}{}.
+\end{equation}
+This equation is used to derive the method of regularized Stokeslets,
+and two approximations are made to arrive at the numerical method. The
+first approximation is to replace $\blobFun{\blobPar}$ with a singular
+$\delta$-function, which eliminates the integral on the left-hand
+side. The second approximation is that the integral on the right hand
+side will be discretized and approximated with a quadrature
+rule. These approximations give the equation
+\begin{equation}
+  \label{eq:method-reg-stokeslets}
+  \flowField(\evalLoc) = \frac{1}{8\pi\viscosity} \sum_{n = 1}^N
+  \regStokeslet{\blobPar} (\arbLoc_n, \evalLoc) \arbForce_n A_n,
+\end{equation}
+where $N$ is the number of Stokeslets placed on $\pltSurf$,
+$\arbLoc_n$ is the location of the $n$th Stokeslet, $\arbForce_n$ is
+the force vector applied at $\arbLoc_n$, and $A_n$ is the quadrature
+weight of the $n$th Stokeslet.
+
+In this method, we pick the location of each of the point forces, and
+the quadrature rule used to approximate the right-hand side integral
+in equation (\ref{eq:boundary-integral-equation}). The unknowns are
+the Stokeslet strengths $\arbForce_n$. Because the boundary
+conditions on $\pltSurf$ are known, we can choose a set of $\evalLoc$
+on $\pltSurf$ and derive $\flowField(\evalLoc)$ from the boundary
+conditions. By choosing $\arbLoc_n$ and $N$ evaluation points
+$\evalLoc \in \pltSurf$, equation (\ref{eq:method-reg-stokeslets}) can
+be written as a $3N \times 3N$ linear system:
+\begin{equation}
+  \label{eq:rs-linear-system}
+  \hat{\flowField} = \frac{1}{8\pi\viscosity} \mathcal{A}
+  \hat{\arbForce},
+\end{equation}
+where $\hat{\flowField} = (\flowField(\evalLoc^1),
+\flowField(\evalLoc^2), \hdots, \flowField(\evalLoc^N)^T$,
+$\hat{\arbForce} = (\arbForce(\arbLoc_1), \arbForce(\arbLoc_2),
+\hdots, \arbForce(\arbLoc_N))^T$, and $\mathcal{A}$ is a $3N \times
+3N$ matrix which depends on $\regStokeslet{\blobPar}$ and $A_n$.
+
+We take the evaluation points $\evalLoc^n$ to be the same as the force
+locations; so $\evalLoc^n = \arbLoc_n$, but other choices could be
+made as well. Therefore in order to find the Stokeslet strengths
+$\hat{\arbForce}$ for a given choice of boundary conditions
+$\hat{\flowField}$, we have to invert $\mathcal{A}$, and because we
+need to solve for $\hat{\arbForce}$ for seven different
+$\hat{\flowField}$s, we compute the Cholesky factorization of
+$\mathcal{A}$ so that we can re-use this work when solving the seven
+linear systems.
+
+Thus far I have glossed over some details regarding the solution of
+the shear drag, that is, solving Stokes' equations with the conditions
+(\ref{eq:plt-bcs-shear}) and (\ref{eq:plt-far-field-shear}). The
+regularized Stokeslets vanish as $\|\arbLoc\| \rightarrow \infty$,
+which is not consistent with the far-field condition
+(\ref{eq:plt-far-field-shear}). Therefore, following Pozrikidis
+\cite{Pozrikidis92}, we decompose $\flowField_7$ into the background
+flow $\flowField^\infty$ and a disturbance flow $\flowField_d$, which
+represents the disturbance to the background flow from the
+platelet. The background flow $\flowField^\infty$ satifies Stokes'
+equations and the boundary condition at the wall, and the disturbance
+field $\flowField_d$ satisfies Stokes equations with the modified
+boundary conditions:
+\begin{equation}
+  \label{eq:disturbance-bcs}
+  \flowField_d(\arbLoc) = -\flowField^\infty(\arbLoc) \tn{ for }
+  \arbLoc \in \pltSurf, \quad \flowField_d \rightarrow \vect{0} \tn{
+    for } \|\arbLoc\| \rightarrow \infty.
+\end{equation}
+Now $\flowField_d$ can be found using regularized Stokeslets following
+the same process described above, and the solution can be integrated
+to find $\genForces_d$.
+
+\subsection{Binding dynamics}
+\label{sec:binding-dynamics}
+
+With the fluid dynamics component of the model taken care of, let's
+now add the binding and unbinding component of the model. The
+assumptions made in this model are similar to those made in the 2D
+rolling model developed in Chapter \ref{cha:two-dimens-roll}. We
+assume that there is a finite number of receptors on the surface of
+the cell, and we track their locations explicitly. We assume the
+receptors have a fixed location relative to the surface of the cell,
+so that the motion of every receptor is completely determined by the
+motion of the platelet. Ligands on the wall are assumed to exist in
+excess, and ligands are not tracked explicitly.
+
+We assume that bonds have some nonzero rest length $\restLength$. When
+the bond length is greater than $\restLength$, the bond acts like a
+linear spring, and when the bond length is less than $\restLength$, no
+force is exerted by the bond. Therefore the function defining the bond
+force exerted by a single bond is
+\begin{equation}
+  \label{eq:single-bond-force}
+  \bondForces_i = \stiffness H(\|\arbLoc_l^i - \arbLoc_r^i\| -
+  \restLength) \frac{\arbLoc_l^i - \arbLoc_r^i}{\|\arbLoc_l^i -
+    \arbLoc_r^i\|},
+\end{equation}
+where $\arbLoc_l^i$ is the point where the bond attaches to a ligand
+on the wall, and $\arbLoc_r^i$ is the location of the bound receptor.
+In order to find the total bond force and torque exerted on the
+platelet, we compute the following sums:
+\begin{align}
+  \left[\bondForces\right]_{1:3} = \sum_{i = 1}^{N_\tn{bonds}}
+  \bondForces_i \label{eq:total-bond-force} \\
+  \left[\bondForces\right]_{4:6} = \sum_{i = 1}^{N_\tn{\bonds}}
+  (\arbLoc_r^i - \pltCOM) \times \bondForces_i.
+\end{align}
+
+The bond formation ($\onRate(L)$) and breaking ($\offRate(L)$) rates
+are distance/length-dependent. We use the Dembo model \cite{Dembo1988}
+for these rates:
+\begin{align}
+  \onRate(L) = \onRate^0 \exp\left[\frac{-\stiffness_\tn{ts} \left(L -
+  \restLength \right)^2}{2 \boltzmann \temp}
+  \right] \label{eq:dembo-on} \\
+  \offRate(L) = \offRate^0 \exp\left[\frac{\left(\stiffness -
+  \stiffness_\tn{ts} \right) \left(L - \restLength \right)^2}{2
+  \boltzmann \temp} \right]. \label{eq:dembo-off}
+\end{align}
+
+% local variables:
+% TeX-master: "phd-thesis.ltx"
+% End:

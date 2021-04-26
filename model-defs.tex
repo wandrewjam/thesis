@@ -7,6 +7,8 @@
 %% Notation for 2D Rolling Model %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+
 %% Coordinates
 \newcommand{\wallDist}{x}
 \newcommand{\ndWallDist}{z}
@@ -54,8 +56,8 @@
 \newcommand{\totalTorque}{\tau}
 
 %% Force, Velocity, and Resistance Tensors
-\newcommand{\forceVec}{\mathbf{F}}
-\newcommand{\velVec}{\mathbf{U}}
+\newcommand{\forceVec}{\vect{F}}
+\newcommand{\velVec}{\vect{U}}
 \newcommand{\resMatrix}{\underline{\underline{R}}}
 
 %% Model Parameters (Nondimensional)
@@ -107,3 +109,38 @@
 \newcommand{\jvVel}{v}
 \newcommand{\jvEscape}{k_\textnormal{escape}}
 \newcommand{\jvTot}{k_\textnormal{tot}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Notation for Regularized Stokeslets Model %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Generalized forces and positions
+\newcommand{\hydrodynamicForces}{\vect{F}_H}
+\newcommand{\bindingForces}{\vect{F}_R}
+\newcommand{\bodyForces}{\vect{F}_\tn{body}}
+\newcommand{\pltPosition}{\vect{x}}
+\newcommand{\shearForces}{\vect{F}_S}
+\newcommand{\dragForces}{\vect{F}_D}
+\newcommand{\fluidDomain}{\Omega}
+
+%% Coordinates and unit vectors
+\newcommand{\rsX}{x}
+\newcommand{\rsY}{y}
+\newcommand{\rsZ}{z}
+\newcommand{\e}[1]{\vect{e}_{#1}}
+\newcommand{\pltCOM}{\vect{x}_c}
+\newcommand{\flowField}{\vect{v}}
+\newcommand{\pressure}{P}
+\newcommand{\pltVelocity}{\vect{U}}
+\newcommand{\pltRotation}{\vect{\Omega}}
+\newcommand{\uu}[1]{\underline{\underline{#1}}}
+\newcommand{\stressTensor}{\uu{\sigma}}
+\newcommand{\pltBody}{P}
+\newcommand{\pltSurf}{\partial\pltBody}
+\newcommand{\blobFun}[1]{\vect{\phi_{#1}}}
+\newcommand{\blobPar}{\epsilon}
+\newcommand{\arbForce}{\vect{g}}
+\newcommand{\arbLoc}{\vect{x}}
+\newcommand{\evalLoc}{\vect{x}_0}
+\newcommand{\regStokeslet}[1]{\uu{S}^{#1}}
+\newcommand{\genVelocity}{\vect{U}}
