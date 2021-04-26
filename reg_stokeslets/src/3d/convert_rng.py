@@ -7,7 +7,7 @@ from binding_expt import parse_file
 def main():
     dir_path = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     for entry in os.scandir(dir_path):
-        if entry.path.endswith('070.pkl'):
+        if entry.name.endswith('.pkl') and not entry.name.endswith('_cont.pkl'):
             process_pkl_file(dir_path, entry)
 
 
@@ -18,6 +18,8 @@ def process_pkl_file(dir_path, entry):
     except UnicodeDecodeError as e:
         with open(entry.path, 'rb') as f:
             rng_history = pkl.load(f, encoding='latin1')
+    except EOFError as f:
+        return
     except Exception as e:
         print('Unable to load data ', entry.name, ':', e)
         raise
@@ -25,7 +27,7 @@ def process_pkl_file(dir_path, entry):
     filename = entry.name[:-4]
     draws = extract_draws(filename, rng_history)
     save_new_npz(dir_path, draws, filename)
-    # os.remove(entry.path)
+    os.remove(entry.path)
 
 
 def save_new_npz(dir_path, draws, filename):
@@ -43,20 +45,28 @@ def extract_draws(filename, rng_history):
     pars = parse_file(filename)
     rng = np.random.RandomState(pars['seed'])
     draws = []
-    for j in range(len(rng_history)):
-        for i in range(0, 10**6):
-            if (np.all(rng.get_state()[1] == rng_history[j][1])
+    if type(rng_history[0]) is tuple:
+        for j in range(len(rng_history)):
+            for i in range(0, 10**6):
+                if (np.all(rng.get_state()[1] == rng_history[j][1])
                     and rng.get_state()[2] == rng_history[j][2]):
-                break
-            rng.rand()
+                    break
+                rng.rand()
+
+        assert i < 10 ** 6
+        draws.append(i)
+    elif type(rng_history[0]) is int:
+        draws = rng_history
+    else:
+        raise AssertionError('rng_history is an unexpected type')
+                     
         # while i < 10 ** 6 and (
         #         np.all(rng.get_state()[1] != rng_history[j][1])
         #         or rng.get_state()[2] != rng_history[j][2]
         # ):
         #
         #     i += 1
-        assert i < 10 ** 6
-        draws.append(i)
+
     return draws
 
 
