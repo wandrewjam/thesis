@@ -1,0 +1,512 @@
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208029.npz 192.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208010.npz 193.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206014.npz 197.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208008.npz 196.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206031.npz 194.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208019.npz 195.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208026.npz 201.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208020.npz 199.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208025.npz 200.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206025.npz 206.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206003.npz 198.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208000.npz 202.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206021.npz 203.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206013.npz 205.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206010.npz 204.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206007.npz 207.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206000.npz 209.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206024.npz 208.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206009.npz 211.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206016.npz 212.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206015.npz 222.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206004.npz 213.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206006.npz 210.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206020.npz 215.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206002.npz 216.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206017.npz 214.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206012.npz 217.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206018.npz 218.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206029.npz 219.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206011.npz 220.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206028.npz 221.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206005.npz 223.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206026.npz 224.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1207057.npz 227.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208032.npz 229.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206023.npz 225.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208037.npz 234.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208036.npz 233.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1207058.npz 228.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208040.npz 237.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206001.npz 226.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208033.npz 230.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208034.npz 231.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208035.npz 232.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208039.npz 236.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208038.npz 235.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208041.npz 238.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208042.npz 239.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208043.npz 240.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208044.npz 241.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208045.npz 242.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208049.npz 246.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206035.npz 250.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208046.npz 243.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208047.npz 244.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208048.npz 245.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206036.npz 251.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206037.npz 252.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206040.npz 255.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206039.npz 254.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206032.npz 247.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206034.npz 249.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206033.npz 248.txt'
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1206038.npz 253.txt'

@@ -1,7 +1,7 @@
-seed 1587279506
+seed 1653570830
 t_start 0.0
 t_end 3.0
-num_steps 234
+num_steps 1500
 n_nodes 8
 a 1.5
 b 0.5

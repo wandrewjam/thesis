@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --time=72:00:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=32
+#SBATCH --nodes=2
+#SBATCH --ntasks=64
 #SBATCH --account=owner-guest
 #SBATCH --partition=notchpeak-guest
-#SBATCH -C "[(rogersa|farmer|cabrera|gnosis|dtn|mansfield|oberg|yrao|chipman|anderegg|fiorella|facelli|uspcasw|pezzolesi|gompert|rutter)&(c32|c64)]"
+#SBATCH -C "[(rogersa|farmer|cabrera|gnosis|dtn|mansfield|oberg|yrao|chipman|anderegg|fiorella|facelli|uspcasw|pezzolesi|rutter|hoepfner|deo|yzhou|round|holmes)&(c32)]"
 #SBATCH -o runner4101_cont.out
 #SBATCH -e runner4101_cont.err
 

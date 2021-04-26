@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "src/3d/continue_int.py", line 271, in <module>
+    continue_integration(filename)
+  File "src/3d/continue_int.py", line 12, in continue_integration
+    pars = parse_file(filename)
+  File "/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/src/3d/binding_expt.py", line 15, in parse_file
+    with open(txt_dir + filename + '.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/par-files/bd_run1208049.npz 246.txt'

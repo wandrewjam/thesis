@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "src/3d/continue_int.py", line 254, in <module>
-    continue_integration(filename)
-  File "src/3d/continue_int.py", line 24, in continue_integration
-    with np.load(data_dir + filename + '.npz') as data:
-  File "/uufs/chpc.utah.edu/common/home/u0946770/software/pkg/miniconda3/envs/rolling/lib/python3.8/site-packages/numpy/lib/npyio.py", line 416, in load
-    fid = stack.enter_context(open(os_fspath(file), "rb"))
-FileNotFoundError: [Errno 2] No such file or directory: '/uufs/chpc.utah.edu/common/home/u0946770/thesis/reg_stokeslets/data/bd_run/bd_run4101049.npz'
