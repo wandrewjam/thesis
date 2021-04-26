@@ -1,0 +1,60 @@
+Velocities:
+F_onewayResult(statistic=119.22559115860386, pvalue=7.122162106067577e-58)
+        Multiple Comparison of Means - Tukey HSD, FWER=0.05         
+====================================================================
+    group1        group2    meandiff p-adj   lower    upper   reject
+--------------------------------------------------------------------
+bd_runner1105 bd_runner1106 -41.0102  0.001 -49.7313 -32.2891   True
+bd_runner1105 bd_runner1107 -49.3746  0.001 -58.0957 -40.6535   True
+bd_runner1105 bd_runner1108 -61.0021  0.001 -69.7232  -52.281   True
+bd_runner1106 bd_runner1107  -8.3644 0.0475 -16.6654  -0.0634   True
+bd_runner1106 bd_runner1108 -19.9919  0.001 -28.2929 -11.6909   True
+bd_runner1107 bd_runner1108 -11.6275 0.0019 -19.9285  -3.3264   True
+--------------------------------------------------------------------
+Anderson_ksampResult(statistic=73.52091553157247, critical_values=array([0.49854918, 1.3236709 , 1.91577682, 2.49304213, 3.24593219,
+       3.82285604, 5.12078789]), significance_level=0.001)
+
+Steps:
+F_onewayResult(statistic=5.689609053952695, pvalue=0.0007638887458148359)
+        Multiple Comparison of Means - Tukey HSD, FWER=0.05        
+===================================================================
+    group1        group2    meandiff p-adj   lower    upper  reject
+-------------------------------------------------------------------
+bd_runner1105 bd_runner1106    1.134    0.9 -11.2945 13.5626  False
+bd_runner1105 bd_runner1107  -7.0453 0.4577  -19.395  5.3043  False
+bd_runner1105 bd_runner1108 -15.0519 0.0161 -28.0898  -2.014   True
+bd_runner1106 bd_runner1107  -8.1794 0.1528 -18.1914  1.8327  False
+bd_runner1106 bd_runner1108 -16.1859  0.001 -27.0355 -5.3363   True
+bd_runner1107 bd_runner1108  -8.0065 0.2219 -18.7657  2.7526  False
+-------------------------------------------------------------------
+Anderson_ksampResult(statistic=9.437685263817345, critical_values=array([0.49854918, 1.3236709 , 1.91577682, 2.49304213, 3.24593219,
+       3.82285604, 5.12078789]), significance_level=0.001)
+
+Dwells:
+F_onewayResult(statistic=10.551781637459912, pvalue=8.434117463449177e-07)
+       Multiple Comparison of Means - Tukey HSD, FWER=0.05       
+=================================================================
+    group1        group2    meandiff p-adj   lower  upper  reject
+-----------------------------------------------------------------
+bd_runner1105 bd_runner1106  -0.0691 0.1848 -0.1576 0.0194  False
+bd_runner1105 bd_runner1107  -0.0226    0.9 -0.1113 0.0661  False
+bd_runner1105 bd_runner1108   0.1252 0.0041  0.0302 0.2203   True
+bd_runner1106 bd_runner1107   0.0465 0.4897  -0.038  0.131  False
+bd_runner1106 bd_runner1108   0.1943  0.001  0.1031 0.2856   True
+bd_runner1107 bd_runner1108   0.1478  0.001  0.0564 0.2393   True
+-----------------------------------------------------------------
+Anderson_ksampResult(statistic=11.126524531812022, critical_values=array([0.49854918, 1.3236709 , 1.91577682, 2.49304213, 3.24593219,
+       3.82285604, 5.12078789]), significance_level=0.001)
+
+Lifetimes:
+Anderson_ksampResult(statistic=0.039970765656969186, critical_values=array([0.49854918, 1.3236709 , 1.91577682, 2.49304213, 3.24593219,
+       3.82285604, 5.12078789]), significance_level=0.25)
+
+Formation:
+Anderson_ksampResult(statistic=6.4822472897634205, critical_values=array([0.49854918, 1.3236709 , 1.91577682, 2.49304213, 3.24593219,
+       3.82285604, 5.12078789]), significance_level=0.001)
+
+Breaking:
+Anderson_ksampResult(statistic=134.1410260563078, critical_values=array([0.49854918, 1.3236709 , 1.91577682, 2.49304213, 3.24593219,
+       3.82285604, 5.12078789]), significance_level=0.001)
+
