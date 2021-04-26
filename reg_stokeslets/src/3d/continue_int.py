@@ -27,8 +27,8 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
             rng_draws = data['draws']
     except FileNotFoundError:
         x = np.array([pars['x1']])
-        y = np.array([pars['x2']])
-        z = np.array([pars['x3']])
+        y = np.array([0.])
+        z = np.array([0.])
         t = np.zeros(1)
 
         theta = np.arctan2(pars['emz'], pars['emy'])
@@ -130,7 +130,7 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
 
     max_bonds = len(max(*bond_history, key=len))
     max_bonds = max([max_bonds, old_bond_array.shape[0]])
-    old_padded = np.pad(old_bond_array,
+    old_padded = np.pad(old_bond_array[..., :],
                         pad_width=((0, max_bonds - old_bond_array.shape[0]),
                                    (0, 0), (0, 0)),
                         mode='constant', constant_values=-1)
@@ -154,7 +154,7 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
         np.savez(data_dir + new_filename, t=new_t, x=new_x, y=new_y, z=new_z,
                  r_matrices=new_rmat, bond_array=new_bond_array,
                  receptors=receptors, draws=new_draws)
-        savemat(data_dir + new_filename,
+        savemat(data_dir + new_filename + '.mat',
                 {'t': new_t, 'x': new_x, 'y': new_y, 'z': new_z, 'R': new_rmat,
                  'bond_array': new_bond_array, 'receptors': receptors,
                  'draws': new_draws})
