@@ -128,13 +128,13 @@ def fit_models(vels, two_par, initial_guess=None, N_obj=512, constraints=()):
                 return -np.sum(np.log(q(1, 1. / v, ap, epsp)), axis=0)
             else:
                 v = np.array(vels)
-                # s = p[0]
-                # if s == 0:
-                #     ap = .5
-                # else:
-                #     ap = (s - 1 + np.sqrt(s ** 2 + 1)) / (2 * s)
-                # epsp = np.exp(p[1])
-                ap, epsp = p
+                s = p[0]
+                if s == 0:
+                    ap = .5
+                else:
+                    ap = (s - 1 + np.sqrt(s ** 2 + 1)) / (2 * s)
+                epsp = np.exp(p[1])
+                # ap, epsp = p
                 return -np.sum(np.log(q(1, 1. / v, ap, epsp)))
 
     def full_objective(p, v, vmin, two_par, N_obj):

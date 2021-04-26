@@ -23,7 +23,7 @@ def main():
     (avg_free_vels_dict, distances_dict, times_dict, steps_dict, dwells_dict,
      ndwells_dict, vels_dict, escape_dict) = result
 
-    Vstar = 40.
+    Vstar = 70.
     average_distance = 5.
 
     k_off_dict = dict([(expt, 1./np.mean(dwell)) for expt, dwell
@@ -69,7 +69,7 @@ def main():
         scaled_times, vels)
 
     sim_dist = 2.5
-    sim_dict = run_velocity_expts(Vstar, a_full, sim_dist, e_full * average_distance / sim_dist, k_off_dict, k_on_dict,
+    sim_dict = run_velocity_expts(Vstar, a_fit, sim_dist, e_fit * average_distance / sim_dist, k_off_dict, k_on_dict,
                                   k_escape_dict)
     sim_result = get_free_velocities_sim(sim_dict)
     (avg_free_vels_sim, distances_sim, times_sim, steps_sim, dwells_sim,
@@ -82,13 +82,13 @@ def main():
     plot_escapes(escape_dict, escape_sim, colors)
     plot_ndwells(ndwells_dict, ndwells_sim, k_escape_dict, k_on_dict, colors)
 
-    k_off_fast = (Vstar * a_full) / (average_distance * e_full)
-    k_on_fast = (Vstar * (1 - a_full)) / (average_distance * e_full)
+    k_off_fast = (Vstar * a_fit) / (average_distance * e_fit)
+    k_on_fast = (Vstar * (1 - a_fit)) / (average_distance * e_fit)
     print('k_off_fast = {}'.format(k_off_fast))
     print('k_on_fast = {}'.format(k_on_fast))
-    plot_vels_and_fits(Vstar, a_fit, a_full, avg_free_vels_dict, e_fit, e_full, reduced, vels, colors)
+    plot_vels_and_fits(Vstar, a_fit, a_fit, avg_free_vels_dict, e_fit, e_fit, reduced, vels, colors)
     plot_vels_and_traj(experiments, sim_dict, vels_dict, vels_sim, k_on_dict, k_off_dict, average_distance, Vstar,
-                       a_full, e_full, colors)
+                       a_fit, e_fit, colors)
     # plot_vels_and_traj(experiments, time_slices, vels_dict, vels_slice, k_on_dict, k_off_dict, average_distance, Vstar,
                        # a_full, e_full, colors)
     # print(sol.x)
@@ -188,12 +188,22 @@ def plot_vels_and_fits(Vstar, a_fit, a_full, avg_free_vels_dict, e_fit, e_full,
 def fit_fast_binding_params(scaled_times, vels):
     def objective_simple(p, vels_temp):
         ap, epsp = p
-        return -np.sum(np.log(q(1, 1. / vels_temp, ap, epsp)))
+        if ap == 0:
+            a = .5
+        else:
+            a = (ap - 1 + np.sqrt(ap ** 2 + 1)) / (2 * ap)
+        e = np.exp(epsp)
+        return -np.sum(np.log(q(1, 1. / vels_temp, a, e)))
 
     def objective_two_variable(p, data):
         ap, epsp = p
-        vels_temp, times_temp = data[:, 0], data[:, 1]
-        return -np.sum(np.log(q(times_temp * vels_temp, times_temp, ap, epsp)))
+        if ap == 0:
+            a = .5
+        else:
+            a = (ap - 1 + np.sqrt(ap ** 2 + 1)) / (2 * ap)
+        e = np.exp(epsp)
+        vels_temp, times_temp = data
+        return -np.sum(np.log(q(times_temp * vels_temp, times_temp, a, e)))
 
     def q(y, s, a, eps):
         return (1 / np.sqrt(4 * np.pi * eps * a * (1 - a) * s)
@@ -211,14 +221,30 @@ def fit_fast_binding_params(scaled_times, vels):
     s2 = np.std(vels) ** 2
     a0 = v_bar - s2 / (2 * v_bar)
     e0 = s2 / (2 * v_bar ** 2 * (1 - v_bar))
-    initial_guess = np.array([a0, e0])
-    sol = minimize(objective_simple, initial_guess, args=(vels,),
-                   bounds=[(0.05, .9), (0.01, None)])
+
+    ap0 = (2 * a0 + 1) / (2 * a0 * (a0 + 1))
+    ep0 = np.log(e0)
+    initial_guess = np.array([ap0, ep0])
+
+    sol = minimize(objective_simple, initial_guess, args=(vels,))
     sol_full = minimize(objective_two_variable, initial_guess,
-                        args=(np.stack([vels, scaled_times]),),
-                        bounds=[(0.05, .9), (0.01, None)])
-    a_fit, e_fit = sol.x
-    a_full, e_full = sol_full.x
+                        args=(np.stack([vels, scaled_times]),))
+    ap_fit, ep_fit = sol.x
+    ap_full, ep_full = sol_full.x
+
+    if ap_fit == 0:
+        a_fit = .5
+    else:
+        a_fit = (ap_fit - 1 + np.sqrt(ap_fit ** 2 + 1)) / (2 * ap_fit)
+
+    if ap_full == 0:
+        a_full = .5
+    else:
+        a_full = (ap_full - 1 + np.sqrt(ap_full ** 2 + 1)) / (2 * ap_full)
+
+    e_fit = np.exp(ep_fit)
+    e_full = np.exp(ep_full)
+
     return a_fit, a_full, e_fit, e_full, reduced
 
 
@@ -309,7 +335,7 @@ def plot_steps(steps_dict, steps_sim, k_on_dict, colors):
     ax[0].set_ylabel('Probability Density')
     ax[1].set_ylabel('CDF')
     ax[0].legend()
-    ax[1].text(1.5, .4, s)
+    # ax[1].text(1.5, .4, s)
     plt.tight_layout()
     plt.show()
 
@@ -369,7 +395,7 @@ def plot_escapes(escape_dict, escape_sim, colors):
     ax[0].set_ylabel('Probability density')
     ax[1].set_ylabel('CDF')
     ax[0].legend()
-    ax[1].text(2, .5, s)
+    # ax[1].text(2, .5, s)
     plt.tight_layout()
     plt.show()
 
@@ -430,8 +456,8 @@ def plot_vels_and_traj(experiments, simulations, vels_dict, vels_sim,
     fig1, ax1 = plt.subplots(ncols=2, figsize=(10, 5))
     fig2, ax2 = plt.subplots(ncols=2, figsize=(10, 5),
                              sharex='all', sharey='all')
-    # fig3, ax3 = plt.subplots(ncols=2, figsize=(10, 5),
-    #     #                          sharex='all', sharey='all')
+    fig3, ax3 = plt.subplots(ncols=2, figsize=(10, 5),
+                                 sharex='all', sharey='all')
     s1 = 'Data:\n'
     s2 = 'Model:\n'
     for expt, vels in vels_dict.items():
@@ -448,10 +474,7 @@ def plot_vels_and_traj(experiments, simulations, vels_dict, vels_sim,
 
         # Truncate the trajectories for the experiment
         traj_list = experiments[expt]
-        if expt[0] == 'h':
-            color = 'b'
-        else:
-            color = 'r'
+
         for traj in traj_list:
             trunc_traj = truncate_trajectory(traj, absolute_pause_threshold=1.)
             if trunc_traj.shape[0] > 0 and np.all(
@@ -459,10 +482,10 @@ def plot_vels_and_traj(experiments, simulations, vels_dict, vels_sim,
                 trunc_traj -= trunc_traj[0]
                 if expt[-1] == 'w':
                     ax2[0].plot(trunc_traj[:, 0], trunc_traj[:, 1],
-                                color=color, linewidth=0.4)
-                # elif expt[-1] == 'p':
-                #     ax3[0].plot(trunc_traj[:, 0], trunc_traj[:, 1],
-                #                 color=color, linewidth=0.4)
+                                color=colors[expt], linewidth=0.4)
+                elif expt[-1] == 'p':
+                    ax3[0].plot(trunc_traj[:, 0], trunc_traj[:, 1],
+                                color=colors[expt], linewidth=0.4)
                 else:
                     raise ValueError('Problem with expt key')
 
@@ -525,11 +548,11 @@ def plot_vels_and_traj(experiments, simulations, vels_dict, vels_sim,
                     if expt[-1] == 'w':
                         ax2[1].plot(trunc_t,
                                     (trunc_y - trunc_y[0]),
-                                    color=color, linewidth=0.4)
-                    # elif expt[-1] == 'p':
-                    #     ax3[1].plot(trunc_t,
-                    #                 (trunc_y - trunc_y[0]),
-                    #                 color=color, linewidth=0.4)
+                                    color=colors[expt], linewidth=0.4)
+                    elif expt[-1] == 'p':
+                        ax3[1].plot(trunc_t,
+                                    (trunc_y - trunc_y[0]),
+                                    color=colors[expt], linewidth=0.4)
                     else:
                         raise ValueError('Problem with expt key')
         except KeyError:
@@ -545,19 +568,24 @@ def plot_vels_and_traj(experiments, simulations, vels_dict, vels_sim,
     for a in ax2:
         a.set_xlabel('Time ($s$)')
         a.set_ylabel('Displacement ($\\mu m$)')
+    for a in ax3:
+        a.set_xlabel('Time ($s$)')
+        a.set_ylabel('Displacement ($\\mu m$)')
     ax1[0].set_ylabel('Probability Density')
     ax1[1].set_ylabel('CDF')
     ax1[0].legend()
-    ax1[1].text(6., .4, s1)
-    ax1[1].text(6., .1, s2)
+    # ax1[1].text(6., .4, s1)
+    # ax1[1].text(6., .1, s2)
     ax1[1].set_xlim(right=17.5)
 
     ax2[0].set_title('Experiments')
     ax2[1].set_title('Simulations')
+    ax3[0].set_title('Experiments')
+    ax3[1].set_title('Simulations')
 
     fig1.tight_layout()
     fig2.tight_layout()
-    # fig3.tight_layout()
+    fig3.tight_layout()
     plt.show()
 
 
