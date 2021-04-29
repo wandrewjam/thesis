@@ -11,10 +11,12 @@ def get_steps_dwells(data_list):
     steps = []
     dwell = []
     dwell_maxes = []
+    dwell_avgs = []
     for data in data_list:
         state = []
         bond_counts = count_bonds(data)
-        for i in range(len(data['t'])):
+        t = data['t']
+        for i in range(len(t)):
             state.append(np.any(data['bond_array'][:, 0, i] > -1))
 
         state = np.array(state)
@@ -23,15 +25,21 @@ def get_steps_dwells(data_list):
         i_trans = np.nonzero(trans)[0]
 
         split_counts = np.split(bond_counts, i_trans)
+        tmp_i_trans = np.concatenate(([0], i_trans, [len(t)-1]))
+        split_times = [t[tmp_i_trans[k]:tmp_i_trans[k]+1]
+                       for k in range(len(tmp_i_trans) - 1)]
         bond_maxes = [np.amax(count) for count in split_counts]
+        bond_avgs = [np.sum(count * (tt[1:] - tt[:-1])) / (tt[-1] - tt[0])
+                     for count, tt in zip(split_counts, split_times)]
 
         z_temp = data['z'][trans]
-        t_temp = data['t'][trans]
+        t_temp = t[trans]
         steps.append(z_temp[2::2] - z_temp[:-2:2])
         dwell.append(t_temp[1::2] - t_temp[:-1:2])
         dwell_maxes.append(bond_maxes[1:-1:2])
+        dwell_avgs.append(bond_avgs[1:-1:2])
 
-    return steps, dwell, dwell_maxes
+    return steps, dwell, dwell_maxes, dwell_avgs
 
 
 def extract_run_files(runner):
@@ -162,6 +170,7 @@ def extract_bond_information(data_list):
     lifetimes = []
     length_at_fm = []
     length_at_bk = []
+    fm_location = []
 
     for data in data_list:
         formation_times = {}
@@ -213,7 +222,9 @@ def extract_bond_information(data_list):
 
             length_at_fm = np.append(length_at_fm, formed_lengths)
             length_at_bk = np.append(length_at_bk, broken_lengths)
-    return lifetimes, length_at_bk, length_at_fm
+            fm_location = np.append(fm_location, np.arccos(
+                true_receptors_new[formed_recs, 0]))
+    return lifetimes, length_at_bk, length_at_fm, fm_location
 
 
 def main():
@@ -262,9 +273,11 @@ def main():
     dwell_err_list = []
     avg_v_list = []
     flattened_maxes_list = []
+    flattened_avgs_list = []
     lifetimes_list = []
     bk_length_list = []
     fm_length_list = []
+    fm_location_list = []
 
     for runner in runners:
         expt_names = extract_run_files(runner)
@@ -281,15 +294,17 @@ def main():
         print('{} proportion bound: {}'.format(runner, proportion_bound))
         print('{} bound at end: {}'.format(runner, bound_at_end))
 
-        steps, dwells, dwell_maxes = get_steps_dwells(data)
+        steps, dwells, dwell_maxes, dwell_avgs = get_steps_dwells(data)
         flattened_steps_list.append(np.concatenate(steps))
         flattened_dwell_list.append(np.concatenate(dwells))
         flattened_maxes_list.append(np.concatenate(dwell_maxes))
+        flattened_avgs_list.append(np.concatenate(dwell_avgs))
 
-        lifetimes, length_at_bk, length_at_fm = extract_bond_information(data)
+        lifetimes, length_at_bk, length_at_fm, fm_location = extract_bond_information(data)
         lifetimes_list.append(lifetimes)
         bk_length_list.append(length_at_bk)
         fm_length_list.append(length_at_fm)
+        fm_location_list.append(fm_location)
 
         step_count_list.append([len(trial) for trial in steps])
         dwell_count_list.append([len(trial) for trial in dwells])
@@ -470,6 +485,27 @@ def main():
     life_anderson = anderson_ksamp(lifetimes_list)
     if save_plots:
         plt.savefig(plot_dir + 'bdlf_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    plt.hist(flattened_avgs_list, density=True)
+    plt.xlabel('Number of bonds per dwell')
+    plt.legend(labels)
+    if save_plots:
+        plt.savefig(plot_dir + 'bdav_' + expt_num, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show()
+
+    for (i, locs) in enumerate(fm_location_list):
+        plt.plot([i] * len(locs), locs, '.')
+    plt.ylabel('Bond formation location')
+    plt.legend(labels)
+    if save_plots:
+        plt.savefig(plot_dir + 'bdav_' + expt_num, bbox_inches='tight')
         plt.close()
     else:
         plt.tight_layout()
