@@ -10,7 +10,7 @@ load(loadfile)
 [x_wall, xp_ref, y_wall, yp_ref, z_wall, zp_ref] = define_parametric_vars();
 
 t = t / 100;
-gap = 5;
+gap = 1;
 slice = 1:gap:length(t);
 new_length = length(slice);
 if mod(length(t) - 1, gap) ~= 0
@@ -81,14 +81,14 @@ view([95, 2])
 
 subplot('Position', [0.13,0.3,0.775,0.17])
 l1 = plot(t(1), x1(1), 'LineWidth', 3.);
-axis([-.004 .504 0.5 1.6])
+axis([-.004, t(end)+.04, 0.5, 1.6])
 xlabel('Time (s)', 'Interpreter', 'latex')
 ylabel('Height ($\mu$m)', 'Interpreter', 'latex')
 set(gca, prop_names, prop_values);
 
 subplot('Position', [0.13,0.07,0.775,0.17])
 l2 = plot(t(1), e3(1), 'LineWidth', 3.);
-axis([-.004 .504 -1.1 1.1])
+axis([-.004, t(end)+.04, -1.1, 1.1])
 xlabel('Time (s)', 'Interpreter', 'latex')
 ylabel('$z$-cmp of minor axis', 'Interpreter', 'latex')
 set(gca, prop_names, prop_values);
@@ -139,14 +139,14 @@ writeVideo(v, frame)
     
     nexttile
     plot(t, x1, 'LineWidth', 3.)
-    axis([-.004 .504 0.5 1.6])
+    axis([-.004, t(end)+.04, 0.5, 1.6])
     xlabel('Time (s)', 'Interpreter', 'latex')
     ylabel('Height ($\mu$m)', 'Interpreter', 'latex')
     set(gca, prop_names, prop_values);
     
     nexttile
     plot(t, e3, 'LineWidth', 3.)
-    axis([-.004 .504 -1.1 1.1])
+    axis([-.004, t(end)+.04, -1.1, 1.1])
     xlabel('Time (s)', 'Interpreter', 'latex')
     ylabel('$z$-cmp of minor axis', 'Interpreter', 'latex')
     set(gca, prop_names, prop_values);
