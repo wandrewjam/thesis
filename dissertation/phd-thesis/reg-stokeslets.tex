@@ -51,7 +51,11 @@ affect its motion:
 \end{enumerate}
 Because we assume the flow field is a Stokes flow (i.e., no inertia is
 present in the system), all of these forces balance:
-$\hydrodynamicForces + \bindingForces + \bodyForces = \vect{0}$.
+$\hydrodynamicForces + \bindingForces + \bodyForces = \vect{0}$. These
+vectors all represent generalized forces, so all of them are elements
+of $\reals^6$; three components represent forces in each of the
+coordinate directions, and three components represent torques about
+the three coordinate axes.
 
 $\bindingForces$ depends on the location and orientation of bonds
 between the cell and wall at time $t$, and $\bodyForces$ depends on
@@ -60,7 +64,10 @@ $\hydrodynamicForces$ depend both on the location and orientation of
 the cell $\pltPosition$, and also the translational and angular
 velocities $\pltPosition'$. Therefore we can use this relation to find
 $\pltPosition'(t)$ at each time step, and update the position and
-orientation of the cell accordingly.
+orientation of the cell accordingly. Similar to the generalized
+forces, $\pltPosition \in \reals^6$. Three components give the
+position of the platelet's center of mass, and three components give
+the three orientation angles of the platelet.
 
 \subsection{Definitions and Domain}
 \label{sec:definitions-domain}
@@ -76,10 +83,16 @@ The platelet is modeled as an ellipsoid with axes lengths of
 $1.5 \mu m \times 1.5 \mu m \times 0.5 \mu m$, and the position of its
 center of mass is $\pltCOM$. There are a couple of different ways to
 represent the orientation of the platelet, however the simplest way to
-represent the platelet is as a unit vector pointing in the direction
-of the platelet's minor axis: $\e{m}$. This uniquely defines an
-orientation because the platelet is rotationally symmetric about its
-minor axis.
+represent it is as a unit vector pointing in the direction of the
+platelet's minor axis: $\e{m}$. This uniquely defines an orientation
+because the platelet is rotationally symmetric about its minor
+axis. This simplification is not able to represent rotations around
+the minor axis. This isn't an issue while the platelet is still
+rotationally symmetric, however if there is something to break the
+symmetry (like a non-symmetrical distribution of receptors for
+example), this representation can be augmented into a $3 \times 3$
+rotation matrix where each column represents one of the vectors in an
+orthonormal coordinate system that rotates with the platelet.
 
 Finally, as mentioned above we use Stokes equations to model the flow
 field, with no-slip boundary conditions on the platelet surface and
@@ -183,10 +196,10 @@ we have six different generalized velocities: $\genVelocity_i = \e{i}$
 ($\e{i}$ is the $i$th canonical basis vector in $\reals^6$). Therefore
 to construct $\resMatrix$, for each $\genVelocity_i$, we solve for
 $v_i$ and then compute the drag forces and torques (combined in the
-generalized force vector $\dragForce^i$) on the platelet using
+generalized force vector $\dragForces^i$) on the platelet using
 equations (\ref{eq:body-force}) and (\ref{eq:body-torque}). Because
 $\genVelocity_i = \e{i}$, the $i$ column of $\resMatrix$ is exactly
-$\dragForce^i$.
+$\dragForces^i$.
 
 The drag force $\shearForces$ due to the shear background flow is
 found with a 7th solve of Stokes' equations, with the boundary and
@@ -251,7 +264,7 @@ regularized point force:
 \begin{equation}
   \label{eq:stokes-with-reg-force}
   \Delta \flowField - \nabla \pressure = -\arbForce
-  \blobFun{\blobPar}(\arbLoc - \evalLoc), \quad \nabla \cdot
+  \blobFun{\blobPar}(\arbLoc - \blobLoc), \quad \nabla \cdot
   \flowField = \vect{0}.
 \end{equation}
 The function $\blobFun{\blobPar}$ is usually called a ``blob
@@ -277,9 +290,21 @@ Then we can write the solution to equation
 \begin{equation}
   \label{eq:solution-to-reg-force}
   \flowField(\arbLoc) = \frac{1}{8\pi \viscosity}
-  \regStokeslet{\blobPar} \arbForce
+  \regStokeslet{\blobPar} (\arbLoc, \blobLoc) \arbForce
 \end{equation}
-where $\regStokeslet{\blobPar}$ is the regularized Stokeslet.
+where $\regStokeslet{\blobPar}$ is the regularized Stokeslet. For the
+blob function defined in equation (\ref{eq:blob-function}), the
+regularized Stokeslet is
+\begin{equation}
+  \label{eq:reg-stokeslet}
+  \regStokeslet{\blobPar}(\arbLoc, \blobLoc) = \frac{\diffLoc^T \diffLoc +
+    2\blobPar^2}{\left(\diffLoc^T \diffLoc + \blobPar^2 \right)^{3/2}}
+  \uu{I} + \frac{\diffLoc \diffLoc^T}{\left(\diffLoc^T \diffLoc +
+      \blobPar^2 \right)^{3/2}},
+\end{equation}
+where $\diffLoc = \arbLoc - \blobLoc$. In the limit $\blobPar
+\rightarrow 0$, $\regStokeslet{\blobPar}$ approaches the singular
+solution of Stokes' equations.
 
 It is possible to derive the following boundary integral equation for
 the solution of Stokes' equations around a body $\pltBody$
@@ -288,7 +313,8 @@ the solution of Stokes' equations around a body $\pltBody$
   \label{eq:boundary-integral-equation}
   \Int{\flowField(\arbLoc) \blobFun{\blobPar}(\arbLoc -
     \evalLoc)}{V(\arbLoc)}{\reals^3}{} = \frac{1}{8\pi \viscosity}
-  \Int{\regStokeslet{\blobPar} \arbForce}{s(\arbLoc)}{\pltSurf}{}.
+  \Int{\regStokeslet{\blobPar}(\arbLoc, \blobLoc)
+    \arbForce}{s(\arbLoc)}{\pltSurf}{}. 
 \end{equation}
 This equation is used to derive the method of regularized Stokeslets,
 and two approximations are made to arrive at the numerical method. The
@@ -322,7 +348,7 @@ be written as a $3N \times 3N$ linear system:
   \hat{\arbForce},
 \end{equation}
 where $\hat{\flowField} = (\flowField(\evalLoc^1),
-\flowField(\evalLoc^2), \hdots, \flowField(\evalLoc^N)^T$,
+\flowField(\evalLoc^2), \hdots, \flowField(\evalLoc^N))^T$,
 $\hat{\arbForce} = (\arbForce(\arbLoc_1), \arbForce(\arbLoc_2),
 \hdots, \arbForce(\arbLoc_N))^T$, and $\mathcal{A}$ is a $3N \times
 3N$ matrix which depends on $\regStokeslet{\blobPar}$ and $A_n$.
@@ -358,7 +384,80 @@ boundary conditions:
 \end{equation}
 Now $\flowField_d$ can be found using regularized Stokeslets following
 the same process described above, and the solution can be integrated
-to find $\genForces_d$.
+to find $\vect{F}_d$.
+
+Most of this section makes no assumption on the domain of the
+fluid. The theory laid out here applies for an arbitrary domain, and
+to solve the Stokes' problems in different domains one only needs to
+change the form of the regularized Stokeslet
+$\regStokeslet{\blobPar}$. Equation (\ref{eq:reg-stokeslet}) is the
+solution to Stokes' equations in $\reals^3$ with $\blobFun{}$ as in
+equation (\ref{eq:blob-function}). In our case, we are solving Stokes'
+equations in the upper half-space, with no slip boundary conditions at
+the plane wall at $\rsX = 0$. Therefore we need to use a regularized
+Stokeslet which satisfies Stokes' equations in that domain with the
+necessary boundary conditions. The precise form of that regularized
+Stokeslet is developed in \cite{Ainley2008}, and is constructed with a
+linear combination of regularized Stokeslets and ``higher-order''
+Stokeslets found by taking derivatives of the regularized
+Stokeslet. This linear combination is called an \emph{image
+  system}. With $\blobFun{\blobPar}$ as in (\ref{eq:blob-function}),
+the appropriate image system is
+\begin{multline}
+  \label{eq:image-system}
+  \regStokeslet{\blobPar}(\imEval, \blobLoc) = H_1(r^*) \uu{I} +
+  \arbLoc^* (\arbLoc^*)^T H_2(r^*) - H_1(r) \uu{I} - \arbLoc \arbLoc^T
+  H_2(r) - h^2 \left[ D_1(r) \uu{I} + \arbLoc \arbLoc^T D_2(r) \right] \uu{D} \\
+  + 2h \left[ \left(\e{1} \arbLoc^T + \e{1}^T \arbLoc \uu{I}\right)
+    H_2(r) + \left(\e{1} H_1'(r) + (\e{1}^T \arbLoc) \arbLoc H_2'(r)
+    \right) \frac{\arbLoc^T}{r} \right] \uu{D} \\
+  - 2h \left(\frac{H_1'(r)}{r} + H_2(r)\right) \left( \uu{I} \times
+    \arbLoc \right) \uu{E},
+\end{multline}
+where $\blobLoc = (h, y, z)^T$ is the location of the regularized
+Stokeslet, $\imLoc = (-h, y, z)^T$ is the location of the image points,
+and the variables and functions are defined as follows:
+\begin{align*}
+  & \arbLoc^* = \imEval - \blobLoc, \quad \arbLoc = \imEval - \imLoc, 
+  \quad r^* = \|\arbLoc^*\|, \quad r = \|\arbLoc\|, \\
+  H_1(r) &= \frac{1}{8\pi \left(r^2 + \blobPar^2 \right)^{1/2}} +
+           \frac{\blobPar^2}{8\pi \left(r^2 + \blobPar^2
+           \right)^{3/2}}, \\
+  H_2(r) &= \frac{1}{8\pi \left(r^2 + \blobPar^2 \right)^{3/2}}, \\
+  D_1(r) &= \frac{1}{4\pi \left(r^2 + \blobPar^2 \right)^{3/2}} -
+           \frac{3\blobPar^2}{4\pi \left(r^2 + \blobPar^2
+           \right)^{5/2}} \\
+  D_2(r) &= -\frac{3}{4\pi \left(r^2 + \blobPar^2 \right)^{5/2}} \\
+  \uu{D} &=
+           \begin{pmatrix}
+             1 & 0 & 0 \\
+             0 & -1 & 0 \\
+             0 & 0 & -1
+           \end{pmatrix} \\
+  \uu{E} &=
+           \begin{pmatrix}
+             0 & 0 & 0 \\
+             0 & 0 & 1 \\
+             0 & -1 & 0
+           \end{pmatrix}
+\end{align*}
+
+Briefly, this image system is constructed by first placing a
+regularized Stokeslet at the Stokeslet location $\blobLoc$ in the
+fluid domain. The flow from this regularized Stokeslet is captured in
+the $H_1(r^*) \uu{I} + \arbLoc^* (\arbLoc^*)^T H_2(r^*)$ terms in
+equation (\ref{eq:image-system}). By itself, these terms give the
+regularized Stokeslet in $\reals^3$. However, we require the flow to
+vanish at the wall, so we need additional terms to cancel out the flow
+there and satisfy the boundary conditions. So next, a regularized
+Stokeslet is placed at the image point $\imLoc$, and its contribution
+to the flow is subtracted from the original regularized
+Stokeslet. This is captured in the $-H_1(r) \uu{I} + \arbLoc \arbLoc^T
+H_2(r)$ terms in equation (\ref{eq:image-system}). These two terms by
+themselves are not sufficient to cancel the flow at the wall, and the
+remaining terms are a combination of higher-order regularized
+Stokeslets placed at the image point that completely cancel out the
+remaining parts of the flow at the wall.
 
 \subsection{Binding dynamics}
 \label{sec:binding-dynamics}
@@ -381,32 +480,318 @@ force is exerted by the bond. Therefore the function defining the bond
 force exerted by a single bond is
 \begin{equation}
   \label{eq:single-bond-force}
-  \bondForces_i = \stiffness H(\|\arbLoc_l^i - \arbLoc_r^i\| -
+  \bindingForces^i = \stiffness H(\|\arbLoc_l^i - \arbLoc_r^i\| -
   \restLength) \frac{\arbLoc_l^i - \arbLoc_r^i}{\|\arbLoc_l^i -
     \arbLoc_r^i\|},
 \end{equation}
 where $\arbLoc_l^i$ is the point where the bond attaches to a ligand
-on the wall, and $\arbLoc_r^i$ is the location of the bound receptor.
+on the wall, and $\arbLoc_r^i$ is the location of the bound
+receptor. Here $H$ is the Heaviside step function:
+\[H(x) =
+\begin{cases}
+  0 & x \le 0 \\
+  1 & x > 0
+\end{cases}.\]
 In order to find the total bond force and torque exerted on the
 platelet, we compute the following sums:
 \begin{align}
-  \left[\bondForces\right]_{1:3} = \sum_{i = 1}^{N_\tn{bonds}}
-  \bondForces_i \label{eq:total-bond-force} \\
-  \left[\bondForces\right]_{4:6} = \sum_{i = 1}^{N_\tn{\bonds}}
-  (\arbLoc_r^i - \pltCOM) \times \bondForces_i.
+  \left[\bindingForces\right]_{1:3} = \sum_{i = 1}^{N_\tn{bonds}}
+  \bindingForces^i \label{eq:total-bond-force} \\
+  \left[\bindingForces\right]_{4:6} = \sum_{i = 1}^{N_\tn{bonds}}
+  (\arbLoc_r^i - \pltCOM) \times \bindingForces^i.
 \end{align}
 
 The bond formation ($\onRate(L)$) and breaking ($\offRate(L)$) rates
 are distance/length-dependent. We use the Dembo model \cite{Dembo1988}
 for these rates:
 \begin{align}
-  \onRate(L) = \onRate^0 \exp\left[\frac{-\stiffness_\tn{ts} \left(L -
+  &\onRate(L) = \onRate^0 \exp\left[\frac{-\stiffness^\tn{ts} \left(L -
   \restLength \right)^2}{2 \boltzmann \temp}
   \right] \label{eq:dembo-on} \\
-  \offRate(L) = \offRate^0 \exp\left[\frac{\left(\stiffness -
-  \stiffness_\tn{ts} \right) \left(L - \restLength \right)^2}{2
+  &\offRate(L) = \offRate^0 \exp\left[\frac{\left(\stiffness -
+  \stiffness^\tn{ts} \right) \left(L - \restLength \right)^2}{2
   \boltzmann \temp} \right]. \label{eq:dembo-off}
 \end{align}
+
+These rates are derived in \cite{Bell1984} and \cite{Dembo1988} using
+the free energy of a Hookean spring. The dissociation constant of a
+chemical reaction is related to the change in free energy by the
+equation
+\begin{equation}
+K_\tn{eq} = \exp\left[\frac{\Delta G^0}{\boltzmann
+    T}\right], \label{eq:dissociation-const}
+\end{equation}
+where $\Delta G^0$ is the difference in the standard free energy of
+the reactants and products, and $K_\tn{eq} = k_r / k_f$. If we
+consider a binding reaction \schemestart R + L \arrow{}[0, .5] B
+\schemestop \, (where R is the receptor, L is the ligand, and B is a
+bond), we can write the standard free energies of the reactants and
+products as $\mu_R^0$, $\mu_L^0$, and $\mu_B^0(S)$. The standard free
+energy of the bond depends on its length $S$. If we assume the bond
+acts like a linear spring, then
+$\mu_B^0(L) = \mu_B^0(\restLength) + 1/2 \stiffness (L -
+\restLength)^2$. Combining this with equation
+(\ref{eq:dissociation-const}), we get the following equation for the
+dissociation constant of receptor-ligand bond formation as a function
+of the bond length:
+\begin{multline}
+  K_\tn{eq}(L) = \exp\left[\frac{\mu_B^0(L) - \mu_R^0 -
+      \mu_L^0}{\boltzmann \temp} \right] =
+  \exp\left[\frac{\mu_B^0(\restLength) - \mu_R^0 - \mu_L^0 + 1/2
+      \stiffness (L - \restLength)^2}{\boltzmann \temp}\right] \\
+  = K_L \exp\left[\frac{\stiffness (L - \restLength)^2}{2 \boltzmann
+      \temp} \right]. \label{eq:final-dissoc-const}
+\end{multline}
+
+So far, we've only derived the ratio of the bond breaking and
+formation rates. In order to find the above expression for
+$\onRate(L)$, Dembo et. al. \cite{Dembo1988} use the Arrhenius
+equation from the transition state theory of chemical reactions:
+$\onRate = A \exp[-E_a / \boltzmann \temp]$. $A$ is a constant, and
+$E_a$ is the activation energy of the reaction. Dembo et. al. then
+assume that the transition state is a linear spring with the same rest
+length as the completely-formed bond, but a different stiffness:
+$\stiffness^\tn{ts}$. Then the activation energy has the form
+$E_a = \mu_\tn{ts}^0(\restLength) + 1/2 \stiffness^\tn{ts} (L -
+\restLength)^2$ and this gives the expression (\ref{eq:dembo-on}) for
+the bond formation rate. Then the expression for the off rate in
+(\ref{eq:dembo-off}) follows immediately from equations
+(\ref{eq:dembo-on}) and (\ref{eq:final-dissoc-const}).
+
+% Boltzmann = R / N_A
+
+% Right now I haven't written down any of the numerical details, or
+% experiments to verify the numerics
+
+\section{Numerical rolling experiments without binding}
+\label{sec:numer-roll-exper}
+
+As a test of this model, we ran simulations of platelets moving in a
+shear flow near a wall with binding turned off. This behavior has been
+studied and quantified before \cite{Mody2005}, and our model should be
+able to reproduce that known behavior. In the mentioned paper, Mody
+and King identify three distinct modes of platelet motion near a plane
+wall which depend on the platelet's distance from the wall. The motion
+which occurs closest to the wall is a wobbling or ``surfing''
+motion. The platelet primarily slides along the wall, with a small
+periodic vertical and rotational motion, where the platelet alternates
+tilting forward and backward in the flow. The method of regularized
+Stokeslets reproduced this behavior for a range of different initial
+starting heights close to the wall. Figure \ref{fig:plt-free-surfing}
+shows the behavior in one of these experiments, where the center of
+mass of the platelet starts at an initial height of $0.8 \mu m$ from
+the wall.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{run74.eps}
+  \caption[Platelet surfing motion]{Platelet center of mass
+    height and orientation in the ``surfing'' regime.}
+  \label{fig:plt-surfing}
+\end{figure}
+
+The second type of motion which occurs somewhat farther from the wall
+(in Mody and King's experiments, this motion occurs between 0.75 and
+1.1 platelet radii from the wall) is a repeated tumbling motion. At
+the start of an experiment, the platelet drifts towards the wall and
+rotates forward, until the edge of the platelet contacts the wall and
+the center of the platelet ``pole-vaults'' off the surface. Following
+this pole-vaulting motion, the center of mass of the platelet is at a
+greater height from the wall than when it started, and platelets with
+different starting heights converge to the same trajectory following
+the initial pole-vault. After the first pole-vault, the platelet
+continues to tumble and the edge of the platelet repeatedly contacts
+the wall. Our results differed somewhat with the results in Mody and
+King in this case. In \cite{Mody2005}, the platelet motion was
+periodic after the initial pole-vault. In particular, the platelet
+center did not migrate any further from the wall on subsequent
+tumbles. However with the method of regularized Stokeslets, we see a
+continued slow migration away from the wall. We suggest that this is
+due to the regularization of forces at the platelet wall. When the
+platelet surface closely approaches the wall during a tumble, because
+of the regularization the platelet surface can continue to push
+against the wall even when the platelet surface and wall are not
+contacting each other. The method used in \cite{Mody2005} relies on a
+singular Stokeslet, and so this does not occur in their
+simulations. Figure \ref{fig:plt-free-pving} shows the behavior of the
+platelet in one simulation in the pole-vaulting regime, where the
+center of mass of the platelet starts at an initial height of
+$1.2 \mu m$ from the wall.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{run72.eps}
+  \caption[Platelet pole-vaulting motion]{Platelet center of mass
+    height and orientation in the ``pole-vaulting'' regime}
+  \label{fig:plt-free-pving}
+\end{figure}
+
+The third type of motion that Mody and King describe occurs at a
+distance of greater than 1.2 platelet radii from the wall, and the
+platelet surface does not come in close contact with the wall in this
+type of motion. In particular, the platelet surface does not come
+close enough to the wall to form bonds, and therefore we are not
+interested in this type of platelet motion.
+
+\section{Rolling and binding experiments}
+\label{sec:roll-bind-exper}
+
+The next thing we want to add in to the simulations is bond
+dynamics. First, let us look at a couple of simple experiments with a
+single bond to develop some intuition of forces and platelet motions
+involved with a single bond between the platelet and surface. In these
+experiments, the platelet is bound to the wall with a single bond and
+the binding and unbinding rates are set to 0. Figure \ref{fig:exp1}
+shows the platelet center of mass, the $\rsZ$ component of the minor
+axis, and the length of the bond for an experiment where the platelet
+is initially bound in a flat orientation (the minor axis is oriented
+normal to the wall). Figure \ref{fig:exp2} shows the same three
+quantities for an experiment where the platelet is initially bound in
+a vertical orientation, with the minor axis parallel to the flow
+direction.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{com_exp1}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{emz_exp1}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{len_exp1}
+  \end{subfigure}
+  \caption{Bound experiment: Platelet initially bound in a flat
+    orientation, no unbinding}
+  \label{fig:exp1}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{com_exp2}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{emz_exp2}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{.5\textwidth}
+    \includegraphics[width=\textwidth]{len_exp2}
+  \end{subfigure}
+  \caption{Bound experiment: Platelet initially bound in a vertical
+    orientation, no unbinding}
+  \label{fig:exp2}
+\end{figure}
+
+In Figure \ref{fig:exp1}, the platelet first is pushed downstream
+(i.e. in the $\rsZ$ direction) by the flow, and is pulled towards the
+wall (the $\rsX$ component of the center of mass decreases
+initially). The bond length is increasing in this short initial
+period, because the drag forces from the flow are greater than the
+bond forces. Then the bond length reaches a local maximum, and
+decreases for a short period of time. Simultaneously, the platelet's
+velocity in the downstream direction decreases, and it continues to be
+pulled towards the wall. When the bond length is decreasing, the bond
+force is greater than the drag force on the platelet, and I suspect
+what is happening is a combination of the bond force increasing
+because the bond has lengthened by $20 nm$ and the drag force on the
+platelet has decreased, because the platelet is being pulled closer to
+the wall where the flow is slower. While this is occurring, the
+platelet is tilting forward in the flow, because the $\rsZ$ component
+of $\e{m}$ is increasing. This forward tilt is what drives the bond to
+start lengthening again, and forces the center of mass of the platelet
+away from the wall again. The rotational component of the shear flow
+applies a torque on the platelet, trying to make it rotate forward,
+however this begins to be counter-acted as the leading edge of the
+platelet approaches the wall and the bond lengthens again to prevent
+the center of mass of the platelet from moving further from the
+wall. Eventually the lengthening of the bond slows as the forces from
+the bond start to balance the drag forces, and the platelet will reach
+a steady state.
+
+In the second experiment shown in Figure \ref{fig:exp2}, there is a
+brief initial period where the bond gets shorter and the platelet is
+pulled towards the wall. Then the bond lengthens quickly, as the
+platelet is pushed downstream in the flow, and the platelet rotates
+forward. Meanwhile the center of mass of the platelet moves closer to
+the wall due to the combined effects of the rotation of the platelet,
+and the bond attaching the trailing edge of the platelet to the
+wall. There is a short period where the bond length remains roughly
+constant, but then it continues to lengthen as the platelet reaches a
+steady state.
+
+Next we look at a couple of examples of a platelet rolling with
+multiple receptors, where both binding and unbinding is turned on. In
+all of these experiments, the platelet initially starts in a flat
+orientation with a center of mass height of $1.2 \mu m$. % I need to
+                                % add in the parameters that I used
+                                % for these simulations at some point
+The center of mass position, $\rsZ$ component of $\e{m}$, and the bond
+lengths for two simulations are shown in Figures \ref{fig:bd-expt0}
+and \ref{fig:bd-expta}. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{bd_expt}
+  \caption[Binding experiment #1]{Center of mass position, $\rsZ$
+    component of the platelet minor axis, and bond lengths for the
+    first binding experiment.}
+  \label{fig:bd-expt0}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.75\textwidth]{bd_expta}
+  \caption[Binding experiment #2]{Center of mass position, $\rsZ$
+    component of the platelet minor axis, and bond lengths for the
+    second binding experiment.}
+  \label{fig:bd-expta}
+\end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{.5\textwidth}
+%     \includegraphics[width=\textwidth]{com_exp3}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{.5\textwidth}
+%     \includegraphics[width=\textwidth]{emz_exp3}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{.5\textwidth}
+%     \includegraphics[width=\textwidth]{len_exp3}
+%   \end{subfigure}
+%   \caption{Bound experiment: Platelet initially bound in a flat
+%     orientation, with unbinding}
+%   \label{fig:exp3}
+% \end{figure}
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{.5\textwidth}
+%     \includegraphics[width=\textwidth]{com_exp4}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{.5\textwidth}
+%     \includegraphics[width=\textwidth]{emz_exp4}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{.5\textwidth}
+%     \includegraphics[width=\textwidth]{len_exp4}
+%   \end{subfigure}
+%   \caption{Bound experiment: Platelet initially bound in a vertical
+%     orientation, with unbinding}
+%   \label{fig:exp4}
+% \end{figure}
+
+
+% Next, talk about some binding experiments?
+
+% I also need to describe how I'm extracting the data I analyze at
+% some point.. maybe in the results section
 
 % local variables:
 % TeX-master: "phd-thesis.ltx"

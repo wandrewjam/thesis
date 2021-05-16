@@ -167,7 +167,7 @@ as they have a higher risk of a thrombotic event even when the device
 is functional and surgery is successful \cite{Cannegieter1994}.
 
 Most hemocompatibility studies focus on local interactions and effects
-of artificial biomaterial on platelets. However recent work
+of artificial bio-material on platelets. However recent work
 \cite{Corum2011,Corum2012} carried out by Dr. Hlady's group has shown
 that non-local effects are also important in understanding platelet
 interactions with implanted bio-materials. In particular, while
@@ -264,14 +264,26 @@ activation state is not clear. The model presented below and the
 planned future work focuses on quantitatively connecting parameters of
 platelet receptor binding and unbinding to rolling behavior. The rest
 of this chapter lays out a brief review of published mathematical
-models of cell rolling in blood. Chapter \ref{cha:model} describes a
-new model of cell rolling which includes individual receptor and bond
-dynamics, but is simpler than existing models which treat individual
-bonds separately. Chapter \ref{cha:results} explores the behavior of
-the model under simplified conditions, and demonstrates that the model
-predicts different rolling behavior for different platelet activation
-states. Finally chapter \ref{cha:future-work} discusses extensions of the
-basic model which incorporate more physical and biological complexity.
+models of cell rolling in blood. Chapter \ref{cha:two-dimens-roll}
+describes a new model of cell rolling which includes individual
+receptor and bond dynamics, but is simpler than existing models which
+treat individual bonds separately. This chapter also explores the
+behavior of the model under simplified conditions, and demonstrates
+that the model predicts different rolling behavior for different
+platelet activation states. Chapter \ref{cha:jump-velocity-model}
+develops and analyzes a simplified model of cell rolling which reduces
+the problem geometry to one spatial dimension, and treats binding and
+unbinding dynamics as an aggregate process for the platelet as a
+whole. This model is much faster to run, and is suitable for
+estimating aggregate on and off rates from experimental
+trajectories. In Chapter \ref{cha:three-dimens-roll}, we develop a
+three-dimensional model of platelet rolling using regularized
+Stokeslets, with tracking of individual bonds. As the most complex and
+time-intensive model to run, it is only suitable for simple
+explorations of parameter space, however it is the most detailed and
+realistic model of the three described. Finally, Chapter
+\ref{cha:future-work} discusses some potential future directions and
+extensions of the three presented models.
 
 \section{Existing cell rolling models}
 \label{sec:exist-cell-roll}
@@ -410,9 +422,9 @@ and faster to implement.
 It is more difficult to talk about the non-AD rolling models as a
 group because they have a greater diversity of assumptions and
 characteristics. In a review of leukocyte rolling models,
-Pospieszalska and Ley group these simplified models into semianalytic
+Pospieszalska and Ley group these simplified models into semi-analytic
 and analytic models \cite{Pospieszalska2009}. In their classification,
-semianalytic models are models which do not track individual receptors
+semi-analytic models are models which do not track individual receptors
 and ligands, but still track spatially variable bond densities with
 distance-dependent rate equations. Analytical models are even simpler
 and model cells moving in fluid as particles which have some overall
@@ -423,7 +435,7 @@ velocity as an average over a population of cells. They also ignore
 some or all of the colloidal forces treated by AD models and simplify
 the fluid dynamics around the rolling cells.
 
-\subsubsection{Semianalytic models of platelet rolling}
+\subsubsection{Semi-analytic models of platelet rolling}
 \label{sec:semi-model-plat}
 
 As mentioned above, a critical difference between leukocytes and
@@ -449,7 +461,7 @@ published rolling models of individual platelets use a boundary
 element method to find the drag on the platelet
 (\cite{Fitzgibbon2014,Mody2008a,Mody2008b,Wang2013} for example).
 
-An example of a semianalytic platelet rolling model is the model of
+An example of a semi-analytic platelet rolling model is the model of
 Fitzgibbon et. al. \cite{Fitzgibbon2014}. This model uses a
 continuous-time Markov process to describe platelet transitions among
 4 discrete states:
@@ -464,9 +476,9 @@ cell depleted layer was estimated with previous whole-blood
 simulations of platelet margination. The transitions associated with
 platelet binding to the blood vessel surface were estimated with a
 stochastic model of platelet binding that incorporated drag forces
-computed using a boundary element method. Similar to the semianalytic
+computed using a boundary element method. Similar to the semi-analytic
 model of leukocyte \cite{Tozeren1992} binding discussed above, the
-binding and unbinding rates were taken to be piecewise constant, and
+binding and unbinding rates were taken to be piece-wise constant, and
 bonds that formed were placed randomly with a uniform distribution on
 the surface of the platelet and bound to the closest point on the
 wall.
@@ -478,7 +490,7 @@ treat platelet adhesion as a boundary condition for a PDE describing
 platelet motion in the bulk flow. The advantage of both of these
 models is their simplicity; they can be fit to experimental data
 quickly, and they have few parameters relative to the AD models and
-even the semianalytic models.
+even the semi-analytic models.
 
 \section{Summary}
 \label{sec:summary-background}
