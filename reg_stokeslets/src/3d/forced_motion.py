@@ -33,8 +33,10 @@ def run_experiment(dist=0., a=1., b=1., exact_vels=None, proc=1,
     init[0] = dist
     init[3] = 1.
 
-    result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes, a=a, b=b, domain=dom, order=order,
-                              adaptive=False, proc=proc, forces=forces, torques=torques)
+    result = integrate_motion([0., stop], t_steps, init, exact_vels, n_nodes,
+                              a=a, b=b, domain=dom, order=order,
+                              adaptive=False, proc=proc, forces=forces,
+                              torques=torques)
 
     x1, x2, x3, e_m = result[:4]
 

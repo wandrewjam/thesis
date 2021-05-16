@@ -99,13 +99,19 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
     a, b = pars['a'], pars['b']
     shear = pars['shear']
 
-    sig, sig_ts, l_sep = pars['sig'], pars['sig_ts'], pars['l_sep']
+    sig1, sig_ts1, l_sep1 = pars['sig'], pars['sig_ts'], pars['l_sep']
     dimk0_on, dimk0_off = pars['dimk0_on'], pars['dimk0_off']
+    dimk0_on2 = pars['dimk0_on2']
     check_bonds, one_side = pars['check_bonds'], pars['one_side']
 
-    t_sc, f_sc, lam, k0_on, k0_off, eta, eta_ts, kappa = nondimensionalize(
-        l_scale=1, shear=shear, mu=4e-3, l_sep=l_sep, dimk0_on=dimk0_on,
-        dimk0_off=dimk0_off, sig=sig, sig_ts=sig_ts, temp=310.)
+    kratio = 0.4
+    nd_parameters = nondimensionalize(
+        l_scale=1, shear=shear, mu=4e-3, l_sep=l_sep1, dimk0_on=dimk0_on,
+        dimk0_off=dimk0_off, dimk0_on2=dimk0_on2, sig=sig1, sig_ts=sig_ts1,
+        temp=310.)
+
+    (t_sc, f_sc, lam1, k0_on, k0_off, k0_on2, eta, eta_ts1, kappa1,
+     gammp, kn0off, ki0off, yn, yi) = nd_parameters
 
     nd_start, nd_end = t[i_start] / t_sc, t_end / t_sc
 
@@ -114,12 +120,16 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
 
     print('Running simulation {}'.format(filename))
 
-    result = integrate_motion(
-        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain,
-        adaptive=adaptive, receptors=receptors, bonds=bonds, eta=eta,
-        eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on, k0_off=k0_off,
-        check_bonds=check_bonds, one_side=one_side, save_file=filename+'_cont',
-    t_sc=t_sc, rng=rng)
+    result = integrate_motion([nd_start, nd_end], num_steps, init, exact_vels,
+                              n_nodes, a, b, domain, adaptive=adaptive,
+                              receptors=receptors, bonds=bonds, eta=eta,
+                              eta_ts1=eta_ts1, kappa1=kappa1, lam1=lam1,
+                              eta_ts2=eta_ts1, kappa2=kappa1, lam2=lam1,
+                              k0_on=k0_on, k0_off=k0_off, k0_on2=k0_on2,
+                              check_bonds=check_bonds, one_side=one_side,
+                              save_file=filename + '_cont', rng=rng, t_sc=t_sc,
+                              kratio=kratio, gammp=gammp, yn=yn, yi=yi,
+                              knoff=kn0off, kioff=ki0off)
 
     t = result[9] * t_sc
     center = np.stack(result[:3])
@@ -160,9 +170,10 @@ def continue_integration(filename, t_end=None, i_start=-1, debug=False, save_dat
                  'draws': new_draws})
         save_info(new_filename, seed=pars['seed'], t_start=pars['t_start'],
                   t_end=pars['t_end'], num_steps=num_steps, n_nodes=n_nodes,
-                  a=a, b=b, adaptive=adaptive, shear=shear, l_sep=l_sep,
-                  dimk0_on=dimk0_on, dimk0_off=dimk0_off, sig=sig,
-                  sig_ts=sig_ts, one_side=one_side, check_bonds=check_bonds)
+                  a=a, b=b, adaptive=adaptive, shear=shear, l_sep=l_sep1,
+                  dimk0_on=dimk0_on, dimk0_off=dimk0_off, dimk0_on2=dimk0_on2,
+                  sig=sig1, sig_ts=sig_ts1, one_side=one_side,
+                  check_bonds=check_bonds)
 
     # t = new_t
     # x = new_x

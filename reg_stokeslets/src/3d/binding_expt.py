@@ -28,7 +28,11 @@ def parse_file(filename):
             elif key == 'order':
                 parlist.append((key, value))
             else:
-                parlist.append((key, float(value)))
+                try:
+                    parlist.append((key, float(value)))
+                except ValueError:
+                    assert value == 'None'
+                    parlist.append((key, None))
     return dict(parlist)
 
 
@@ -58,9 +62,10 @@ def save_rng(filename, rng_states):
 
 def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
          t_end=50., num_steps=250, seed=None, n_nodes=8, adaptive=False, a=1.5,
-         b=.5, shear=100., l_sep=0.1, dimk0_on=10., dimk0_off=5., sig=1e4,
-         sig_ts=9.99e3, one_side=False, check_bonds=False, x1=1.2, x2=0.,
-         x3=0., emx=1., emy=0., emz=0, order='2nd', receptor_multiplier=1):
+         b=.5, shear=100., l_sep1=0.1, dimk0_on=10., dimk0_off=5., dimk0_on2=0,
+         sig1=1e4, sig_ts1=9.99e3, one_side=False, check_bonds=False, x1=1.2,
+         x2=0., x3=0., emx=1., emy=0., emz=0, order='2nd',
+         receptor_multiplier=1):
     save_dir = os.path.expanduser('~/thesis/reg_stokeslets/data/bd_run/')
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     # Read in previous file names
@@ -131,7 +136,7 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
         receptors = np.load(os.path.expanduser(
             '~/thesis/reg_stokeslets/src/3d/Xb_0.26.npy'))
         receptors = np.repeat(receptors, repeats=receptor_multiplier, axis=0)
-        bonds = np.zeros(shape=(0, 3), dtype='float')
+        bonds = np.zeros(shape=(0, 4), dtype='float')
         # bonds = np.array([[np.argmax(receptors[:, 1]), 0., 0.]])
     else:
         raise ValueError('expt is not valid')
@@ -143,19 +148,30 @@ def main(filename, expt_num=None, save_data=True, plot_data=False, t_start=0.,
     # dimk0_off = 5.
     # sig = 1e4
     # sig_ts = 9.99e3
-    t_sc, f_sc, lam, k0_on, k0_off, eta, eta_ts, kappa = nondimensionalize(
-        l_scale=1, shear=shear, mu=4e-3, l_sep=l_sep, dimk0_on=dimk0_on,
-        dimk0_off=dimk0_off, sig=sig, sig_ts=sig_ts, temp=310.)
+
+    kratio = 0.4
+    nd_parameters = nondimensionalize(
+        l_scale=1, shear=shear, mu=4e-3, l_sep=l_sep1, dimk0_on=dimk0_on,
+        dimk0_off=dimk0_off, dimk0_on2=dimk0_on2, sig=sig1, sig_ts=sig_ts1,
+        temp=310.)
+
+    (t_sc, f_sc, lam1, k0_on, k0_off, k0_on2, eta, eta_ts1, kappa1,
+     gammp, kn0off, ki0off, yn, yi) = nd_parameters
 
     nd_start, nd_end = t_start / t_sc, t_end / t_sc
     start = timer()
     # pdb.set_trace();
-    result = integrate_motion(
-        [nd_start, nd_end], num_steps, init, exact_vels, n_nodes, a, b, domain,
-        order=order, adaptive=adaptive, receptors=receptors, bonds=bonds,
-        eta=eta, eta_ts=eta_ts, kappa=kappa, lam=lam, k0_on=k0_on,
-        k0_off=k0_off, check_bonds=check_bonds, one_side=one_side,
-        save_file=filename, rng=rng, t_sc=t_sc)
+    result = integrate_motion([nd_start, nd_end], num_steps, init, exact_vels,
+                              n_nodes, a, b, domain, order=order,
+                              adaptive=adaptive, receptors=receptors,
+                              bonds=bonds, eta=eta, eta_ts1=eta_ts1,
+                              kappa1=kappa1, lam1=lam1, eta_ts2=eta_ts1,
+                              kappa2=kappa1, lam2=lam1, k0_on=k0_on,
+                              k0_off=k0_off, k0_on2=k0_on2,
+                              check_bonds=check_bonds, one_side=one_side,
+                              save_file=filename, rng=rng, t_sc=t_sc,
+                              kratio=kratio, gammp=gammp, yn=yn, yi=yi,
+                              knoff=kn0off, kioff=ki0off)
     end = timer()
 
     t = result[9] * t_sc

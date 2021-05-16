@@ -20,7 +20,8 @@ def pick_random_height():
     return r
 
 
-def main(num_expts, runner, random_initial=False, start_numbering=-1, **pars):
+def main(num_expts, runner, random_initial=False, catch_slip=False,
+         start_numbering=-1, **pars):
     import os
     txt_dir = os.path.expanduser('~/thesis/reg_stokeslets/par-files/')
     defaults = parse_file('default')
@@ -70,8 +71,10 @@ def main(num_expts, runner, random_initial=False, start_numbering=-1, **pars):
             ('seed', seed), ('filename', filename)])
         par_dict.update(pars)
 
-
-
+        if catch_slip:
+            par_dict.update([('dimk0_on2', 5.)])
+        else:
+            par_dict.update([('dimk0_on2', 0.)])
 
             # height = pick_random_height()
             # while True:
@@ -115,12 +118,15 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--k_on', default=5.0, type=float)
     parser.add_argument('-f', '--k_off', default=5.0, type=float)
     parser.add_argument('-m', '--receptor_multiplier', default=1, type=int)
+    parser.add_argument('-c', '--catch_slip', action='store_true')
 
     args = parser.parse_args()
 
-    main(args.num_expts, args.runner, args.randomize, args.start_numbering,
+    main(args.num_expts, args.runner, args.randomize,
+         start_numbering=args.start_numbering,
          receptor_multiplier=args.receptor_multiplier, order=args.order,
-         l_sep=args.rest_length, dimk0_on=args.k_on, dimk0_off=args.k_off)
+         l_sep1=args.rest_length, dimk0_on=args.k_on, dimk0_off=args.k_off,
+         catch_slip=args.catch_slip)
 
     # try:
     #     main(int(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4])
