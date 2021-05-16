@@ -26,11 +26,11 @@ def get_steps_dwells(data_list):
 
         split_counts = np.split(bond_counts, i_trans)
         tmp_i_trans = np.concatenate(([0], i_trans, [len(t)-1]))
-        split_times = [t[tmp_i_trans[k]:tmp_i_trans[k]+1]
+        split_times = [t[tmp_i_trans[k]:tmp_i_trans[k+1]+1]
                        for k in range(len(tmp_i_trans) - 1)]
         bond_maxes = [np.amax(count) for count in split_counts]
         bond_avgs = [np.sum(count * (tt[1:] - tt[:-1])) / (tt[-1] - tt[0])
-                     for count, tt in zip(split_counts, split_times)]
+                     for count, tt in zip(split_counts, split_times) if len(count) + 1 == len(tt)]
 
         z_temp = data['z'][trans]
         t_temp = t[trans]
@@ -223,7 +223,7 @@ def extract_bond_information(data_list):
             length_at_fm = np.append(length_at_fm, formed_lengths)
             length_at_bk = np.append(length_at_bk, broken_lengths)
             fm_location = np.append(fm_location, np.arccos(
-                true_receptors_new[formed_recs, 0]))
+                true_receptors_new[formed_recs.astype('int'), 0]))
     return lifetimes, length_at_bk, length_at_fm, fm_location
 
 
@@ -260,6 +260,7 @@ def main():
     elif expt_num == '10':
         runners = [('bd_runner1105', 'bd_runner1205'), ('bd_runner1106', 'bd_runner1206'),
                    ('bd_runner1107', 'bd_runner1207'), ('bd_runner1108', 'bd_runner1208')]
+        # runners = [('bd_runner1105', 'bd_runner1205'), ('bd_runner1106', 'bd_runner1206')]
     else:
         raise ValueError('expt_num is invalid')
 
@@ -320,7 +321,7 @@ def main():
         labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$',
                   '$k_{on} = 25$']
         # labels = ['$k_{on} = 1$', '$k_{on} = 5$', '$k_{on} = 10$']
-    # labels = ['$k_{on} = 1$', '$k_{on} = 10$']
+        # labels = ['$k_{on} = 1$', '$k_{on} = 5$']
     elif expt_num == '6':
         labels = ['$k_{on} = 1$', '$k_{on} = 5$']
     elif expt_num == '7':
@@ -505,7 +506,7 @@ def main():
     plt.ylabel('Bond formation location')
     plt.legend(labels)
     if save_plots:
-        plt.savefig(plot_dir + 'bdav_' + expt_num, bbox_inches='tight')
+        plt.savefig(plot_dir + 'bdloc_' + expt_num, bbox_inches='tight')
         plt.close()
     else:
         plt.tight_layout()

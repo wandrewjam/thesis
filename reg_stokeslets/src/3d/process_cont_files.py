@@ -63,6 +63,7 @@ def main():
 
                                 new_draws = np.concatenate((data['draws'][:-1], data_cont['draws']))
                                 assert len(new_draws) == len(new_t)
+                                assert new_bond_array.shape[-1] == new_t.shape[-1]
 
                                 np.savez(data_dir + entry.name, t=new_t, x=new_x, y=new_y, z=new_z,
                                          r_matrices=new_rmat, bond_array=new_bond_array,
