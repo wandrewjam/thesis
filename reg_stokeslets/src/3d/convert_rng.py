@@ -19,15 +19,21 @@ def process_pkl_file(dir_path, entry):
         with open(entry.path, 'rb') as f:
             rng_history = pkl.load(f, encoding='latin1')
     except EOFError as f:
+        print('Skipped {}'.format(entry.name))
         return
     except Exception as e:
         print('Unable to load data ', entry.name, ':', e)
         raise
 
     filename = entry.name[:-4]
-    draws = extract_draws(filename, rng_history)
+    try:
+        draws = extract_draws(filename, rng_history)
+    except AssertionError:
+        print('Skipped {}'.format(entry.name))
+        return
     save_new_npz(dir_path, draws, filename)
     os.remove(entry.path)
+    print('Removed {}'.format(entry.name))
 
 
 def save_new_npz(dir_path, draws, filename):
@@ -49,11 +55,11 @@ def extract_draws(filename, rng_history):
         for j in range(len(rng_history)):
             for i in range(0, 10**6):
                 if (np.all(rng.get_state()[1] == rng_history[j][1])
-                    and rng.get_state()[2] == rng_history[j][2]):
+                        and rng.get_state()[2] == rng_history[j][2]):
                     break
                 rng.rand()
 
-        assert i < 10 ** 6
+            assert i < 10 ** 6 - 1
         draws.append(i)
     elif type(rng_history[0]) is int:
         draws = rng_history

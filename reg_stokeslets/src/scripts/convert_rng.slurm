@@ -1,9 +1,10 @@
 #!/bin/bash
-#SBATCH --time=08:00:00
+#SBATCH --time=72:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --account=notchpeak-shared-short
-#SBATCH --partition=notchpeak-shared-short
+#SBATCH --account=owner-guest
+#SBATCH --partition=notchpeak-guest
+#SBATCH -C "chipman|rutter|gnosis|mansfield|uspcasw|cabrera|zpu|farmer|yzhou|zhang|oberg|dtn|fiorella|deo"
 #SBATCH -o convert_rng.out
 #SBATCH -e convert_rng.err
 
