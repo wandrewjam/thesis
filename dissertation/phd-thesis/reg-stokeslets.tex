@@ -731,64 +731,66 @@ orientation with a center of mass height of $1.2 \mu m$. % I need to
                                 % for these simulations at some point
 The center of mass position, $\rsZ$ component of $\e{m}$, and the bond
 lengths for two simulations are shown in Figures \ref{fig:bd-expt0}
-and \ref{fig:bd-expta}. 
+and \ref{fig:bd-expta}. In the bond length plot, a curve starts when a
+bond forms, and it ends when that bond breaks. In both trials, several
+bonds form during the initial pole-vault that occurs at 0.1 s. These bonds
+``catch'' the platelet as the edge of the platelet is close to the
+wall, slows the platelet down in the flow, and causes it to flatten
+against the wall. Without bonds, the platelet's center of mass would
+migrate away from the wall after flipping, but the presence of bonds
+tethers the platelet's trailing edge to the wall and causes the
+platelet's center of mass to move towards the wall as the platelet
+flattens in the flow.
 
 \begin{figure}
   \centering
   \includegraphics[width=.75\textwidth]{bd_expt}
-  \caption[Binding experiment #1]{Center of mass position, $\rsZ$
+  \caption[Binding experiment \#1]{Center of mass position, $\rsZ$
     component of the platelet minor axis, and bond lengths for the
-    first binding experiment.}
+    first binding experiment. Different colors are used in the bond
+    length subplot to help distinguish the curves for different bonds,
+    but don't have any other meaning.}
   \label{fig:bd-expt0}
 \end{figure}
 
 \begin{figure}
   \centering
   \includegraphics[width=.75\textwidth]{bd_expta}
-  \caption[Binding experiment #2]{Center of mass position, $\rsZ$
+  \caption[Binding experiment \#2]{Center of mass position, $\rsZ$
     component of the platelet minor axis, and bond lengths for the
     second binding experiment.}
   \label{fig:bd-expta}
 \end{figure}
 
-% \begin{figure}
-%   \centering
-%   \begin{subfigure}{.5\textwidth}
-%     \includegraphics[width=\textwidth]{com_exp3}
-%   \end{subfigure}
-%   \\
-%   \begin{subfigure}{.5\textwidth}
-%     \includegraphics[width=\textwidth]{emz_exp3}
-%   \end{subfigure}
-%   \\
-%   \begin{subfigure}{.5\textwidth}
-%     \includegraphics[width=\textwidth]{len_exp3}
-%   \end{subfigure}
-%   \caption{Bound experiment: Platelet initially bound in a flat
-%     orientation, with unbinding}
-%   \label{fig:exp3}
-% \end{figure}
+These initial bonds break because they get stretched far beyond their
+rest length (except for the orange bond in Figure \ref{fig:bd-expt0}),
+but more bonds form between the flat part of the platelet and the wall
+which mostly do not get stretched beyond their rest length. The
+platelets in these simulations are hyper-active: they were captured
+from the flow at the first flip, and immediately formed stable
+adhesions. In reality, unprimed and primed platelets are less active
+than this, and do not immediately form stable adhesions, therefore
+$\onConst$ should be lowered in order to get more realistic
+behavior. Nonetheless, these figures show how platelets can be
+captured from the flow.
 
-% \begin{figure}
-%   \centering
-%   \begin{subfigure}{.5\textwidth}
-%     \includegraphics[width=\textwidth]{com_exp4}
-%   \end{subfigure}
-%   \\
-%   \begin{subfigure}{.5\textwidth}
-%     \includegraphics[width=\textwidth]{emz_exp4}
-%   \end{subfigure}
-%   \\
-%   \begin{subfigure}{.5\textwidth}
-%     \includegraphics[width=\textwidth]{len_exp4}
-%   \end{subfigure}
-%   \caption{Bound experiment: Platelet initially bound in a vertical
-%     orientation, with unbinding}
-%   \label{fig:exp4}
-% \end{figure}
+\section{Statistical analysis of numerical rolling experiments}
+\label{sec:stat-analys-numer}
+
+% Some intro shit
+
+Similar to the analysis for experimental trajectories, we extract
+pauses, steps, and average velocities from our numerical
+trajectories. Steps are defined as periods where there are no bonds
+between the platelet and the surface, and dwells are defined as
+periods where there is at least one bond. The first ``step'' (i.e. the
+time between when the simulation starts, and the formation of the
+first bond) is excluded from the step data, along with the final step
+if the platelet is in a step phase at the end of the
+simuation. Similarly, if the platelet is in a dwell at the end of a
+simulation, that dwell is excluded from the dwell data.
 
 
-% Next, talk about some binding experiments?
 
 % I also need to describe how I'm extracting the data I analyze at
 % some point.. maybe in the results section
