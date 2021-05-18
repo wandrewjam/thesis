@@ -1,0 +1,284 @@
+\documentclass{article}
+
+\newcommand{\ep}{\rule{.06in}{.1in}}
+\textheight 9.5in
+
+\usepackage{amssymb, bm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx, subcaption, booktabs}
+
+\usepackage{tikz, pgfplots, pgfplotstable, chemfig, xcolor}
+\graphicspath{{/Users/andrewwork/thesis/reg_stokeslets/plots/}}
+
+% \usepgfplotslibrary{colorbrewer, statistics}
+% \pgfplotsset{
+%   exact axis/.style={grid=major, minor tick num=4, xlabel=$v^*$,
+%     legend entries={PDF, CDF},},
+%   every axis plot post/.append style={thick},
+%   table/search
+%   path={/Users/andrewwork/thesis/jump-velocity/dat-files},
+%   colormap/YlGnBu,
+%   cycle list/Set1-5,
+%   legend style={legend cell align=left,},
+% }
+
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+
+\renewcommand{\arraystretch}{1.2}
+\pagestyle{empty} 
+\oddsidemargin -0.25in
+\evensidemargin -0.25in 
+\topmargin -0.75in 
+\parindent 0pt
+\parskip 12pt
+\textwidth 7in
+%\font\cj=msbm10 at 12pt
+
+\newcommand{\tn}{\textnormal}
+\newcommand{\stiff}{\frac{k_f}{\gamma}}
+\newcommand{\dd}{d}
+\newcommand{\Der}[2]{\frac{\dd #1}{\dd #2}}
+\newcommand{\Pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\Integral}[4]{\int_{#3}^{#4} {#1} \dd #2}
+\newcommand{\mat}[1]{\underline{\underline{#1}}}
+\DeclareMathOperator{\Exp}{Exp}
+
+% Text width is 7 inches
+
+\def\R{\mathbb{R}}
+\def\N{\mathbb{N}}
+\def\C{\mathbb{C}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\H{\mathbb{H}}
+\def\B{\mathcal{B}} 
+%\topmargin -.5in 
+
+\input{/Users/andrewwork/thesis/model-defs}
+\setcounter{secnumdepth}{2}
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large Meeting Notes (\today)}
+\end{center}
+
+% \begin{figure}[h]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{avel_avg_10.png}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{step_avg_10.png}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{dwell_avg_10.png}
+%   \end{subfigure}
+%   \label{fig:stats10}
+%   \caption{Means of average velocity (top left), step size (top
+%     right), and dwell time (bottom) for different $k_\tn{on}$
+%     values ($k_\tn{off} = 5$)}
+% \end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{bdav_10.png}
+  \caption{Histogram of average bond number in individual dwells}
+  \label{fig:bd-av-10}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{grpav_10.png}
+  \caption{Combined average bond number across all trials in an experiment}
+  \label{fig:grp-av-10}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{bdmax_10.png}
+  \caption{Proportion of dwells with a certain maximum bond count}
+  \label{fig:dwell-corrs-10}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{dwell_corrs_10.png}
+  \caption{Scatterplot of maximum bond number versus dwell length}
+  \label{fig:dwell-corrs-10}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{dwell_acorr_10.png}
+  \caption{Scatterplot of average bond number versus dwell length}
+  \label{fig:dwell-corrs-10}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{bdav_8.png}
+  \caption{Histogram of average bond number in individual dwells}
+  \label{fig:bd-av-8}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{grpav_8.png}
+  \caption{Combined average bond number across all trials in an experiment}
+  \label{fig:grp-av-8}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{bdmax_8.png}
+  \caption{Proportion of dwells with a certain maximum bond count}
+  \label{fig:dwell-corrs-8}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{dwell_corrs_8.png}
+  \caption{Scatterplot of maximum bond number versus dwell length}
+  \label{fig:dwell-corrs-8}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{dwell_acorr_8.png}
+  \caption{Scatterplot of average bond number versus dwell length}
+  \label{fig:dwell-corrs-8}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{bdav_9.png}
+  \caption{Histogram of average bond number in individual dwells}
+  \label{fig:bd-av-9}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{grpav_9.png}
+  \caption{Combined average bond number across all trials in an experiment}
+  \label{fig:grp-av-9}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{bdmax_9.png}
+  \caption{Proportion of dwells with a certain maximum bond count}
+  \label{fig:dwell-corrs-9}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{dwell_corrs_9.png}
+  \caption{Scatterplot of maximum bond number versus dwell length}
+  \label{fig:dwell-corrs-9}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{dwell_acorr_9.png}
+  \caption{Scatterplot of average bond number versus dwell length}
+  \label{fig:dwell-corrs-9}
+\end{figure}
+
+% \begin{figure}[h]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{avel_avg_8.png}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{step_avg_8.png}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{dwell_avg_8.png}
+%   \end{subfigure}
+%   \label{fig:stats8}
+%   \caption{Means of average velocity (top left), step size (top
+%     right), and dwell time (bottom) for 3 different $k_\tn{off}$
+%     values ($k_\tn{on} = 5$). For average velocities, there are
+%     significant differences between the $k_\tn{off} = 1$ and
+%     $k_\tn{off} = 10$ and $k_\tn{off} = 5$ and $k_\tn{off} = 10$
+%     cases. For step sizes, there is a significant difference between
+%     the $k_\tn{off} = 2$ and $k_\tn{off} = 10$ cases. For dwells,
+%     all differences are significant except between $k_\tn{off} = 5$
+%     and $k_\tn{off} = 10$}
+% \end{figure}
+
+% \begin{figure}[h]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{avel_avg_9.png}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{step_avg_9.png}
+%   \end{subfigure}
+%   \\
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{dwell_avg_9.png}
+%   \end{subfigure}
+%   \label{fig:stats9}
+%   \caption{Means of average velocity (top left), step size (top
+%     right), and dwell time (bottom).}
+% \end{figure}
+
+% \begin{figure}[h]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{avg_vels_9.png}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{steps_9.png}
+%   \end{subfigure}
+%   \caption{Distributions of average velocities and step sizes for
+%     different receptor numbers}
+%   \label{fig:avg-vels9}
+% \end{figure}
+
+% \begin{figure}[h]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{bdbk_8.png}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{bdbk_10.png}
+%   \end{subfigure}
+%   \caption{Distributions of bond lengths at breaking for a range of
+%     $k_\tn{on}$ and $k_\tn{off}$ values}
+%   \label{fig:bdbk}
+% \end{figure}
+
+% \begin{figure}[h]
+%   \centering
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{bdlf_8.png}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.49\textwidth}
+%     \includegraphics[width=\textwidth]{bdlf_10.png}
+%   \end{subfigure}
+%   \caption{Distributions of bond lifetimes for a range of $k_\tn{on}$
+%     and $k_\tn{off}$ values}
+%   \label{fig:bdlf}
+% \end{figure}
+
+% \bibliographystyle{plain}
+% \bibliography{/Users/andrewwork/Documents/grad-school/thesis/library}
+
+\end{document}
+
+
+
+
