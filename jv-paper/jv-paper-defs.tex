@@ -1,0 +1,29 @@
+%%% This is jv-paper-defs.tex
+%%%
+%%% Define symbols for model parameters here so that it is
+%%% straightforward to change notation if necessary.
+
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Notation for Jump-Velocity Model %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% State definitions
+\newcommand{\stateUnbound}{S_{00}}
+\newcommand{\stateBoundF}{S_{01}}
+\newcommand{\stateBoundS}{S_{10}}
+\newcommand{\stateBoundFS}{S_{11}}
+
+%% Parameter definitions
+\newcommand{\jvOnFast}{k_\textnormal{on}}
+\newcommand{\jvOffFast}{k_\textnormal{off}}
+\newcommand{\jvOnSlow}{k^S_\textnormal{on}}
+\newcommand{\jvOffSlow}{k^S_\textnormal{off}}
+\newcommand{\jvVel}{v}
+\newcommand{\jvEscape}{k_\textnormal{escape}}
+\newcommand{\jvTot}{k_\textnormal{tot}}
+
+%% Shorthands for Chemical Species
+\newcommand{\ITA}[1]{\textalpha\textsubscript{#1}}
+\newcommand{\ITB}[1]{\textbeta\textsubscript{#1}}
